@@ -118,14 +118,37 @@ for(a=0;21>a;a++)b=tih(a),b=new TK(this.settings,"snake_arcade/v4/apple_"+b+".pn
 regex:
         this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)};
 */  
-  add_pudding = 'b=22,b=new TK(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png"),c={base: \'#fc2d00\', target: \'#808080\', threshold: 10},UK(b,c.base,c.target,c.threshold),this.wa.push(b)$&'
+//debugger;
 
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
-  add_fruit_array_last_func_regex = new RegExp("this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)");
+
+  ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.settings,\"snake_arcade\/v4\/apple_\"/)
+  func_name = code.match(ip_grabber)[0].replace("=new ", "").replace('\(this.settings,\"snake_arcade\/v4\/apple_\"',"")
+  ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.base,c.target,c.threshold\)/)
+  func_name2 = code.match(ip_grabber2)[0].replace('\(b,c.base,c.target,c.threshold\)',"")
+  array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
+  array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
+  add_pudding = 'b=22;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);$&'
+  add_pudding2 = '$&;debugger;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
+
+  link_regex = new RegExp(/settings\.[a-zA-Z0-9_$]{1,8}=\"https\:\/\/www\.google\.com\/logos\/fnbx\/\"\+\(1\=\=\=[a-zA-Z0-9_$]{1,8}\.settings\.[a-zA-Z0-9_$]{1,8}\?\"snake_arcade\/pixel\/px_apple_\"\+[a-zA-Z0-9_$]{1,8}\+\"\.png\"\:\"snake_arcade\/v4\/apple\_\"\+[a-zA-Z0-9_$]{1,8}\+\"\.png\"\)/);
+  link_match = code.match(link_regex)[0]
+  settings_grab = link_match.split('.')[1].split("=")[0]
+
+  pudding_links = "$&;if(d==22)a.settings."+settings_grab+"=\""+pudding_src+"\""
+
+  add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
   add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
   print_dog = 'console.log("dog");$&';
   //debugger;
-  code = code.assertReplace(add_fruit_before_loop_regex, add_pudding);
+  //code = code.assertReplace(add_fruit_before_loop_regex, add_pudding);
+  code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
+  code = code.assertReplace(link_regex, pudding_links);
+
+
+
+
+  console.log(code);
   //code = code.assertReplace(".66", "0.5");
 
 /*
