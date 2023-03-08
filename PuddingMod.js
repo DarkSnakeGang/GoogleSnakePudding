@@ -44,7 +44,20 @@ window.PuddingMod.runCodeBefore = function() {
     //    'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png',
     //]) document.querySelector('#skull').appendChild(uiImage(src));
   
+  // Get all elements with text content
+/*const elements = document.querySelectorAll("*:not(script):not(style):not(meta):not(link)");
+
+// Loop through each element
+elements.forEach(element => {
+  // Get the computed style of the element
+  const style = window.getComputedStyle(element);
   
+  // Get the current color of the text
+  const color = style.color;
+  
+  // Create a new style with a dark outline and apply it to the element
+  element.style.textShadow = `1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000`;
+});*/
 
 };
 
@@ -129,7 +142,7 @@ regex:
   array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
   array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
   add_pudding = 'b=22;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);$&'
-  add_pudding2 = '$&;debugger;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
+  add_pudding2 = '$&;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
 
   link_regex = new RegExp(/settings\.[a-zA-Z0-9_$]{1,8}=\"https\:\/\/www\.google\.com\/logos\/fnbx\/\"\+\(1\=\=\=[a-zA-Z0-9_$]{1,8}\.settings\.[a-zA-Z0-9_$]{1,8}\?\"snake_arcade\/pixel\/px_apple_\"\+[a-zA-Z0-9_$]{1,8}\+\"\.png\"\:\"snake_arcade\/v4\/apple\_\"\+[a-zA-Z0-9_$]{1,8}\+\"\.png\"\)/);
   link_match = code.match(link_regex)[0]
@@ -140,12 +153,105 @@ regex:
   add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
   add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
   print_dog = 'console.log("dog");$&';
+
+  shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.path/);
+  firstvar_name = code.match(shh_grabber)[0].split('.')[0];
+  Hr_name = code.match(shh_grabber)[0].split('.')[1];
+
+  new_shh_line = "if("+firstvar_name+".path===\""+pudding_src+"\")"+firstvar_name+"."+Hr_name+".src=\""+pudding_src+"\";else $&";
+
+  Pr_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  Pr_a = code.match(Pr_regex)[0].split('.')[0]
+  Pr_ka = code.match(Pr_regex)[0].split('.')[1].split('&')[0]
+  Pr_pa = code.match(Pr_regex)[0].split('.')[6]
+  Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
+
+  count_score_regex = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,4}\|\|"graphics"===[a-zA-Z0-9_$]{1,4}\)[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}\([a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\),[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\?"snake_arcade\/pixel\/px_apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png":"snake_arcade\/v4\/apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png"\);/)
+  
+  get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
+  get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+  get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+  console.log("Apple Val 2: " + get_apple_val2)
+
+  yc_settings_regex = new RegExp(`\([a-zA-Z0-9_$]{1,4}\.settings\.${get_apple_val2}\)`)
+  yc_settings_regex_v2 = new RegExp(`\([a-zA-Z0-9_$]{1,4}\.settings\.${get_apple_val2}\)`)
+
+  console.log(yc_settings_regex)
+
+  Replace_BB = "COUNT"
+  
+
+// if("apple"===b||"graphics"===b)d=ahh(a.settings.yc),a.settings.Bb="https://www.google.com/logos/fnbx/"+(1===a.settings.Ya?"snake_arcade/pixel/px_apple_"+d+".png":"snake_arcade/v4/apple_"+d+".png");
+//if\("apple"===b\|\|"graphics"===b\)d=ahh\(a\.settings\.yc\),a\.settings\.Bb="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===a\.settings\.Ya\?"snake_arcade\/pixel\/px_apple_"\+d\+"\.png":"snake_arcade\/v4\/apple_"\+d\+"\.png"\);
+//if\("apple"===[a-zA-Z0-9_$]{1,4}\|\|"graphics"===[a-zA-Z0-9_$]{1,4}\)[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}\([a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\),[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\?"snake_arcade\/pixel\/px_apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png":"snake_arcade\/v4\/apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png"\);
+
+//[a-zA-Z0-9_$]{1,4}=function(a){""!==a.settings.Bb&&(a.Jb.src=a.settings.Bb);""!==a.settings.Nb&&(a.Em.src=a.settings.Nb);
+// [a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\);
+// Get top bar a.settings.Bb
+
+// Regex for top bar food LMAO END SCREEN WHAT A LOSER WASTE OF TIME
+  Bb_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\);/)
+  Bb_to_count1 = code.match(Bb_regex)[0].split('.')[0].split('=')[3]
+  Bb_to_count2 = code.match(Bb_regex)[0].split('.')[2].split('&')[0]
+  //console.log("a BB is: " + Bb_to_count1)
+  console.log("BB is: " + Bb_to_count2)
+
+  // 
+  count_score = code.match(count_score_regex)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(Bb_to_count2, Replace_BB).replaceAll(get_apple_val2, get_count_val2)
+  //console.log(count_score)
+  Bb_replaced_code = code.match(Bb_regex)[0].replaceAll(Bb_to_count2, Replace_BB)
+
+  // still useful maybe?
+  check_count_undefined = `if(${Bb_to_count1}.settings.${Replace_BB} in window)${Bb_to_count1}.settings.${Replace_BB}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";`
+
+  part1 = Bb_replaced_code.split('{')[0];
+  part2 = Bb_replaced_code.split('{')[1];
+
+  Bb_replaced_code = part1 + "{" + check_count_undefined + part2;
+/// LMAO END SCREEN WHAT A LOSER WASTE OF TIME
+  //code = code.assertReplace(Bb_regex, Bb_replaced_code+"debugger;")
+//:_.Im.add(a.Ca,"LaTyvd");""!==a.settings.Bb&&(a.Na.src=a.settings.Bb);
+  TopBar_bb_regex1 = new RegExp(`\_\.[a-zA-Z0-9_$]{1,4}\.add\\\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\,\"[a-zA-Z0-9_$]{1,8}\"\\\)\;\"\"\!\=\=[a-zA-Z0-9_$]{1,4}\.settings\.${Bb_to_count2}\&\&`)
+  TopBar_bb_regex2 = new RegExp(`\\\(a.[a-zA-Z0-9_$]{1,4}.src=a.settings.${Bb_to_count2}\\\);""!==a.settings.[a-zA-Z0-9_$]{1,4}&&\\\(a.[a-zA-Z0-9_$]{1,4}.src=a.settings.[a-zA-Z0-9_$]{1,4}\\\);a=this.[a-zA-Z0-9_$]{1,4}.[a-zA-Z0-9_$]{1,4};`);
+  //console.log(TopBar_bb_regex1);
+  //console.log(TopBar_bb_regex2);
+  //console.log(code.match(TopBar_bb_regex1))
+  //console.log(code.match(TopBar_bb_regex2)[0])
+  //TopBar_bb_code = code.match(TopBar_bb_regex1)[0].replaceAll(Bb_to_count2,Replace_BB) + code.match(TopBar_bb_regex2)[0].replaceAll(Bb_to_count2,Replace_BB);
+  //console.log(TopBar_bb_code);
+
+  TopBar_bb_safety=code.match(TopBar_bb_regex1)[0].replaceAll(Bb_to_count2,Replace_BB)
+  TopBar_bb_safety=TopBar_bb_safety.split(';')[0]+';'+check_count_undefined+TopBar_bb_safety.split(';')[1]
+
+
+  code = code.assertReplace(TopBar_bb_regex1, TopBar_bb_safety);
+  code = code.assertReplace(TopBar_bb_regex2, code.match(TopBar_bb_regex2)[0].replaceAll(Bb_to_count2,Replace_BB));
+
+
+  //console.log("Pr_a is: " + Pr_a)
+  //console.log("Pr_ka is: " + Pr_ka)
+  //console.log("Pr_pa is: " + Pr_pa)
+  //console.log("Pr_new is: " + Pr_new)
+  //console.log("Pr_a is: " + Pr_a)
+
   //debugger;
   //code = code.assertReplace(add_fruit_before_loop_regex, add_pudding);
+  code = code.assertReplace(Pr_regex, Pr_new);
+
+  // END SCREEM APPLES (???)
+  code = code.assertReplace(shh_grabber, new_shh_line);
+
+  // SETTINGS FRUIT ICON
   code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
-  code = code.assertReplace(link_regex, pudding_links);
+  //code = code.assertReplace(count_score, add_pudding2);
 
+  // INITIAL ICON LOAD - for pudding, required for end screen to work
+  code = code.assertReplace(link_regex, pudding_links);  //"debugger;"+
 
+  // Changes top bar icon to count score
+  code = code.assertReplace(count_score_regex, count_score + "$&");
+
+  //code = code.assertReplace(yc_settings_regex, "("+get_count_val1+".settings."+get_count_val2+")")
 
 
   console.log(code);
