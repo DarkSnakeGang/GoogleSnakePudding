@@ -61,6 +61,10 @@ window.PuddingMod.alterSnakeCode = function(code) {
   load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} ? ${settings_var}.settings.${settings_src}="${pudding_src}" : {}\);`
   // Any additional fruit will need an extra line for it's own src
 
+  // Too lazy to clean this code, it's "good enough" to leave untouched for now
+  // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
+  // The if statements are janky and get be condensed
+  // This fixes errors in console but doesn't "change" anything in-game
   shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.path/);
   firstvar_name = code.match(shh_grabber)[0].split('.')[0];
   Hr_name = code.match(shh_grabber)[0].split('.')[1];
