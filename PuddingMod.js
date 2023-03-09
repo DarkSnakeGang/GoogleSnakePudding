@@ -82,7 +82,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Also fixes an image call to pudding
   code = code.assertReplace(shh_grabber, new_shh_line);
 
-
+  // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
   get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
   get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
