@@ -8,22 +8,7 @@ part2 = Bb_replaced_code.split('{')[1];
 Bb_replaced_code = part1 + "{" + check_count_undefined + part2;
 
 // Deprecated code has been replace with a match better version:
- //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.settings,\"snake_arcade\/v4\/apple_\"/)
-  //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace('\(this.settings,\"snake_arcade\/v4\/apple_\"',"")
-  //ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.base,c.target,c.threshold\)/)
-  //func_name2 = code.match(ip_grabber2)[0].replace('\(b,c.base,c.target,c.threshold\)',"")
-  //array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
-  //array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
-  //add_pudding = 'b=22;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);$&'
-  //add_pudding2 = '$&;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
 
-  // No Idea why did was ever needed. This probably replaced the topbar fruit with pudding at some point
-  //code = code.assertReplace(count_score, add_pudding2);
-
-    //add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
-  //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
-
-  //code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
 
 
 
@@ -49,3 +34,28 @@ link_match = code.match(link_regex)[0]
 settings_grab = link_match.split('.')[1].split("=")[0]
 
   //load_pudding_code = `if\(${select_fruit_numvar}==22\)${settings_var}.settings.${settings_src}="${pudding_src}";`
+
+
+  ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.settings,\"snake_arcade\/v4\/apple_\"/)
+  func_name = code.match(ip_grabber)[0].replace("=new ", "").replace('\(this.settings,\"snake_arcade\/v4\/apple_\"',"")
+  ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.base,c.target,c.threshold\)/)
+  func_name2 = code.match(ip_grabber2)[0].replace('\(b,c.base,c.target,c.threshold\)',"")
+  array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
+  array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
+  add_pudding2 = '$&;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
+
+  // No Idea why did was ever needed. This probably replaced the topbar fruit with pudding at some point
+  //code = code.assertReplace(count_score, add_pudding2);
+
+  add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
+  //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
+
+  code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
+
+
+
+
+
+  // else a.ka&&(a.ka.src="https://www.google.com/logos/fnbx/"+a.Qa,_.Tj(a.ka,"load",function(){$dh(a)}))}
+
+  // `(a.${Pr_pa} == "${pudding_src}") ? ${pudding_src} : "https://www.google.com/logos/fnbx/"+a.${Pr_pa}`

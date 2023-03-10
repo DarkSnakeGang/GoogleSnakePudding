@@ -23,13 +23,13 @@ window.PuddingMod.runCodeBefore = function() {
   // Fruit, aka pudding
 
     for(let src of [
-        'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Foods/Pudding.png',
+        'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
       // Skull
 
     //for(let src of [
-    //    'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png',
+     //   'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png',
     //]) document.querySelector('#skull').appendChild(uiImage(src));
 
 
@@ -42,7 +42,11 @@ window.PuddingMod.runCodeBefore = function() {
 
 window.PuddingMod.alterSnakeCode = function(code) {
 
-  pudding_src = 'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Foods/Pudding.png'
+
+  console.log(code);
+  console.log("Starting to edit code...");
+
+  pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
 
   // Full function that sets the current fruit icon
   load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,4}\|\|"graphics"===[a-zA-Z0-9_$]{1,4}\)[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}\([a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\),[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\?"snake_arcade\/pixel\/px_apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png":"snake_arcade\/v4\/apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png"\);/)
@@ -59,7 +63,27 @@ window.PuddingMod.alterSnakeCode = function(code) {
   last_fruit_num = 21
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
   load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} ? ${settings_var}.settings.${settings_src}="${pudding_src}" : {}\);`
+  load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
+
+  ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.settings,\"snake_arcade\/v4\/apple_\"/)
+  func_name = code.match(ip_grabber)[0].replace("=new ", "").replace('\(this.settings,\"snake_arcade\/v4\/apple_\"',"")
+  ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.base,c.target,c.threshold\)/)
+  func_name2 = code.match(ip_grabber2)[0].replace('\(b,c.base,c.target,c.threshold\)',"")
+  array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
+  array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
+  add_pudding3 = '$&;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
+  add_pudding2 = `$&;b=new ${func_name}(this.settings,"${pudding_src}",1,this.oa,"${pudding_src}");${func_name2}(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);this.wa.push(b);`
+// lots of hardcoded shit here, fix it later
+
+  // No Idea why did was ever needed. This probably replaced the topbar fruit with pudding at some point
+  //code = code.assertReplace(count_score, add_pudding2);
+
+  add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
+  //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
+
+  code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
+
 
   // Too lazy to clean this code, it's "good enough" to leave untouched for now
   // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
@@ -74,11 +98,17 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Pr_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   Pr_a = code.match(Pr_regex)[0].split('.')[0]
   Pr_ka = code.match(Pr_regex)[0].split('.')[1].split('&')[0]
-  Pr_pa = code.match(Pr_regex)[0].split('.')[6]
+  Pr_pa = code.match(Pr_regex)[0].split('.')[6] // Where relative path is stored
+  console.log("Pr_pa: " + Pr_pa)
+
+  only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})`
+  aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition)
+  code = code.assertReplace(Pr_regex, aggressive_change);
   Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
 
   // Fixes an image call to pudding
-  code = code.assertReplace(Pr_regex, Pr_new);
+  //code = code.assertReplace(Pr_regex, Pr_new);
   // Also fixes an image call to pudding
   code = code.assertReplace(shh_grabber, new_shh_line);
 
@@ -86,6 +116,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
   get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+  get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
 
   // Arbitrary values for keeping the SRC image for these things
   Count_SRC = "COUNT"
@@ -98,7 +129,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2)
-  speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, Replace_Speed)
+  speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
 
   // Adds loading for counts when starting the game
   code = code.assertReplace(load_image_func, count_score + "$&");
@@ -123,9 +154,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Endscreen related image loading for new fruit - pudding. Keep this last
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_pudding_code_condensed));
+  //code = code.assertReplace(load_image_func, "$&" + load_pudding_code);
+
+
 
   console.log(code);
-
 
   return code;
 };
