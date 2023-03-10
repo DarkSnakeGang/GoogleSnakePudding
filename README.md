@@ -2,7 +2,7 @@
 Simple mod that does simple things.
 
 ## Current features     
-* Pudding added as a food
+* Pudding added as food option
 * Selected Multi count (1a, 3a and 5a) is displayed instead of food, at the top bar
 * Pixelated Pudding food works
 
