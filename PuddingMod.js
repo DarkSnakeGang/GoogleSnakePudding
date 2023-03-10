@@ -34,6 +34,7 @@ window.PuddingMod.runCodeBefore = function() {
 
 
 
+
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -47,6 +48,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Starting to edit code...");
 
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
+  skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
+  skull_path = 'snake_arcade/v12/trophy_10.png'
 
   // Full function that sets the current fruit icon
   load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,4}\|\|"graphics"===[a-zA-Z0-9_$]{1,4}\)[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}\([a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\),[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\?"snake_arcade\/pixel\/px_apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png":"snake_arcade\/v4\/apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png"\);/)
@@ -66,23 +69,27 @@ window.PuddingMod.alterSnakeCode = function(code) {
   load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
 
+
   ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.settings,\"snake_arcade\/v4\/apple_\"/)
   func_name = code.match(ip_grabber)[0].replace("=new ", "").replace('\(this.settings,\"snake_arcade\/v4\/apple_\"',"")
   ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.base,c.target,c.threshold\)/)
-  func_name2 = code.match(ip_grabber2)[0].replace('\(b,c.base,c.target,c.threshold\)',"")
+  func_name2 = code.match(ip_grabber2)[0].replace('\(b,c.base,c.target,c.threshold\)',"") // This function is what makes the poison grey in poison mode
   array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
   array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
-  add_pudding3 = '$&;b=new '+func_name+'(this.settings,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png",1,this.oa,"https://i.postimg.cc/5y7gwwGY/pudding-cr.png");'+func_name2+'(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);'
-  add_pudding2 = `$&;b=new ${func_name}(this.settings,"${pudding_src}",1,this.oa,"${pudding_src}");${func_name2}(b,\'#eaca23\',\'#909090\',10);this.wa.push(b);this.wa.push(b);`
+  set_skull = `b.Qa = "${pudding_src}"; b.path = "${pudding_src}";`
+  set_pudding = `b.Qa = "${skull_src}"; b.path = "${skull_path}";`
+  add_pudding = `$&;
+  b=new ${func_name}(this.settings,"${pudding_src}",1,this.oa,"${pudding_src}");
+  ${func_name2}(b,\'#eaca23\',\'#909090\',10);
+  this.wa.push(b);this.wa.push(b);
+  `
 // lots of hardcoded shit here, fix it later
-
-  // No Idea why did was ever needed. This probably replaced the topbar fruit with pudding at some point
-  //code = code.assertReplace(count_score, add_pudding2);
+// call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
 
   add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
   //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
 
-  code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
+  code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding);
 
 
   // Too lazy to clean this code, it's "good enough" to leave untouched for now
@@ -102,7 +109,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Pr_pa: " + Pr_pa)
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-  new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})`
+  new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
   aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition)
   code = code.assertReplace(Pr_regex, aggressive_change);
   Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
@@ -128,7 +135,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
 
   // Create a new if statement that sets the count image whenever changes are made
-  count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2)
+  count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
   speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
 
   // Adds loading for counts when starting the game
@@ -155,8 +162,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_pudding_code_condensed));
   //code = code.assertReplace(load_image_func, "$&" + load_pudding_code);
-
-
 
   console.log(code);
 
