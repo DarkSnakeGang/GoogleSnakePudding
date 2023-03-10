@@ -12,8 +12,3 @@ Simple mod that does simple things.
 * Replace the volume and mute icons with the selected speed.
 * Add burger food
 * Support more menu mod (?)
-
-## Credits
-* Yarmiplay (Creator)
-* Llama (Mod Loader creator)
-* Carl (Made Pudding icon)
