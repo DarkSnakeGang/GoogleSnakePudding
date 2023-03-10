@@ -68,10 +68,12 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   last_fruit_num = 21
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
-  load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.settings.${pixel_setting} === 0 ? ${settings_var}.settings.${settings_src}="${pudding_src}" : ${settings_var}.settings.${settings_src}="${pudding_px_src}"\);`
+  load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.settings.${pixel_setting} === 0 ? ${settings_var}.settings.${settings_src}="${pudding_src}" : {}\)
+  ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.settings.${pixel_setting} === 1 ? ${settings_var}.settings.${settings_src}="${pudding_px_src}" : {}\)
+  ;`
   //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
-
+  //  //load pixelated pudding
 
   ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.settings,\"snake_arcade\/v4\/apple_\"/)
   func_name = code.match(ip_grabber)[0].replace("=new ", "").replace('\(this.settings,\"snake_arcade\/v4\/apple_\"',"")
