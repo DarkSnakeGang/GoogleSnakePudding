@@ -48,6 +48,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Starting to edit code...");
 
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
+  pudding_px_src = 'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
   skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
   skull_path = 'snake_arcade/v12/trophy_10.png'
 
@@ -59,14 +60,16 @@ window.PuddingMod.alterSnakeCode = function(code) {
   settings_var = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[0].split(',')[1]
   settings_src = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[2]
   select_fruit_numvar = code.match(load_image_func)[0].match(new RegExp(/\+.\+/))[0].split('+')[1]
+  //console.log(code.match(load_image_func)[0])
+  pixel_setting = code.match(load_image_func)[0].match(/\=[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\?/)[0].split('.')[2].split('?')[0]
 
   // Gets the element that changed, "apple" means fruit here, in endscreen - Unused code here, but may be useful in the future.
   get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
 
   last_fruit_num = 21
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
-  load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} ? ${settings_var}.settings.${settings_src}="${pudding_src}" : {}\);`
-  load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
+  load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.settings.${pixel_setting} === 0 ? ${settings_var}.settings.${settings_src}="${pudding_src}" : ${settings_var}.settings.${settings_src}="${pudding_px_src}"\);`
+  //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
 
 
@@ -79,7 +82,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   set_skull = `b.Qa = "${pudding_src}"; b.path = "${pudding_src}";`
   set_pudding = `b.Qa = "${skull_src}"; b.path = "${skull_path}";`
   add_pudding = `$&;
-  b=new ${func_name}(this.settings,"${pudding_src}",1,this.oa,"${pudding_src}");
+  b=new ${func_name}(this.settings,"${pudding_src}",1,this.oa,"${pudding_px_src}");
   ${func_name2}(b,\'#eaca23\',\'#909090\',10);
   this.wa.push(b);this.wa.push(b);
   `
@@ -109,8 +112,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Pr_pa: " + Pr_pa)
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-  new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
-  aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition)
+  //new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
+  new_aggressive_condition_v2 = `(${Pr_a}.${Pr_pa}.includes("postimg") ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
+
+  aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition_v2)
+
   code = code.assertReplace(Pr_regex, aggressive_change);
   Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
 
