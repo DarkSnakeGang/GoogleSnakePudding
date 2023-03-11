@@ -32,7 +32,7 @@ window.PuddingMod.runCodeBefore = function() {
      //   'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png',
     //]) document.querySelector('#skull').appendChild(uiImage(src));
 
-
+    document.body.style.overflow = 'hidden';
 
 
 };
@@ -139,16 +139,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Regex for a function that sets the src for count (I think)
   settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\);/)
   settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
+  settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
   settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
-  speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
 
   // Adds loading for counts when starting the game
   code = code.assertReplace(load_image_func, count_score + "$&");
-  // Add loading for speed when starting the game
-  code = code.assertReplace(load_image_func, speed_volume + "$&");
 
   // Function that checks if count image is set, and sets it to a default of 1a if it's not set.
   check_count_undefined = `if(${settings_var}.settings.${Count_SRC} in window)${settings_var}.settings.${Count_SRC}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";`
@@ -164,6 +162,18 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Actually changes Top Bar fruit to multi count
   code = code.assertReplace(TopBar_srcFunc_p1, TopBar_count_code);
   code = code.assertReplace(TopBar_srcFunc_p2, code.match(TopBar_srcFunc_p2)[0].replaceAll(settings_src,Count_SRC));
+
+  // Volume Regex
+  volume_regex = new RegExp(/this\.muted\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
+  code = code.assertReplace(volume_regex, `this.${settings_itself}.${Replace_Speed} ? this.${settings_itself}.${Replace_Speed} : "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" ;`)
+// _.k.R7b=function(){this.muted=!this.muted;
+  volume_src_regex = new RegExp(/[a-zA-Z0-9_$.]{1,7}=function\(\){this\.muted=!this\.muted;this\.header\.[a-zA-Z0-9_$.]{1,7}\.src=/)
+  volume_src = `document.querySelector('img[alt="Mute"]').src `
+
+  speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
+  speed_volume = speed_volume.replace(';', `,${volume_src}=${settings_var}.${settings_itself}.${Replace_Speed};`)
+  // Add loading for speed when starting the game
+  code = code.assertReplace(load_image_func, speed_volume + "$&");
 
   // Endscreen related image loading for new fruit - pudding. Keep this last
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
