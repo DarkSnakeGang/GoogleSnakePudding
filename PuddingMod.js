@@ -86,7 +86,7 @@ window.PuddingMod.runCodeBefore = function() {
 window.PuddingMod.alterSnakeCode = function(code) {
 
 
-  console.log(code);
+  //console.log(code);
   console.log("Starting to edit code...");
 
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
@@ -188,7 +188,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Count_SRC = "COUNT"
   Replace_Speed = "SPEED"
 
-  console.log("Settings? : " + settings_itself)
+  //console.log("Settings? : " + settings_itself)
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
@@ -233,11 +233,10 @@ window.PuddingMod.alterSnakeCode = function(code) {
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
   pudding_skull_xd = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
 
-  console.log("Draw Skull Func: " + code.match(draw_skull_func)[0])
-
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
   //console.log(Math.floor((Math.random() * 1000000) + 1) == 426017) // 426017
-  console.log(code);
+  //console.log(code);
+  console.log("Done, enjoy Pudding Mod!");
 
   return code;
 };
