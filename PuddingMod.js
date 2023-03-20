@@ -162,7 +162,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Pr_a = code.match(Pr_regex)[0].split('.')[0]
   Pr_ka = code.match(Pr_regex)[0].split('.')[1].split('&')[0]
   Pr_pa = code.match(Pr_regex)[0].split('.')[6] // Where relative path is stored
-  console.log("Pr_pa: " + Pr_pa)
+  //console.log("Pr_pa: " + Pr_pa)
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   //new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
