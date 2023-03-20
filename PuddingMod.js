@@ -140,7 +140,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
-  ${poison_convert}(b,\'#eaca23\',\'#909090\',10);debugger;
+  ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
   this.${fruit_array_name}.push(b);this.${fruit_array_name}.push(b);
   `
 // lots of hardcoded shit here, fix it later
@@ -236,7 +236,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Draw Skull Func: " + code.match(draw_skull_func)[0])
 
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
-
+  //console.log(Math.floor((Math.random() * 1000000) + 1) == 426017) // 426017
   console.log(code);
 
   return code;
