@@ -34,6 +34,48 @@ window.PuddingMod.runCodeBefore = function() {
 
     document.body.style.overflow = 'hidden';
 
+    function i(src) {
+      let img = new Image();
+      img.src = src;
+      img.crossOrigin = 'Anonymous';
+      img.width = img.height = 47;
+      return img;
+    }
+
+    const normal = {
+       pudding:   i('https://i.postimg.cc/5y7gwwGY/pudding-cr.png'),
+     };
+
+     const dead = {
+       pudding:   i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'),
+     };
+
+    window.darks = [
+      i('https://i.postimg.cc/pTMsq0k2/apple-00-1.png'),
+      i('https://i.postimg.cc/Pxb2cmF1/apple-01.png'),
+      i('https://i.postimg.cc/rs8QLKv3/apple-02.png'),
+      i('https://i.postimg.cc/CKqvCyGP/apple-03-1.png'),
+      i('https://i.postimg.cc/VkTGbsC0/apple-04-1.png'),
+      i('https://i.postimg.cc/yY1rMbKx/apple-05.png'),
+      i('https://i.postimg.cc/280Xr7jw/apple-06.png'),
+      i('https://i.postimg.cc/qvgDR6zd/apple-07.png'),
+      i('https://i.postimg.cc/PJ4VLmWd/apple-08-1.png'),
+      i('https://i.postimg.cc/2jFKXfPg/apple-09.png'),
+      i('https://i.postimg.cc/NFYPfNrN/apple-10.png'),
+      i('https://i.postimg.cc/ZR6Mmk0B/apple-11.png'),
+      i('https://i.postimg.cc/XYDhccTJ/apple-12-1.png'),
+      i('https://i.postimg.cc/rpBP7yy2/apple-13.png'),
+      i('https://i.postimg.cc/9QfK7NgK/apple-14.png'),
+      i('https://i.postimg.cc/bvD56ShR/apple-15.png'),
+      i('https://i.postimg.cc/NfBWg06g/apple-16.png'),
+      i('https://i.postimg.cc/yYj2Wzj0/apple-17.png'),
+      i('https://i.postimg.cc/0jdFYgsR/apple-18.png'),
+      i('https://i.postimg.cc/05pTRSJW/apple-19.png'),
+      i('https://i.postimg.cc/vTdCxYCt/apple-20.png'),
+      new Image(),
+      dead.pudding,
+      dead.pudding,
+    ];
 
 };
 
@@ -48,7 +90,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Starting to edit code...");
 
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
-  pudding_px_src = 'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
+  pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
   skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
   skull_path = 'snake_arcade/v12/trophy_10.png'
 
@@ -86,7 +128,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/v4\/apple_\"/)
   func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/v4\/apple_\"`,"")
   ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
-  func_name2 = code.match(ip_grabber2)[0].split('(')[0] // replace('\(b,c.base,c.target,c.threshold\)',"") // This function is what makes the poison grey in poison mode
+  poison_convert = code.match(ip_grabber2)[0].split('(')[0] // replace('\(b,c.base,c.target,c.threshold\)',"") // This function is what makes the poison grey in poison mode
   array_grabber = new RegExp(/".png"\),c=[a-zA-Z0-9_$]{1,8}\[a\],/)
   array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
 
@@ -98,7 +140,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
-  ${func_name2}(b,\'#eaca23\',\'#909090\',10);
+  ${poison_convert}(b,\'#eaca23\',\'#909090\',10);debugger;
   this.${fruit_array_name}.push(b);this.${fruit_array_name}.push(b);
   `
 // lots of hardcoded shit here, fix it later
@@ -185,6 +227,15 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_pudding_code_condensed));
   //code = code.assertReplace(load_image_func, "$&" + load_pudding_code);
+
+  // The elegent piece of code that replace the grey pudding with the skull icon
+  draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
+  get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
+  pudding_skull_xd = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
+
+  console.log("Draw Skull Func: " + code.match(draw_skull_func)[0])
+
+  code = code.assertReplace(draw_skull_func, pudding_skull_xd)
 
   console.log(code);
 
