@@ -136,11 +136,13 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
 
   fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
+  volume_src = `document.querySelector('img[alt="Mute"]').src `
 
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
+  ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
   this.${fruit_array_name}.push(b);this.${fruit_array_name}.push(b);
   `
 // lots of hardcoded shit here, fix it later
@@ -221,7 +223,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   code = code.assertReplace(volume_regex, `this.${settings_itself}.${Replace_Speed} ? this.${settings_itself}.${Replace_Speed} : "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" ;`)
 // _.k.R7b=function(){this.muted=!this.muted;
   volume_src_regex = new RegExp(/[a-zA-Z0-9_$.]{1,7}=function\(\){this\.muted=!this\.muted;this\.header\.[a-zA-Z0-9_$.]{1,7}\.src=/)
-  volume_src = `document.querySelector('img[alt="Mute"]').src `
 
   speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
   speed_volume = speed_volume.replace(';', `,${volume_src}=${settings_var}.${settings_itself}.${Replace_Speed} == "https://www.google.com/logos/fnbx/snake_arcade/pixel/px_speed_00.png" ? "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" : ${settings_var}.${settings_itself}.${Replace_Speed} ;`)

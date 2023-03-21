@@ -52,10 +52,9 @@ settings_grab = link_match.split('.')[1].split("=")[0]
 
   code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding2);
 
-
-
-
-
   // else a.ka&&(a.ka.src="https://www.google.com/logos/fnbx/"+a.Qa,_.Tj(a.ka,"load",function(){$dh(a)}))}
 
   // `(a.${Pr_pa} == "${pudding_src}") ? ${pudding_src} : "https://www.google.com/logos/fnbx/"+a.${Pr_pa}`
+
+  /////////             b = Math.floor(Math.random() * (this.ka.oa.width * this.ka.oa.height - a.size));
+// Logic for golden apple here
