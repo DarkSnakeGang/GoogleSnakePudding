@@ -154,7 +154,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
-  this.${fruit_array_name}.push(b);debugger;
+  this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
