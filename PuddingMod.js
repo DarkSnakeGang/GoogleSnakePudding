@@ -26,9 +26,9 @@ window.PuddingMod.runCodeBefore = function() {
         'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
-//    for(let src of [
-//      'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
-//  ]) document.querySelector('#count').appendChild(uiImage(src));
+    for(let src of [
+      'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
+  ]) document.querySelector('#count').appendChild(uiImage(src));
 
       // Skull
 
