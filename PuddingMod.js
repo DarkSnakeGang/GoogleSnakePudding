@@ -265,8 +265,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Adding 1 in a 10 Million Special Secret...")
   code = code.assertReplace(apple_info_regex, set_gold)
 
-  draw_apple_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
-  golden_logic = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
+  //draw_apple_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
+  //golden_logic = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
 
   console.log("Done, enjoy Pudding Mod!");
 
