@@ -26,8 +26,8 @@ window.PuddingMod.runCodeBefore = function() {
         'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
-  //  for(let src of [
-  //    'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
+    //for(let src of [
+    //  'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
   //]) document.querySelector('#count').appendChild(uiImage(src));
 
       // Skull
@@ -141,7 +141,9 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
 
   fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
-  volume_src = `document.querySelector('img[class="oGdex JWsmhb"]').src `
+  volume_class = document.querySelector('img[src="//www.gstatic.com/images/icons/material/system/2x/volume_up_white_24dp.png"]').getAttribute("class")
+  //console.log("Volume class: " + volume_class)
+  volume_src = `document.querySelector('img[class="${volume_class}"]').src `
 
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
