@@ -154,7 +154,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
-  ${poison_convert}(b,\'#eaca22\',\'#909091\',0); debugger;
+  ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
   `
 // lots of hardcoded shit here, fix it later
@@ -210,7 +210,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
   detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
   count_score = count_score.replaceAll("\".png\")", detect_dice)
-  debugger;
   // Adds loading for counts when starting the game
   console.log("Adding count detector...")
   code = code.assertReplace(load_image_func, count_score + "$&");
