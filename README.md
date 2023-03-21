@@ -11,4 +11,5 @@ Simple mod that does simple things.
 
 
 ### Planned Features
+* One in a million chance of a golden apple/red pudding
 * One secret feature is planned.
