@@ -26,9 +26,9 @@ window.PuddingMod.runCodeBefore = function() {
         'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
-//    for(let src of [
-//      'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
-//  ]) document.querySelector('#count').appendChild(uiImage(src));
+  //  for(let src of [
+  //    'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
+  //]) document.querySelector('#count').appendChild(uiImage(src));
 
       // Skull
 
@@ -141,7 +141,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
 
   fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
-  volume_src = `document.querySelector('img[alt="Mute"]').src `
+  volume_src = `document.querySelector('img[class="oGdex JWsmhb"]').src `
 
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
@@ -152,7 +152,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
-  this.${fruit_array_name}.push(b);
+  this.${fruit_array_name}.push(b);debugger;
   b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
@@ -204,7 +204,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Count_SRC = "COUNT"
   Replace_Speed = "SPEED"
 
-  console.log("Settings? : " + settings_itself)
+  //console.log("Settings? : " + settings_itself)
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
