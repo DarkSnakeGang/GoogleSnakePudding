@@ -145,7 +145,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   `
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
-
+  console.log("Adding pudding to stack...")
   code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding);
 
   // Too lazy to clean this code, it's "good enough" to leave untouched for now
@@ -170,12 +170,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition_v2)
 
+  console.log("Adding pixelated pudding...")
   code = code.assertReplace(Pr_regex, aggressive_change);
   Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
 
   // Fixes an image call to pudding
   //code = code.assertReplace(Pr_regex, Pr_new);
   // Also fixes an image call to pudding
+  console.log("Adding pudding image...")
   code = code.assertReplace(shh_grabber, new_shh_line);
 
   // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
@@ -194,6 +196,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
 
   // Adds loading for counts when starting the game
+  console.log("Adding count detector...")
   code = code.assertReplace(load_image_func, count_score + "$&");
 
   // Function that checks if count image is set, and sets it to a default of 1a if it's not set.
@@ -208,10 +211,12 @@ window.PuddingMod.alterSnakeCode = function(code) {
   TopBar_count_code=TopBar_count_code.split(';')[0]+';'+check_count_undefined+TopBar_count_code.split(';')[1]
 
   // Actually changes Top Bar fruit to multi count
+  console.log("Updating top bar with count...")
   code = code.assertReplace(TopBar_srcFunc_p1, TopBar_count_code);
   code = code.assertReplace(TopBar_srcFunc_p2, code.match(TopBar_srcFunc_p2)[0].replaceAll(settings_src,Count_SRC));
 
   // Volume Regex
+  console.log("Replacing volume with speed...")
   volume_regex = new RegExp(/this\.muted\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
   code = code.assertReplace(volume_regex, `this.${settings_itself}.${Replace_Speed} ? this.${settings_itself}.${Replace_Speed} : "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" ;`)
 // _.k.R7b=function(){this.muted=!this.muted;
@@ -220,11 +225,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
   speed_volume = speed_volume.replace(';', `,${volume_src}=${settings_var}.${settings_itself}.${Replace_Speed} == "https://www.google.com/logos/fnbx/snake_arcade/pixel/px_speed_00.png" ? "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" : ${settings_var}.${settings_itself}.${Replace_Speed} ;`)
+
   // Add loading for speed when starting the game
+  console.log("Adding speed detector...")
   code = code.assertReplace(load_image_func, speed_volume + "$&");
 
   // Endscreen related image loading for new fruit - pudding. Keep this last
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
+  console.log("Adding pudding to endscreen...")
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_pudding_code_condensed));
   //code = code.assertReplace(load_image_func, "$&" + load_pudding_code);
 
@@ -233,6 +241,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
   pudding_skull_xd = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
 
+  console.log("Replacing grey poison pudding with skull trophy icon...")
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
   //console.log(Math.floor((Math.random() * 1000000) + 1) == 426017) // 426017
   //console.log(code);
