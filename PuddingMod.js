@@ -30,6 +30,7 @@ window.PuddingMod.runCodeBefore = function() {
       'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
   ]) document.querySelector('#count').appendChild(uiImage(src));
 
+
       // Skull
 
     //for(let src of [
@@ -141,7 +142,9 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
 
   fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
-  volume_src = `document.querySelector('img[alt="Mute"]').src `
+  volume_class = document.querySelector('img[src="//www.gstatic.com/images/icons/material/system/2x/volume_up_white_24dp.png"]').getAttribute("class")
+  //console.log("Volume class: " + volume_class)
+  volume_src = `document.querySelector('img[class="${volume_class}"]').src `
 
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
@@ -204,7 +207,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Count_SRC = "COUNT"
   Replace_Speed = "SPEED"
 
-  console.log("Settings? : " + settings_itself)
+  //console.log("Settings? : " + settings_itself)
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
