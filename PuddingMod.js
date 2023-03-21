@@ -26,6 +26,10 @@ window.PuddingMod.runCodeBefore = function() {
         'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
+//    for(let src of [
+//      'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
+//  ]) document.querySelector('#count').appendChild(uiImage(src));
+
       // Skull
 
     //for(let src of [
@@ -150,7 +154,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
-  ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
+  ${poison_convert}(b,\'#eaca22\',\'#909091\',0); debugger;
   this.${fruit_array_name}.push(b);
   `
 // lots of hardcoded shit here, fix it later
@@ -200,17 +204,19 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Count_SRC = "COUNT"
   Replace_Speed = "SPEED"
 
-  //console.log("Settings? : " + settings_itself)
+  console.log("Settings? : " + settings_itself)
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
-
+  detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
+  count_score = count_score.replaceAll("\".png\")", detect_dice)
+  debugger;
   // Adds loading for counts when starting the game
   console.log("Adding count detector...")
   code = code.assertReplace(load_image_func, count_score + "$&");
 
   // Function that checks if count image is set, and sets it to a default of 1a if it's not set.
-  check_count_undefined = `if(${settings_var}.settings.${Count_SRC} in window)${settings_var}.settings.${Count_SRC}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";`
+  check_count_undefined = `if(${settings_var}.${settings_itself}.${Count_SRC} in window)${settings_var}.${settings_itself}.${Count_SRC}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";`
 
   // Regex for where the src in settings is taken from
   TopBar_srcFunc_p1 = new RegExp(`\_\.[a-zA-Z0-9_$]{1,4}\.add\\\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\,\"[a-zA-Z0-9_$]{1,8}\"\\\)\;\"\"\!\=\=[a-zA-Z0-9_$]{1,4}\.settings\.${settings_src}\&\&`)
@@ -219,11 +225,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Changes the SRC of where top bar fruit is taken from fruit to count
   TopBar_count_code=code.match(TopBar_srcFunc_p1)[0].replaceAll(settings_src,Count_SRC)
   TopBar_count_code=TopBar_count_code.split(';')[0]+';'+check_count_undefined+TopBar_count_code.split(';')[1]
+  TopBar_count_code2 = code.match(TopBar_srcFunc_p2)[0].replaceAll(settings_src,Count_SRC)
+
 
   // Actually changes Top Bar fruit to multi count
   console.log("Updating top bar with count...")
+
   code = code.assertReplace(TopBar_srcFunc_p1, TopBar_count_code);
-  code = code.assertReplace(TopBar_srcFunc_p2, code.match(TopBar_srcFunc_p2)[0].replaceAll(settings_src,Count_SRC));
+  code = code.assertReplace(TopBar_srcFunc_p2, TopBar_count_code2);
 
   // Volume Regex
   console.log("Replacing volume with speed...")
