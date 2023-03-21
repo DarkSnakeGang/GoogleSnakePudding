@@ -93,7 +93,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
   pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
   skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
   skull_path = 'snake_arcade/v12/trophy_10.png'
-
+  gold_src = 'https://i.postimg.cc/tJqR4tT6/gold-apple.png'
+  red_pudding = 'https://i.postimg.cc/15kNH2Y5/pudding-red.png'
   // Regex for a function that sets the src for count (I think)
   settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\);/)
   settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
@@ -143,7 +144,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
   ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
-  this.${fruit_array_name}.push(b);this.${fruit_array_name}.push(b);
+  this.${fruit_array_name}.push(b);
+  this.${fruit_array_name}.push(b);
+  b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
+  ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
+  this.${fruit_array_name}.push(b);
+  b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
+  ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
+  this.${fruit_array_name}.push(b);
   `
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
@@ -158,7 +166,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   firstvar_name = code.match(shh_grabber)[0].split('.')[0];
   Hr_name = code.match(shh_grabber)[0].split('.')[1];
 
-  new_shh_line = "if("+firstvar_name+".path===\""+pudding_src+"\")"+firstvar_name+"."+Hr_name+".src=\""+pudding_src+"\";else $&";
+  new_shh_line = "if("+firstvar_name+".path.includes(\"postimg\"))"+firstvar_name+"."+Hr_name+".src="+firstvar_name+".path;else $&";
 
   Pr_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   Pr_a = code.match(Pr_regex)[0].split('.')[0]
@@ -174,7 +182,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   console.log("Adding pixelated pudding...")
   code = code.assertReplace(Pr_regex, aggressive_change);
-  Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
+  //Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
 
   // Fixes an image call to pudding
   //code = code.assertReplace(Pr_regex, Pr_new);
@@ -246,6 +254,20 @@ window.PuddingMod.alterSnakeCode = function(code) {
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
   //console.log(Math.floor((Math.random() * 1000000) + 1) == 426017) // 426017
   //console.log(code);
+
+
+  apple_info_regex = new RegExp(/a\.ka\[b\]\.pos/)
+  set_gold = `if(a.ka[b].type >= 23){a.ka[b].type = a.ka[b].old_type;}
+  if(Math.floor((Math.random() * 1000000) + 1) == 426017){a.ka[b].old_type = a.ka[b].type; a.ka[b].type = 23;}
+  if(Math.floor((Math.random() * 10000000) + 1) == 4263017){a.ka[b].old_type = a.ka[b].type; a.ka[b].type = 24;}
+  $&`
+  console.log("Adding 1 in a Million Golden Apple...")
+  console.log("Adding 1 in a 10 Million Special Secret...")
+  code = code.assertReplace(apple_info_regex, set_gold)
+
+  draw_apple_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
+  golden_logic = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
+
   console.log("Done, enjoy Pudding Mod!");
 
   return code;
