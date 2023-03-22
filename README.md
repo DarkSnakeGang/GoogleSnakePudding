@@ -4,11 +4,10 @@ Mod made for speedrunners.
 
 ## Features
 ### Current Features
-* Pudding added as food option
+* Pudding added as food option, including pixelated pudding
 * Selected Multi count (1a, 3a and 5a) is displayed instead of food, at the top bar
-* Pixelated Pudding food works
 * The volume and mute icons are replaced with selected speed
-* Replace poison food for pudding with the poison mode icon
+* Replace poison food for pudding with the poison mode icon (only for normal graphics)
 * One in a million chance of a golden apple
 
 ### Planned Features
