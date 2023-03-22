@@ -11,10 +11,15 @@ Simple mod that does simple things.
 * One in a million chance of a golden apple
 
 ### Planned Features
-* One secret feature is planned.
+* Secret feature
+* Distinct soko goals (fishes)
+* Side panel with auto-updating SRC times
+* Attempt and Input counters
+* Advanced options to switch textures
 
 ## Credits
 * Yarmiplay (Author)
 * Llama (Mod Loader Author)
+* Fishes (Distinct Soko Goals, Soon™)
 * CarL (Pudding Texture)
 * m0nument (Golden Apple Texture)
