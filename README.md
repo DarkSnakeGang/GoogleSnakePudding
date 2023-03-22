@@ -1,7 +1,6 @@
 # Google Snake Pudding Mod
 Mod made for speedrunners.                     
 ![image](https://user-images.githubusercontent.com/6286286/226864041-8c3975f5-95cd-4718-90e8-3e5ab4f7e9fa.png)
-img[alt=drawing] { width: 200px; height: 200px }
 
 ## Features
 ### Current Features
