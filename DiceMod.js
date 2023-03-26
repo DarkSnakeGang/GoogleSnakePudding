@@ -90,7 +90,7 @@ window.DiceMod.runCodeBefore = function() {
 window.DiceMod.alterSnakeCode = function(code) {
 
 
-  console.log(code);
+  //console.log(code);
   console.log("Starting to edit code...");
 
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
@@ -526,13 +526,13 @@ window.DiceMod.alterSnakeCode = function(code) {
 
   acutally_spawn_apple_regex = new RegExp(`if\\\(${should_spawn_res}\\\)[^]*?this.wa\\\)\\\);`,"gms")
   acutally_spawn_apple_code = code.match(acutally_spawn_apple_regex)[0]
-  console.log("Actually spawn apple: " + acutally_spawn_apple_code)
+  //console.log("Actually spawn apple: " + acutally_spawn_apple_code)
 
-  console.log(dice_eaten_code);
+  //console.log(dice_eaten_code);
 
-  console.log(code);
+  //console.log(code);
 
-  console.log("Done, enjoy Pudding Mod!");
+  console.log("Done, enjoy Dice Mod!");
 
   return code;
 };
