@@ -5,7 +5,6 @@ window.DiceMod = {};
 ////////////////////////////////////////////////////////////////////
 
 window.DiceMod.runCodeBefore = function() {
-
   console.log("Thank you for loading Yarmiplay's Dice Mod! Hope you enjoy :)");
   console.log("Please provide feedback and report bugs in #snake-modding in the Official Google Snake Discord");
   console.log("Google Snake SRC Discord link: https://discord.gg/dDuCTm62EZ");
@@ -585,5 +584,9 @@ window.DiceMod.alterSnakeCode = function(code) {
 ////////////////////////////////////////////////////////////////////
 
 window.DiceMod.runCodeAfter = function() {
-
+  let modIndicator = document.createElement('div');
+  modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
+  modIndicator.textContent = 'Dice Mod';
+  let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
+  document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
