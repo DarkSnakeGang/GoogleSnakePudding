@@ -6,7 +6,7 @@ window.DiceMod = {};
 
 window.DiceMod.runCodeBefore = function() {
 
-  console.log("Thank you for loading Yarmiplay's Pudding Mod! Hope you enjoy :)");
+  console.log("Thank you for loading Yarmiplay's Dice Mod! Hope you enjoy :)");
   console.log("Please provide feedback and report bugs in #snake-modding in the Official Google Snake Discord");
   console.log("Google Snake SRC Discord link: https://discord.gg/dDuCTm62EZ");
 
@@ -315,10 +315,20 @@ window.DiceMod.alterSnakeCode = function(code) {
   array_index = move_apple_func.split(';')[1].split('(')[1].split(',')[0]
   move_latest_apple = move_apple_func.split(';')[0] + ';' + move_apple_func.split(';')[1].replace(array_index,"this.wa.ka.length-1") + ';'
   //console.log(move_latest_apple);
+  move_func_name = move_latest_apple.split(';')[1].split('.')[1].split('(')[0]
+  //console.log(move_func_name); // ${move_func_name}
+
   is_dimension = is_portal.replace('2', '11');
   is_soko = is_portal.replace('2', '9');
   is_key = is_portal.replace('2', '8');
   is_yinyang = is_portal.replace('2', '7');
+  mode_check_func = is_yinyang.split('(')[0]; // ${mode_check_func}
+
+  fruit_bowl_check = code.match(`21===[a-zA-Z0-9_$]{1,4}\.${settings_itself}\.[a-zA-Z0-9_$]{1,4}`)[0].split('.')[2]
+  //console.log(fruit_bowl_check) // ${fruit_bowl_check}
+
+  key_type = code.match(/[a-zA-Z0-9_$]{1,8}\(a\.[a-zA-Z0-9_$]{1,8},b.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8}\);/gm)[0].split('.')[3].split(',')[0]
+  //console.log(key_type) //${key_type}
 
   dice_reset_code = `resetState=function\(a\){ ${expectedCount} = ${currentCount} = 3;
   window.snake.typeStore = [];
@@ -329,20 +339,19 @@ window.DiceMod.alterSnakeCode = function(code) {
   portal_match_index = "pmi"
 
   // this.wa.ka is "AppleArray" - very important
-
   add_apple_only = `new_apple = ${real_new_apple_func};
   new_apple.type = this.wa.ka[0].type;
-  avoid_key_texture = this.wa.ka[0].Lka;
+  avoid_key_texture = this.wa.ka[0].${key_type};
   if(${is_key})
   {
     if(key_texture == avoid_key_texture)
     {
       key_texture = key_texture + 1;
     }
-    new_apple.Lka = key_texture; // Hardcoded, fix later - give key texture
+    new_apple.${key_type} = key_texture;
     key_texture = key_texture + 1;
   }
-  21 === this.settings.Da && (new_apple.type = ohh(this.wa)); // Hardcoded, fix later - fix randomize fruit
+  21 === this.${settings_itself}.${fruit_bowl_check} && (new_apple.type = ohh(this.wa));
   this.wa.ka.push(new_apple);
   `
 
@@ -358,13 +367,12 @@ window.DiceMod.alterSnakeCode = function(code) {
   window.snake.typeStore.splice(0,1);
   index2 = this.wa.ka.length-1;
   var index2 = 0 === index1 % 2 ? index1 + 1 : index1 - 1;
-	if (21 === this.settings.Da){
+	if (21 === this.${settings_itself}.${fruit_bowl_check}){
 		this.wa.ka[index1].type = ohh(this.wa);
 		this.wa.ka[index2].type = this.wa.ka[index1].type;
 	}
-	var Gx = 0 === this.wa.settings.Aa && !xL(this.wa.settings, 11);
-	var et = this.nSc(index1, !1, null);
-  //debugger;
+	var Gx = 0 === this.wa.${settings_itself}.Aa && !${mode_check_func}(this.wa.${settings_itself}, 11);
+	var et = this.${move_func_name}(index1, !1, null);
   second_index = first_index = 0;
   found_one = false;
   for(i = 0; i<this.wa.ka.length; i++){
@@ -386,13 +394,13 @@ window.DiceMod.alterSnakeCode = function(code) {
     }
   }
 
-	if (xL(this.wa.settings, 8) || xL(this.wa.settings, 9)){
+	if (${mode_check_func}(this.wa.${settings_itself}, 8) || ${mode_check_func}(this.wa.${settings_itself}, 9)){
     this.wa.ka.splice(max_index, 1);
     this.wa.ka.splice(min_index, 1);
   }
 	else {
-		var Hx = xL(this.wa.settings, 7) ? BL(this.wa.oa, this.wa.ka[first_index].pos) : null;
-		var Nz = this.nSc(second_index, Gx, Hx);
+		var Hx = ${mode_check_func}(this.wa.${settings_itself}, 7) ? BL(this.wa.oa, this.wa.ka[first_index].pos) : null;
+		var Nz = this.${move_func_name}(second_index, Gx, Hx);
     found_one = false;
     for(i = 0; i<this.wa.ka.length; i++){
       if(this.wa.ka[i].type === temp_type && !found_one){
@@ -409,6 +417,7 @@ window.DiceMod.alterSnakeCode = function(code) {
 	}
   `
 
+  console.log("Adding dice count...");
   code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = d === 3 ? true : false;`)
   //code = code.assertReplace(/case "count":/, `case "count": d = 3; ${is_dice} = true;`)
   code = code.assertReplace(/resetState=function\(a\){/, dice_reset_code)
@@ -417,8 +426,6 @@ window.DiceMod.alterSnakeCode = function(code) {
     if(!${is_portal}) {
       ${mark_avoid_spawn}
       ${expectedCount} = ${expectedCount} - 1;
-      //debugger;
-      //console.log("Ate Expected: " + ${expectedCount});
       ${currentCount} = ${currentCount} - 1;
       if(${expectedCount} === 0)
       {
@@ -441,20 +448,19 @@ window.DiceMod.alterSnakeCode = function(code) {
           if(${is_dimension}) {
             this.flip();
           }
-          //debugger;
           new_apple = ${real_new_apple_func};
           new_apple.type = this.wa.ka[0].type;
-          avoid_key_texture = this.wa.ka[0].Lka;
+          avoid_key_texture = this.wa.ka[0].${key_type};
           if(${is_key})
           {
             if(key_texture == avoid_key_texture)
             {
               key_texture = key_texture + 1;
             }
-            new_apple.Lka = key_texture; // Hardcoded, fix later - give key texture
+            new_apple.${key_type} = key_texture;
             key_texture = key_texture + 1;
           }
-          21 === this.settings.Da && (new_apple.type = ohh(this.wa)); // Hardcoded, fix later - fix randomize fruit
+          21 === this.settings.${fruit_bowl_check} && (new_apple.type = ohh(this.wa));
           this.wa.ka.push(new_apple);
           ${move_latest_apple}
           if(${should_spawn_res}){
@@ -478,22 +484,20 @@ window.DiceMod.alterSnakeCode = function(code) {
     }
     else //all the portal logic goes here
     {
-      //debugger;
       ${expectedCount} = ${expectedCount} - 1;
       ${currentCount} = ${currentCount} - 1;
-      //var ${portal_match_index} = 0 === ${array_index} % 2 ? ${array_index} + 1 : ${array_index} - 1; // Get matching apple for portal, I can't believe this fucking works
+      //var ${portal_match_index} = 0 === ${array_index} % 2 ? ${array_index} + 1 : ${array_index} - 1; // Get matching apple for portal, I can't believe this works for CLT at all
       for(i = 0; i<this.wa.ka.length; i++){
         if(this.wa.ka[i].type === this.wa.ka[${array_index}].type && i !== ${array_index}){
           ${portal_match_index} = i;
           break;
         }
       }
-      if(21 === this.settings.Da) {
+      if(21 === this.settings.${fruit_bowl_check}) {
         this.wa.ka[${array_index}].type = ohh(this.wa);
         this.wa.ka[${portal_match_index}].type = this.wa.ka[${array_index}].type;
       } // Hardcoded, fix later - fix randomize fruit
       if (${is_key} || ${is_soko} || ${expectedCount} !== 0) {
-          //debugger;
           window.snake.typeStore.push(this.wa.ka[${array_index}].type);
           this.wa.ka.splice(Math.max(${array_index},${portal_match_index}), 1);
           this.wa.ka.splice(Math.min(${array_index},${portal_match_index}), 1);
@@ -501,7 +505,6 @@ window.DiceMod.alterSnakeCode = function(code) {
       else
       {
         ${spawn_portal}
-        //debugger;
         ${expectedCount} = Math.floor((Math.random() * 3) + 1);
         ${currentCount} = 1;
         while(${currentCount} < ${expectedCount})
