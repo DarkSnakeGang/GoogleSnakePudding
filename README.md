@@ -3,7 +3,7 @@
 * Dice Mod adds a new count settings, which spawn between 1 and 6/12 apples when the last available apple is eaten.
 
 ## Features
-### Pudding Mod Features
+### Pudding Mod
 * Pudding added as food option, including pixelated pudding
 * Selected Multi count (1a, 3a and 5a) is displayed instead of food, at the top bar
 * The volume and mute icons are replaced with selected speed
