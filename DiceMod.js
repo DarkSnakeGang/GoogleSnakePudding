@@ -28,6 +28,7 @@ window.DiceMod.runCodeBefore = function() {
 
     for(let src of [
       'https://i.postimg.cc/RFy3tJLS/dice-count.png',
+      'https://i.postimg.cc/QNbwZG9D/dice-count2.png',
   ]) document.querySelector('#count').appendChild(uiImage(src));
 
       // Skull
@@ -210,7 +211,8 @@ window.DiceMod.alterSnakeCode = function(code) {
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
-  detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://i.postimg.cc/RFy3tJLS/dice-count.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
+  detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://i.postimg.cc/RFy3tJLS/dice-count.png" : ${settings_var}.${settings_itself}.${Count_SRC}
+  ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "04") ? "https://i.postimg.cc/QNbwZG9D/dice-count2.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
   //detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = "https://i.postimg.cc/RFy3tJLS/dice-count.png"`
 
   count_score = count_score.replaceAll("\".png\")", detect_dice)
@@ -282,6 +284,7 @@ window.DiceMod.alterSnakeCode = function(code) {
 
   // Add global for isDice and reset expecte and current counts
   is_dice = `window.snake.isDice`
+  double_dice = `window.snake.doubleDice`
   expectedCount = `window.snake.expectedCount`
   currentCount = `window.snake.currentCount`
   secretAppleArr = `window.snake.secretAppleArr`
@@ -356,6 +359,21 @@ window.DiceMod.alterSnakeCode = function(code) {
   `
 
   add_portal_apples = `
+  if(${double_dice} === 2 && window.snake.typeStore.length < 6)
+  {
+    used_types = []
+    open_types = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
+    for(i = 0; i<this.wa.ka.length; i++){
+      used_types.push(this.wa.ka[i].type);
+      index_in_open = open_types.indexOf(this.wa.ka[i].type);
+      if (index_in_open > -1) {
+        open_types.splice(index_in_open, 1);
+      }
+    }
+    for(i = 0; i<open_types.length; i++){
+      window.snake.typeStore.push(open_types[i]);
+    }
+  }
   ${add_apple_only}
   new_apple.type = window.snake.typeStore[0];
   new_apple.__first = true;
@@ -418,7 +436,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   `
 
   console.log("Adding dice count...");
-  code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = d === 3 ? true : false;`)
+  code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = (d === 3 || d === 4) ? true : false; ${double_dice} = d === 4 ? 2 : 1;`)
   //code = code.assertReplace(/case "count":/, `case "count": d = 3; ${is_dice} = true;`)
   code = code.assertReplace(/resetState=function\(a\){/, dice_reset_code)
   dice_eaten_code = `if(${is_dice} && !(${is_poison_apple})) //  && !(${is_portal})
@@ -429,9 +447,9 @@ window.DiceMod.alterSnakeCode = function(code) {
       ${currentCount} = ${currentCount} - 1;
       if(${expectedCount} === 0)
       {
-        ${expectedCount} = Math.floor((Math.random() * 6) + 1);
+        ${expectedCount} = Math.floor((Math.random() * 6 * ${double_dice}) + 1);
         if(${is_key}){
-          ${expectedCount} = Math.floor((Math.random() * 5) + 1);
+          ${expectedCount} = Math.floor((Math.random() * 5 * ${double_dice}) + 1);
           //console.log("Rolled Expected: " + ${expectedCount});
           key_texture = 0;
         }
@@ -456,6 +474,10 @@ window.DiceMod.alterSnakeCode = function(code) {
             if(key_texture == avoid_key_texture)
             {
               key_texture = key_texture + 1;
+            }
+            if(key_texture == 5)
+            {
+              key_texture = 0;
             }
             new_apple.${key_type} = key_texture;
             key_texture = key_texture + 1;
@@ -505,7 +527,7 @@ window.DiceMod.alterSnakeCode = function(code) {
       else
       {
         ${spawn_portal}
-        ${expectedCount} = Math.floor((Math.random() * 3) + 1);
+        ${expectedCount} = Math.floor((Math.random() * 3 * ${double_dice}) + 1);
         ${currentCount} = 1;
         while(${currentCount} < ${expectedCount})
         {
