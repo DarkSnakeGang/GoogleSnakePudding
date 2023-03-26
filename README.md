@@ -1,6 +1,6 @@
 # Google Snake Pudding Mod and Dice Mod
-Pudding Mod specifically made for speedrunners. Mainly has quality of life features.                    
-Dice Mod adds new apple "Dice" count, which spawns between 1 and 6 apples when the last available apple is eaten. Also has "Blue Dice" with is between 1 and 12. Has Pudding Mod built in.
+* Pudding Mod specifically made for speedrunners. Mainly has quality of life features.                    
+* Dice Mod adds a new count settings, which spawn between 1 and 6/12 apples when the last available apple is eaten.
 
 ## Features
 ### Current Features
