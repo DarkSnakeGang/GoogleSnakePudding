@@ -453,8 +453,8 @@ window.DiceMod.alterSnakeCode = function(code) {
           //console.log("Rolled Expected: " + ${expectedCount});
           key_texture = 0;
         }
-        if(${is_soko} && ${double_dice} !== 2){
-          ${expectedCount} = (${expectedCount} % 3) + 1;
+        if(${is_soko}){
+          ${expectedCount} = (${expectedCount} % 3 * ${double_dice}) + 1;
         }
         if(${is_dimension}) {
           ${expectedCount} = ${expectedCount} * 2;
