@@ -3,16 +3,17 @@
 * Dice Mod adds a new count settings, which spawn between 1 and 6/12 apples when the last available apple is eaten.
 
 ## Features
-### Current Features
+### Pudding Mod Features
 * Pudding added as food option, including pixelated pudding
 * Selected Multi count (1a, 3a and 5a) is displayed instead of food, at the top bar
 * The volume and mute icons are replaced with selected speed
 * Replace poison food for pudding with the poison mode icon (only for normal graphics)
 * One in a million chance of a golden apple
 
-### Dice Mod Specific
+### Dice Mod
 * Dice count, which spawns between 1 and 6 apples when the last available apple is eaten. 
 * Blue dice count, which spawns between 1 and 12 apples when the last available apple is eaten. 
+* Includes Pudding Mod
 
 ### Planned Features
 * Distinct soko goals (fishes)
