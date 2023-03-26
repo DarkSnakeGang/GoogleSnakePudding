@@ -330,6 +330,9 @@ window.DiceMod.alterSnakeCode = function(code) {
   fruit_bowl_check = code.match(`21===[a-zA-Z0-9_$]{1,4}\.${settings_itself}\.[a-zA-Z0-9_$]{1,4}`)[0].split('.')[2]
   //console.log(fruit_bowl_check) // ${fruit_bowl_check}
 
+  fruit_bowl_randomize = code.match(/21===[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\[[a-zA-Z0-9_$]{1,4}\]\.[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}/gm)[0].split('=')[4]
+  //console.log(fruit_bowl_randomize) // ${fruit_bowl_randomize}
+
   key_type = code.match(/[a-zA-Z0-9_$]{1,8}\(a\.[a-zA-Z0-9_$]{1,8},b.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8}\);/gm)[0].split('.')[3].split(',')[0]
   //console.log(key_type) //${key_type}
 
@@ -354,7 +357,7 @@ window.DiceMod.alterSnakeCode = function(code) {
     new_apple.${key_type} = key_texture;
     key_texture = key_texture + 1;
   }
-  21 === this.${settings_itself}.${fruit_bowl_check} && (new_apple.type = ohh(this.wa));
+  21 === this.${settings_itself}.${fruit_bowl_check} && (new_apple.type = ${fruit_bowl_randomize}(this.wa));
   this.wa.ka.push(new_apple);
   `
 
@@ -386,7 +389,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   index2 = this.wa.ka.length-1;
   var index2 = 0 === index1 % 2 ? index1 + 1 : index1 - 1;
 	if (21 === this.${settings_itself}.${fruit_bowl_check}){
-		this.wa.ka[index1].type = ohh(this.wa);
+		this.wa.ka[index1].type = ${fruit_bowl_randomize}(this.wa);
 		this.wa.ka[index2].type = this.wa.ka[index1].type;
 	}
 	var Gx = 0 === this.wa.${settings_itself}.Aa && !${mode_check_func}(this.wa.${settings_itself}, 11);
@@ -482,7 +485,7 @@ window.DiceMod.alterSnakeCode = function(code) {
             new_apple.${key_type} = key_texture;
             key_texture = key_texture + 1;
           }
-          21 === this.settings.${fruit_bowl_check} && (new_apple.type = ohh(this.wa));
+          21 === this.settings.${fruit_bowl_check} && (new_apple.type = ${fruit_bowl_randomize}(this.wa));
           this.wa.ka.push(new_apple);
           ${move_latest_apple}
           if(${should_spawn_res}){
@@ -516,7 +519,7 @@ window.DiceMod.alterSnakeCode = function(code) {
         }
       }
       if(21 === this.settings.${fruit_bowl_check}) {
-        this.wa.ka[${array_index}].type = ohh(this.wa);
+        this.wa.ka[${array_index}].type = ${fruit_bowl_randomize}(this.wa);
         this.wa.ka[${portal_match_index}].type = this.wa.ka[${array_index}].type;
       } // Hardcoded, fix later - fix randomize fruit
       if (${is_key} || ${is_soko} || ${expectedCount} !== 0) {
