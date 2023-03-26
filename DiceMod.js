@@ -556,6 +556,8 @@ window.DiceMod.alterSnakeCode = function(code) {
   //console.log(dice_eaten_code);
 
   //console.log(code);
+  code = code.assertReplace("ALL", "all")
+  code = code.assertReplace(`\"--:--:---\"`, `\"==:==:===\"`)
 
   console.log("Done, enjoy Dice Mod!");
 
