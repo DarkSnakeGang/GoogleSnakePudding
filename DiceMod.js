@@ -28,6 +28,7 @@ window.DiceMod.runCodeBefore = function() {
     for(let src of [
       'https://i.postimg.cc/RFy3tJLS/dice-count.png',
       'https://i.postimg.cc/QNbwZG9D/dice-count2.png',
+      'https://i.postimg.cc/rsMdf8FD/dice-count3.png',
   ]) document.querySelector('#count').appendChild(uiImage(src));
 
       // Skull
@@ -211,7 +212,9 @@ window.DiceMod.alterSnakeCode = function(code) {
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
   detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://i.postimg.cc/RFy3tJLS/dice-count.png" : ${settings_var}.${settings_itself}.${Count_SRC}
-  ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "04") ? "https://i.postimg.cc/QNbwZG9D/dice-count2.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
+  ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "04") ? "https://i.postimg.cc/QNbwZG9D/dice-count2.png" : ${settings_var}.${settings_itself}.${Count_SRC}
+  ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "05") ? "https://i.postimg.cc/rsMdf8FD/dice-count3.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
+  //
   //detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = "https://i.postimg.cc/RFy3tJLS/dice-count.png"`
 
   count_score = count_score.replaceAll("\".png\")", detect_dice)
@@ -284,6 +287,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   // Add global for isDice and reset expecte and current counts
   is_dice = `window.snake.isDice`
   double_dice = `window.snake.doubleDice`
+  high_dice = `window.snake.highDice`
   expectedCount = `window.snake.expectedCount`
   currentCount = `window.snake.currentCount`
   secretAppleArr = `window.snake.secretAppleArr`
@@ -443,7 +447,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   `
 
   console.log("Adding dice count...");
-  code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = (d > 2) ? true : false; ${double_dice} = d === 4 ? 2 : 1;`)
+  code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = (d > 2) ? true : false; ${double_dice} = d === 4 ? 2 : 1; ${high_dice} = d === 5 ? 3 : 0;`)
   //code = code.assertReplace(/case "count":/, `case "count": d = 3; ${is_dice} = true;`)
   code = code.assertReplace(/resetState=function\(a\){/, dice_reset_code)
   dice_eaten_code = `if(${is_dice} && !(${is_poison_apple})) //  && !(${is_portal})
@@ -454,14 +458,14 @@ window.DiceMod.alterSnakeCode = function(code) {
       ${currentCount} = ${currentCount} - 1;
       if(${expectedCount} === 0)
       {
-        ${expectedCount} = Math.floor((Math.random() * 6 * ${double_dice}) + 1);
+        ${expectedCount} = Math.floor((Math.random() * 6 * ${double_dice}) + 1) + ${high_dice};
         if(${is_key}){
-          ${expectedCount} = Math.floor((Math.random() * 5 * ${double_dice}) + 1);
+          ${expectedCount} = Math.floor((Math.random() * 5 * ${double_dice}) + 1) + ${high_dice};
           //console.log("Rolled Expected: " + ${expectedCount});
           key_texture = 0;
         }
         if(${is_soko}){
-          ${expectedCount} = (${expectedCount} % 3 * ${double_dice}) + 1;
+          ${expectedCount} = (${expectedCount} % 3 * ${double_dice}) + 1 + ${high_dice};
         }
         if(${is_dimension}) {
           ${expectedCount} = ${expectedCount} * 2;
@@ -542,7 +546,7 @@ window.DiceMod.alterSnakeCode = function(code) {
       else
       {
         ${spawn_portal}
-        ${expectedCount} = Math.floor((Math.random() * 3 * ${double_dice}) + 1);
+        ${expectedCount} = Math.floor((Math.random() * 3 * ${double_dice}) + 1) + ${high_dice};
         ${currentCount} = 1;
         while(${currentCount} < ${expectedCount})
         {
