@@ -303,10 +303,10 @@ window.DiceMod.alterSnakeCode = function(code) {
   current_count_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\(a\){var b=0;if\([a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8},10\)\){a=_.[a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\);for\(var c=a.next\(\);!c.done;c=a.next\(\)\)c.value.[a-zA-Z0-9_$]{1,8}\|\|b\+\+}else b=a.[a-zA-Z0-9_$]{1,8}.length;return b};/gm);
   current_count_func = code.match(current_count_regex)[0].split("=")[0] + "(this.wa);"
 
-  real_new_apple_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=function\(a,b,c\){return/)
+  real_new_apple_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=function\(a,b,c\){return{pos/)
   real_new_apple_func = code.match(real_new_apple_regex)[0].split(' ')[1].split('=')[0] + "(this, 0, 0)"
 
-  //console.log(spawn_func_code);
+  //console.log(real_new_apple_func);
   //console.log(should_spawn_res);
   //console.log("Spawn Portal: " + spawn_portal);
   //console.log(move_apple_func);
@@ -333,7 +333,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   //console.log(fruit_bowl_randomize) // ${fruit_bowl_randomize}
 
   fruit_bowl_visible = code.match(/if\([a-zA-Z0-9_$]{1,4}\(this\.[a-zA-Z0-9_$]{1,8},6\)&&!b\.[a-zA-Z0-9_$]{1,4}&&!this\.[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\)/gm)[0].split('.')[2].split('&')[0];
-  console.log(fruit_bowl_visible) // ${fruit_bowl_visible}
+  //console.log(fruit_bowl_visible) // ${fruit_bowl_visible}
 
   key_type = code.match(/[a-zA-Z0-9_$]{1,8}\(a\.[a-zA-Z0-9_$]{1,8},b.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8}\);/gm)[0].split('.')[3].split(',')[0]
   //console.log(key_type) //${key_type}
@@ -443,7 +443,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   `
 
   console.log("Adding dice count...");
-  code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = (d === 3 || d === 4) ? true : false; ${double_dice} = d === 4 ? 2 : 1;`)
+  code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = (d > 2) ? true : false; ${double_dice} = d === 4 ? 2 : 1;`)
   //code = code.assertReplace(/case "count":/, `case "count": d = 3; ${is_dice} = true;`)
   code = code.assertReplace(/resetState=function\(a\){/, dice_reset_code)
   dice_eaten_code = `if(${is_dice} && !(${is_poison_apple})) //  && !(${is_portal})
