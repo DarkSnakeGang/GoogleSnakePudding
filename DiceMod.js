@@ -291,7 +291,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   expectedCount = `window.snake.expectedCount`
   currentCount = `window.snake.currentCount`
   secretAppleArr = `window.snake.secretAppleArr`
-
+  typeStore = `window.snake.typeStore`
 
   spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)\)var [a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=?\n!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
   spawn_func_code = code.match(spawn_func_regex)[0]
@@ -343,7 +343,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   //console.log(key_type) //${key_type}
 
   dice_reset_code = `resetState=function\(a\){ ${expectedCount} = ${currentCount} = 3;
-  window.snake.typeStore = [];
+  ${typeStore} = [];
   if(${is_dimension}) {
     ${expectedCount} = ${currentCount} = 6;
   }`
@@ -368,7 +368,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   `
 
   add_portal_apples = `
-  if(window.snake.typeStore.length < 6)
+  if(${typeStore}.length < 6)
   {
     used_types = []
     open_types = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]
@@ -380,25 +380,25 @@ window.DiceMod.alterSnakeCode = function(code) {
       }
     }
     for(i = 0; i<open_types.length; i++){
-      window.snake.typeStore.push(open_types[i]);
+      ${typeStore}.push(open_types[i]);
     }
-    window.snake.typeStore = Array.from(new Set(window.snake.typeStore));
+    ${typeStore} = Array.from(new Set(${typeStore}));
   }
   ${add_apple_only}
-  new_apple.type = window.snake.typeStore[0];
+  new_apple.type = ${typeStore}[0];
   new_apple.__first = true;
   index1 = this.wa.ka.length-1;
   ${add_apple_only}
   new_apple.__first = false;
-  new_apple.type = window.snake.typeStore[0];
-  temp_type = window.snake.typeStore[0];
-  window.snake.typeStore.splice(0,1);
+  new_apple.type = ${typeStore}[0];
+  temp_type = ${typeStore}[0];
+  ${typeStore}.splice(0,1);
   index2 = this.wa.ka.length-1;
   var index2 = 0 === index1 % 2 ? index1 + 1 : index1 - 1;
 	if (21 === this.${settings_itself}.${fruit_bowl_check}){
-		this.wa.ka[index1].type = window.snake.typeStore[0]; //${fruit_bowl_randomize}(this.wa);
+		this.wa.ka[index1].type = ${typeStore}[0]; //${fruit_bowl_randomize}(this.wa);
 		this.wa.ka[index2].type = this.wa.ka[index1].type;
-    window.snake.typeStore.splice(0,1);
+    ${typeStore}.splice(0,1);
 	}
 	var Gx = 0 === this.wa.${settings_itself}.Aa && !${mode_check_func}(this.wa.${settings_itself}, 11);
 	var et = this.${move_func_name}(index1, !1, null);
@@ -471,6 +471,7 @@ window.DiceMod.alterSnakeCode = function(code) {
           ${expectedCount} = ${expectedCount} * 2;
         }
         ${move_apple_func}
+        temp = ${should_spawn_res};
         ${currentCount} = 1;
         while (${currentCount} < ${expectedCount})
         {
@@ -513,6 +514,7 @@ window.DiceMod.alterSnakeCode = function(code) {
         if(${is_dimension}) {
           this.flip();
         }
+        ${should_spawn_res} = temp;
       }
     }
     else //all the portal logic goes here
@@ -520,9 +522,9 @@ window.DiceMod.alterSnakeCode = function(code) {
       if(21 === this.settings.${fruit_bowl_check}){
         this.settings.${fruit_bowl_check}=20;
       }
-      index_in_typeStore = window.snake.typeStore.indexOf(21);
+      index_in_typeStore = ${typeStore}.indexOf(21);
       if (index_in_typeStore > -1) {
-        window.snake.typeStore.splice(index_in_typeStore, 1);
+        ${typeStore}.splice(index_in_typeStore, 1);
       }
       ${expectedCount} = ${expectedCount} - 1;
       ${currentCount} = ${currentCount} - 1;
@@ -534,12 +536,12 @@ window.DiceMod.alterSnakeCode = function(code) {
         }
       }
       if(21 === this.settings.${fruit_bowl_check}) {
-        //this.wa.ka[${array_index}].type = window.snake.typeStore[0]; //${fruit_bowl_randomize}(this.wa); // replace the fruit_bowl_randomize with your own function.
+        //this.wa.ka[${array_index}].type = ${typeStore}[0]; //${fruit_bowl_randomize}(this.wa); // replace the fruit_bowl_randomize with your own function.
         //this.wa.ka[${portal_match_index}].type = this.wa.ka[${array_index}].type;
-        //window.snake.typeStore.splice(0, 1);
+        //${typeStore}.splice(0, 1);
       }
       if (${is_key} || ${is_soko} || ${expectedCount} !== 0) {
-          window.snake.typeStore.push(this.wa.ka[${array_index}].type);
+          ${typeStore}.push(this.wa.ka[${array_index}].type);
           this.wa.ka.splice(Math.max(${array_index},${portal_match_index}), 1);
           this.wa.ka.splice(Math.min(${array_index},${portal_match_index}), 1);
       }
