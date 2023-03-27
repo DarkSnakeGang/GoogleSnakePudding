@@ -28,7 +28,7 @@ window.DiceMod.runCodeBefore = function() {
     for(let src of [
       'https://i.postimg.cc/RFy3tJLS/dice-count.png',
       'https://i.postimg.cc/QNbwZG9D/dice-count2.png',
-      'https://i.postimg.cc/rsMdf8FD/dice-count3.png',
+      'https://i.postimg.cc/MKynhfjv/dice-count3.png',
   ]) document.querySelector('#count').appendChild(uiImage(src));
 
       // Skull
@@ -213,7 +213,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
   detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://i.postimg.cc/RFy3tJLS/dice-count.png" : ${settings_var}.${settings_itself}.${Count_SRC}
   ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "04") ? "https://i.postimg.cc/QNbwZG9D/dice-count2.png" : ${settings_var}.${settings_itself}.${Count_SRC}
-  ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "05") ? "https://i.postimg.cc/rsMdf8FD/dice-count3.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
+  ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "05") ? "https://i.postimg.cc/MKynhfjv/dice-count3.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
   //
   //detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = "https://i.postimg.cc/RFy3tJLS/dice-count.png"`
 
