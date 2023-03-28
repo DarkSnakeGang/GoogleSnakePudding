@@ -187,46 +187,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   `
   );
 
-  const bees = code.match(
-    `[a-zA-Z0-9_$]{1,8}=function\\\(a\\\){if\\\(0!==a\.${settings_itself}[^]*?oa\\\)}`
-  )[0];
-  const bDaoa = bees.match(
-    `b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\\\[0\\\]\\\[0\\\],c,5`
-  )[0].match(/b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)[0];
-
-  const snatch = function(s) {
-    return bees.match(
-      `[a-zA-Z0-9_$]{1,8}\\\(a\.${settings_itself},a\.${settings_itself}\.[a-zA-Z0-9_$]{1,8},4\\\)`
-    )[0].replace('4', s);
-  };
-
-//console.log(bees)
-//console.log(bDaoa)
-//console.log(snatch(0))
-
-final_bees = `
-${bDaoa}.ka = new Image();
-${bDaoa}.ka.src = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
-${bDaoa}.ka.currentSrc = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
-${bDaoa}.ka.crossOrigin = "Anonymous";
-
-${bDaoa}.ys = new Image();
-${bDaoa}.ys.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-${bDaoa}.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-${bDaoa}.ys.crossOrigin = "Anonymous";
-
-${bDaoa}.xs = new Image();
-${bDaoa}.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-${bDaoa}.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-${bDaoa}.xs.crossOrigin = "Anonymous";
-
-}else`
-
-final_bees = bees.assertReplace("}else", final_bees) // assertReplace("{", final_bees).
-
-//console.log(final_bees)
-code = code.assertReplace(bees, final_bees)
-
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
   console.log("Adding pudding to stack...")
