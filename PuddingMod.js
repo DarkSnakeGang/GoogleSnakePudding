@@ -171,25 +171,32 @@ window.PuddingMod.alterSnakeCode = function(code) {
   console.log("Making soko goals more distinct...")
   code = code.assertReplace(/resetState=function\(a\){/, "$&" + `
   this.oa.Da.oa.ka = new Image();
-  this.oa.Da.oa.ys = new Image();
   this.oa.Da.oa.ka.src = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
   this.oa.Da.oa.ka.currentSrc = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
+  this.oa.Da.oa.ka.crossOrigin = "Anonymous";
+
+  this.oa.Da.oa.ys = new Image();
   this.oa.Da.oa.ys.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-  this.oa.Da.oa.ka.crossOrigin = "Anonymous";
   this.oa.Da.oa.ys.crossOrigin = "Anonymous";
+
+  this.oa.Da.oa.xs = new Image();
+  this.oa.Da.oa.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
+  this.oa.Da.oa.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
+  this.oa.Da.oa.xs.crossOrigin = "Anonymous";
   `
   );
 
   const bees = code.match(
-    /[a-zA-Z0-9_$]{1,8}=function\(a\){if\(0!==a\.settings[^]*?oa\)}/
+    `[a-zA-Z0-9_$]{1,8}=function\\\(a\\\){if\\\(0!==a\.${settings_itself}[^]*?oa\\\)}`
   )[0];
   const bDaoa = bees.match(
-    /b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\[0\]\[0\],c,5/
+    `b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\\\[0\\\]\\\[0\\\],c,5`
   )[0].match(/b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)[0];
+
   const snatch = function(s) {
     return bees.match(
-      /[a-zA-Z0-9_$]{1,8}\(a\.settings,a\.settings\.[a-zA-Z0-9_$]{1,8},4\)/
+      `[a-zA-Z0-9_$]{1,8}\\\(a\.${settings_itself},a\.${settings_itself}\.[a-zA-Z0-9_$]{1,8},4\\\)`
     )[0].replace('4', s);
   };
 
@@ -205,8 +212,13 @@ ${bDaoa}.ka.crossOrigin = "Anonymous";
 
 ${bDaoa}.ys = new Image();
 ${bDaoa}.ys.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-${bDaoa}.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';//'https://i.postimg.cc/Cx6yP2Tj/box-Purple.png';
+${bDaoa}.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
 ${bDaoa}.ys.crossOrigin = "Anonymous";
+
+${bDaoa}.xs = new Image();
+${bDaoa}.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
+${bDaoa}.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';//'https://i.postimg.cc/Cx6yP2Tj/box-Purple.png';
+${bDaoa}.xs.crossOrigin = "Anonymous";
 
 }else`
 
