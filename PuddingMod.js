@@ -229,7 +229,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   {
     switch(d){
       case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000'); break;
-      case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#FDB9FD', '#090220', '#110C30'); break;
+      case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30'); break;
     }
   }
   else
