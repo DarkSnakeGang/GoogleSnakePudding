@@ -217,7 +217,7 @@ ${bDaoa}.ys.crossOrigin = "Anonymous";
 
 ${bDaoa}.xs = new Image();
 ${bDaoa}.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-${bDaoa}.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';//'https://i.postimg.cc/Cx6yP2Tj/box-Purple.png';
+${bDaoa}.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
 ${bDaoa}.xs.crossOrigin = "Anonymous";
 
 }else`
