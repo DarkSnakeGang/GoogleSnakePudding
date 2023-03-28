@@ -212,7 +212,7 @@ ${bDaoa}.ys.crossOrigin = "Anonymous";
 
 final_bees = bees.assertReplace("}else", final_bees) // assertReplace("{", final_bees).
 
-console.log(final_bees)
+//console.log(final_bees)
 code = code.assertReplace(bees, final_bees)
 
 // lots of hardcoded shit here, fix it later
