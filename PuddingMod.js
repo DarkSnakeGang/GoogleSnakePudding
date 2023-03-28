@@ -176,7 +176,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.oa.Da.oa.ys.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.ka.crossOrigin = "Anonymous";
-  this.oa.Da.oa.ys.crossOrigin = "Anonymous"; //debugger;`
+  this.oa.Da.oa.ys.crossOrigin = "Anonymous"; //debugger;
+  `
   );
 
   const bees = code.match(
