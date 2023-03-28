@@ -132,7 +132,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
   load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
   ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_px_src}" : {}\)
-  ;debugger;`
+  ;`
   //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
   //  //load pixelated pudding
