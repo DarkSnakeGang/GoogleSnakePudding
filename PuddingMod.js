@@ -117,13 +117,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
   load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,4}\|\|"graphics"===[a-zA-Z0-9_$]{1,4}\)[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\),[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\?"snake_arcade\/pixel\/px_apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png":"snake_arcade\/v4\/apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png"\);/)
 
   // Get all required variables around src for endscreen
-  settings_regex = new RegExp(/,[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}/)
+  settings_regex = new RegExp(`,[a-zA-Z0-9_$]{1,4}\.${settings_itself}\.[a-zA-Z0-9_$]{1,4}`)
   settings_var = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[0].split(',')[1]
   settings_src = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[2]
   select_fruit_numvar = code.match(load_image_func)[0].match(new RegExp(/\+.\+/))[0].split('+')[1]
   //console.log(code.match(load_image_func)[0])
-  pixel_setting = code.match(load_image_func)[0].match(/\=[a-zA-Z0-9_$]{1,4}\.settings\.[a-zA-Z0-9_$]{1,4}\?/)[0].split('.')[2].split('?')[0]
-
+  pixel_setting_regex = new RegExp(`case "graphics":[a-zA-Z0-9_$]{1,4}.${settings_itself}.[a-zA-Z0-9_$]{1,4}`);
+  pixel_setting = code.match(pixel_setting_regex)[0].split('.')[2]
+  //console.log(code)
   // Gets the element that changed, "apple" means fruit here, in endscreen - Unused code here, but may be useful in the future.
   get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
 
@@ -131,7 +132,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
   load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
   ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_px_src}" : {}\)
-  ;`
+  ;debugger;`
   //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
   //  //load pixelated pudding
