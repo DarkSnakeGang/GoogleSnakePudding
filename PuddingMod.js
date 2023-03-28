@@ -167,14 +167,15 @@ window.PuddingMod.alterSnakeCode = function(code) {
   `
 
   // Distinct Soko Goals
-  console.log("Making soko goals more distinct...")
-  code = code.assertReplace(/resetState=function\(a\){/, "$&" + `
-  this.oa.Da.oa.ka = new Image();
-  this.oa.Da.oa.ys = new Image();
-  this.oa.Da.oa.ka.src = 'https://i.postimg.cc/2LYM4X22/px-box-red.png';
-  this.oa.Da.oa.ys.src = 'https://i.postimg.cc/ZBpXvhFW/box-red.png';
-  this.oa.Da.oa.ka.crossOrigin = "Anonymous";
-  this.oa.Da.oa.ys.crossOrigin = "Anonymous";`);
+  //console.log("Making soko goals more distinct...")
+  //code = code.assertReplace(/resetState=function\(a\){/, "$&" + `
+  //this.oa.Da.oa.ka = new Image();
+  //this.oa.Da.oa.ys = new Image();
+  //this.oa.Da.oa.ka.src = 'https://i.postimg.cc/2LYM4X22/px-box-red.png';
+  //this.oa.Da.oa.ys.src = 'https://i.postimg.cc/ZBpXvhFW/box-red.png';
+  //this.oa.Da.oa.ka.crossOrigin = "Anonymous";
+  //this.oa.Da.oa.ys.crossOrigin = "Anonymous";`
+  //);
 
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
