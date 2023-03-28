@@ -1,5 +1,5 @@
 # Google Snake Pudding Mod and Dice Mod
-* Pudding Mod specifically made for speedrunners. Mainly has quality of life features.                    
+* Pudding Mod specifically made for speedrunners. Mainly has quality of life features.
 * Dice Mod adds a new count settings, which spawn between 1 and 6/12 apples when the last available apple is eaten.
 
 ## Features
@@ -9,14 +9,15 @@
 * The volume and mute icons are replaced with selected speed
 * Replace poison food for pudding with the poison mode icon (only for normal graphics)
 * One in a million chance of a golden apple
+* Distinct soko goals
+* Dark Night and Planeptune themes
 
 ### Dice Mod
-* Dice count, which spawns between 1 and 6 apples when the last available apple is eaten. 
-* Blue dice count, which spawns between 1 and 12 apples when the last available apple is eaten. 
+* Dice count, which spawns between 1 and 6 apples when the last available apple is eaten.
+* Blue dice count, which spawns between 1 and 12 apples when the last available apple is eaten.
 * Includes Pudding Mod
 
 ### Planned Features
-* Distinct soko goals (fishes)
 * Side panel with auto-updating SRC times (Pudding Mod only)
 * Attempt and Input counters
 * Advanced options to switch textures
@@ -24,6 +25,5 @@
 ## Credits
 * Yarmiplay (Author)
 * Llama (Mod Loader Author)
-* Fishes (Distinct Soko Goals, Soon™)
 * CarL (Pudding Texture)
 * m0nument (Golden Apple Texture)
