@@ -26,6 +26,12 @@ window.PuddingMod.runCodeBefore = function() {
         'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
+
+    for(let src of [
+      'https://i.postimg.cc/R0R1ZMNx/dark-night.png',
+      'https://i.postimg.cc/t4bxfYzt/planeptune.png',
+  ]) document.querySelector('#theme').appendChild(uiImage(src));
+
     //for(let src of [
     //  'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
   //]) document.querySelector('#count').appendChild(uiImage(src));
@@ -159,6 +165,17 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
   `
+
+  // Distinct Soko Goals
+  console.log("Making soko goals more distinct...")
+  code = code.assertReplace(/resetState=function\(a\){/, "$&" + `
+  this.oa.Da.oa.ka = new Image();
+  this.oa.Da.oa.ys = new Image();
+  this.oa.Da.oa.ka.src = 'https://i.postimg.cc/2LYM4X22/px-box-red.png';
+  this.oa.Da.oa.ys.src = 'https://i.postimg.cc/ZBpXvhFW/box-red.png';
+  this.oa.Da.oa.ka.crossOrigin = "Anonymous";
+  this.oa.Da.oa.ys.crossOrigin = "Anonymous";`);
+
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
   console.log("Adding pudding to stack...")
@@ -201,6 +218,22 @@ window.PuddingMod.alterSnakeCode = function(code) {
   get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+  //theme_case
+
+  console.log("Adding dark night and planeptune themes...")
+  code = code.assertReplace(/case "theme":/, `case "theme":
+  if(d>8)
+  {
+    switch(d){
+      case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000'); break;
+      case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#FDB9FD', '#090220', '#110C30'); break;
+    }
+  }
+  else
+  {
+    window.snake.clearCustomTheme();
+  }
+  `)
 
   // Arbitrary values for keeping the SRC image for these things
   Count_SRC = "COUNT"
