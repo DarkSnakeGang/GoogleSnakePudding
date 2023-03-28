@@ -176,7 +176,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.oa.Da.oa.ys.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.ka.crossOrigin = "Anonymous";
-  this.oa.Da.oa.ys.crossOrigin = "Anonymous"; //debugger;
+  this.oa.Da.oa.ys.crossOrigin = "Anonymous";
   `
   );
 
@@ -197,7 +197,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
 //console.log(snatch(0))
 
 final_bees = `
-//debugger;
 ${bDaoa}.ka = new Image();
 ${bDaoa}.ka.src = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
 ${bDaoa}.ka.currentSrc = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
