@@ -385,20 +385,20 @@ window.DiceMod.alterSnakeCode = function(code) {
     ${typeStore} = Array.from(new Set(${typeStore}));
   }
   ${add_apple_only}
-  new_apple.type = ${typeStore}[0];
+  new_apple.type = ${typeStore}[${typeStore}.length - 1];
   new_apple.__first = true;
   index1 = this.wa.ka.length-1;
   ${add_apple_only}
   new_apple.__first = false;
-  new_apple.type = ${typeStore}[0];
-  temp_type = ${typeStore}[0];
-  ${typeStore}.splice(0,1);
+  new_apple.type = ${typeStore}[${typeStore}.length - 1];
+  temp_type = ${typeStore}[${typeStore}.length - 1];
+  ${typeStore}.splice(${typeStore}.length - 1,1);
   index2 = this.wa.ka.length-1;
   var index2 = 0 === index1 % 2 ? index1 + 1 : index1 - 1;
 	if (21 === this.${settings_itself}.${fruit_bowl_check}){
-		this.wa.ka[index1].type = ${typeStore}[0]; //${fruit_bowl_randomize}(this.wa);
+		this.wa.ka[index1].type = ${typeStore}[${typeStore}.length - 1]; //${fruit_bowl_randomize}(this.wa);
 		this.wa.ka[index2].type = this.wa.ka[index1].type;
-    ${typeStore}.splice(0,1);
+    ${typeStore}.splice(${typeStore}.length - 1,1);
 	}
 	var Gx = 0 === this.wa.${settings_itself}.Aa && !${mode_check_func}(this.wa.${settings_itself}, 11);
 	var et = this.${move_func_name}(index1, !1, null);
