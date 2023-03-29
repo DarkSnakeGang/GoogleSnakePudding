@@ -390,6 +390,11 @@ window.DiceMod.alterSnakeCode = function(code) {
   add_portal_apples = `
   if(${typeStore}.length < 6)
   {
+    temp_store = [];
+    for(i = 0; i<${typeStore}.length; i++){
+      temp_store.push(${typeStore}[i]);
+      ${typeStore}.splice(i,1);
+    }
     used_types = []
     open_types = [0,1,2,3,5,7,8,10,11,12,17,18]
     for(i = 0; i<this.wa.ka.length; i++){
@@ -402,7 +407,19 @@ window.DiceMod.alterSnakeCode = function(code) {
     for(i = 0; i<open_types.length; i++){
       ${typeStore}.push(open_types[i]);
     }
-    ${typeStore} = Array.from(new Set(${typeStore}));
+    for(i = 0; i<temp_store.length; i++){
+      ${typeStore}.push(temp_store[i]);
+      temp_store.splice(i,1);
+    }
+    for(i = 0; i<${typeStore}.length; i++){
+      temp_store.push(${typeStore}[i]);
+      ${typeStore}.splice(i,1);
+    }
+    temp_store = Array.from(new Set(temp_store));
+    for(i = 0; i<temp_store.length; i++){
+      ${typeStore}.push(temp_store[i]);
+      temp_store.splice(i,1);
+    }
   }
   ${add_apple_only}
   new_apple.type = ${typeStore}[${typeStore}.length - 1];
