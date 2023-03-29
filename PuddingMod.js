@@ -23,7 +23,7 @@ window.PuddingMod.runCodeBefore = function() {
   // Fruit, aka pudding
 
     for(let src of [
-        'https://github.com/DarkSnakeGang/GoogleSnakeIcons/blob/main/Foods/Pudding.png?raw=true',
+        'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
 
