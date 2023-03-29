@@ -256,8 +256,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
-  detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
-  count_score = count_score.replaceAll("\".png\")", detect_dice)
+  //detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
+  //count_score = count_score.replaceAll("\".png\")", detect_dice)
   // Adds loading for counts when starting the game
   console.log("Adding count detector...")
   code = code.assertReplace(load_image_func, count_score + "$&");
