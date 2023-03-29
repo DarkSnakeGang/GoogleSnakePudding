@@ -169,7 +169,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   b=new ${func_name}(this.${settings_itself},"${blueberries_src}",1,this.oa,"${blueberries_px_src}");
   ${poison_convert}(b,\'#2323ea\',\'#909090\',30);
   this.${fruit_array_name}.push(b);
-  this.${fruit_array_name}.push(b);
+  this.${fruit_array_name}.push(b); // Add extra so type is recognized
   b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
   this.${fruit_array_name}.push(b);
@@ -177,7 +177,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
   ${golden_index} = this.${fruit_array_name}.length - 1;
-  console.log(${golden_index});
   `
 
   // Distinct Soko Goals
