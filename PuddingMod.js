@@ -165,10 +165,10 @@ window.PuddingMod.alterSnakeCode = function(code) {
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
   ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
+  this.${fruit_array_name}.push(b); // Add dummy for randomizer
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${blueberries_src}",1,this.oa,"${blueberries_px_src}");
   ${poison_convert}(b,\'#2323ea\',\'#909090\',30);
-  this.${fruit_array_name}.push(b);
   this.${fruit_array_name}.push(b); // Add extra so type is recognized
   b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
@@ -196,6 +196,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.oa.Da.oa.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.xs.crossOrigin = "Anonymous";
+  debugger;
   `
   );
 
@@ -222,7 +223,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   //new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
-  new_aggressive_condition_v2 = `(${Pr_a}.${Pr_pa}.includes("postimg") ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
+  new_aggressive_condition_v2 = `(${Pr_a}.${Pr_pa}.includes("postimg") ? (${Pr_a}.${Pr_pa}.includes("blueberries") ? "${blueberries_px_src}" : "${pudding_px_src}") : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
 
   aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition_v2)
 
