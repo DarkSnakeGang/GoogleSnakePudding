@@ -20,10 +20,13 @@ window.PuddingMod.runCodeBefore = function() {
     return img;
   };
 
-  // Fruit, aka pudding
 
+
+
+  // Fruit, aka pudding
     for(let src of [
         'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
+        'https://i.postimg.cc/8cmVPfGd/blueberries.png',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
 
@@ -96,6 +99,9 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //console.log(code);
   console.log("Starting to edit code...");
 
+  blueberries_src = 'https://i.postimg.cc/8cmVPfGd/blueberries.png'
+  blueberries_px_src = 'https://i.postimg.cc/Hkh1xCqN/px-blueberries.png'
+
   pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
   pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
   skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
@@ -127,8 +133,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   last_fruit_num = 21
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
-  load_pudding_code_condensed = `,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
+  load_pudding_code_condensed = `
+  ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
   ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_px_src}" : {}\)
+  ,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_src}" : {}\)
+  ,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_px_src}" : {}\)
   ;`
   //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
@@ -149,11 +158,16 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //console.log("Volume class: " + volume_class)
   volume_src = `document.querySelector('img[class="${volume_class}"]').src `
 
+  golden_index = `window.goldenIndex`
+
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
   add_pudding = `$&;
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
   ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
+  this.${fruit_array_name}.push(b);
+  b=new ${func_name}(this.${settings_itself},"${blueberries_src}",1,this.oa,"${blueberries_px_src}");
+  ${poison_convert}(b,\'#2323ea\',\'#909090\',30);
   this.${fruit_array_name}.push(b);
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
@@ -162,6 +176,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
   b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
+  ${golden_index} = this.${fruit_array_name}.length - 1;
+  console.log(${golden_index});
   `
 
   // Distinct Soko Goals
@@ -307,11 +323,14 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //console.log(Math.floor((Math.random() * 1000000) + 1) == 426017) // 426017
   //console.log(code);
 
+  gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance}
+  super_chance = `* 10000000) + 1) == 4263017)` // ${super_chance}
+  free_test = `* 10) + 1) == 6)` // ${free_test}
 
   apple_info_regex = new RegExp(/a\.ka\[b\]\.pos/)
-  set_gold = `if(a.ka[b].type >= 23){a.ka[b].type = a.ka[b].old_type;}
-  if(Math.floor((Math.random() * 1000000) + 1) == 426017){a.ka[b].old_type = a.ka[b].type; a.ka[b].type = 23;}
-  if(Math.floor((Math.random() * 10000000) + 1) == 4263017){a.ka[b].old_type = a.ka[b].type; a.ka[b].type = 24;}
+  set_gold = `if(a.ka[b].type >= ${golden_index} - 1){a.ka[b].type = a.ka[b].old_type;}
+  if(Math.floor((Math.random() ${gold_chance}{a.ka[b].old_type = a.ka[b].type; a.ka[b].type = ${golden_index} - 1;}
+  if(Math.floor((Math.random() ${super_chance}{a.ka[b].old_type = a.ka[b].type; a.ka[b].type = ${golden_index};}
   $&`
   console.log("Adding 1 in a Million Golden Apple...")
   console.log("Adding 1 in a 10 Million Special Secret...")
