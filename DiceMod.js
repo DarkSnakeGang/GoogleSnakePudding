@@ -391,9 +391,10 @@ window.DiceMod.alterSnakeCode = function(code) {
   if(${typeStore}.length < 6)
   {
     temp_store = [];
-    for(i = 0; i<${typeStore}.length; i++){
-      temp_store.push(${typeStore}[i]);
-      ${typeStore}.splice(i,1);
+    temp_length = ${typeStore}.length;
+    for(i = 0; i<temp_length; i++){
+      temp_store.push(${typeStore}[0]);
+      ${typeStore}.splice(0,1);
     }
     used_types = []
     open_types = [0,1,2,3,5,7,8,10,11,12,17,18]
@@ -407,16 +408,17 @@ window.DiceMod.alterSnakeCode = function(code) {
     for(i = 0; i<open_types.length; i++){
       ${typeStore}.push(open_types[i]);
     }
-    for(i = 0; i<temp_store.length; i++){
-      ${typeStore}.push(temp_store[i]);
-      temp_store.splice(i,1);
+    temp_length = temp_store.length;
+    for(i = 0; i<temp_length; i++){
+      ${typeStore}.push(temp_store[0]);
+      temp_store.splice(0,1);
     }
-    for(i = 0; i<${typeStore}.length; i++){
+    for(i = ${typeStore}.length - 1; i>=0; i--){
       temp_store.push(${typeStore}[i]);
       ${typeStore}.splice(i,1);
     }
     temp_store = Array.from(new Set(temp_store));
-    for(i = 0; i<temp_store.length; i++){
+    for(i = temp_store.length-1; i>=0; i--){
       ${typeStore}.push(temp_store[i]);
       temp_store.splice(i,1);
     }
