@@ -53,10 +53,6 @@ window.PuddingMod.runCodeBefore = function() {
       return img;
     }
 
-    const normal = {
-       pudding:   i('https://i.postimg.cc/5y7gwwGY/pudding-cr.png'),
-     };
-
      const dead = {
        pudding:   i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'),
      };
