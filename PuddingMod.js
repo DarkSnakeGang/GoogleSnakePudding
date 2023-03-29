@@ -196,7 +196,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.oa.Da.oa.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.xs.crossOrigin = "Anonymous";
-  debugger;
   `
   );
 
