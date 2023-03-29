@@ -429,10 +429,12 @@ window.DiceMod.alterSnakeCode = function(code) {
       min_index = i;
       if(this.wa.ka[i].__first){
         first_index = i;
+        found_one = true;
       } else{
         second_index = i;
+        found_one = true;
       }
-    } else if (this.wa.ka[i].type === temp_type && !found_one){
+    } else if (this.wa.ka[i].type === temp_type && found_one){
       max_index = i;
       if(this.wa.ka[i].__first){
         first_index = i;
@@ -454,6 +456,7 @@ window.DiceMod.alterSnakeCode = function(code) {
     for(i = 0; i<this.wa.ka.length; i++){
       if(this.wa.ka[i].type === temp_type && !found_one){
         min_index = i;
+        found_one = true;
       } else if (this.wa.ka[i].type === temp_type && !found_one){
         max_index = i;
         break;
