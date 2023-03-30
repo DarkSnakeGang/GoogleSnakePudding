@@ -39,7 +39,7 @@ window.DiceMod.runCodeBefore = function() {
 window.DiceMod.alterSnakeCode = function(code) {
 
   code = window.PuddingMod.alterSnakeCode(code);
-//console.log(code);
+console.log(code);
 
     // Regex for a function that sets the src for count (I think)
     settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\);/)
@@ -47,6 +47,8 @@ window.DiceMod.alterSnakeCode = function(code) {
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
     //settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
     // ${settings_itself}
+    console.log(code);
+
 console.log("Getting settings values...")
   // Full function that sets the current fruit icon
   //load_image_func = new RegExp(/count_"\+d\+"\.png"\)/gm)
