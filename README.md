@@ -19,7 +19,7 @@
 * Includes Pudding Mod
 
 ### Planned Features
-* Side panel with auto-updating SRC times (Pudding Mod only)
+* Side panel with auto-updating SRC times
 * Attempt and Input counters
 * Advanced options to switch textures
 
