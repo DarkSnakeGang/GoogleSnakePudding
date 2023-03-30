@@ -49,20 +49,20 @@ window.DiceMod.alterSnakeCode = function(code) {
     // ${settings_itself}
 
   // Full function that sets the current fruit icon
-  load_image_func = new RegExp(/count_"\+d\+"\.png"\)/gm)
+  //load_image_func = new RegExp(/count_"\+d\+"\.png"\)/gm)
 
     // Create a new if statement that sets the count image whenever changes are made
-    count_score = code.match(load_image_func)[0]
+    //count_score = code.match(load_image_func)[0]
     //console.log(count_score)
-    detect_dice = `count_"+d+".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://i.postimg.cc/RFy3tJLS/dice-count.png" : ${settings_var}.${settings_itself}.${Count_SRC}
-    ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "04") ? "https://i.postimg.cc/QNbwZG9D/dice-count2.png" : ${settings_var}.${settings_itself}.${Count_SRC}
-    ,${settings_var}.${settings_itself}.${Count_SRC} = (d === "05") ? "https://i.postimg.cc/MKynhfjv/dice-count3.png" : ${settings_var}.${settings_itself}.${Count_SRC};`
+    //detect_dice = `count_"+d+".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://i.postimg.cc/RFy3tJLS/dice-count.png" : ${settings_var}.${settings_itself}.${Count_SRC}
+    //,${settings_var}.${settings_itself}.${Count_SRC} = (d === "04") ? "https://i.postimg.cc/QNbwZG9D/dice-count2.png" : ${settings_var}.${settings_itself}.${Count_SRC}
+    //,${settings_var}.${settings_itself}.${Count_SRC} = (d === "05") ? "https://i.postimg.cc/MKynhfjv/dice-count3.png" : ${settings_var}.${settings_itself}.${Count_SRC};`
     //
     //detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = "https://i.postimg.cc/RFy3tJLS/dice-count.png"`
 
-    count_score = count_score.replaceAll(`count_"+d+".png")`, detect_dice)
+    //count_score = count_score.replaceAll(`count_"+d+".png")`, detect_dice)
     // Adds loading for counts when starting the game
-    console.log("Adding count detector for Dice...")
+    //console.log("Adding count detector for Dice...")
     //code = code.assertReplace(load_image_func, count_score);
 
   // Add global for isDice and reset expecte and current counts
