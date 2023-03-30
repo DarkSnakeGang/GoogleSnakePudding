@@ -79,6 +79,26 @@ window.PuddingMod.alterSnakeCode = function(code) {
     "Pixel":'https://i.postimg.cc/02BWLrzt/red-pepper-px.png',
     "Poison_values": 'b,\'#910a22\',\'#909090\',20',
   });
+  new_fruit.push({ // Lime
+    "Normal":'https://i.postimg.cc/k5kWcyFB/lime.png',
+    "Pixel":'https://i.postimg.cc/8cqg53Jr/px-lime.png',
+    "Poison_values": 'b,\'#93ef13\',\'#909090\',70',
+  });
+  new_fruit.push({ // Blacberries
+    "Normal":'https://i.postimg.cc/hPTVGdNX/blackberries.png',
+    "Pixel":'https://i.postimg.cc/RZTf7zS9/px-blackberries.png',
+    "Poison_values": 'b,\'#cccccc\',\'#909090\',70',
+  });
+  new_fruit.push({ // Green Grapes
+    "Normal":'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
+    "Pixel":'https://i.postimg.cc/J79bmqYw/px-green-grapes.png',
+    "Poison_values": 'b,\'#93ef13\',\'#909090\',30',
+  });
+  new_fruit.push({ // Burger
+    "Normal":'https://i.postimg.cc/B6ycxmBb/porga.png',
+    "Pixel":'https://i.postimg.cc/52SDdj3z/pixel-burger.png',
+    "Poison_values": 'b,\'#910a22\',\'#909090\',90',
+  });
   // Add new fruits here above this line!
   new_fruit.push({ // Golden Apple
     "Normal":'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
