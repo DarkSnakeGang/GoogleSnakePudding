@@ -261,8 +261,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   load_pixelated_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},"load",?\nfunction\(\){[a-zA-Z0-9_$]{1,8}\(a\)}\)\)}/gm)
 
-  console.log(code.match(load_pixelated_regex)[0]);
-  console.log(code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]);
+  //console.log(code.match(load_pixelated_regex)[0]);
+  //console.log(code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]);
 
   pixelated_switch = `switch(${Pr_a}.${Pr_pa}){ `;
 
