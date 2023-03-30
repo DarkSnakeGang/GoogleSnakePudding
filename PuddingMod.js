@@ -102,7 +102,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   document.querySelector('#apple').appendChild(uiImage(new_fruit[index].Normal));
 }
 
-  // Add new fruits here above this line!
   new_fruit.push({ // Golden Apple
     "Normal":'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
     "Pixel":'https://i.postimg.cc/MGDg1gBQ/px-gold-apple.png',
