@@ -20,10 +20,6 @@ window.PuddingMod.runCodeBefore = function() {
     return img;
   };
 
-
-
-
-  // Fruit, aka pudding
     for(let src of [
         'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
         'https://i.postimg.cc/8cmVPfGd/blueberries.png',
