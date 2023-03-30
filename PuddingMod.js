@@ -89,7 +89,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   });
   new_fruit.push({ // Burger 28
     "Normal":'https://i.postimg.cc/B6ycxmBb/porga.png',
-    "Pixel":'https://i.postimg.cc/52SDdj3z/pixel-burger.png',
+    "Pixel":'https://i.postimg.cc/fW3Vjz67/px-burger.png',
     "Poison_values": 'b,\'#D99E82\',\'#D3D3D3\',40',
   });
   new_fruit.push({ // Cheese 29
