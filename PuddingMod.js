@@ -68,37 +68,37 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   var new_fruit = [];
 
-  new_fruit.push({ // Pudding
+  new_fruit.push({ // Pudding 22
       "Normal":'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
       "Pixel":'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png',
       "Poison_values": 'b,\'#eaca23\',\'#909090\',10',
   });
-  new_fruit.push({ // Blueberries
+  new_fruit.push({ // Blueberries 23
     "Normal":'https://i.postimg.cc/8cmVPfGd/blueberries.png',
     "Pixel":'https://i.postimg.cc/Hkh1xCqN/px-blueberries.png',
     "Poison_values": 'b,\'#2323ea\',\'#909090\',30',
   });
-  new_fruit.push({ // Red Pepper
+  new_fruit.push({ // Red Pepper 24
     "Normal":'https://i.postimg.cc/BQqHMbDc/redpepper.png',
     "Pixel":'https://i.postimg.cc/02BWLrzt/red-pepper-px.png',
     "Poison_values": 'b,\'#910a22\',\'#909090\',20',
   });
-  new_fruit.push({ // Lime
+  new_fruit.push({ // Lime 25
     "Normal":'https://i.postimg.cc/k5kWcyFB/lime.png',
     "Pixel":'https://i.postimg.cc/8cqg53Jr/px-lime.png',
     "Poison_values": 'b,\'#93ef13\',\'#909090\',70',
   });
-  new_fruit.push({ // Blacberries
+  new_fruit.push({ // Blacberries 26
     "Normal":'https://i.postimg.cc/hPTVGdNX/blackberries.png',
     "Pixel":'https://i.postimg.cc/RZTf7zS9/px-blackberries.png',
     "Poison_values": 'b,\'#000044\',\'#909090\',50',
   });
-  new_fruit.push({ // Green Grapes
+  new_fruit.push({ // Green Grapes 27
     "Normal":'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
     "Pixel":'https://i.postimg.cc/J79bmqYw/px-green-grapes.png',
     "Poison_values": 'b,\'#93ef13\',\'#909090\',10',
   });
-  new_fruit.push({ // Burger
+  new_fruit.push({ // Burger 28
     "Normal":'https://i.postimg.cc/B6ycxmBb/porga.png',
     "Pixel":'https://i.postimg.cc/52SDdj3z/pixel-burger.png',
     "Poison_values": 'b,\'#D99E82\',\'#D3D3D3\',40',
