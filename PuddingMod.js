@@ -37,11 +37,6 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
-    //for(let src of [
-    //  'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
-  //]) document.querySelector('#count').appendChild(uiImage(src));
-
-
 
     document.body.style.overflow = 'hidden';
 
@@ -88,7 +83,17 @@ window.PuddingMod.alterSnakeCode = function(code) {
     "Pixel":'https://i.postimg.cc/02BWLrzt/red-pepper-px.png',
     "Poison_values": 'b,\'#910a22\',\'#909090\',20',
   });
-
+  // Add new fruits here above this line!
+  new_fruit.push({ // Golden Apple
+    "Normal":'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
+    "Pixel":'https://i.postimg.cc/MGDg1gBQ/px-gold-apple.png',
+    "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+  });
+  new_fruit.push({ // Red Pudding
+    "Normal":'https://i.postimg.cc/15kNH2Y5/pudding-red.png',
+    "Pixel":'https://i.postimg.cc/sXW6w8Qm/Red-Pixel-Pudding170-Small.png',
+    "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
+  });
   //console.log(code);
   console.log("Starting to edit code...");
 
@@ -99,8 +104,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
   //skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
   //skull_path = 'snake_arcade/v12/trophy_10.png'
-  gold_src = 'https://i.postimg.cc/tJqR4tT6/gold-apple.png'
-  red_pudding = 'https://i.postimg.cc/15kNH2Y5/pudding-red.png'
+  //gold_src = 'https://i.postimg.cc/tJqR4tT6/gold-apple.png'
+  //red_pudding = 'https://i.postimg.cc/15kNH2Y5/pudding-red.png'
   // Regex for a function that sets the src for count (I think)
   settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\);/)
   settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
@@ -175,12 +180,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   }
 
 
-  add_gold = `b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${gold_src}");
-  ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
-  this.${fruit_array_name}.push(b);
-  b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${red_pudding}");
-  ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
-  this.${fruit_array_name}.push(b);
+  add_gold = `
   ${golden_index} = this.${fruit_array_name}.length - 1;
   ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
   `
@@ -246,10 +246,10 @@ window.PuddingMod.alterSnakeCode = function(code) {
   }
 
   // This fixes special rare fruits, but they aren't pixelated sprite here, need to make those.
-  pixelated_switch = pixelated_switch + `
-  case '${gold_src}': ${Pr_a}.${Pr_ka}.src = '${gold_src}'; break;`;
-  pixelated_switch = pixelated_switch + `
-  case '${red_pudding}': ${Pr_a}.${Pr_ka}.src = '${red_pudding}'; break;`;
+  //pixelated_switch = pixelated_switch + `
+  //case '${gold_src}': ${Pr_a}.${Pr_ka}.src = '${gold_src}'; break;`;
+  //pixelated_switch = pixelated_switch + `
+  //case '${red_pudding}': ${Pr_a}.${Pr_ka}.src = '${red_pudding}'; break;`;
 
   pixelated_switch = pixelated_switch + `
   default: ${Pr_a}.${Pr_ka}.src = "https://www.google.com/logos/fnbx/" + ${Pr_a}.${Pr_pa}; break;
