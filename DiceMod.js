@@ -63,7 +63,7 @@ window.DiceMod.alterSnakeCode = function(code) {
     count_score = count_score.replaceAll(`count_"+d+".png")`, detect_dice)
     // Adds loading for counts when starting the game
     console.log("Adding count detector for Dice...")
-    code = code.assertReplace(load_image_func, count_score);
+    //code = code.assertReplace(load_image_func, count_score);
 
   // Add global for isDice and reset expecte and current counts
   is_dice = `window.snake.isDice`

@@ -138,13 +138,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   }
   load_code_condensed = load_code_condensed + ';';
 
-  // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
-  //load_pudding_code_condensed = `
-  //,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
-  //,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_px_src}" : {}\)
-  //,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_src}" : {}\)
-  //,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_px_src}" : {}\)
-  //;`
 
 
   //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
@@ -167,25 +160,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   volume_src = `document.querySelector('img[class="${volume_class}"]').src `
 
   golden_index = `window.goldenIndex`
-
-   ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
-  /*add_pudding = `$&;
-  b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
-  ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
-  ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
-  this.${fruit_array_name}.push(b); // Add dummy for randomizer
-  this.${fruit_array_name}.push(b);
-  b=new ${func_name}(this.${settings_itself},"${blueberries_src}",1,this.oa,"${blueberries_px_src}");
-  ${poison_convert}(b,\'#2323ea\',\'#909090\',30);
-  this.${fruit_array_name}.push(b);
-  b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
-  ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
-  this.${fruit_array_name}.push(b);
-  b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${pudding_px_src}");
-  ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
-  this.${fruit_array_name}.push(b);
-  ${golden_index} = this.${fruit_array_name}.length - 1;
-  `*/
 
   add_fruit = `$&;this.${fruit_array_name}.push(b); // Add dummy for randomizer
   `
@@ -212,9 +186,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
   `
 
   add_fruit = add_fruit + add_gold;
-
-  //console.log(add_fruit);
-  //console.log(add_pudding);
 
   // Distinct Soko Goals
   console.log("Making soko goals more distinct...")
@@ -296,24 +267,6 @@ window.PuddingMod.alterSnakeCode = function(code) {
 }
   `
 
-  //console.log(new_pixelated_func);
-/*
-Old Bullshit:
-a.ka && (a.ka.src = "https://www.google.com/logos/fnbx/" + a.Qa, _.nk(a.ka, "load",
-function() {
-  Hih(a)
-}))
-
-New Bullshit:
-if (a.ka)
-{
-    a.ka.src = "https://www.google.com/logos/fnbx/" + a.Qa;
-    _.nk(a.ka, "load",
-    function() {
-        Hih(a)
-    });
-}
-*/
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   //new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
@@ -362,6 +315,37 @@ if (a.ka)
   Count_SRC = "COUNT"
   Replace_Speed = "SPEED"
 
+  imgElement_func =`
+  function getImgFromElement(element){
+    return element.replace('class=', '').replace('width=', '').replace('height=', '').split('=')[1].split('"')[1];
+  }
+  `
+
+  count_code = `
+  ${imgElement_func}
+  count_img = document.querySelector('#count').innerHTML.split('<');
+  count_img_arr = [];
+  for (let index = 0; index < count_img.length; index++) {
+    const element = count_img[index];
+    if(element != "")
+    {
+      count_img_arr.push(getImgFromElement(element));
+    }
+  }
+`
+  speed_code =`
+  ${imgElement_func}
+  speed_img = document.querySelector('#speed').innerHTML.split('<');
+  speed_img_arr = [];
+  for (let index = 0; index < speed_img.length; index++) {
+    const element = speed_img[index];
+    if(element != "")
+    {
+      speed_img_arr.push(getImgFromElement(element));
+    }
+  }
+  `
+
   //console.log("Settings? : " + settings_itself)
 
   // Create a new if statement that sets the count image whenever changes are made
@@ -370,6 +354,16 @@ if (a.ka)
   //count_score = count_score.replaceAll("\".png\")", detect_dice)
   // Adds loading for counts when starting the game
   console.log("Adding count detector...")
+  //console.log(count_score);
+
+  count_score = count_score.split(')')[0].replace('||"graphics"===b','') + `){
+    ${count_code}
+    ${settings_var}.${settings_itself}.${Count_SRC} = count_img_arr[d];
+  }
+
+  `
+  //console.log(count_score);
+
   code = code.assertReplace(load_image_func, count_score + "$&");
 
   // Function that checks if count image is set, and sets it to a default of 1a if it's not set.
@@ -400,6 +394,14 @@ if (a.ka)
 
   speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
   speed_volume = speed_volume.replace(';', `,${volume_src}=${settings_var}.${settings_itself}.${Replace_Speed} == "https://www.google.com/logos/fnbx/snake_arcade/pixel/px_speed_00.png" ? "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" : ${settings_var}.${settings_itself}.${Replace_Speed} ;`)
+
+  speed_volume = speed_volume.split(')')[0].replace('||"graphics"===b','') + `){
+    ${speed_code}
+    ${settings_var}.${settings_itself}.${Replace_Speed} = speed_img_arr[d];
+    ${volume_src}=speed_img_arr[d];
+  }
+  `
+  //console.log(speed_volume);
 
   // Add loading for speed when starting the game
   console.log("Adding speed detector...")
