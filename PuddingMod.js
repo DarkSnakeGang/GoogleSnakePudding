@@ -21,18 +21,6 @@ window.PuddingMod.runCodeBefore = function() {
   };
 
     for(let src of [
-        'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
-        'https://i.postimg.cc/8cmVPfGd/blueberries.png',
-        'https://i.postimg.cc/BQqHMbDc/redpepper.png',
-        'https://i.postimg.cc/k5kWcyFB/lime.png',
-        'https://i.postimg.cc/hPTVGdNX/blackberries.png',
-        'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
-        'https://i.postimg.cc/B6ycxmBb/porga.png',
-        'https://i.postimg.cc/zXD1z9d6/trophy-03.png',
-    ]) document.querySelector('#apple').appendChild(uiImage(src));
-
-
-    for(let src of [
       'https://i.postimg.cc/R0R1ZMNx/dark-night.png',
       'https://i.postimg.cc/t4bxfYzt/planeptune.png',
       'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
@@ -109,6 +97,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
     "Pixel":'https://i.postimg.cc/kMvmdnyW/px-trophy-03.png',
     "Poison_values": 'b,\'#eaca23\',\'#909090\',30',
 });
+
+for (let index = 0; index < new_fruit.length; index++) {
+  document.querySelector('#apple').appendChild(uiImage(new_fruit[index].Normal));
+}
+
   // Add new fruits here above this line!
   new_fruit.push({ // Golden Apple
     "Normal":'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
