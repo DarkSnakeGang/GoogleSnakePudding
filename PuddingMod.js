@@ -113,25 +113,14 @@ for (let index = 0; index < new_fruit.length; index++) {
     "Pixel":'https://i.postimg.cc/sXW6w8Qm/Red-Pixel-Pudding170-Small.png',
     "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
   });
-  //console.log(code);
   console.log("Starting to edit code...");
 
-  //blueberries_src = 'https://i.postimg.cc/8cmVPfGd/blueberries.png'
-  //blueberries_px_src = 'https://i.postimg.cc/Hkh1xCqN/px-blueberries.png'
-
-  //pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
-  //pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
-  //skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
-  //skull_path = 'snake_arcade/v12/trophy_10.png'
-  //gold_src = 'https://i.postimg.cc/tJqR4tT6/gold-apple.png'
-  //red_pudding = 'https://i.postimg.cc/15kNH2Y5/pudding-red.png'
   // Regex for a function that sets the src for count (I think)
   settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\);/)
   settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
   settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
   settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
   // ${settings_itself}
-
 
   // Full function that sets the current fruit icon
   load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,4}\|\|"graphics"===[a-zA-Z0-9_$]{1,4}\)[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\),[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\?"snake_arcade\/pixel\/px_apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png":"snake_arcade\/v4\/apple_"\+[a-zA-Z0-9_$]{1,4}\+"\.png"\);/)
@@ -141,10 +130,8 @@ for (let index = 0; index < new_fruit.length; index++) {
   settings_var = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[0].split(',')[1]
   settings_src = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[2]
   select_fruit_numvar = code.match(load_image_func)[0].match(new RegExp(/\+.\+/))[0].split('+')[1]
-  //console.log(code.match(load_image_func)[0])
   pixel_setting_regex = new RegExp(`case "graphics":[a-zA-Z0-9_$]{1,4}.${settings_itself}.[a-zA-Z0-9_$]{1,4}`);
   pixel_setting = code.match(pixel_setting_regex)[0].split('.')[2]
-  //console.log(code)
   // Gets the element that changed, "apple" means fruit here, in endscreen - Unused code here, but may be useful in the future.
   get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
 
@@ -162,12 +149,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   }
   load_code_condensed = load_code_condensed + ';';
 
-
-
-  //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
-  // Any additional fruit will need an extra line for it's own src
-  //  //load pixelated pudding
-
   ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/v4\/apple_\"/)
   func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/v4\/apple_\"`,"")
   ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
@@ -176,11 +157,9 @@ for (let index = 0; index < new_fruit.length; index++) {
   array_name = code.match(array_grabber)[0].replace('".png"\),c=',"").replace('[a],',"")
 
   add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
-  //add_fruit_before_loop_regex = new RegExp(/for\(a=0;21>a;a\+\+\)/);
 
   fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
   volume_class = document.querySelector('img[src="//www.gstatic.com/images/icons/material/system/2x/volume_up_white_24dp.png"]').getAttribute("class")
-  //console.log("Volume class: " + volume_class)
   volume_src = `document.querySelector('img[class="${volume_class}"]').src `
 
   golden_index = `window.goldenIndex`
@@ -245,14 +224,8 @@ for (let index = 0; index < new_fruit.length; index++) {
   Pr_a = code.match(Pr_regex)[0].split('.')[0]
   Pr_ka = code.match(Pr_regex)[0].split('.')[1].split('&')[0]
   Pr_pa = code.match(Pr_regex)[0].split('.')[6] // Where relative path is stored
-  //console.log("Pr_pa: " + Pr_pa)
-
-//console.log(code.match(Pr_regex)[0]);
 
   load_pixelated_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},"load",?\nfunction\(\){[a-zA-Z0-9_$]{1,8}\(a\)}\)\)}/gm)
-
-  //console.log(code.match(load_pixelated_regex)[0]);
-  //console.log(code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]);
 
   pixelated_switch = `switch(${Pr_a}.${Pr_pa}){ `;
 
@@ -264,11 +237,6 @@ for (let index = 0; index < new_fruit.length; index++) {
     pixelated_switch = pixelated_switch + pixelated_case_template;
   }
 
-  // This fixes special rare fruits, but they aren't pixelated sprite here, need to make those.
-  //pixelated_switch = pixelated_switch + `
-  //case '${gold_src}': ${Pr_a}.${Pr_ka}.src = '${gold_src}'; break;`;
-  //pixelated_switch = pixelated_switch + `
-  //case '${red_pudding}': ${Pr_a}.${Pr_ka}.src = '${red_pudding}'; break;`;
 
   pixelated_switch = pixelated_switch + `
   default: ${Pr_a}.${Pr_ka}.src = "https://www.google.com/logos/fnbx/" + ${Pr_a}.${Pr_pa}; break;
@@ -288,22 +256,12 @@ for (let index = 0; index < new_fruit.length; index++) {
 
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-  //new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
-  //new_aggressive_condition_v2 = `(${Pr_a}.${Pr_pa}.includes("postimg") ? (${Pr_a}.${Pr_pa}.includes("blueberries") ? "${blueberries_px_src}" : "${pudding_px_src}") : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
-
-  //aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition_v2)
 
 
   console.log("Adding pixelated pudding...")
-  //code = code.assertReplace(Pr_regex, aggressive_change);
   code = code.assertReplace(load_pixelated_regex, new_pixelated_func);
-  //console.log(code);
-
-  //Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
 
   // Fixes an image call to pudding
-  //code = code.assertReplace(Pr_regex, Pr_new);
-  // Also fixes an image call to pudding
   console.log("Adding pudding image...")
   code = code.assertReplace(shh_grabber, new_shh_line);
 
@@ -312,7 +270,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-  //theme_case
 
   console.log("Adding dark night and planeptune themes...")
   code = code.assertReplace(/case "theme":/, `case "theme":
@@ -365,15 +322,11 @@ for (let index = 0; index < new_fruit.length; index++) {
   }
   `
 
-  //console.log("Settings? : " + settings_itself)
-
   // Create a new if statement that sets the count image whenever changes are made
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
-  //detect_dice = `".png"),${settings_var}.${settings_itself}.${Count_SRC} = (d === "03") ? "https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png" : ${settings_var}.${settings_itself}.${Count_SRC}`
-  //count_score = count_score.replaceAll("\".png\")", detect_dice)
+
   // Adds loading for counts when starting the game
   console.log("Adding count detector...")
-  //console.log(count_score);
 
   count_score = count_score.split(')')[0].replace('||"graphics"===b','') + `){
     ${count_code}
@@ -381,7 +334,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   }
 
   `
-  //console.log(count_score);
 
   code = code.assertReplace(load_image_func, count_score + "$&");
 
@@ -397,7 +349,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   TopBar_count_code=TopBar_count_code.split(';')[0]+';'+check_count_undefined+TopBar_count_code.split(';')[1]
   TopBar_count_code2 = code.match(TopBar_srcFunc_p2)[0].replaceAll(settings_src,Count_SRC)
 
-
   // Actually changes Top Bar fruit to multi count
   console.log("Updating top bar with count...")
 
@@ -408,7 +359,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   console.log("Replacing volume with speed...")
   volume_regex = new RegExp(/this\.muted\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
   code = code.assertReplace(volume_regex, `this.${settings_itself}.${Replace_Speed} ? this.${settings_itself}.${Replace_Speed} : "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" ;`)
-// _.k.R7b=function(){this.muted=!this.muted;
   volume_src_regex = new RegExp(/[a-zA-Z0-9_$.]{1,7}=function\(\){this\.muted=!this\.muted;this\.header\.[a-zA-Z0-9_$.]{1,7}\.src=/)
 
   speed_volume = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "speed").replaceAll(settings_src, Replace_Speed).replaceAll(get_apple_val2, get_speed_val2)
@@ -420,7 +370,6 @@ for (let index = 0; index < new_fruit.length; index++) {
     ${volume_src}=speed_img_arr[d];
   }
   `
-  //console.log(speed_volume);
 
   // Add loading for speed when starting the game
   console.log("Adding speed detector...")
@@ -430,7 +379,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
   console.log("Adding pudding to endscreen...")
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_code_condensed));
-  //code = code.assertReplace(load_image_func, "$&" + load_pudding_code);
 
   // The elegent piece of code that replace the grey pudding with the skull icon
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
@@ -439,8 +387,6 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   console.log("Replacing grey poison pudding with skull trophy icon...")
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
-  //console.log(Math.floor((Math.random() * 1000000) + 1) == 426017) // 426017
-  //console.log(code);
 
   gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance}
   super_chance = `* 10000000) + 1) == 4263017)` // ${super_chance}
@@ -454,9 +400,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   console.log("Adding 1 in a Million Golden Apple...")
   console.log("Adding 1 in a 10 Million Special Secret...")
   code = code.assertReplace(apple_info_regex, set_gold)
-
-  //draw_apple_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
-  //golden_logic = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
 
   console.log("Done, enjoy Pudding Mod!");
 
