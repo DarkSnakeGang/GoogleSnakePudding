@@ -103,6 +103,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
     "Pixel":'https://i.postimg.cc/52SDdj3z/pixel-burger.png',
     "Poison_values": 'b,\'#D99E82\',\'#D3D3D3\',40',
   });
+  new_fruit.push({ // Cheese 29
+    "Normal":'https://i.postimg.cc/zXD1z9d6/trophy-03.png',
+    "Pixel":'https://i.postimg.cc/kMvmdnyW/px-trophy-03.png',
+    "Poison_values": 'b,\'#eaca23\',\'#909090\',30',
+});
   // Add new fruits here above this line!
   new_fruit.push({ // Golden Apple
     "Normal":'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
