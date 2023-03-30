@@ -22,7 +22,7 @@ window.MorePudding.runCodeBefore = function() {
         req.send();
       }
 
-    loadAndRunCodeSynchronous('http://127.0.0.1:5500/PuddingMod.js');
+    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/PuddingMod.js');
     loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/main/modloadercode.js');
 
     console.log("Enabling Pudding Mod");
