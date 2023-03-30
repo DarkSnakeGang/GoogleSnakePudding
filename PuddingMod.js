@@ -24,6 +24,10 @@ window.PuddingMod.runCodeBefore = function() {
         'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
         'https://i.postimg.cc/8cmVPfGd/blueberries.png',
         'https://i.postimg.cc/BQqHMbDc/redpepper.png',
+        'https://i.postimg.cc/k5kWcyFB/lime.png',
+        'https://i.postimg.cc/hPTVGdNX/blackberries.png',
+        'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
+        'https://i.postimg.cc/B6ycxmBb/porga.png',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
 
