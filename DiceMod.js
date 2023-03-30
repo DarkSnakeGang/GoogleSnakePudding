@@ -91,7 +91,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   real_new_apple_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=function\(a,b,c\){return{pos/)
   real_new_apple_func = code.match(real_new_apple_regex)[0].split(' ')[1].split('=')[0] + "(this, 0, 0)"
 
-  //console.log(real_new_apple_func);
+  //console.log(spawn_func_code);
   //console.log(should_spawn_res);
   //console.log("Spawn Portal: " + spawn_portal);
   //console.log(move_apple_func);
@@ -376,8 +376,8 @@ window.DiceMod.alterSnakeCode = function(code) {
 
     code = code.assertReplace(spawn_func_code, dice_eaten_code+spawn_func_code)
 
-    acutally_spawn_apple_regex = new RegExp(`if\\\(${should_spawn_res}\\\)[^]*?this.wa\\\)\\\);`,"gms")
-    acutally_spawn_apple_code = code.match(acutally_spawn_apple_regex)[0]
+    //acutally_spawn_apple_regex = new RegExp(`if\\\(${should_spawn_res}\\\)[^]*?this.wa\\\)\\\);`,"gms")
+    //acutally_spawn_apple_code = code.match(acutally_spawn_apple_regex)[0]
     //console.log("Actually spawn apple: " + acutally_spawn_apple_code)
 
     //console.log(dice_eaten_code);
