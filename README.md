@@ -4,17 +4,18 @@
 
 ## Features
 ### Pudding Mod
-* Pudding added as food option, including pixelated pudding
+* Pudding added as food option. Additional fruits are available as well.
 * Selected Multi count (1a, 3a and 5a) is displayed instead of food, at the top bar
 * The volume and mute icons are replaced with selected speed
 * Replace poison food for pudding with the poison mode icon (only for normal graphics)
-* One in a million chance of a golden apple
+* Rare and ultra rare special fruit may appear (visual effect only)
 * Distinct soko goals
-* Dark Night and Planeptune themes
+* Additional themes available
 
 ### Dice Mod
 * Dice count, which spawns between 1 and 6 apples when the last available apple is eaten.
 * Blue dice count, which spawns between 1 and 12 apples when the last available apple is eaten.
+* Green dice count, which spawns between 4 and 9 apples when the last available apple is eaten.
 * Includes Pudding Mod
 
 ### Planned Features
