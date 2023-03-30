@@ -47,7 +47,7 @@ window.DiceMod.alterSnakeCode = function(code) {
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
     settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
     // ${settings_itself}
-
+console.log("Getting settings values...")
   // Full function that sets the current fruit icon
   //load_image_func = new RegExp(/count_"\+d\+"\.png"\)/gm)
 
