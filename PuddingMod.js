@@ -27,6 +27,7 @@ window.PuddingMod.runCodeBefore = function() {
     for(let src of [
         'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
         'https://i.postimg.cc/8cmVPfGd/blueberries.png',
+        'https://i.postimg.cc/BQqHMbDc/redpepper.png',
     ]) document.querySelector('#apple').appendChild(uiImage(src));
 
 
@@ -40,11 +41,7 @@ window.PuddingMod.runCodeBefore = function() {
     //  'https://github.com/DarkSnakeGang/GoogleSnakeIcons/raw/main/Counts/dice_count.png',
   //]) document.querySelector('#count').appendChild(uiImage(src));
 
-      // Skull
 
-    //for(let src of [
-     //   'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png',
-    //]) document.querySelector('#skull').appendChild(uiImage(src));
 
     document.body.style.overflow = 'hidden';
 
@@ -56,36 +53,7 @@ window.PuddingMod.runCodeBefore = function() {
       return img;
     }
 
-     const dead = {
-       pudding:   i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'),
-     };
-
-    window.darks = [
-      i('https://i.postimg.cc/pTMsq0k2/apple-00-1.png'),
-      i('https://i.postimg.cc/Pxb2cmF1/apple-01.png'),
-      i('https://i.postimg.cc/rs8QLKv3/apple-02.png'),
-      i('https://i.postimg.cc/CKqvCyGP/apple-03-1.png'),
-      i('https://i.postimg.cc/VkTGbsC0/apple-04-1.png'),
-      i('https://i.postimg.cc/yY1rMbKx/apple-05.png'),
-      i('https://i.postimg.cc/280Xr7jw/apple-06.png'),
-      i('https://i.postimg.cc/qvgDR6zd/apple-07.png'),
-      i('https://i.postimg.cc/PJ4VLmWd/apple-08-1.png'),
-      i('https://i.postimg.cc/2jFKXfPg/apple-09.png'),
-      i('https://i.postimg.cc/NFYPfNrN/apple-10.png'),
-      i('https://i.postimg.cc/ZR6Mmk0B/apple-11.png'),
-      i('https://i.postimg.cc/XYDhccTJ/apple-12-1.png'),
-      i('https://i.postimg.cc/rpBP7yy2/apple-13.png'),
-      i('https://i.postimg.cc/9QfK7NgK/apple-14.png'),
-      i('https://i.postimg.cc/bvD56ShR/apple-15.png'),
-      i('https://i.postimg.cc/NfBWg06g/apple-16.png'),
-      i('https://i.postimg.cc/yYj2Wzj0/apple-17.png'),
-      i('https://i.postimg.cc/0jdFYgsR/apple-18.png'),
-      i('https://i.postimg.cc/05pTRSJW/apple-19.png'),
-      i('https://i.postimg.cc/vTdCxYCt/apple-20.png'),
-      new Image(),
-      dead.pudding,
-      dead.pudding,
-    ];
+    window.skull = i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png');
 
 };
 
@@ -95,17 +63,42 @@ window.PuddingMod.runCodeBefore = function() {
 
 window.PuddingMod.alterSnakeCode = function(code) {
 
+  function i(src) {
+    let img = new Image();
+    img.src = src;
+    img.crossOrigin = 'Anonymous';
+    img.width = img.height = 47;
+    return img;
+  }
+
+  var new_fruit = [];
+
+  new_fruit.push({ // Pudding
+      "Normal":'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
+      "Pixel":'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png',
+      "Poison_values": 'b,\'#eaca23\',\'#909090\',10',
+  });
+  new_fruit.push({ // Blueberries
+    "Normal":'https://i.postimg.cc/8cmVPfGd/blueberries.png',
+    "Pixel":'https://i.postimg.cc/Hkh1xCqN/px-blueberries.png',
+    "Poison_values": 'b,\'#2323ea\',\'#909090\',30',
+  });
+  new_fruit.push({ // Red Pepper
+    "Normal":'https://i.postimg.cc/BQqHMbDc/redpepper.png',
+    "Pixel":'https://i.postimg.cc/02BWLrzt/red-pepper-px.png',
+    "Poison_values": 'b,\'#910a22\',\'#909090\',20',
+  });
 
   //console.log(code);
   console.log("Starting to edit code...");
 
-  blueberries_src = 'https://i.postimg.cc/8cmVPfGd/blueberries.png'
-  blueberries_px_src = 'https://i.postimg.cc/Hkh1xCqN/px-blueberries.png'
+  //blueberries_src = 'https://i.postimg.cc/8cmVPfGd/blueberries.png'
+  //blueberries_px_src = 'https://i.postimg.cc/Hkh1xCqN/px-blueberries.png'
 
-  pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
-  pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
-  skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
-  skull_path = 'snake_arcade/v12/trophy_10.png'
+  //pudding_src = 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png'
+  //pudding_px_src = 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png' //'https://i.postimg.cc/44Bzcd69/Pixel-Pudding.png' // need to get a better pixelated pudding, 170x170
+  //skull_src = 'https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png'
+  //skull_path = 'snake_arcade/v12/trophy_10.png'
   gold_src = 'https://i.postimg.cc/tJqR4tT6/gold-apple.png'
   red_pudding = 'https://i.postimg.cc/15kNH2Y5/pudding-red.png'
   // Regex for a function that sets the src for count (I think)
@@ -132,13 +125,28 @@ window.PuddingMod.alterSnakeCode = function(code) {
   get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
 
   last_fruit_num = 21
+
+  load_code_condensed = ``;
+
+  for (let index = 0; index < new_fruit.length; index++) {
+    current_fruit = new_fruit[index].Normal;
+    current_fruit_px = new_fruit[index].Pixel;
+    load_fruit_template = `
+    ,\(${select_fruit_numvar}==${last_fruit_num+1+index} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${current_fruit}" : {}\)
+    ,\(${select_fruit_numvar}==${last_fruit_num+1+index} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${current_fruit_px}" : {}\)`
+    load_code_condensed = load_code_condensed + load_fruit_template;
+  }
+  load_code_condensed = load_code_condensed + ';';
+
   // Code to add that check if pudding has been selected and sets it's SRC - works for endscreen
-  load_pudding_code_condensed = `
-  ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
-  ,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_px_src}" : {}\)
-  ,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_src}" : {}\)
-  ,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_px_src}" : {}\)
-  ;`
+  //load_pudding_code_condensed = `
+  //,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_src}" : {}\)
+  //,\(${select_fruit_numvar}==${last_fruit_num+1} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${pudding_px_src}" : {}\)
+  //,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_src}" : {}\)
+  //,\(${select_fruit_numvar}==${last_fruit_num+2} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${blueberries_px_src}" : {}\)
+  //;`
+
+
   //load_pudding_code = `if\(${select_fruit_numvar}==="22"\)${settings_var}.settings.${settings_src}="${pudding_src}";`
   // Any additional fruit will need an extra line for it's own src
   //  //load pixelated pudding
@@ -161,7 +169,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   golden_index = `window.goldenIndex`
 
    ////// I need to grab "wa" and replace it with whatever dynamic thing in the future, also "base" has changed to some random non-sense
-  add_pudding = `$&;
+  /*add_pudding = `$&;
   b=new ${func_name}(this.${settings_itself},"${pudding_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca23\',\'#909090\',10);
   ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
@@ -169,7 +177,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${blueberries_src}",1,this.oa,"${blueberries_px_src}");
   ${poison_convert}(b,\'#2323ea\',\'#909090\',30);
-  this.${fruit_array_name}.push(b); // Add extra so type is recognized
+  this.${fruit_array_name}.push(b);
   b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${pudding_px_src}");
   ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
   this.${fruit_array_name}.push(b);
@@ -177,7 +185,36 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
   this.${fruit_array_name}.push(b);
   ${golden_index} = this.${fruit_array_name}.length - 1;
+  `*/
+
+  add_fruit = `$&;this.${fruit_array_name}.push(b); // Add dummy for randomizer
   `
+  for (let index = 0; index < new_fruit.length; index++) {
+    current_fruit = new_fruit[index].Normal;
+    current_fruit_px = new_fruit[index].Pixel;
+    current_fruit_poison_values = new_fruit[index].Poison_values; // ${current_fruit_poison_values}
+    add_fruit_template = `
+    b=new ${func_name}(this.${settings_itself},"${current_fruit}",1,this.oa,"${current_fruit_px}");
+    ${poison_convert}(${current_fruit_poison_values});
+    this.${fruit_array_name}.push(b);`
+    add_fruit = add_fruit + add_fruit_template;
+  }
+
+
+  add_gold = `b=new ${func_name}(this.${settings_itself},"${gold_src}",1,this.oa,"${gold_src}");
+  ${poison_convert}(b,\'#eaca21\',\'#909092\',0);
+  this.${fruit_array_name}.push(b);
+  b=new ${func_name}(this.${settings_itself},"${red_pudding}",1,this.oa,"${red_pudding}");
+  ${poison_convert}(b,\'#eaca22\',\'#909091\',0);
+  this.${fruit_array_name}.push(b);
+  ${golden_index} = this.${fruit_array_name}.length - 1;
+  ${volume_src}="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png";
+  `
+
+  add_fruit = add_fruit + add_gold;
+
+  //console.log(add_fruit);
+  //console.log(add_pudding);
 
   // Distinct Soko Goals
   console.log("Making soko goals more distinct...")
@@ -202,7 +239,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
   console.log("Adding pudding to stack...")
-  code = code.assertReplace(add_fruit_array_last_func_regex, add_pudding);
+  code = code.assertReplace(add_fruit_array_last_func_regex, add_fruit);
 
   // Too lazy to clean this code, it's "good enough" to leave untouched for now
   // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
@@ -220,14 +257,76 @@ window.PuddingMod.alterSnakeCode = function(code) {
   Pr_pa = code.match(Pr_regex)[0].split('.')[6] // Where relative path is stored
   //console.log("Pr_pa: " + Pr_pa)
 
+//console.log(code.match(Pr_regex)[0]);
+
+  load_pixelated_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},"load",?\nfunction\(\){[a-zA-Z0-9_$]{1,8}\(a\)}\)\)}/gm)
+
+  console.log(code.match(load_pixelated_regex)[0]);
+  console.log(code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]);
+
+  pixelated_switch = `switch(${Pr_a}.${Pr_pa}){ `;
+
+  for (let index = 0; index < new_fruit.length; index++) {
+    current_fruit = new_fruit[index].Normal;
+    current_fruit_px = new_fruit[index].Pixel;
+    pixelated_case_template = `
+    case '${current_fruit_px}': ${Pr_a}.${Pr_ka}.src = '${current_fruit_px}'; break;`;
+    pixelated_switch = pixelated_switch + pixelated_case_template;
+  }
+
+  // This fixes special rare fruits, but they aren't pixelated sprite here, need to make those.
+  pixelated_switch = pixelated_switch + `
+  case '${gold_src}': ${Pr_a}.${Pr_ka}.src = '${gold_src}'; break;`;
+  pixelated_switch = pixelated_switch + `
+  case '${red_pudding}': ${Pr_a}.${Pr_ka}.src = '${red_pudding}'; break;`;
+
+  pixelated_switch = pixelated_switch + `
+  default: ${Pr_a}.${Pr_ka}.src = "https://www.google.com/logos/fnbx/" + ${Pr_a}.${Pr_pa}; break;
+}`;
+
+  new_pixelated_func = `
+  if (${Pr_a}.${Pr_ka})
+  {
+    ${pixelated_switch}
+    ${code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]}(${Pr_a}.${Pr_ka}, "load",
+    function() {
+        ${code.match(load_pixelated_regex)[0].split('{')[1].split('(')[0]}(${Pr_a})
+    });
+  }
+}
+  `
+
+  //console.log(new_pixelated_func);
+/*
+Old Bullshit:
+a.ka && (a.ka.src = "https://www.google.com/logos/fnbx/" + a.Qa, _.nk(a.ka, "load",
+function() {
+  Hih(a)
+}))
+
+New Bullshit:
+if (a.ka)
+{
+    a.ka.src = "https://www.google.com/logos/fnbx/" + a.Qa;
+    _.nk(a.ka, "load",
+    function() {
+        Hih(a)
+    });
+}
+*/
+
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   //new_aggressive_condition = `(${Pr_a}.${Pr_pa} == "${pudding_src}" ? "${pudding_px_src}" : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
-  new_aggressive_condition_v2 = `(${Pr_a}.${Pr_pa}.includes("postimg") ? (${Pr_a}.${Pr_pa}.includes("blueberries") ? "${blueberries_px_src}" : "${pudding_px_src}") : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
+  //new_aggressive_condition_v2 = `(${Pr_a}.${Pr_pa}.includes("postimg") ? (${Pr_a}.${Pr_pa}.includes("blueberries") ? "${blueberries_px_src}" : "${pudding_px_src}") : "https://www.google.com/logos/fnbx/"+${Pr_a}.${Pr_pa})` // This has to do with pixel graphics
 
-  aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition_v2)
+  //aggressive_change = code.match(Pr_regex)[0].replace(only_link_regex, new_aggressive_condition_v2)
+
 
   console.log("Adding pixelated pudding...")
-  code = code.assertReplace(Pr_regex, aggressive_change);
+  //code = code.assertReplace(Pr_regex, aggressive_change);
+  code = code.assertReplace(load_pixelated_regex, new_pixelated_func);
+  //console.log(code);
+
   //Pr_new = "if("+Pr_a+"."+Pr_pa+"==\"" +pudding_src+"\")"+Pr_a+"."+Pr_ka+".src=\""+pudding_src+"\";else $&"
 
   // Fixes an image call to pudding
@@ -309,13 +408,13 @@ window.PuddingMod.alterSnakeCode = function(code) {
   // Endscreen related image loading for new fruit - pudding. Keep this last
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
   console.log("Adding pudding to endscreen...")
-  code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_pudding_code_condensed));
+  code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_code_condensed));
   //code = code.assertReplace(load_image_func, "$&" + load_pudding_code);
 
   // The elegent piece of code that replace the grey pudding with the skull icon
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
-  pudding_skull_xd = `if(a.path.includes("postimg") && !${get_pixel}){return window.darks[22];}$&;`
+  pudding_skull_xd = `if(a.path.includes("pudding") && !${get_pixel}){return window.skull;}$&;`
 
   console.log("Replacing grey poison pudding with skull trophy icon...")
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
