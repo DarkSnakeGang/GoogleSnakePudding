@@ -252,6 +252,8 @@ window.DiceMod.alterSnakeCode = function(code) {
     code = code.assertReplace(/case "count":/, `case "count": ${is_dice} = (d > 2) ? true : false; ${double_dice} = d === 4 ? 2 : 1; ${high_dice} = d === 5 ? 3 : 0;`)
     //code = code.assertReplace(/case "count":/, `case "count": d = 3; ${is_dice} = true;`)
     code = code.assertReplace(/resetState=function\(a\){/, dice_reset_code)
+
+    console.log("Creating dice code...");
     dice_eaten_code = `if(${is_dice} && !(${is_poison_apple})) //  && !(${is_portal})
     {
       if(!${is_portal}) {
