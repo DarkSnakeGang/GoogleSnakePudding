@@ -370,6 +370,8 @@ window.DiceMod.alterSnakeCode = function(code) {
     } else this.wa.ka.splice(
     `
 
+    console.log("Adding dice portal support...");
+
     code = code.assertReplace(fix_portal_extra_regex, fix_portal_extra_code);
 
     code = code.assertReplace(spawn_func_code, dice_eaten_code+spawn_func_code)
