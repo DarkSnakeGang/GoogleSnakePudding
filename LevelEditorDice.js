@@ -1,10 +1,10 @@
-window.MorePudding = {};
+window.LevelEditorDice = {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
 
-window.MorePudding.runCodeBefore = function() {
+window.LevelEditorDice.runCodeBefore = function() {
     function loadAndRunCodeSynchronous(url) {
         let req = new XMLHttpRequest();
         req.open('GET', url, false);
@@ -22,12 +22,13 @@ window.MorePudding.runCodeBefore = function() {
         req.send();
       }
 
-    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/PuddingMod.js');
-    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/main/modloadercode.js');
+    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/DiceMod.js');
+    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeLevelEditor/main/modloadercode.js');
 
-    console.log("Enabling Pudding Mod");
-    window.PuddingMod.runCodeBefore();
-    window.moreMenu.runCodeBefore();
+    console.log("Enabling Dice Mod");
+    window.DiceMod.runCodeBefore();
+    console.log("Enabling Level Editor Mod");
+    window.levelEditorMod.runCodeBefore();
 
 }
 
@@ -35,16 +36,17 @@ window.MorePudding.runCodeBefore = function() {
 //ALTERSNAKECODE
 ////////////////////////////////////////////////////////////////////
 
-window.MorePudding.alterSnakeCode = function(code) {
-  return window.moreMenu.alterSnakeCode(window.PuddingMod.alterSnakeCode(code));;
+window.LevelEditorDice.alterSnakeCode = function(code) {
+  code = window.DiceMod.alterSnakeCode((window.levelEditorMod.alterSnakeCode(code)));
+  return code;
 }
 
 
-window.MorePudding.runCodeAfter = function() {
-  window.moreMenu.runCodeAfter();
+window.LevelEditorDice.runCodeAfter = function() {
+  window.levelEditorMod.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'More Pudding Mod';
+  modIndicator.textContent = 'Level Editor Mod With Dice';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
