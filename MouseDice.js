@@ -1,10 +1,10 @@
-window.MousePudding = {};
+window.MouseDice = {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
 
-window.MousePudding.runCodeBefore = function() {
+window.MouseDice.runCodeBefore = function() {
     function loadAndRunCodeSynchronous(url) {
         let req = new XMLHttpRequest();
         req.open('GET', url, false);
@@ -22,11 +22,11 @@ window.MousePudding.runCodeBefore = function() {
         req.send();
       }
 
-    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/PuddingMod.js');
+    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/DiceMod.js');
     loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeMouseMode/main/modloadercode.js');
 
-    console.log("Enabling Pudding Mod");
-    window.PuddingMod.runCodeBefore();
+    console.log("Enabling Dice Mod");
+    window.DiceMod.runCodeBefore();
     window.mouseMode.runCodeBefore();
 
 }
@@ -35,16 +35,16 @@ window.MousePudding.runCodeBefore = function() {
 //ALTERSNAKECODE
 ////////////////////////////////////////////////////////////////////
 
-window.MousePudding.alterSnakeCode = function(code) {
-  return window.mouseMode.alterSnakeCode(window.PuddingMod.alterSnakeCode(code));;
+window.MouseDice.alterSnakeCode = function(code) {
+  return window.mouseMode.alterSnakeCode(window.DiceMod.alterSnakeCode(code));;
 }
 
 
-window.MousePudding.runCodeAfter = function() {
+window.MouseDice.runCodeAfter = function() {
   window.mouseMode.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'Mouse Pudding Mod';
+  modIndicator.textContent = 'Mouse Dice Mod';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
