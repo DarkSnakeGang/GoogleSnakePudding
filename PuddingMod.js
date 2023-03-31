@@ -43,6 +43,9 @@ window.PuddingMod.runCodeBefore = function() {
 
     window.skull = i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png');
     window.px_skull = i('https://www.google.com/logos/fnbx/snake_arcade/pixel/px_trophy_10.png');
+    window.ghost_skull = i('https://i.postimg.cc/x17LG8TH/poison-ghost.png');
+    window.px_ghost_skull = i('https://i.postimg.cc/zBPNvskJ/px-poison-ghost.png');
+
     window.skull_toggle = false;
     document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
 
@@ -117,6 +120,11 @@ new_fruit.push({ // Hotdog 31
 new_fruit.push({ // Pizza 32
   "Normal":'https://i.postimg.cc/rwDXKnPj/pizza.png',
   "Pixel":'https://i.postimg.cc/1tY1RKYq/pixil-frame-0-5.png',
+  "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
+});
+new_fruit.push({ // Pacman Ghost 33
+  "Normal":'https://i.postimg.cc/fyhKcLC5/pacman-ghost.png',
+  "Pixel":'https://i.postimg.cc/jqzvsHq1/px-pacman-ghost.png',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
 
@@ -403,7 +411,10 @@ for (let index = 0; index < new_fruit.length; index++) {
   // The elegent piece of code that replace the grey pudding with the skull icon
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
-  pudding_skull_xd = `if(window.skull_toggle){if(${get_pixel}){return window.px_skull;}return window.skull;}$&;`
+  pudding_skull_xd = `
+  if(window.skull_toggle){if(${get_pixel}){return window.px_skull;}return window.skull;}
+  if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
+  $&;`
 
   console.log("Replacing grey poison pudding with skull trophy icon...")
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
