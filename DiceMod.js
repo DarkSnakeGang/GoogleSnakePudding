@@ -158,7 +158,7 @@ window.DiceMod.alterSnakeCode = function(code) {
         ${typeStore}.splice(0,1);
       }
       used_types = []
-      open_types = [0,1,2,3,5,7,8,10,11,12,17,18,23,24,26]
+      open_types = [0,1,2,3,5,7,8,10,11,12,17,18,23,24,26,29]
       for(i = 0; i<this.wa.ka.length; i++){
         used_types.push(this.wa.ka[i].type);
         index_in_open = open_types.indexOf(this.wa.ka[i].type);
