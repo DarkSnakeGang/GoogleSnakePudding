@@ -7,7 +7,7 @@
 * Pudding added as food option, additional fruits are available as well
 * Selected Multi count is displayed instead of food, at the top bar
 * The volume and mute icons are replaced with selected speed
-* Replace poison food for pudding with the poison mode icon (only for normal graphics)
+* Replace poison food for with the poison mode icon by clicking on the poison icon.
 * Rare and ultra rare special fruit may appear (visual effect only)
 * Distinct soko goals
 * Additional themes available

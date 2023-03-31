@@ -42,6 +42,7 @@ window.PuddingMod.runCodeBefore = function() {
     }
 
     window.skull = i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png');
+    window.px_skull = i('https://www.google.com/logos/fnbx/snake_arcade/pixel/px_trophy_10.png');
     window.skull_toggle = false;
     document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
 
@@ -402,7 +403,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   // The elegent piece of code that replace the grey pudding with the skull icon
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
-  pudding_skull_xd = `if(window.skull_toggle){return window.skull;}$&;`
+  pudding_skull_xd = `if(window.skull_toggle){if(${get_pixel}){return window.px_skull;}return window.skull;}$&;`
 
   console.log("Replacing grey poison pudding with skull trophy icon...")
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
