@@ -22,9 +22,3 @@
 * Side panel with auto-updating SRC times
 * Attempt and Input counters
 * Advanced options to switch textures
-
-## Credits
-* Yarmiplay (Author)
-* Llama (Mod Loader Author)
-* CarL (Pudding Texture)
-* m0nument (Golden Apple Texture)
