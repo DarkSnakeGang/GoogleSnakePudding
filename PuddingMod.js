@@ -24,6 +24,7 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/R0R1ZMNx/dark-night.png',
       'https://i.postimg.cc/t4bxfYzt/planeptune.png',
       'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
+      'https://i.postimg.cc/C53WfD61/pacman.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
 
@@ -299,6 +300,13 @@ for (let index = 0; index < new_fruit.length; index++) {
   get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
   get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
 
+  /*light tiles
+  dark tiles
+  shadow
+  border
+  key block sign color
+  top bar
+  endscreen background*/
   console.log("Adding dark night and planeptune themes...")
   code = code.assertReplace(/case "theme":/, `case "theme":
   if(d>8)
@@ -307,6 +315,8 @@ for (let index = 0; index < new_fruit.length; index++) {
       case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000'); break;
       case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30'); break;
       case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30'); break;
+      case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30'); break;
+
     }
   }
   else
