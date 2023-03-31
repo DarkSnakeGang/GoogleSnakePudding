@@ -97,6 +97,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
     "Pixel":'https://i.postimg.cc/kMvmdnyW/px-trophy-03.png',
     "Poison_values": 'b,\'#eaca23\',\'#909090\',30',
 });
+new_fruit.push({ // Fries 30
+  "Normal":'https://i.postimg.cc/4xLksg23/fries.png',
+  "Pixel":'https://i.postimg.cc/N0Kh0zZk/px-fries.png',
+  "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
+});
 
 for (let index = 0; index < new_fruit.length; index++) {
   document.querySelector('#apple').appendChild(uiImage(new_fruit[index].Normal));
