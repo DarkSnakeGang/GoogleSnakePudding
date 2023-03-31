@@ -103,7 +103,7 @@ new_fruit.push({ // Fries 30
   "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
 });
 new_fruit.push({ // Hotdog 31
-  "Normal":'https://i.postimg.cc/htQPjnhp/hotdog.png',
+  "Normal":'https://i.postimg.cc/BbQf4Vgs/hotdog.png',
   "Pixel":'https://i.postimg.cc/Pr3PJKyr/px-hotdog.png',
   "Poison_values": 'b,\'#9b441c\',\'#909090\',30',
 });
