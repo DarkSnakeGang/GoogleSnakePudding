@@ -1,11 +1,11 @@
 # Google Snake Pudding Mod and Dice Mod
-* Pudding Mod specifically made for speedrunners. Mainly has quality of life features.
-* Dice Mod adds a new count settings, which spawn between 1 and 6/12 apples when the last available apple is eaten.
+* Pudding Mod is a mod for Speedrunners with visual changes only. Supports all other mods!
+* Dice Mod adds a new count settings, which spawn a random number of apples when the last available apple is eaten.
 
 ## Features
 ### Pudding Mod
-* Pudding added as food option. Additional fruits are available as well.
-* Selected Multi count (1a, 3a and 5a) is displayed instead of food, at the top bar
+* Pudding added as food option, additional fruits are available as well
+* Selected Multi count is displayed instead of food, at the top bar
 * The volume and mute icons are replaced with selected speed
 * Replace poison food for pudding with the poison mode icon (only for normal graphics)
 * Rare and ultra rare special fruit may appear (visual effect only)
