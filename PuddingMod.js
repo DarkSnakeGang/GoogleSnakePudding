@@ -102,6 +102,11 @@ new_fruit.push({ // Fries 30
   "Pixel":'https://i.postimg.cc/N0Kh0zZk/px-fries.png',
   "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
 });
+new_fruit.push({ // Hotdog 30
+  "Normal":'https://i.postimg.cc/htQPjnhp/hotdog.png',
+  "Pixel":'https://i.postimg.cc/Pr3PJKyr/px-hotdog.png',
+  "Poison_values": 'b,\'#9b441c\',\'#909090\',30',
+});
 
 for (let index = 0; index < new_fruit.length; index++) {
   document.querySelector('#apple').appendChild(uiImage(new_fruit[index].Normal));
