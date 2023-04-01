@@ -124,7 +124,7 @@ new_fruit.push({ // Pizza 32
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
 new_fruit.push({ // Pacman Ghost 33
-  "Normal":'https://i.postimg.cc/fyhKcLC5/pacman-ghost.png',
+  "Normal":'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
   "Pixel":'https://i.postimg.cc/jqzvsHq1/px-pacman-ghost.png',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
