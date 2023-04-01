@@ -46,7 +46,7 @@ window.PuddingMod.runCodeBefore = function() {
     window.skull = i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png');
     window.px_skull = i('https://www.google.com/logos/fnbx/snake_arcade/pixel/px_trophy_10.png');
     window.ghost_skull = i('https://i.postimg.cc/DZqL146Z/poison-ghost.png');
-    window.px_ghost_skull = i('https://i.postimg.cc/zBPNvskJ/px-poison-ghost.png');
+    window.px_ghost_skull = i('https://i.postimg.cc/cLF34LtP/px-poison-ghost.png');
 
     window.skull_toggle = false;
     document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
@@ -126,7 +126,7 @@ new_fruit.push({ // Pizza 32
 });
 new_fruit.push({ // Pacman Ghost 33
   "Normal":'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
-  "Pixel":'https://i.postimg.cc/jqzvsHq1/px-pacman-ghost.png',
+  "Pixel":'https://i.postimg.cc/BvtK8fxb/px-pacman-ghost.png',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
 new_fruit.push({ // Sonic Rings 34
