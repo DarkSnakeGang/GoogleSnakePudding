@@ -134,6 +134,11 @@ new_fruit.push({ // Sonic Rings 34
   "Pixel":'https://i.postimg.cc/v8NS0ptd/sonic-ring.gif',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
+new_fruit.push({ // Steak 35
+  "Normal":'https://i.postimg.cc/qvx7cXVW/steak.png',
+  "Pixel":'https://i.postimg.cc/3NxNWkbz/steak.png',
+  "Poison_values": 'b,\'#D99E82\',\'#909090\',70',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
