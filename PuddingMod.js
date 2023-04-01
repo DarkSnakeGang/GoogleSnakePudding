@@ -129,6 +129,11 @@ new_fruit.push({ // Pacman Ghost 33
   "Pixel":'https://i.postimg.cc/jqzvsHq1/px-pacman-ghost.png',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
+new_fruit.push({ // Sonic Rings 34
+  "Normal":'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
+  "Pixel":'https://i.postimg.cc/jjDD4nxT/sonic-ring.gif',
+  "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
