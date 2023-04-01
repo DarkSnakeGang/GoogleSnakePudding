@@ -141,7 +141,7 @@ new_fruit.push({ // Pacman Ghost 33
 });
 new_fruit.push({ // Sonic Rings 34
   "Normal":'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
-  "Pixel":'https://i.postimg.cc/QMmjv97B/ring-1.png',
+  "Pixel":'https://i.postimg.cc/BvzJqWhs/ring-1.png',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
 new_fruit.push({ // Steak 35
