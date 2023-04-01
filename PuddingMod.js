@@ -434,9 +434,11 @@ for (let index = 0; index < new_fruit.length; index++) {
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
   pudding_skull_xd = `
+  if(!a.path.includes("key")){
   if(a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
   if(window.skull_toggle && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
   if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
+  }
   $&;`
 
   console.log("Replacing grey poison pudding with skull trophy icon...")
