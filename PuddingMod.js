@@ -141,7 +141,7 @@ new_fruit.push({ // Pacman Ghost 33
 });
 new_fruit.push({ // Sonic Rings 34
   "Normal":'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
-  "Pixel":'https://i.postimg.cc/v8NS0ptd/sonic-ring.gif',
+  "Pixel":'https://i.postimg.cc/QMmjv97B/ring-1.png',
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
 new_fruit.push({ // Steak 35
@@ -236,27 +236,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   `
 
   add_fruit = add_fruit + add_gold;
-
-  // Old Distinct Soko Goals
-  //console.log("Making soko goals more distinct...")
-  /*
-  code = code.assertReplace(/resetState=function\(a\){/, "$&" + `
-  this.oa.Da.oa.ka = new Image();
-  this.oa.Da.oa.ka.src = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
-  this.oa.Da.oa.ka.currentSrc = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
-  this.oa.Da.oa.ka.crossOrigin = "Anonymous";
-
-  this.oa.Da.oa.ys = new Image();
-  this.oa.Da.oa.ys.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-  this.oa.Da.oa.ys.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-  this.oa.Da.oa.ys.crossOrigin = "Anonymous";
-
-  this.oa.Da.oa.xs = new Image();
-  this.oa.Da.oa.xs.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-  this.oa.Da.oa.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-  this.oa.Da.oa.xs.crossOrigin = "Anonymous";
-  `
-  ); */
 
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
