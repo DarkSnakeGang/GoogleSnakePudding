@@ -52,9 +52,14 @@ window.PuddingMod.runCodeBefore = function() {
     document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
 
     window.distinct_soko_goal = new Image();
-    window.distinct_soko_goal.src = 'https://i.postimg.cc/76W4cH5n/box-red.png';
-    window.distinct_soko_goal.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
+    window.distinct_soko_goal.src = 'https://i.postimg.cc/sgrTQr43/box-red-cross.png';
+    window.distinct_soko_goal.currentSrc = 'https://i.postimg.cc/sgrTQr43/box-red-cross.png';
     window.distinct_soko_goal.crossOrigin = "Anonymous";
+
+    window.distinct_soko_goal_px = new Image();
+    window.distinct_soko_goal_px.src = 'https://i.postimg.cc/NFnWqP35/px-box-red.png';
+    window.distinct_soko_goal_px.currentSrc = 'https://i.postimg.cc/NFnWqP35/px-box-red.png';
+    window.distinct_soko_goal_px.crossOrigin = "Anonymous";
 
 };
 
@@ -232,8 +237,9 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   add_fruit = add_fruit + add_gold;
 
-  // Distinct Soko Goals
-  console.log("Making soko goals more distinct...")
+  // Old Distinct Soko Goals
+  //console.log("Making soko goals more distinct...")
+  /*
   code = code.assertReplace(/resetState=function\(a\){/, "$&" + `
   this.oa.Da.oa.ka = new Image();
   this.oa.Da.oa.ka.src = 'https://i.postimg.cc/BbP3frD9/px-box-red.png';
@@ -250,7 +256,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   this.oa.Da.oa.xs.currentSrc = 'https://i.postimg.cc/76W4cH5n/box-red.png';
   this.oa.Da.oa.xs.crossOrigin = "Anonymous";
   `
-  );
+  ); */
 
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
@@ -443,10 +449,13 @@ for (let index = 0; index < new_fruit.length; index++) {
   is_soko = is_portal.replace('2', '9').replace("this", "a");
 
   // The elegent piece of code that replace the grey pudding with the skull icon
+  console.log("Making soko goals more distinct...")
+  console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)...")
+
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
   get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
   pudding_skull_xd = `
-  //if(a.path.includes("box")){console.log(a);} // Best spot to make distinct soko goal, but return must be "completed" product
+  if(a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
   if(window.skull_toggle && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
   if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
   $&;`
