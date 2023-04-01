@@ -121,7 +121,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 });
 new_fruit.push({ // Fries 30
   "Normal":'https://i.postimg.cc/YCMFFP1Q/french-fries.png',
-  "Pixel":'https://i.postimg.cc/13BqrKH2/px-fries.png',
+  "Pixel":'https://i.postimg.cc/MKDTCpQj/px-fries.png',
   "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
 });
 new_fruit.push({ // Hotdog 31
