@@ -120,8 +120,8 @@ window.PuddingMod.alterSnakeCode = function(code) {
     "Poison_values": 'b,\'#eaca23\',\'#909090\',30',
 });
 new_fruit.push({ // Fries 30
-  "Normal":'https://i.postimg.cc/4xLksg23/fries.png',
-  "Pixel":'https://i.postimg.cc/N0Kh0zZk/px-fries.png',
+  "Normal":'https://i.postimg.cc/YCMFFP1Q/french-fries.png',
+  "Pixel":'https://i.postimg.cc/13BqrKH2/px-fries.png',
   "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
 });
 new_fruit.push({ // Hotdog 31
