@@ -25,6 +25,7 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/t4bxfYzt/planeptune.png',
       'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
       'https://i.postimg.cc/C53WfD61/pacman.png',
+      'https://i.postimg.cc/8PLc5bjq/sonic-theme.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
 
@@ -316,7 +317,7 @@ for (let index = 0; index < new_fruit.length; index++) {
       case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30'); break;
       case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30'); break;
       case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30'); break;
-
+      case 13: window.snake.setCustomTheme('#B25900', '#A05000', '#333333', '#124f00', '#0f81d8', '#2bb800', '#0f81d8'); break;
     }
   }
   else
