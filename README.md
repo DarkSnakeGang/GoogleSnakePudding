@@ -20,5 +20,4 @@
 
 ### Planned Features
 * Side panel with auto-updating SRC times
-* Attempt and Input counters
-* Advanced options to switch textures
+* Attempt counters (session and overall, per category)
