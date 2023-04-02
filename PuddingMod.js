@@ -457,6 +457,67 @@ for (let index = 0; index < new_fruit.length; index++) {
   console.log("Adding 1 in a 10 Million Special Secret...")
   code = code.assertReplace(apple_info_regex, set_gold)
 
+
+  snake_colors_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}[^]?=[^]?\[\["#4E7CF6","#17439F"\][^]*?\]\]/);
+  yinyang_colors_regex = new RegExp(/\[5,4,7,7,1,2,0,3,9,8,0,14,15,15,11,12,17,16\]/)
+
+
+  snake_colors = [];
+
+snake_colors.push({ // Black 18
+  "Icon":'https://i.postimg.cc/3x9SPxYJ/dark.png',
+  "Colors":'["#222222","#000000"]',
+  "YinYang": '9',
+});
+snake_colors.push({ // Neon Red 19
+  "Icon":'https://i.postimg.cc/0yy5gnLg/red.png',
+  "Colors":'["#FF0000","#FF0000"]',
+  "YinYang": '21',
+});
+snake_colors.push({ // Neon Blue 20
+  "Icon":'https://i.postimg.cc/dtvt6w6V/blue.png',
+  "Colors":'["#0000FF","#0000FF"]',
+  "YinYang": '6',
+});
+snake_colors.push({ // Neon Green 21
+  "Icon":'https://i.postimg.cc/KvNcsw-pr/green.png',
+  "Colors":'["#00FF00","#00FF00"]',
+  "YinYang": '19',
+});
+snake_colors.push({ // White Black 22
+  "Icon":'https://i.postimg.cc/RFRbz7k8/white-black.png',
+  "Colors":'["#FFFFFF","#000000"]',
+  "YinYang": '23',
+});
+snake_colors.push({ // Black White 23
+  "Icon":'https://i.postimg.cc/vTZ281Mm/black-white.png',
+  "Colors":'["#000000","#FFFFFF"]',
+  "YinYang": '22',
+});
+
+  colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
+  yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
+
+  document.querySelector('#color').removeChild(document.querySelector('#color').lastChild);
+
+for (let index = 0; index < snake_colors.length; index++) {
+  document.querySelector('#color').appendChild(uiImage(snake_colors[index].Icon));
+  colors_build = colors_build + ',' + snake_colors[index].Colors;
+  yinyang_colors_build = yinyang_colors_build + ',' + snake_colors[index].YinYang;
+
+}
+document.querySelector('#color').appendChild(uiImage('https://www.google.com/logos/fnbx/snake_arcade/v5/color_18.png'));
+
+  colors_build = colors_build + ']';
+  yinyang_colors_build = yinyang_colors_build + ']';
+
+  console.log(colors_build + yinyang_colors_build)
+
+  code = code.assertReplace(snake_colors_regex, colors_build)
+  code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
+
+  console.log(code)
+
   console.log("Done, enjoy Pudding Mod!");
 
   return code;
