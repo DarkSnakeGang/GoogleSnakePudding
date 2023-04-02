@@ -491,7 +491,7 @@ snake_colors.push({ // White Black 22
 });
 snake_colors.push({ // Black White 23
   "Icon":'https://i.postimg.cc/vTZ281Mm/black-white.png',
-  "Colors":'["#000000","#FFFFFF"]',
+  "Colors":'["#222222","#FFFFFF"]',
   "YinYang": '22',
 });
 
