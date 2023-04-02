@@ -504,6 +504,11 @@ snake_colors.push({ // Noire Blue 25
   "Colors":'["#0050b0", "#0059b9"]',
   "YinYang": '25',
 });
+snake_colors.push({ // Pitch Black 26
+  "Icon":'https://i.postimg.cc/R0R1ZMNx/dark-night.png',
+  "Colors":'["#000000","#000000"]',
+  "YinYang": '9',
+});
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
   yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
