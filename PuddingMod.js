@@ -494,6 +494,16 @@ snake_colors.push({ // Black White 23
   "Colors":'["#222222","#FFFFFF"]',
   "YinYang": '22',
 });
+snake_colors.push({ // Nep Purple 24
+  "Icon":'https://i.postimg.cc/t4bxfYzt/planeptune.png',
+  "Colors":'["#5B50B0", "#6759B9"]',
+  "YinYang": '24',
+});
+snake_colors.push({ // Noire Blue 25
+  "Icon":'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
+  "Colors":'["#0050b0", "#0059b9"]',
+  "YinYang": '25',
+});
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
   yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
