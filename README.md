@@ -1,6 +1,8 @@
 # Google Snake Pudding Mod and Dice Mod
 * Pudding Mod is a mod for Speedrunners with visual changes only. Supports all other mods!
 * Dice Mod adds a new count settings, which spawn a random number of apples when the last available apple is eaten.
+![image](https://user-images.githubusercontent.com/6286286/229340513-0d40cf9d-006f-445e-ab71-736e85962204.png)
+
 
 ## Features
 ### Pudding Mod
