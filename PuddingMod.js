@@ -149,6 +149,11 @@ new_fruit.push({ // Steak 35
   "Pixel":'https://i.postimg.cc/3NxNWkbz/steak.png',
   "Poison_values": 'b,\'#D99E82\',\'#909090\',70',
 });
+new_fruit.push({ // Coconut 35
+  "Normal":'https://i.postimg.cc/1XbSVygZ/coconut.png',
+  "Pixel":'https://i.postimg.cc/qBF45x1Z/coconut-px.png',
+  "Poison_values": 'b,\'#6d4c41\',\'#909090\',20',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
