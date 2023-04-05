@@ -52,8 +52,8 @@ window.PuddingMod.runCodeBefore = function() {
     document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
 
     window.distinct_soko_goal = new Image();
-    window.distinct_soko_goal.src = 'https://i.postimg.cc/sgrTQr43/box-red-cross.png';
-    window.distinct_soko_goal.currentSrc = 'https://i.postimg.cc/sgrTQr43/box-red-cross.png';
+    window.distinct_soko_goal.src = 'https://i.postimg.cc/VLPxHVzk/box-distinct-soko-goals.png';
+    window.distinct_soko_goal.currentSrc = 'https://i.postimg.cc/VLPxHVzk/box-distinct-soko-goals.png';
     window.distinct_soko_goal.crossOrigin = "Anonymous";
 
     window.distinct_soko_goal_px = new Image();
