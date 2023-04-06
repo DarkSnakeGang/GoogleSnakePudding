@@ -39,7 +39,6 @@ window.DiceMod.runCodeBefore = function() {
 window.DiceMod.alterSnakeCode = function(code) {
 
   code = window.PuddingMod.alterSnakeCode(code);
-
     // Regex for a function that sets the src for count (I think)
     settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}=function\([a-zA-Z0-9_$]{1,4}\){""!==[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.src=[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,4}\);/)
     //settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
@@ -75,7 +74,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   secretAppleArr = `window.snake.secretAppleArr`
   typeStore = `window.snake.typeStore`
 
-  spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)\)var [a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=?\n!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
+  spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)\)var [a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
   spawn_func_code = code.match(spawn_func_regex)[0]
   is_poison_apple = spawn_func_code.split('(')[3] + '(' + spawn_func_code.split('(')[4].split(')')[0] + ')' + spawn_func_code.split(')')[3]
   spawn_portal = spawn_func_code.split(')')[2].split(';')[0] + ';'
@@ -118,7 +117,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   fruit_bowl_randomize = code.match(/21===[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\[[a-zA-Z0-9_$]{1,4}\]\.[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}/gm)[0].split('=')[4]
   //console.log(fruit_bowl_randomize) // ${fruit_bowl_randomize}
 
-  fruit_bowl_visible = code.match(/if\([a-zA-Z0-9_$]{1,4}\(this\.[a-zA-Z0-9_$]{1,8},6\)&&!b\.[a-zA-Z0-9_$]{1,4}&&!this\.[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\)/gm)[0].split('.')[2].split('&')[0];
+  fruit_bowl_visible = code.match(/if\([a-zA-Z0-9_$]{1,4}\(this\.[a-zA-Z0-9_$]{1,8},6\)&&!b\.[a-zA-Z0-9_$]{1,8}&&!this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)/gm)[0].split('.')[2].split('&')[0];
   //console.log(fruit_bowl_visible) // ${fruit_bowl_visible}
 
   key_type = code.match(/[a-zA-Z0-9_$]{1,8}\(a\.[a-zA-Z0-9_$]{1,8},b.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8}\);/gm)[0].split('.')[3].split(',')[0]
