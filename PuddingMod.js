@@ -536,8 +536,6 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   code = code.assertReplace(snake_colors_regex, colors_build)
   code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
 
-  console.log(code)
-
   console.log("Done, enjoy Pudding Mod!");
 
   return code;
