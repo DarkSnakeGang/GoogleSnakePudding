@@ -531,7 +531,7 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   colors_build = colors_build + ']';
   yinyang_colors_build = yinyang_colors_build + ']';
 
-  console.log(colors_build + yinyang_colors_build)
+  //console.log(colors_build + yinyang_colors_build)
 
   code = code.assertReplace(snake_colors_regex, colors_build)
   code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
