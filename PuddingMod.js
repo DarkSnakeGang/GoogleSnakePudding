@@ -514,6 +514,11 @@ snake_colors.push({ // Pitch Black 26
   "Colors":'["#000000","#000000"]',
   "YinYang": '9',
 });
+snake_colors.push({ // Purple Heart 27
+  "Icon":'https://i.postimg.cc/8zCJj2JH/nep-color.png',
+  "Colors":'["#ff77ff","#ffaaff"]',
+  "YinYang": '9',
+});
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
   yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
