@@ -73,6 +73,7 @@ window.DiceMod.alterSnakeCode = function(code) {
   currentCount = `window.snake.currentCount`
   secretAppleArr = `window.snake.secretAppleArr`
   typeStore = `window.snake.typeStore`
+  gridSize = `window.snake.gridSize`
 
   spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)\)var [a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
   spawn_func_code = code.match(spawn_func_regex)[0]
@@ -90,6 +91,16 @@ window.DiceMod.alterSnakeCode = function(code) {
 
   real_new_apple_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=function\(a,b,c\){return{pos/)
   real_new_apple_func = code.match(real_new_apple_regex)[0].split(' ')[1].split('=')[0] + "(this, 0, 0)"
+
+  real_gridSize = code.match(real_new_apple_regex)[0].split('{')[0] + '{' + `
+  if(typeof a.oa.gridSize !== 'undefined'){
+    ${gridSize} = a.oa.gridSize;
+  }
+  else {
+    a.oa.gridSize = ${gridSize};
+  }` + code.match(real_new_apple_regex)[0].split('{')[1] + '{' + code.match(real_new_apple_regex)[0].split('{')[2]
+
+  code = code.assertReplace(real_new_apple_regex, real_gridSize)
 
   //console.log(spawn_func_code);
   //console.log(should_spawn_res);
@@ -111,13 +122,13 @@ window.DiceMod.alterSnakeCode = function(code) {
   is_yinyang = is_portal.replace('2', '7');
   mode_check_func = is_yinyang.split('(')[0]; // ${mode_check_func}
 
-  fruit_bowl_check = code.match(`21===[a-zA-Z0-9_$]{1,4}\.${settings_itself}\.[a-zA-Z0-9_$]{1,4}`)[0].split('.')[2]
+  fruit_bowl_check = code.match(`21===[a-zA-Z0-9_$]{1,8}\.${settings_itself}\.[a-zA-Z0-9_$]{1,8}`)[0].split('.')[2]
   //console.log(fruit_bowl_check) // ${fruit_bowl_check}
 
-  fruit_bowl_randomize = code.match(/21===[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}&&\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\[[a-zA-Z0-9_$]{1,4}\]\.[a-zA-Z0-9_$]{1,4}=[a-zA-Z0-9_$]{1,4}/gm)[0].split('=')[4]
+  fruit_bowl_randomize = code.match(/21===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\[[a-zA-Z0-9_$]{1,8}\]\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}/gm)[0].split('=')[4]
   //console.log(fruit_bowl_randomize) // ${fruit_bowl_randomize}
 
-  fruit_bowl_visible = code.match(/if\([a-zA-Z0-9_$]{1,4}\(this\.[a-zA-Z0-9_$]{1,8},6\)&&!b\.[a-zA-Z0-9_$]{1,8}&&!this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)/gm)[0].split('.')[2].split('&')[0];
+  fruit_bowl_visible = code.match(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)&&!b\.[a-zA-Z0-9_$]{1,8}&&!this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)/gm)[0].split('.')[2].split('&')[0];
   //console.log(fruit_bowl_visible) // ${fruit_bowl_visible}
 
   key_type = code.match(/[a-zA-Z0-9_$]{1,8}\(a\.[a-zA-Z0-9_$]{1,8},b.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8},b\.[a-zA-Z0-9_$]{1,8}\);/gm)[0].split('.')[3].split(',')[0]
@@ -387,7 +398,7 @@ window.DiceMod.alterSnakeCode = function(code) {
     code = code.assertReplace(`\"--:--:---\"`, `\"==:==:===\"`)
 
     console.log("Done, enjoy Dice Mod!");
-
+console.log(code);
     return code;
 }
 
