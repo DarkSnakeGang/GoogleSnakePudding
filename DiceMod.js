@@ -398,7 +398,7 @@ window.DiceMod.alterSnakeCode = function(code) {
     code = code.assertReplace(`\"--:--:---\"`, `\"==:==:===\"`)
 
     console.log("Done, enjoy Dice Mod!");
-console.log(code);
+//console.log(code);
     return code;
 }
 
