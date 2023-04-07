@@ -97,7 +97,9 @@ window.DiceMod.alterSnakeCode = function(code) {
     ${gridSize} = a.oa.gridSize;
   }
   else {
-    a.oa.gridSize = ${gridSize};
+    if(typeof ${gridSize} !== 'undefined'){
+      a.oa.gridSize = ${gridSize};
+    }
   }` + code.match(real_new_apple_regex)[0].split('{')[1] + '{' + code.match(real_new_apple_regex)[0].split('{')[2]
 
   code = code.assertReplace(real_new_apple_regex, real_gridSize)
