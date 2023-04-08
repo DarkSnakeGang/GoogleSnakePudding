@@ -370,7 +370,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
 
   // Adds loading for counts when starting the game
-  console.log("Adding count detector...")
+  console.log("Adding count detector at top bar...")
 
   count_score = count_score.split(')')[0].replace('||"graphics"===b','') + `){
     ${count_code}
