@@ -244,7 +244,7 @@ for (let index = 0; index < new_fruit.length; index++) {
 
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
-  console.log("Adding pudding to stack...")
+  console.log("Adding new fruit to stack...")
   code = code.assertReplace(add_fruit_array_last_func_regex, add_fruit);
 
   // Too lazy to clean this code, it's "good enough" to leave untouched for now
