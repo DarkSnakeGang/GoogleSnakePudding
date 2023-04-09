@@ -435,16 +435,18 @@ for (let index = 0; index < new_fruit.length; index++) {
   // The elegent piece of code that replace the grey pudding with the skull icon
   console.log("Making soko goals more distinct...")
   console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)...")
-
-  draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.oa\?a\.oa\.canvas\:a\.Aa\.canvas/)
-  get_pixel = code.match(draw_skull_func)[0].split(' ')[1].split('&')[0]
+//console.log(code)
+  draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.canvas\:a\.[a-zA-Z0-9_$]{1,8}\.canvas},[a-zA-Z0-9_$]{1,8}=function\(\)/gm)
+  new_draw_skull = code.match(draw_skull_func)[0].split("}")[0]
+  get_pixel = new_draw_skull.split(' ')[1].split('&')[0]
   pudding_skull_xd = `
   if(!a.path.includes("key")){
   if(a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
   if(window.skull_toggle && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
   if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
   }
-  $&;`
+  ${code.match(draw_skull_func)[0].split("}")[0]};}
+  ${code.match(draw_skull_func)[0].split("}")[1]}`
 
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
 
