@@ -26,6 +26,7 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
       'https://i.postimg.cc/C53WfD61/pacman.png',
       'https://i.postimg.cc/8PLc5bjq/sonic-theme.png',
+      'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
 
@@ -320,6 +321,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   top bar
   endscreen background*/
   console.log("Adding new themes...")
+
   code = code.assertReplace(/case "theme":/, `case "theme":
   if(d>8)
   {
@@ -329,6 +331,15 @@ for (let index = 0; index < new_fruit.length; index++) {
       case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30'); break;
       case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30'); break;
       case 13: window.snake.setCustomTheme('#B25900', '#A05000', '#333333', '#124f00', '#0f81d8', '#2bb800', '#0f81d8'); break;
+      case 14: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
+      window.snake.setCustomTheme(
+        advancedSettings.themeCol1 ?? '#1D1D1D',
+        advancedSettings.themeCol2 ?? '#161616',
+        advancedSettings.themeCol3 ?? '#111111',
+        advancedSettings.themeCol4 ?? '#000000',
+        advancedSettings.themeCol5 ?? '#1D1D1D',
+        advancedSettings.themeCol6 ?? '#111111',
+        advancedSettings.themeCol7 ?? '#000000'); break;
     }
   }
   else
