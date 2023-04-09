@@ -460,9 +460,9 @@ for (let index = 0; index < new_fruit.length; index++) {
   apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
   //console.log(apple_info_regex)
 
-  set_gold = `if(a.ka[b].type >= ${golden_index} - 1){a.ka[b].type = a.ka[b].old_type;}
-  if(Math.floor((Math.random() ${gold_chance}{a.ka[b].old_type = a.ka[b].type; a.ka[b].type = ${golden_index} - 1;}
-  if(Math.floor((Math.random() ${super_chance}{a.ka[b].old_type = a.ka[b].type; a.ka[b].type = ${golden_index};}
+  set_gold = `if(a.${get_ka}[b].type >= ${golden_index} - 1){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
+  if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} - 1;}
+  if(Math.floor((Math.random() ${super_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
   $&`
   console.log("Adding 1 in a Million Golden Apple...")
   console.log("Adding 1 in a 10 Million Special Secret...")
