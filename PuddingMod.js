@@ -293,11 +293,11 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
 
-  console.log("Adding pixelated pudding...")
+  console.log("Adding pixelated images...")
   code = code.assertReplace(load_pixelated_regex, new_pixelated_func);
 
-  // Fixes an image call to pudding
-  console.log("Adding pudding image...")
+  // Fixes a image calls
+  console.log("Adding images...")
   code = code.assertReplace(shh_grabber, new_shh_line);
 
   // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
@@ -313,7 +313,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   key block sign color
   top bar
   endscreen background*/
-  console.log("Adding dark night and planeptune themes...")
+  console.log("Adding new themes...")
   code = code.assertReplace(/case "theme":/, `case "theme":
   if(d>8)
   {
@@ -415,7 +415,7 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   // Endscreen related image loading for new fruit - pudding. Keep this last
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
-  console.log("Adding pudding to endscreen...")
+  console.log("Adding new fruit to endscreen...")
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_code_condensed));
 
   // Attempt to get info on which mode it is
@@ -440,7 +440,6 @@ for (let index = 0; index < new_fruit.length; index++) {
   }
   $&;`
 
-  console.log("Replacing grey poison pudding with skull trophy icon...")
   code = code.assertReplace(draw_skull_func, pudding_skull_xd)
 
   gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance}
@@ -530,7 +529,7 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   colors_build = colors_build + ']';
   yinyang_colors_build = yinyang_colors_build + ']';
 
-  //console.log(colors_build + yinyang_colors_build)
+  console.log("Adding new snake colors...")
 
   code = code.assertReplace(snake_colors_regex, colors_build)
   code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
