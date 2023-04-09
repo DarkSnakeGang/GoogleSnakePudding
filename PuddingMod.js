@@ -371,7 +371,6 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   // Adds loading for counts when starting the game
   console.log("Adding count detector at top bar...")
-console.log(code)
   count_score = count_score.split(')')[0].replace('||"graphics"===b','') + `){
     ${count_code}
     ${settings_var}.${settings_itself}.${Count_SRC} = count_img_arr[d];
@@ -393,7 +392,6 @@ console.log(code)
   set_fruit_count = `${check_count_undefined}
   ${fruit_src}=${settings_var}.${settings_itself}.${Count_SRC};`
   code = code.assertReplace(reset_regex, set_fruit_count + "$&");
-
 
   // Volume Regex
   console.log("Replacing volume with speed...")
