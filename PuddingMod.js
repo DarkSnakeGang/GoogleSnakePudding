@@ -371,7 +371,7 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   // Adds loading for counts when starting the game
   console.log("Adding count detector at top bar...")
-
+console.log(code)
   count_score = count_score.split(')')[0].replace('||"graphics"===b','') + `){
     ${count_code}
     ${settings_var}.${settings_itself}.${Count_SRC} = count_img_arr[d];
@@ -382,22 +382,18 @@ for (let index = 0; index < new_fruit.length; index++) {
   code = code.assertReplace(load_image_func, count_score + "$&");
 
   // Function that checks if count image is set, and sets it to a default of 1a if it's not set.
-  check_count_undefined = `if(${settings_var}.${settings_itself}.${Count_SRC} in window)${settings_var}.${settings_itself}.${Count_SRC}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";`
-
-  // Regex for where the src in settings is taken from
-  TopBar_srcFunc_p1 = new RegExp(`\_\.[a-zA-Z0-9_$]{1,4}\.add\\\([a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,4}\,\"[a-zA-Z0-9_$]{1,8}\"\\\)\;\"\"\!\=\=[a-zA-Z0-9_$]{1,4}\.${settings_itself}\.${settings_src}\&\&`)
-  TopBar_srcFunc_p2 = new RegExp(`\\\(${settings_var}.[a-zA-Z0-9_$]{1,4}.src=${settings_var}.${settings_itself}.${settings_src}\\\);""!==${settings_var}.${settings_itself}.[a-zA-Z0-9_$]{1,4}&&\\\(a.[a-zA-Z0-9_$]{1,4}.src=${settings_var}.${settings_itself}.[a-zA-Z0-9_$]{1,4}\\\);${settings_var}=this.[a-zA-Z0-9_$]{1,4}.[a-zA-Z0-9_$]{1,4};`);
-
-  // Changes the SRC of where top bar fruit is taken from fruit to count
-  TopBar_count_code=code.match(TopBar_srcFunc_p1)[0].replaceAll(settings_src,Count_SRC)
-  TopBar_count_code=TopBar_count_code.split(';')[0]+';'+check_count_undefined+TopBar_count_code.split(';')[1]
-  TopBar_count_code2 = code.match(TopBar_srcFunc_p2)[0].replaceAll(settings_src,Count_SRC)
+  check_count_undefined = `if(${settings_var}.${settings_itself}.${Count_SRC} in window){${settings_var}.${settings_itself}.${Count_SRC}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";}`
 
   // Actually changes Top Bar fruit to multi count
   console.log("Updating top bar with count...")
 
-  code = code.assertReplace(TopBar_srcFunc_p1, TopBar_count_code);
-  code = code.assertReplace(TopBar_srcFunc_p2, TopBar_count_code2);
+  fruit_class = document.querySelector('img[src="//www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"]').getAttribute("class")
+  fruit_src = `document.querySelector('img[class="${fruit_class}"]').src `
+  reset_regex = new RegExp(/this.reset\(\)/)
+  set_fruit_count = `${check_count_undefined}
+  ${fruit_src}=${settings_var}.${settings_itself}.${Count_SRC};`
+  code = code.assertReplace(reset_regex, set_fruit_count + "$&");
+
 
   // Volume Regex
   console.log("Replacing volume with speed...")
