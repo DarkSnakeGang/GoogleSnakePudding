@@ -155,6 +155,11 @@ new_fruit.push({ // Coconut 35
   "Pixel":'https://i.postimg.cc/qBF45x1Z/coconut-px.png',
   "Poison_values": 'b,\'#6d4c41\',\'#909090\',20',
 });
+new_fruit.push({ // These apples are shit 36
+  "Normal":'https://i.postimg.cc/66719KfJ/poop.png',
+  "Pixel":'https://i.postimg.cc/T2ZN1sty/poop-px.png',
+  "Poison_values": 'b,\'#6d4c41\',\'#909090\',50',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
