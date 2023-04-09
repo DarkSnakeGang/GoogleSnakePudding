@@ -454,7 +454,12 @@ for (let index = 0; index < new_fruit.length; index++) {
   super_chance = `* 10000000) + 1) == 4263017)` // ${super_chance}
   free_test = `* 10) + 1) == 6)` // ${free_test}
 
-  apple_info_regex = new RegExp(/a\.ka\[b\]\.pos/)
+  apple_info_regex_improved = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\(a,b,c\){a\.[a-zA-Z0-9_$]{1,8}\[b\]\.[a-zA-Z0-9_$]{1,8}=c;/)
+  get_ka = code.match(apple_info_regex_improved)[0].split('.')[1].split('[')[0]
+  get_pos = code.match(apple_info_regex_improved)[0].split('.')[2].split('=')[0]
+  apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
+  //console.log(apple_info_regex)
+
   set_gold = `if(a.ka[b].type >= ${golden_index} - 1){a.ka[b].type = a.ka[b].old_type;}
   if(Math.floor((Math.random() ${gold_chance}{a.ka[b].old_type = a.ka[b].type; a.ka[b].type = ${golden_index} - 1;}
   if(Math.floor((Math.random() ${super_chance}{a.ka[b].old_type = a.ka[b].type; a.ka[b].type = ${golden_index};}
