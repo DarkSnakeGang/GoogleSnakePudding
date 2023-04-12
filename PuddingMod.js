@@ -416,10 +416,10 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   fruit_class = document.querySelector('img[src="//www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"]').getAttribute("class")
   fruit_src = `document.querySelector('img[class="${fruit_class}"]').src `
-  reset_regex = new RegExp(/this.reset\(\)/)
+  reset_regex = new RegExp(/;this\.reset\(\)/)
   set_fruit_count = `${check_count_undefined}
   ${fruit_src}=${settings_var}.${settings_itself}.${Count_SRC};`
-  code = code.assertReplace(reset_regex, set_fruit_count + "$&");
+  code = code.assertReplace(reset_regex, ";" + set_fruit_count + "this.reset()");
 
   // Volume Regex
   console.log("Replacing volume with speed...")
