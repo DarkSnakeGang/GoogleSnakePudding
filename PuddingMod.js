@@ -160,6 +160,12 @@ new_fruit.push({ // These apples are shit 36
   "Pixel":'https://i.postimg.cc/T2ZN1sty/poop-px.png',
   "Poison_values": 'b,\'#6d4c41\',\'#909090\',50',
 });
+new_fruit.push({ // Egg 37
+  "Normal":'https://i.postimg.cc/ZRg1jkrg/egg.png',
+  "Pixel":'https://i.postimg.cc/pd0Nh5yP/px-egg.png',
+  "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
+});
+
 
 
 for (let index = 0; index < new_fruit.length; index++) {
