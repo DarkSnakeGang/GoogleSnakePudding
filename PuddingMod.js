@@ -187,7 +187,6 @@ for (let index = 0; index < new_fruit.length; index++) {
     console.log(code)
     console.log("Google experiment detected, please provide the above text to Yarmiplay by pressing copy ^^^")
   }
-  console.log(code)
 
   console.log("Starting to edit code...");
 
