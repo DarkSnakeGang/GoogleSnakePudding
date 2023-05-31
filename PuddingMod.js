@@ -545,6 +545,11 @@ snake_colors.push({ // Purple Heart 27
   "Colors":'["#ff77ff","#ffaaff"]',
   "YinYang": '9',
 });
+snake_colors.push({ // Brown 28
+  "Icon":'https://i.postimg.cc/fLWFTZGj/brown-snake.png',
+  "Colors":'["#964B00","#7B3F00"]',
+  "YinYang": '9',
+});
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
   yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;

@@ -37,12 +37,6 @@ repos:
       - id: black
         args: [--config=./pyproject.toml]
         exclude: ^airflow/_vendor/
-  - repo: https://github.com/asottile/blacken-docs
-    rev: v1.11.0
-    hooks:
-      - id: blacken-docs
-        alias: black
-        additional_dependencies: [black==21.9b0]
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
@@ -94,14 +88,6 @@ repos:
         entry: yamllint -c yamllint-config.yml --strict
         types: [yaml]
         exclude: ^.*init_git_sync\.template\.yaml$|^.*airflow\.template\.yaml$|^chart/(?:templates|files)/.*\.yaml$|openapi/.*\.yaml|pre-commit-config|^airflow/_vendor/
-  - repo: https://github.com/timothycrosley/isort
-    rev: 5.9.3
-    hooks:
-      - id: isort
-        name: Run isort to sort imports in Python files
-        files: \.py$
-        # To keep consistent with the global isort skip config defined in setup.cfg
-        exclude: ^build/.*$|^.tox/.*$|^venv/.*$|^airflow/_vendor/
   - repo: https://github.com/pycqa/pydocstyle
     rev: 6.1.1
     hooks:
