@@ -146,8 +146,8 @@ new_fruit.push({ // Sonic Rings 34
   "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
 });
 new_fruit.push({ // Steak 35
-  "Normal":'https://i.postimg.cc/qvx7cXVW/steak.png',
-  "Pixel":'https://i.postimg.cc/3NxNWkbz/steak.png',
+  "Normal":'https://i.postimg.cc/XYjC4zzf/steak.png',
+  "Pixel":'https://i.postimg.cc/x16bC3wW/steak-px.png',
   "Poison_values": 'b,\'#D99E82\',\'#909090\',70',
 });
 new_fruit.push({ // Coconut 35
@@ -165,7 +165,11 @@ new_fruit.push({ // Egg 37
   "Pixel":'https://i.postimg.cc/pd0Nh5yP/px-egg.png',
   "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
 });
-
+new_fruit.push({ // Mango 38
+  "Normal":'https://i.postimg.cc/R0NbYNSH/Mango.png',
+  "Pixel":'https://i.postimg.cc/bNny7wv4/mango-px.png',
+  "Poison_values": 'b,\'#fc8824\',\'#909090\',50',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
@@ -543,12 +547,17 @@ snake_colors.push({ // Pitch Black 26
 snake_colors.push({ // Purple Heart 27
   "Icon":'https://i.postimg.cc/8zCJj2JH/nep-color.png',
   "Colors":'["#ff77ff","#ffaaff"]',
-  "YinYang": '9',
+  "YinYang": '24',
 });
 snake_colors.push({ // Brown 28
   "Icon":'https://i.postimg.cc/fLWFTZGj/brown-snake.png',
   "Colors":'["#964B00","#7B3F00"]',
-  "YinYang": '9',
+  "YinYang": '6',
+});
+snake_colors.push({ // Extra Brown 29
+  "Icon":'https://i.postimg.cc/nh5XvPCt/browner-snake.png',
+  "Colors":'["#4B2D08","#1B1D08"]',
+  "YinYang": '6',
 });
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
