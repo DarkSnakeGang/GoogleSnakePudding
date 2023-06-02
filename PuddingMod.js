@@ -559,6 +559,16 @@ snake_colors.push({ // Extra Brown 29
   "Colors":'["#4B2D08","#1B1D08"]',
   "YinYang": '6',
 });
+snake_colors.push({ // Gold 30
+  "Icon":'https://i.postimg.cc/qvWmwKmt/gold-snake.png',
+  "Colors":'["#b59b1d","#947f19"]',
+  "YinYang": '31',
+});
+snake_colors.push({ // Silver 31
+  "Icon":'https://i.postimg.cc/jjNMFj9M/silver-snake.png',
+  "Colors":'["#87868c","#555652"]',
+  "YinYang": '30',
+});
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
   yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
