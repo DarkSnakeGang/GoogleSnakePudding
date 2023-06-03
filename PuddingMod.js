@@ -601,8 +601,9 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   ${twin_all_global}=true;
   `
 
-  timer_update_regex = new RegExp(/&"NONE"!==this\.ka\.oa\.direction/);
-  twin_timer_update = `&("NONE"!==this\.ka\.oa\.direction||${twin_all_global})`
+  timer_update_regex = new RegExp(/&"NONE"!==this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.direction/);
+  ka_oa_fill = code.match(timer_update_regex)[0].split('.')[1] + '.' + code.match(timer_update_regex)[0].split('.')[2]
+  twin_timer_update = `&("NONE"!==this.${ka_oa_fill}.direction||${twin_all_global})`
 
   code = code.assertReplace(all_regex, add_direction)
   code = code.assertReplace(timer_update_regex, twin_timer_update)
