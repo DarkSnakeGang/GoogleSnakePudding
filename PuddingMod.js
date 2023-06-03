@@ -418,11 +418,14 @@ for (let index = 0; index < new_fruit.length; index++) {
   // Actually changes Top Bar fruit to multi count
   console.log("Updating top bar with count...")
 
+  twin_all_global = `window.snake.twinAll`
   fruit_class = document.querySelector('img[src="//www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"]').getAttribute("class")
   fruit_src = `document.querySelector('img[class="${fruit_class}"]').src `
   reset_regex = new RegExp(/;this\.reset\(\)/)
   set_fruit_count = `${check_count_undefined}
-  ${fruit_src}=${settings_var}.${settings_itself}.${Count_SRC};`
+  ${fruit_src}=${settings_var}.${settings_itself}.${Count_SRC};
+  ${twin_all_global}=false;
+  `
   code = code.assertReplace(reset_regex, ";" + set_fruit_count + "this.reset()");
 
   // Volume Regex
@@ -591,7 +594,22 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   code = code.assertReplace(snake_colors_regex, colors_build)
   code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
 
+  console.log("Fixing Twin All Timer...");
+
+  all_regex = new RegExp(/\"ALL\"\);/);
+  add_direction = `"ALL");
+  ${twin_all_global}=true;
+  `
+
+  timer_update_regex = new RegExp(/&"NONE"!==this\.ka\.oa\.direction/);
+  twin_timer_update = `&("NONE"!==this\.ka\.oa\.direction||${twin_all_global})`
+
+  code = code.assertReplace(all_regex, add_direction)
+  code = code.assertReplace(timer_update_regex, twin_timer_update)
+
   console.log("Done, enjoy Pudding Mod!");
+
+
 
   return code;
 };
