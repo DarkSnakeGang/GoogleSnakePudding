@@ -170,6 +170,26 @@ new_fruit.push({ // Mango 38
   "Pixel":'https://i.postimg.cc/bNny7wv4/mango-px.png',
   "Poison_values": 'b,\'#fc8824\',\'#909090\',50',
 });
+new_fruit.push({ // Melon 39
+  "Normal":'https://i.postimg.cc/8knkL3WN/melon.png',
+  "Pixel":'https://i.postimg.cc/Qt8NqZ0x/pixel-melon.png',
+  "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
+});
+new_fruit.push({ // Musa Banana 40
+  "Normal":'https://i.postimg.cc/3JsKcvnq/musa-banana.png',
+  "Pixel":'https://i.postimg.cc/bwSh0wPR/pixel-musa-banana.png',
+  "Poison_values": 'b,\'#910a22\',\'#909090\',50',
+});
+new_fruit.push({ // Pear 41
+  "Normal":'https://i.postimg.cc/L6Y9DTBf/pear.png',
+  "Pixel":'https://i.postimg.cc/SsgST1vL/pixel-pear.png',
+  "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
+});
+new_fruit.push({ // Soccer Ball 42
+  "Normal":'https://i.postimg.cc/1XT9PnPf/soccer-ball.png',
+  "Pixel":'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
+  "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
@@ -572,6 +592,11 @@ snake_colors.push({ // Silver 31
   "Colors":'["#87868c","#555652"]',
   "YinYang": '30',
 });
+snake_colors.push({ // Dark Teal 32
+  "Icon":'https://i.postimg.cc/mD2Cqq88/dark-teal.png',
+  "Colors":'["#667da4","#4c5a73"]',
+  "YinYang": '30',
+});
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
   yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
@@ -609,8 +634,6 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   code = code.assertReplace(timer_update_regex, twin_timer_update)
 
   console.log("Done, enjoy Pudding Mod!");
-
-
 
   return code;
 };
