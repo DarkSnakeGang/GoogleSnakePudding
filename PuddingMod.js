@@ -208,8 +208,12 @@ for (let index = 0; index < new_fruit.length; index++) {
   });
 
   if (code.match(/loaded_/) !== null) {
-    console.log(code)
-    console.log("Google experiment detected, please provide the above text to Yarmiplay by pressing copy ^^^")
+    console.log(code);
+    console.log("Google experiment detected, please provide the above text to Yarmiplay by pressing copy ^^^");
+    window.loaded_code = true;
+  }
+  else {
+    window.loaded_code = false;
   }
 
   console.log("Starting to edit code...");
@@ -646,6 +650,9 @@ window.PuddingMod.runCodeAfter = function() {
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'Pudding Mod';
+  if(window.loaded_code){
+    modIndicator.textContent = 'Pudding Mod - Google Test Version';
+  }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
