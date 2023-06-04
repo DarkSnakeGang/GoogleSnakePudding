@@ -186,7 +186,7 @@ new_fruit.push({ // Pear 41
   "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
 });
 new_fruit.push({ // Soccer Ball 42
-  "Normal":'https://i.postimg.cc/1XT9PnPf/soccer-ball.png',
+  "Normal":'https://i.postimg.cc/C1yT8vjL/soccer-ball.png',
   "Pixel":'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
   "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
 });
