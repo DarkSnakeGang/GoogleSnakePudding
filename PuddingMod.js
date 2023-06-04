@@ -569,7 +569,7 @@ snake_colors.push({ // Pitch Black 26
 });
 snake_colors.push({ // Purple Heart 27
   "Icon":'https://i.postimg.cc/8zCJj2JH/nep-color.png',
-  "Colors":'["#ff77ff","#ffaaff"]',
+  "Colors":'["#ffaaff","#ff77ff"]',
   "YinYang": '24',
 });
 snake_colors.push({ // Brown 28
