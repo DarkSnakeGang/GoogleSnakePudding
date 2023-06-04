@@ -192,7 +192,7 @@ new_fruit.push({ // Soccer Ball 42
 });
 new_fruit.push({ // Jacko 43
   "Normal":'https://i.postimg.cc/RVyssW-DN/betterjacko.png',
-  "Pixel":'https://i.postimg.cc/JhrD3nxF/pixeljacko.png',
+  "Pixel":'https://i.postimg.cc/3wS84M1M/pixel-jacko.png',
   "Poison_values": 'b,\'#fc8824\',\'#909090\',25',
 });
 
