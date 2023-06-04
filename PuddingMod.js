@@ -190,6 +190,11 @@ new_fruit.push({ // Soccer Ball 42
   "Pixel":'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
   "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
 });
+new_fruit.push({ // Jacko 43
+  "Normal":'https://i.postimg.cc/BncP1DTD/jacko.png',
+  "Pixel":'https://i.postimg.cc/JhrD3nxF/pixeljacko.png',
+  "Poison_values": 'b,\'#fc8824\',\'#909090\',25',
+});
 
 
 for (let index = 0; index < new_fruit.length; index++) {
