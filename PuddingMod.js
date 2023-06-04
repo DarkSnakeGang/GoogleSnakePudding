@@ -554,12 +554,12 @@ snake_colors.push({ // Black White 23
 });
 snake_colors.push({ // Nep Purple 24
   "Icon":'https://i.postimg.cc/t4bxfYzt/planeptune.png',
-  "Colors":'["#5B50B0", "#6759B9"]',
+  "Colors":'["#6759B9", "#5B50B0"]',
   "YinYang": '25',
 });
 snake_colors.push({ // Noire Blue 25
   "Icon":'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
-  "Colors":'["#0050b0", "#0059b9"]',
+  "Colors":'["#0059b9", "#0050b0"]',
   "YinYang": '24',
 });
 snake_colors.push({ // Pitch Black 26
