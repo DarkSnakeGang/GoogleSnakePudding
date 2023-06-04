@@ -182,7 +182,7 @@ new_fruit.push({ // Musa Banana 40
 });
 new_fruit.push({ // Pear 41
   "Normal":'https://i.postimg.cc/L6Y9DTBf/pear.png',
-  "Pixel":'https://i.postimg.cc/SsgST1vL/pixel-pear.png',
+  "Pixel":'https://i.postimg.cc/RZp3PRWz/pixel-pear.png',
   "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
 });
 new_fruit.push({ // Soccer Ball 42
@@ -599,7 +599,7 @@ snake_colors.push({ // Dark Teal 32
 });
 
   colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
-  yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');;
+  yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');
 
   document.querySelector('#color').removeChild(document.querySelector('#color').lastChild);
 
