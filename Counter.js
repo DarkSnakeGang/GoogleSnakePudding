@@ -5,7 +5,7 @@ window.Counter = {};
 ////////////////////////////////////////////////////////////////////
 
 window.Counter.runCodeBefore = function() {
-    windows.loadStatistics = function() {
+    window.loadStatistics = function() {
         let stats = localStorage.getItem('inputCounterMod');
         if(stats === null) {
             stats = {
@@ -31,6 +31,7 @@ window.Counter.runCodeBefore = function() {
 
         return stats;
     }
+    window.stats = window.loadStatistics();
     window.saveStatistics = function() {
         if(typeof stats !== 'undefined' &&
         typeof stats.statShown !== 'undefined' &&
@@ -196,21 +197,21 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
     settingsElement.appendChild(c);
 
     const settingsBox = document.createElement('div');
-    settingsBox.style = 'position:absolute;left:120%;z-index:10000;background-color:FloralWhite;padding:5px;display:none;border-radius:3px;';
+    settingsBox.style = 'position:absolute;left:120%;z-index:10000;background-color:#111111;padding:5px;display:none;border-radius:3px;width:160px;';
     settingsBox.id = 'settings-popup';
     settingsBox.innerHTML = `
-    <span>Settings</span><span class="settings-close" style="float:right;cursor:pointer">&times;</span>
-    <select style="margin:3px;" id="stat-chooser">
-      <option value="inputGame">inputs - game</option>
-      <option value="inputSession">inputs - session</option>
-      <option value="inputLifetime">inputs - lifetime</option>
-      <option value="playsSession">plays - session</option>
-      <option value="playsLifetime">plays - lifetime</option>
+    <span style="color:white;font-family:Roboto,Arial,sans-serif;">Counter Settings</span><span class="settings-close" style="float:right;cursor:pointer">&times;</span>
+    <select style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="stat-chooser">
+      <option value="inputGame">Game inputs</option>
+      <option value="inputSession">Session inputs</option>
+      <option value="inputLifetime">Lifetime inputs</option>
+      <option value="playsSession">Session resets</option>
+      <option value="playsLifetime">Lifetime resets</option>
     </select>
-    <button style="margin:3px;" id="edit-stat">Edit stat count</button>
-    <button style="margin:3px;" id="reset-stats">Reset all</button>
+    <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat count</button>
+    <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset all</button>
     <br>
-    <span style="margin:3px;cursor:pointer" class="settings-close">close</span>
+    <span style="margin:3px;color:white;cursor:pointer;font-family:Roboto,Arial,sans-serif;" class="settings-close">Close</span>
     `;
 
     settingsElement.appendChild(settingsBox);
@@ -254,7 +255,7 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
     document.getElementById('edit-stat').addEventListener('click',promptToEditStatCount);
     document.getElementById('reset-stats').addEventListener('click',promptToResetStats);
   }
-
+  window.setuphtml();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -263,18 +264,16 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
 
 window.Counter.alterSnakeCode = function(code) {
 
-    window.setuphtml();
-
     reset_regex = new RegExp(/;this\.reset\(\)/)
-    counter_reset_code = `stats.inputs.game = 0;
+    counter_reset_code = `;stats.inputs.game = 0;
     stats.plays.session++;
     stats.plays.lifetime++;
     saveStatistics();
-    updateCounterDisplay();this.reset()`
+    updateCounterDisplay();this.reset();`
 
     code = code.assertReplace(reset_regex, counter_reset_code);
 
-    input_counter_regex = new RegExp(/=function\(a,b\){if/)
+    input_counter_regex = new RegExp(/=function\(a,b\){if\(!/)
     input_counter_code =`=function\(a,b\){
         if(b !== a.direction) {
             stats.inputs.game++;
@@ -282,13 +281,13 @@ window.Counter.alterSnakeCode = function(code) {
             stats.inputs.lifetime++;
             stats.statShown === 'inputs' && updateCounterDisplay();
           }
-    if`
-    code = code.assertReplace(input_counter_regex, counter_reset_code);
+    if(!`
+    code = code.assertReplace(input_counter_regex, input_counter_code);
 
     stop_regex = new RegExp(/stop=function\(a\){/)
     save_stats_code = `stop=function(a){saveStatistics();`
 
-    code = code.assertReplace(input_counter_regex, counter_reset_code);
+    code = code.assertReplace(stop_regex, save_stats_code);
 
     return code;
 }
