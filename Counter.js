@@ -202,7 +202,7 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
     settingsElement.appendChild(c);
 
     const settingsBox = document.createElement('div');
-    settingsBox.style = 'position:absolute;left:120%;z-index:10000;background-color:#111111;padding:8px;display:none;border-radius:3px;width:160px;';
+    settingsBox.style = 'position:absolute;left:135px;z-index:10000;background-color:#111111;padding:8px;display:none;border-radius:3px;width:200px;';
     settingsBox.id = 'settings-popup';
     settingsBox.innerHTML = `
     <span style="color:white;font-family:Roboto,Arial,sans-serif;">Counter Settings</span><span class="settings-close" style="float:right;cursor:pointer">&times;</span>
