@@ -230,8 +230,8 @@ window.setuphtml=function() {
     <option value="playsLifetime">Lifetime resets</option>
   </select><br>
   <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat count</button><br>
-  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset all</button><br>
-  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="toggle-counter">Toggle Visibility</button>
+  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset all stats</button><br>
+  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="toggle-counter">Toggle Counter</button>
   <br>
   <span style="margin:3px;color:white;cursor:pointer;font-family:Roboto,Arial,sans-serif;" class="settings-close">Close</span>
   `;
@@ -294,10 +294,12 @@ window.setuphtml=function() {
       if(stats.visible) {
           document.getElementById('stat-icon').style.display = 'inline';
           document.getElementById('counter-num').style.display = 'inherit';
+          document.getElementById('toggle-counter').innerHTML = 'Hide counter';
       }
       else {
           document.getElementById('stat-icon').style.display = 'none';
           document.getElementById('counter-num').style.display = 'none';
+          document.getElementById('toggle-counter').innerHTML = 'Show counter';
       }
       saveStatistics();
   }
@@ -307,10 +309,12 @@ window.setuphtml=function() {
   if(stats.visible) {
       document.getElementById('stat-icon').style.display = 'inline';
       document.getElementById('counter-num').style.display = 'inherit';
+      document.getElementById('toggle-counter').innerHTML = 'Hide counter';
   }
   else {
       document.getElementById('stat-icon').style.display = 'none';
       document.getElementById('counter-num').style.display = 'none';
+      document.getElementById('toggle-counter').innerHTML = 'Show counter';
   }
 
 };
