@@ -27,6 +27,7 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/C53WfD61/pacman.png',
       'https://i.postimg.cc/8PLc5bjq/sonic-theme.png',
       'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
+      'https://i.postimg.cc/6Q2DyGbK/jungle.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
 
@@ -496,6 +497,11 @@ for (let index = 0; index < new_fruit.length; index++) {
     topbar_color='#3a91bb';
     buttons_color='#1155CC';
     bg_color=bottom_color='#4dc1f9';
+    break;
+    case 15: window.snake.setCustomTheme('#499D43', '#2B7E25', '#336E2B', '#335B36', '#37623C', '#476C42', '#13867E');
+    sep_color='#47724C';
+    topbar_color=buttons_color='#335B36';
+    bg_color=bottom_color='#37623C';
     break;
   }
   ${color_code}
