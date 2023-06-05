@@ -266,15 +266,6 @@ window.setuphtml=function() {
   document.getElementById('toggle-counter').addEventListener('click',toggleCounter);
   }
 
-  window.toggleCog = function(){
-    if(document.getElementById('input-counter-settings').style.display == 'none') {
-        document.getElementById('input-counter-settings').style.display = 'inline';
-    }
-    else {
-        document.getElementById('input-counter-settings').style.display = 'none';
-    }
-  }
-
   window.cogOff = function(){
     document.getElementById('input-counter-settings').style.display = 'none';
   }
