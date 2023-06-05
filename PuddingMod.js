@@ -141,7 +141,20 @@ window.promptToResetStats=function() {
     let userResponse = prompt('Type DELETE to reset all stats. Cannot be undone');
     if(userResponse === 'DELETE') {
         localStorage.removeItem('inputCounterMod');
-        loadStatistics();
+        stats = {
+          visible: false,
+          statShown: 'inputs',
+          statDurationShown: 'game',
+          inputs: {
+              game: 0,
+              session: 0,
+              lifetime: 0
+          },
+          plays: {
+              session: 0,
+              lifetime: 0
+          }
+          };
         saveStatistics();
         updateCounterDisplay();
         alert('All stats have been reset');
