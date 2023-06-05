@@ -63,6 +63,29 @@ window.PuddingMod.runCodeBefore = function() {
     window.distinct_soko_goal_px.currentSrc = 'https://i.postimg.cc/NFnWqP35/px-box-red.png';
     window.distinct_soko_goal_px.crossOrigin = "Anonymous";
 
+    function loadAndRunCodeSynchronous(url) {
+      let req = new XMLHttpRequest();
+      req.open('GET', url, false);
+      req.onload = function() {
+        if(this.status === 200) {
+          (1,eval)(this.responseText);
+        } else {
+          console.log(`Loading selected mod returned non-200 status. Received: ${this.status}`);
+        }
+      };
+      req.onerror = function(event) {
+        console.error(`Error when attempting to retrieve mod code from ${url}`);
+        console.log(event);
+      };
+      req.send();
+    }
+
+  loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Counter.js');
+  //loadAndRunCodeSynchronous(' http://127.0.0.1:5500/Counter.js');
+
+  console.log("Enabling Pudding Mod");
+  window.Counter.runCodeBefore();
+
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -70,6 +93,8 @@ window.PuddingMod.runCodeBefore = function() {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function(code) {
+
+  code = window.Counter.alterSnakeCode(code);
 
   function i(src) {
     let img = new Image();

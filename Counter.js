@@ -9,6 +9,7 @@ window.Counter.runCodeBefore = function() {
         let stats = localStorage.getItem('inputCounterMod');
         if(stats === null) {
             stats = {
+            visible: false,
             statShown: 'inputs',
             statDurationShown: 'game',
             inputs: {
@@ -28,7 +29,9 @@ window.Counter.runCodeBefore = function() {
         stats.inputs.game = 0;
         stats.inputs.session = 0;
         stats.plays.session = 0;
-
+        if(stats.visible === null) {
+            stats.visible =  true;
+        }
         return stats;
     }
     window.stats = window.loadStatistics();
@@ -42,7 +45,8 @@ window.Counter.runCodeBefore = function() {
         typeof stats.inputs.session !== 'undefined' &&
         typeof stats.inputs.lifetime !== 'undefined' &&
         typeof stats.plays.session !== 'undefined' &&
-        typeof stats.plays.lifetime !== 'undefined'
+        typeof stats.plays.lifetime !== 'undefined' &&
+        typeof stats.visible !== 'undefined'
         ) {
             localStorage.setItem('inputCounterMod', JSON.stringify(stats));
         }
@@ -179,6 +183,7 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
     window.divList = document.createElement('div');
     divList.class = 'counter-num'
     divList.style = 'width:25px;position:relative;left:490px;top:-24px;font-size:20px;font-family:Roboto,Arial,sans-serif;'
+    divList.id = 'counter-num'
 
     document.getElementsByClassName('sEOCsb')[0].appendChild(a);
     document.getElementsByClassName('sEOCsb')[0].appendChild(divList);
@@ -197,7 +202,7 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
     settingsElement.appendChild(c);
 
     const settingsBox = document.createElement('div');
-    settingsBox.style = 'position:absolute;left:120%;z-index:10000;background-color:#111111;padding:5px;display:none;border-radius:3px;width:160px;';
+    settingsBox.style = 'position:absolute;left:120%;z-index:10000;background-color:#111111;padding:8px;display:none;border-radius:3px;width:160px;';
     settingsBox.id = 'settings-popup';
     settingsBox.innerHTML = `
     <span style="color:white;font-family:Roboto,Arial,sans-serif;">Counter Settings</span><span class="settings-close" style="float:right;cursor:pointer">&times;</span>
@@ -210,6 +215,7 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
     </select>
     <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat count</button>
     <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset all</button>
+    <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="toggle-counter">Toggle Visibility</button>
     <br>
     <span style="margin:3px;color:white;cursor:pointer;font-family:Roboto,Arial,sans-serif;" class="settings-close">Close</span>
     `;
@@ -254,8 +260,32 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
 
     document.getElementById('edit-stat').addEventListener('click',promptToEditStatCount);
     document.getElementById('reset-stats').addEventListener('click',promptToResetStats);
-  }
-  window.setuphtml();
+    document.getElementById('toggle-counter').addEventListener('click',toggleCounter);
+    }
+
+    window.toggleCounter = function(){
+        stats.visible = !stats.visible;
+        if(stats.visible) {
+            document.getElementById('stat-icon').style.display = 'inline';
+            document.getElementById('counter-num').style.display = 'inherit';
+        }
+        else {
+            document.getElementById('stat-icon').style.display = 'none';
+            document.getElementById('counter-num').style.display = 'none';
+        }
+        saveStatistics();
+    }
+
+    window.setuphtml();
+
+    if(stats.visible) {
+        document.getElementById('stat-icon').style.display = 'inline';
+        document.getElementById('counter-num').style.display = 'inherit';
+    }
+    else {
+        document.getElementById('stat-icon').style.display = 'none';
+        document.getElementById('counter-num').style.display = 'none';
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
