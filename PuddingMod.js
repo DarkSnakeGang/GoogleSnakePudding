@@ -164,11 +164,13 @@ window.promptToEditStatCount=function() {
 window.showSettingsBox=function() {
     const settingsBox = document.getElementById('settings-popup');
     settingsBox.style.display = 'block';
+    window.cogOff();
 }
 
 window.hideSettingsBox=function() {
     const settingsBox = document.getElementById('settings-popup');
     settingsBox.style.display = 'none';
+    window.cogOn();
 }
 
 window.getStatIconImageSrc=function() {
@@ -264,6 +266,25 @@ window.setuphtml=function() {
   document.getElementById('toggle-counter').addEventListener('click',toggleCounter);
   }
 
+  window.toggleCog = function(){
+    if(document.getElementById('input-counter-settings').style.display == 'none') {
+        document.getElementById('input-counter-settings').style.display = 'inline';
+    }
+    else {
+        document.getElementById('input-counter-settings').style.display = 'none';
+    }
+  }
+
+  window.cogOff = function(){
+    document.getElementById('input-counter-settings').style.display = 'none';
+  }
+
+  window.cogOn = function(){
+    if(document.getElementById('settings-popup').style.display == 'none'){
+      document.getElementById('input-counter-settings').style.display = 'inline';
+    }
+  }
+
   window.toggleCounter = function(){
       stats.visible = !stats.visible;
       if(stats.visible) {
@@ -302,6 +323,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   reset_regex = new RegExp(/;this\.reset\(\)/)
   counter_reset_code = `;stats.inputs.game = 0;
+  window.cogOn();
   stats.plays.session++;
   stats.plays.lifetime++;
   saveStatistics();
@@ -312,6 +334,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   input_counter_regex = new RegExp(/=function\(a,b\){if\(!/)
   input_counter_code =`=function\(a,b\){
       if(b !== a.direction) {
+          window.cogOff();
           stats.inputs.game++;
           stats.inputs.session++;
           stats.inputs.lifetime++;
@@ -321,7 +344,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   code = code.assertReplace(input_counter_regex, input_counter_code);
 
   stop_regex = new RegExp(/stop=function\(a\){/)
-  save_stats_code = `stop=function(a){saveStatistics();`
+  save_stats_code = `stop=function(a){window.cogOn();saveStatistics();`
 
   code = code.assertReplace(stop_regex, save_stats_code);
 
