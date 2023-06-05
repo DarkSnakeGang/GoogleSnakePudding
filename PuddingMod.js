@@ -207,7 +207,7 @@ window.setuphtml=function() {
   settingsBox.id = 'settings-popup';
   settingsBox.innerHTML = `
   <span style="color:white;font-family:Roboto,Arial,sans-serif;">Counter Settings</span><span class="settings-close" style="float:right;cursor:pointer">&times;</span>
-  <select style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="stat-chooser">
+  <select style="margin:3px;background-color:#111111;color:white;font-family:Roboto,Arial,sans-serif;" id="stat-chooser">
     <option value="inputGame">Game inputs</option>
     <option value="inputSession">Session inputs</option>
     <option value="inputLifetime">Lifetime inputs</option>
