@@ -401,67 +401,104 @@ for (let index = 0; index < new_fruit.length; index++) {
     `
 
   code = code.assertReplace(/case "theme":/, `case "theme":
-  if(d>8)
-  {
-
-
-    switch(d){
-      case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000');
-      sep_color='#212121';
-      topbar_color=buttons_color='#000000';
-      bg_color=bottom_color='#111111';
-      ${color_code}
-      break;
-      case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30');
-      sep_color='#191230';
-      topbar_color=buttons_color='#090220';
-      bg_color=bottom_color='#110C30';
-      ${color_code}
-      break;
-      case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30');
-      sep_color='#101230';
-      topbar_color=buttons_color='#000220';
-      bg_color=bottom_color='#000c30';
-      ${color_code}
-      break;
-      case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30');
-      sep_color='#101010';
-      topbar_color=buttons_color='#111111';
-      bg_color=bottom_color='#0805c6';
-      ${color_code}
-      break;
-      case 13: window.snake.setCustomTheme('#B25900', '#A05000', '#333333', '#124f00', '#0f81d8', '#2bb800', '#0f81d8');
-      sep_color='#1f91e8';
-      topbar_color=buttons_color='#124f00';
-      bg_color=bottom_color='#0f81d8';
-      ${color_code}
-      break;
-      case 14: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
-      window.snake.setCustomTheme(
-        advancedSettings.themeCol1 ?? '#1D1D1D',
-        advancedSettings.themeCol2 ?? '#161616',
-        advancedSettings.themeCol3 ?? '#111111',
-        advancedSettings.themeCol4 ?? '#000000',
-        advancedSettings.themeCol5 ?? '#1D1D1D',
-        advancedSettings.themeCol6 ?? '#111111',
-        advancedSettings.themeCol7 ?? '#000000');
-      sep_color='#7eccfa';
-      topbar_color='#3a91bb';
-      buttons_color='#1155CC';
-      bg_color=bottom_color='#4dc1f9';
-      ${color_code}
-        break;
-    }
-  }
-  else
-  {
+  switch(d){
+    case 0:
+    window.snake.setCustomTheme('#aad751','#a2d149','#94bd46','#578a34','#38640e','#4a752c','#4dc1f9');
+    sep_color='#7eccfa';
+    topbar_color='#3a91bb';
+    buttons_color='#1155CC';
+    bg_color=bottom_color='#4dc1f9';
+    break;
+    case 1:
+    window.snake.setCustomTheme('#494351','#443e4c','#3d3644','#2c2730','#453d4d','#262428','#2a2640');
+    sep_color='#363438';
+    topbar_color=buttons_color='#2c2730';
+    bg_color=bottom_color='#262428';
+    break;
+    case 2:
+    window.snake.setCustomTheme('#deeced','#d1e4e6','#b9d4d5','#879fa1','#506486','#75898a','#8cbfd9');
+    sep_color='#85999a';
+    topbar_color=buttons_color='#879fa1';
+    bg_color=bottom_color='#75898a';
+    break;
+    case 3:
+    window.snake.setCustomTheme('#6e3535','#673232','#633131','#a33e3e','#642b2b','#762d2d','#292e4c');
+    sep_color='#863d3d';
+    topbar_color=buttons_color='#a33e3e';
+    bg_color=bottom_color='#762d2d';
+    break;
+    case 4:
+    window.snake.setCustomTheme('#f2d78c','#eccd79','#e6c770','#977b26','#594d26','#725e1d','#5fb7e3');
+    sep_color='#826e2d';
+    topbar_color=buttons_color='#977b26';
+    bg_color=bottom_color='#725e1d';
+    break;
+    case 5:
+    window.snake.setCustomTheme('#3f5543','#3b4f3f','#334737','#253227','#354b38','#202822','#2b375a');
+    sep_color='#303832';
+    topbar_color=buttons_color='#253227';
+    bg_color=bottom_color='#202822';
+    break;
+    case 6:
+    window.snake.setCustomTheme('#b4d0f9','#a3c5f5','#94baf0','#275ba5','#11325f','#1d457c','#42a5f0');
+    sep_color='#2d558c';
+    topbar_color='#275ba5';buttons_color='#1155CC';
+    bg_color=bottom_color='#1d457c';
+    break;
+    case 7:
+    window.snake.setCustomTheme('#432c68','#3d285d','#3a2956','#604096','#3f305a','#432a6f','#32224f');
+    sep_color='#533a7f';
+    topbar_color=buttons_color='#604096';
+    bg_color=bottom_color='#432a6f';
+    break;
+    case 8:
     window.snake.clearCustomTheme();
     sep_color='#7eccfa';
     topbar_color='#3a91bb';
     buttons_color='#1155CC';
     bg_color=bottom_color='#4dc1f9';
-    ${color_code}
+    break; // Randomize Globe Theme
+    case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000');
+    sep_color='#212121';
+    topbar_color=buttons_color='#000000';
+    bg_color=bottom_color='#111111';
+    break;
+    case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30');
+    sep_color='#191230';
+    topbar_color=buttons_color='#090220';
+    bg_color=bottom_color='#110C30';
+    break;
+    case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30');
+    sep_color='#101230';
+    topbar_color=buttons_color='#000220';
+    bg_color=bottom_color='#000c30';
+    break;
+    case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30');
+    sep_color='#10104d';
+    topbar_color=buttons_color='#111111';
+    bg_color=bottom_color='#00003d';
+    break;
+    case 13: window.snake.setCustomTheme('#B25900', '#A05000', '#333333', '#124f00', '#0f81d8', '#2bb800', '#0f81d8');
+    sep_color='#1f91e8';
+    topbar_color=buttons_color='#124f00';
+    bg_color=bottom_color='#0f81d8';
+    break;
+    case 14: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
+    window.snake.setCustomTheme(
+      advancedSettings.themeCol1 ?? '#1D1D1D',
+      advancedSettings.themeCol2 ?? '#161616',
+      advancedSettings.themeCol3 ?? '#111111',
+      advancedSettings.themeCol4 ?? '#000000',
+      advancedSettings.themeCol5 ?? '#1D1D1D',
+      advancedSettings.themeCol6 ?? '#111111',
+      advancedSettings.themeCol7 ?? '#000000');
+    sep_color='#7eccfa';
+    topbar_color='#3a91bb';
+    buttons_color='#1155CC';
+    bg_color=bottom_color='#4dc1f9';
+    break;
   }
+  ${color_code}
   `)
 
   // Arbitrary values for keeping the SRC image for these things
@@ -715,6 +752,8 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   code = code.assertReplace(timer_update_regex, twin_timer_update)
 
   console.log("Done, enjoy Pudding Mod!");
+
+  console.log(code)
 
   return code;
 };
