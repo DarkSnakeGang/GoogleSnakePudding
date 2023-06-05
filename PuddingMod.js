@@ -26,8 +26,8 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/T2rc2X5Y/Lastation-Logo.png',
       'https://i.postimg.cc/C53WfD61/pacman.png',
       'https://i.postimg.cc/8PLc5bjq/sonic-theme.png',
-      'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
       'https://i.postimg.cc/6Q2DyGbK/jungle.png',
+      'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
 
@@ -767,7 +767,12 @@ for (let index = 0; index < new_fruit.length; index++) {
     topbar_color=buttons_color='#124f00';
     bg_color=bottom_color='#0f81d8';
     break;
-    case 14: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {}; // ModLoader
+    case 14: window.snake.setCustomTheme('#499D43', '#36982F', '#336E2B', '#335B36', '#37623C', '#476C42', '#13867E'); // Jungle
+    sep_color='#47724C';
+    topbar_color=buttons_color='#335B36';
+    bg_color=bottom_color='#37623C';
+    break;
+    case 15: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {}; // ModLoader
     window.snake.setCustomTheme(
       advancedSettings.themeCol1 ?? '#1D1D1D',
       advancedSettings.themeCol2 ?? '#161616',
@@ -780,11 +785,6 @@ for (let index = 0; index < new_fruit.length; index++) {
     topbar_color='#3a91bb';
     buttons_color='#1155CC';
     bg_color=bottom_color='#4dc1f9';
-    break;
-    case 15: window.snake.setCustomTheme('#499D43', '#36982F', '#336E2B', '#335B36', '#37623C', '#476C42', '#13867E'); // Jungle
-    sep_color='#47724C';
-    topbar_color=buttons_color='#335B36';
-    bg_color=bottom_color='#37623C';
     break;
   }
   ${color_code}
