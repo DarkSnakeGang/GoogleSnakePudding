@@ -366,15 +366,76 @@ for (let index = 0; index < new_fruit.length; index++) {
   endscreen background*/
   console.log("Adding new themes...")
 
+    // Settings topbar: zFl3vb
+    // Settings background: wXSCdb
+    // Settings buttons: FL0z2d
+
+    window.ui_topbar = document.getElementsByClassName('zFl3vb');
+    window.ui_background = document.getElementsByClassName('sXu3u');
+    window.ui_buttons = document.getElementsByClassName('FL0z2d');
+    window.ui_topbar.style = '';
+    window.ui_background.style = '';
+    window.ui_buttons.style = '';
+    window.ui_sep = document.getElementsByClassName('e1XC2b');
+    window.ui_sep.style = '';
+    window.ui_bottom = document.getElementsByClassName('T7SB3d');
+    window.ui_bottom.style = '';
+
+    color_code = `
+    for(let p of window.ui_sep) {
+      let separators = sep_color;
+      p.style.borderBottomColor = separators;
+    }
+    for(let h of window.ui_topbar){
+      h.style.background = topbar_color;
+    }
+    for(let h of window.ui_buttons){
+      h.style.background = buttons_color;
+    }
+    for(let h of window.ui_background){
+      h.style.background = bg_color;
+    }
+    for(let h of window.ui_bottom){
+      h.style.background = bottom_color;
+    }
+    `
+
   code = code.assertReplace(/case "theme":/, `case "theme":
   if(d>8)
   {
+
+
     switch(d){
-      case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000'); break;
-      case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30'); break;
-      case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30'); break;
-      case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30'); break;
-      case 13: window.snake.setCustomTheme('#B25900', '#A05000', '#333333', '#124f00', '#0f81d8', '#2bb800', '#0f81d8'); break;
+      case 9: window.snake.setCustomTheme('#1D1D1D', '#161616', '#111111', '#000000', '#1D1D1D', '#111111', '#000000');
+      sep_color='#212121';
+      topbar_color=buttons_color='#000000';
+      bg_color=bottom_color='#111111';
+      ${color_code}
+      break;
+      case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30');
+      sep_color='#191230';
+      topbar_color=buttons_color='#090220';
+      bg_color=bottom_color='#110C30';
+      ${color_code}
+      break;
+      case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30');
+      sep_color='#101230';
+      topbar_color=buttons_color='#000220';
+      bg_color=bottom_color='#000c30';
+      ${color_code}
+      break;
+      case 12: window.snake.setCustomTheme('#010101', '#000000', '#000000', '#0805c6', '#000000', '#000000', '#000C30');
+      sep_color='#101010';
+      topbar_color=buttons_color='#111111';
+      bg_color=bottom_color='#0805c6';
+      ${color_code}
+      break;
+      case 13: window.snake.setCustomTheme('#B25900', '#A05000', '#333333', '#124f00', '#0f81d8', '#2bb800', '#0f81d8');
+      sep_color='#1f91e8';
+      topbar_color=buttons_color='#124f00';
+      bg_color=bottom_color='#0f81d8';
+      ${color_code}
+      break;
       case 14: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
       window.snake.setCustomTheme(
         advancedSettings.themeCol1 ?? '#1D1D1D',
@@ -383,12 +444,23 @@ for (let index = 0; index < new_fruit.length; index++) {
         advancedSettings.themeCol4 ?? '#000000',
         advancedSettings.themeCol5 ?? '#1D1D1D',
         advancedSettings.themeCol6 ?? '#111111',
-        advancedSettings.themeCol7 ?? '#000000'); break;
+        advancedSettings.themeCol7 ?? '#000000');
+      sep_color='#7eccfa';
+      topbar_color='#3a91bb';
+      buttons_color='#1155CC';
+      bg_color=bottom_color='#4dc1f9';
+      ${color_code}
+        break;
     }
   }
   else
   {
     window.snake.clearCustomTheme();
+    sep_color='#7eccfa';
+    topbar_color='#3a91bb';
+    buttons_color='#1155CC';
+    bg_color=bottom_color='#4dc1f9';
+    ${color_code}
   }
   `)
 
