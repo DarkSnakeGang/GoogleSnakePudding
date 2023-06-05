@@ -753,7 +753,7 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
 
   console.log("Done, enjoy Pudding Mod!");
 
-  console.log(code)
+  //console.log(code)
 
   return code;
 };
