@@ -183,7 +183,7 @@ window.setuphtml=function() {
 
   window.divList = document.createElement('div');
   divList.class = 'counter-num'
-  divList.style = 'width:25px;position:relative;left:505px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;'
+  divList.style = 'width:25px;position:relative;left:505px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;'
   divList.id = 'counter-num'
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(a);
@@ -197,7 +197,7 @@ window.setuphtml=function() {
 
   const d = document.createElement('div');
   d.id = 'input-counter-settings-container';
-  d.style = 'position:absolute;left:465px;top:45px;z-index:10000';
+  d.style = 'position:absolute;left:465px;top:45px;z-index:10000;';
   document.getElementsByClassName('sEOCsb')[0].appendChild(d);
   const settingsElement = document.querySelector('#input-counter-settings-container');
   settingsElement.appendChild(c);
