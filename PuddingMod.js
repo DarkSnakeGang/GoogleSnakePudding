@@ -641,6 +641,8 @@ window.timeKeeper.makeStorage = function(){
 	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
 }
 
+window.timeKeeper.dialogActive = false;
+
 //generate and show the dialog
 window.timeKeeper.showDialog = function(){
 	//make dialog
@@ -796,11 +798,9 @@ window.timeKeeper.showDialog = function(){
 	dialog.appendChild(document.createElement("br"));
 	buttonClose = document.createElement("button");
 	buttonClose.appendChild(document.createTextNode("Close"));
-	buttonClose.addEventListener("click", function(){
-		//remove dialog when click on ok
-		child = document.getElementById("timeKeeperDialog");
-		child.parentElement.removeChild(child);
-	});
+	buttonClose.addEventListener("click", (e)=>{
+    window.timeKeeper.toggleDialog();
+  });
   buttonClose.style = 'color:white;background:black';
 	dialog.appendChild(buttonClose);
 
@@ -819,10 +819,7 @@ window.timeKeeper.showDialog = function(){
 	div.insertBefore(dialog, div.firstChild)
 	};
 
-  TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
-  document.querySelector("div[jsname^=\""+TimerID+"\"]").addEventListener("click",(e)=>{
-		window.timeKeeper.showDialog();
-	});
+
 
   //Function to find the snake code, and apply changes.
 window.timeKeeper.setup = function(){
@@ -833,8 +830,6 @@ window.timeKeeper.setup = function(){
 
   console.log("Enabling TimeKeeper")
   window.timeKeeper.setup();
-
-  window.timeKeeper.dialogActive = false;
 
   window.timeKeeper.hideDialog = function(){
 		//remove dialog when click on ok
@@ -858,7 +853,10 @@ window.timeKeeper.setup = function(){
   document.querySelector("button[jsname^=\""+tempID+"\"]").addEventListener("click",(e)=>{
     window.timeKeeper.toggleDialog();
   });
-
+  TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
+  document.querySelector("div[jsname^=\""+TimerID+"\"]").addEventListener("click",(e)=>{
+		window.timeKeeper.toggleDialog();
+	});
 
 };
 
