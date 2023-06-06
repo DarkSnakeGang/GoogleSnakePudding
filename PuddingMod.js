@@ -231,7 +231,8 @@ window.setuphtml=function() {
   </select><br>
   <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat count</button><br>
   <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset all stats</button><br>
-  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="toggle-counter">Toggle Counter</button>
+  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="toggle-counter">Toggle Counter</button><br>
+  <button style="margin:3px;color:white;background-color:#111111;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Show TimeKeeper</button>
   <br>
   <span style="margin:3px;color:white;cursor:pointer;font-family:Roboto,Arial,sans-serif;" class="settings-close">Close</span>
   `;
@@ -643,6 +644,8 @@ window.timeKeeper.makeStorage = function(){
 //generate and show the dialog
 window.timeKeeper.showDialog = function(){
 	//make dialog
+  window.timeKeeper.dialogActive = true;
+  document.getElementById('time-keeper').innerHTML = 'Hide TimeKeeper';
 
 	dialog = document.createElement("dialog");
 	dialog.setAttribute("open","");
@@ -821,7 +824,6 @@ window.timeKeeper.showDialog = function(){
 		window.timeKeeper.showDialog();
 	});
 
-
   //Function to find the snake code, and apply changes.
 window.timeKeeper.setup = function(){
 	//just make storage, this used to also alter snake code
@@ -831,6 +833,32 @@ window.timeKeeper.setup = function(){
 
   console.log("Enabling TimeKeeper")
   window.timeKeeper.setup();
+
+  window.timeKeeper.dialogActive = false;
+
+  window.timeKeeper.hideDialog = function(){
+		//remove dialog when click on ok
+		child = document.getElementById("timeKeeperDialog");
+		child.parentElement.removeChild(child);
+    window.timeKeeper.dialogActive = false;
+    document.getElementById('time-keeper').innerHTML = 'Show TimeKeeper';
+
+	}
+
+  window.timeKeeper.toggleDialog = function(){
+    if(window.timeKeeper.dialogActive){
+      window.timeKeeper.hideDialog();
+    }
+    else {
+      window.timeKeeper.showDialog();
+    }
+  }
+
+  tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
+  document.querySelector("button[jsname^=\""+tempID+"\"]").addEventListener("click",(e)=>{
+    window.timeKeeper.toggleDialog();
+  });
+
 
 };
 
