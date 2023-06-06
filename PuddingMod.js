@@ -198,7 +198,7 @@ window.setuphtml=function() {
 
   window.divList = document.createElement('div');
   divList.class = 'counter-num'
-  divList.style = 'width:25px;position:relative;left:505px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;'
+  divList.style = 'width:25px;position:relative;left:505px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;'
   divList.id = 'counter-num'
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(a);
@@ -317,6 +317,521 @@ window.setuphtml=function() {
       document.getElementById('toggle-counter').innerHTML = 'Show counter';
   }
 
+  /*
+	storage:
+	att-modeStr-count-speed-size : number of attempts of this mode
+	25-modeStr-count-speed-size: {time: time of 25 score, date: date of 25 score, att: number of attempts that reached 25 score, sum: total time of all attempts that reached 25 score}
+	50, 100 and ALL idem.
+	H-modeStr-count-speed-size: {high: highscore of this mode, time: time of the highscore run, date: date of the highscore run, sum: total score of all attempts}
+*/
+window.timeKeeper = {};
+window.timeKeeper.debug = false;
+//called on every apple
+window.timeKeeper.gotApple = function(time, score){
+	if(window.timeKeeper.debug){
+		console.log("got Apple %s, %s", time, score);
+	}
+	window.timeKeeper.lastAppleDate = new Date();
+	window.timeKeeper.lastAppleTime = time;
+	//save time
+	if(score == 25 || score == 50 || score == 100){
+    if(window.timeKeeper.debug){
+      console.log("Saving PB for %s Ticks, %s Apples", time, score);
+    }
+		window.timeKeeper.savePB(time, score, window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+	}
+}
+
+//called when you get all apples
+window.timeKeeper.gotAll = function(time, score){
+	if(window.timeKeeper.debug){
+		console.log("got All %s, %s", time, score);
+	}
+	window.timeKeeper.savePB(time, "ALL", window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+}
+
+//called when you're dead, every time.
+window.timeKeeper.death = function(time, score){
+	if(window.timeKeeper.debug){
+		console.log("death %s, %s", time, score);
+	}
+	if(window.timeKeeper.playing){
+		window.timeKeeper.playing = false;
+		window.timeKeeper.saveScore(time, score, window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+	}
+}
+
+//called when you start gamed d
+window.timeKeeper.start = function(){
+	if(window.timeKeeper.debug){
+		console.log("start");
+	}
+	window.timeKeeper.playing = true;
+	//save current settings
+	window.timeKeeper.mode = window.timeKeeper.getCurrentMode();
+	window.timeKeeper.count = window.timeKeeper.getCurrentSetting("count");
+	window.timeKeeper.speed = window.timeKeeper.getCurrentSetting("speed");
+	window.timeKeeper.size = window.timeKeeper.getCurrentSetting("size");
+	window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+}
+
+window.timeKeeper.getCurrentMode = function(){
+	element = "";
+	for(i of document.querySelectorAll('img')){
+    	if(i.src.includes('random.png')){
+        	element = i;
+    	}
+	}
+	counter = -1;
+	modeStr = "";
+	for(child of element.parentElement.parentElement.parentElement.children){
+		counter++;
+		if(counter == 0){continue;};
+		if(child.firstChild.classList.length > 1 && child.firstChild.children.length > 0){
+			modeStr+="1";
+		}
+		else{
+			modeStr+="0";
+		}
+	}
+
+	let mode = window.timeKeeper.getCurrentSetting("trophy");
+	if(mode != document.getElementById("trophy").children.length-1){	//not on blender mode
+		modeStr = "";
+		for(t = 1; t <= 15; t++){
+			if(t == mode){
+				modeStr += "1";
+			}
+			else{
+				modeStr += "0";
+			}
+		}
+	}
+	return modeStr
+}
+
+//get the current setting, name = 'count', 'speed', 'size' or 'trophy'
+window.timeKeeper.getCurrentSetting = function(name){
+	let getSelectedIndex = function(name){
+		let elementList = document.getElementById(name);
+		let number = 0;
+		let classNames = [];
+		let notUnique = "";
+		for(element of elementList.children){
+			if(classNames.indexOf(element.className) == -1){
+				classNames.push(element.className);
+			}
+			else{
+				notUnique = element.className;
+				break;
+			}
+		}
+		for(element of elementList.children){
+			if(element.className != notUnique){
+				return number;
+			}
+			number++;
+		}
+		return 0;
+	}
+	return getSelectedIndex(name);
+}
+
+//save highscore
+window.timeKeeper.saveScore = function(time, score, mode, count, speed, size){
+  if(count > 2 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined'){
+    // More Menu, or Dice, or MouseMode or Level Editor
+    return;
+  }
+	if(typeof(window.timeKeeper.lastAppleDate) == "undefined"){
+		window.timeKeeper.lastAppleDate = new Date();
+	}
+	if(typeof(window.timeKeeper.lastAppleTime) == "undefined"){
+		window.timeKeeper.lastAppleTime = time;
+	}
+
+	time = Math.floor(time);
+	let storage = localStorage.getItem("snake_timeKeeper");
+	storage = JSON.parse(storage);
+	let name = "H"+"-"+mode+"-"+count+"-"+speed+"-"+size;
+	//if undefined, save new high
+	if(typeof(storage[name]) == "undefined"){
+		storage[name] = {"high":score,"time":window.timeKeeper.lastAppleTime,"date":window.timeKeeper.lastAppleDate,"sum":score};
+	}
+	else{
+		//increase sum
+		storage[name].sum += score;
+		if(score > storage[name].high || (score == storage[name].high && time < storage[name].time)){
+			//save new pb
+			storage[name].high = score;
+			storage[name].time = window.timeKeeper.lastAppleTime;
+			storage[name].date = window.timeKeeper.lastAppleDate;
+		}
+	}
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+//save 25, 50, 100 or 'ALL' score
+window.timeKeeper.savePB = function(time,score,mode,count,speed,size){
+
+  if(count > 2 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined'){
+    // More Menu, or Dice, or MouseMode or Level Editor
+    return;
+  }
+
+	time = Math.floor(time);
+	let storage = localStorage.getItem("snake_timeKeeper");
+	storage = JSON.parse(storage);
+	let name = score.toString()+"-"+mode+"-"+count+"-"+speed+"-"+size;
+
+	//if undefined, save new pb
+	if(typeof(storage[name]) == "undefined"){
+		storage[name] = {"time":time,"date":new Date(),"att":1,"sum":time};
+	}
+	else{
+		//increase attempt
+		if(typeof(storage[name].att) == "undefined"){storage[name].att = 0};
+		storage[name].att+=1;
+		//increase sum
+		if(typeof(storage[name].sum) == "undefined"){storage[name].sum = 0};
+		storage[name].sum+=time;
+		if(time < storage[name].time){		//only pb when lower time then stored
+			storage[name] = {"time":time,"date":new Date(),"att":storage[name].att,"sum":storage[name].sum};
+		}
+	}
+
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+//function to add attempt to localStorage
+window.timeKeeper.addAttempt = function(mode, count, speed, size){
+	let storage = localStorage.getItem("snake_timeKeeper");
+	storage = JSON.parse(storage);
+	let name = "att"+"-"+mode+"-"+count+"-"+speed+"-"+size;
+	if(typeof(storage[name]) == "undefined"){
+		storage[name] = 1;
+	}
+	else{
+		storage[name]+=1;
+	}
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+window.timeKeeper.setAttempts = function(attempts){
+	if(isNaN(attempts)){
+		console.log(attempts.toString() + " is not a number!");
+		return;
+	}
+	let storage = localStorage.getItem("snake_timeKeeper");
+	storage = JSON.parse(storage);
+	mode = window.timeKeeper.getCurrentMode()
+	count = window.timeKeeper.getCurrentSetting("count");
+	speed = window.timeKeeper.getCurrentSetting("speed");
+	size = window.timeKeeper.getCurrentSetting("size");
+	let name = "att"+"-"+mode+"-"+count+"-"+speed+"-"+size;
+	storage[name] = {};
+	storage[name] = attempts;
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+window.timeKeeper.setPB = function(time, score, attempts, average){
+	if(isNaN(time)){
+		console.log(time.toString() + " is not a number!");
+		return;
+	}
+	if(score != 25 && score != 50 && score != 100 && score != "ALL"){
+		console.log(score + " has to be 25, 50, 100 or \"ALL\"!");
+		return;
+	}
+	if(isNaN(attempts)){
+		console.log(attempts.toString() + " is not a number!");
+		return;
+	}
+	if(isNaN(average)){
+		console.log(average.toString() + " is not a number!");
+		return;
+	}
+	let storage = localStorage.getItem("snake_timeKeeper");
+	storage = JSON.parse(storage);
+	mode = window.timeKeeper.getCurrentMode()
+	count = window.timeKeeper.getCurrentSetting("count");
+	speed = window.timeKeeper.getCurrentSetting("speed");
+	size = window.timeKeeper.getCurrentSetting("size");
+	let name = score.toString()+"-"+mode+"-"+count+"-"+speed+"-"+size;
+	storage[name] = {};
+	storage[name].time = time;
+	storage[name].date = new Date();
+	storage[name].att = attempts;
+	storage[name].sum = Math.round(average * attempts);
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+window.timeKeeper.setScore = function(highscore, time, average){
+	if(isNaN(highscore)){
+		console.log(highscore.toString() + " is not a number!");
+		return;
+	}
+	if(isNaN(time)){
+		console.log(time.toString() + " is not a number!");
+		return;
+	}
+	if(isNaN(average)){
+		console.log(average.toString() + " is not a number!");
+		return;
+	}
+	let storage = localStorage.getItem("snake_timeKeeper");
+	storage = JSON.parse(storage);
+	mode = window.timeKeeper.getCurrentMode()
+	count = window.timeKeeper.getCurrentSetting("count");
+	speed = window.timeKeeper.getCurrentSetting("speed");
+	size = window.timeKeeper.getCurrentSetting("size");
+	let name = "H"+"-"+mode+"-"+count+"-"+speed+"-"+size;
+	storage[name] = {};
+	storage[name].high = highscore;
+	storage[name].time = time;
+	storage[name].date = new Date();
+	storage[name].sum = average * storage["att"+"-"+mode+"-"+count+"-"+speed+"-"+size];
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+//generate storage if it doesn't exist, or import from old file format.
+window.timeKeeper.makeStorage = function(){
+	let storage = localStorage.getItem("snake_timeKeeper");
+	if(storage == null){
+		storage = {};
+		storage["version"] = 2;
+
+		//try to read version 1 to new storage type
+		old_pbs = localStorage.getItem("snake_pbs");
+		if(old_pbs != null){
+			old_pbs = JSON.parse(old_pbs);
+			console.log("Converting local storage to new storage type");
+			for(mode = 0; mode < 11; mode++){
+				modeStr = "000000000000000".split("");
+				if(mode != 0){
+					modeStr[mode-1] = '1';
+				}
+				modeStr = modeStr.join('');
+
+				for(count = 0; count < 3; count++){
+					for(speed = 0; speed < 3; speed++){
+						for(size = 0; size < 3; size++){
+							for(let score of ["25","50","100","ALL","att"]){
+								let name = score+"-"+mode+"-"+count+"-"+speed+"-"+size;
+								if(typeof(old_pbs[name]) != "undefined"){
+									console.log(name, old_pbs[name]);
+									newName = score+"-"+modeStr+"-"+count+"-"+speed+"-"+size;
+									storage[newName] = old_pbs[name];
+								}
+
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else{
+		storage = JSON.parse(storage);
+	}
+	if(storage["version"] != 2){
+		alert("Something went wrong with you localStorage!");
+	}
+	localStorage.setItem("snake_timeKeeper",JSON.stringify(storage));
+}
+
+//generate and show the dialog
+window.timeKeeper.showDialog = function(){
+	//make dialog
+
+	dialog = document.createElement("dialog");
+	dialog.setAttribute("open","");
+	dialog.setAttribute("id","timeKeeperDialog");
+
+	let count = window.timeKeeper.getCurrentSetting("count");
+	let speed = window.timeKeeper.getCurrentSetting("speed");
+	let size = window.timeKeeper.getCurrentSetting("size");
+	let modeStr = window.timeKeeper.getCurrentMode("size");
+	//change modeStr to gamemode
+	counter = 0
+	var gamemode = "";
+	for(t of modeStr){
+		if(t == 1){
+
+			switch(counter){
+				case 0: gamemode += "Wall, "; break;
+				case 1: gamemode += "Portal, "; break;
+				case 2: gamemode += "Cheese, "; break;
+				case 3: gamemode += "Infinity, "; break;
+				case 4: gamemode += "Twin, "; break;
+				case 5: gamemode += "Winged, "; break;
+				case 6: gamemode += "YinYang, "; break;
+				case 7: gamemode += "Key, "; break;
+				case 8: gamemode += "Sokoban, "; break;
+				case 9: gamemode += "Poison, "; break;
+				case 10: gamemode += "Dimension, "; break;
+        case 11: gamemode += "Minesweeper, "; break;
+				case 12: gamemode += "Statue, "; break;
+				case 13: gamemode += "Light, "; break;
+				case 14: gamemode += "Peaceful, "; break;
+				default: gamemode += "Unknown, "; break;
+			}
+		}
+		counter++;
+	}
+	if(gamemode == ""){
+		gamemode = "Classic, ";
+	}
+	gamemode = gamemode.substring(0, gamemode.lastIndexOf(","));
+
+	//add level information
+	bold = document.createElement('strong');
+  textnode = document.createTextNode("TimeKeeper");
+  bold.style = 'color:white;font-family:Arial;'
+  //textnode.style = 'color:white;font-family:Arial;'
+  bold.appendChild(textnode);
+  //buttonClose.style = 'color:white;background:black'; font-family:roboto;
+  dialog.appendChild(bold);
+	dialog.appendChild(document.createElement("br"));
+	dialog.appendChild(document.createTextNode("Mode: "+gamemode));
+	dialog.appendChild(document.createElement("br"));
+	switch(count){
+		case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
+		case 1: dialog.appendChild(document.createTextNode("3 Apples,")); break;
+    case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
+		default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
+	}
+	switch(speed){
+		case 0: dialog.appendChild(document.createTextNode("Normal speed, ")); break;
+		case 1: dialog.appendChild(document.createTextNode("Fast speed, ")); break;
+		case 2: dialog.appendChild(document.createTextNode("Slow speed, ")); break;
+    default: dialog.appendChild(document.createTextNode("MoreMenu speed, ")); break;
+
+	}
+	switch(size){
+		case 0: dialog.appendChild(document.createTextNode("Normal size")); break;
+		case 1: dialog.appendChild(document.createTextNode("Small size")); break;
+		case 2: dialog.appendChild(document.createTextNode("Large size")); break;
+    default: dialog.appendChild(document.createTextNode("MoreMenu size")); break;
+	}
+  //dialog.style = 'color:white;font-family:Arial;'\
+
+	//add stats
+	dialog.appendChild(document.createElement("br"));
+	dialog.appendChild(document.createElement("br"));
+	storage = JSON.parse(localStorage["snake_timeKeeper"]);
+	let totalAttempts = 0;
+
+	for(let score of ["att", "25","50","100","ALL", "H"]){
+		let name = score+"-"+modeStr+"-"+count+"-"+speed+"-"+size;
+		if(typeof(storage[name]) != "undefined"){
+
+			bold = document.createElement('strong');
+			switch(score){
+				case "25": bold.appendChild(document.createTextNode("25 Apples:")); break;
+				case "50": bold.appendChild(document.createTextNode("50 Apples:")); break;
+				case "100": bold.appendChild(document.createTextNode("100 Apples:")); break;
+				case "ALL": bold.appendChild(document.createTextNode("All Apples:")); break;
+				case "att": bold.appendChild(document.createTextNode("Total Attempts: ")); break;
+				case "H": bold.appendChild(document.createTextNode("Highscore: ")); break;
+				default: break;
+			}
+			dialog.appendChild(bold);
+
+			if(score == "att"){
+				totalAttempts = storage[name];
+				dialog.appendChild(document.createTextNode(totalAttempts));
+				dialog.appendChild(document.createElement("br"));
+			}
+			else if(score == "H"){
+				dialog.appendChild(document.createTextNode(storage[name].high));
+			}
+
+			dialog.appendChild(document.createElement("br"));
+
+			if(score == "att")
+				continue;
+
+			minutes = Math.floor(storage[name].time/60000);
+			seconds = Math.floor((storage[name].time-minutes*60000)/1000);
+			mseconds = storage[name].time-minutes*60000-seconds*1000;
+			if(minutes.toString().length < 2){minutes = "0"+minutes.toString()}
+			if(seconds.toString().length < 2){seconds = "0"+seconds.toString()}
+			while(mseconds.toString().length < 3){mseconds = "0"+mseconds.toString()}
+			if(score != "H"){
+				dialog.appendChild(document.createTextNode("Best Time: "+minutes+":"+seconds+":"+mseconds));
+				dialog.appendChild(document.createElement("br"));
+				dialog.appendChild(document.createTextNode("Achieved on: "+new Date(storage[name].date).toString()));
+				dialog.appendChild(document.createElement("br"));
+			}
+			else{
+				dialog.appendChild(document.createTextNode("Duration: "+minutes+":"+seconds+":"+mseconds));
+				dialog.appendChild(document.createElement("br"));
+				dialog.appendChild(document.createTextNode("Achieved on: "+new Date(storage[name].date).toString()));
+				dialog.appendChild(document.createElement("br"));
+				dialog.appendChild(document.createTextNode("Average score: "+(Math.round(100 * (storage[name].sum/totalAttempts)) /100).toString()));
+				dialog.appendChild(document.createElement("br"));
+			}
+			if(storage[name].att != undefined && storage[name].sum != undefined){
+				let time = Math.floor(storage[name].sum/storage[name].att);
+				minutes = Math.floor(time/60000);
+				seconds = Math.floor((time-minutes*60000)/1000);
+				mseconds = time-minutes*60000-seconds*1000;
+				if(minutes.toString().length < 2){minutes = "0"+minutes.toString()}
+				if(seconds.toString().length < 2){seconds = "0"+seconds.toString()}
+				while(mseconds.toString().length < 3){mseconds = "0"+mseconds.toString()}
+				dialog.appendChild(document.createTextNode("Attempts to this point: "+storage[name].att));
+				dialog.appendChild(document.createElement("br"));
+				dialog.appendChild(document.createTextNode("Average: "+minutes+":"+seconds+":"+mseconds));
+				dialog.appendChild(document.createElement("br"));
+			}
+			dialog.appendChild(document.createElement("br"));
+		}
+	}
+
+	//buttonClose
+	dialog.appendChild(document.createElement("br"));
+	buttonClose = document.createElement("button");
+	buttonClose.appendChild(document.createTextNode("Close"));
+	buttonClose.addEventListener("click", function(){
+		//remove dialog when click on ok
+		child = document.getElementById("timeKeeperDialog");
+		child.parentElement.removeChild(child);
+	});
+  buttonClose.style = 'color:white;background:black';
+	dialog.appendChild(buttonClose);
+
+	//buttonExport
+	buttonExport = document.createElement("button");
+	buttonExport.appendChild(document.createTextNode("Export"));
+	buttonExport.addEventListener("click", function(){
+		download("timeKeeper - "+new Date().toString()+".txt", "To import: open snake -> open console -> paste the following:\nlocalStorage[\"snake_timeKeeper\"]='"+localStorage["snake_timeKeeper"]+"'");
+	});
+	//dialog.appendChild(buttonExport); // Disabled export button, I don't want this.
+
+	//add dialog
+	div = document.querySelector("body");
+	dialog.setAttribute("style","z-index:9999;top:-50px;right:-50px;bottom:-50px;left:-50px;background:black;color:white;font-family:Arial;");
+
+	div.insertBefore(dialog, div.firstChild)
+	};
+
+  TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
+  document.querySelector("div[jsname^=\""+TimerID+"\"]").addEventListener("click",(e)=>{
+		window.timeKeeper.showDialog();
+	});
+
+
+  //Function to find the snake code, and apply changes.
+window.timeKeeper.setup = function(){
+	//just make storage, this used to also alter snake code
+	window.timeKeeper.makeStorage();
+	return;
+}
+
+  console.log("Enabling TimeKeeper")
+  window.timeKeeper.setup();
+
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -324,13 +839,85 @@ window.setuphtml=function() {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function(code) {
+  //console.log(code)
+  // TimeKeeper stuff start
+  //change stepfunction to run gotApple(), gotAll() and death()
+  func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)
+	let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)[0];
+  StartOfNext = func.substring(func.lastIndexOf(";"),func.length);
+	func = func.substring(0,func.lastIndexOf(";"));
+  //console.log(StartOfNext);
 
+	let modeFunc = func.match(/1}\);[^%]{0,10}/)[0];
+	modeFunc = modeFunc.substring(modeFunc.indexOf("(")+1,modeFunc.lastIndexOf("("));
+	//scoreFunc = func.match(/25\!\=\=this.[a-zA-Z0-9$]{1,4}/)[0]; // Need to figure this out
+  scoreFuncVar = func.match(/25\=\=\=[a-zA-Z0-9$]{1,4}/)[0].split('=')[3]; // Assuming he wanted just the "this.score"
+  scoreFunc = func.match(`${scoreFuncVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1]
+  //console.log(scoreFunc)
+	//scoreFunc = scoreFunc.substring(scoreFunc.indexOf("this."),scoreFunc.size);
+	//timeFunc = func.match(/this.[a-zA-Z0-9$]{1,6}\*this.[a-zA-Z0-9$]{1,6}/)[0];
+  // Now has weird vars that obfuscate, it's "this.ticks" * "this.{1,4}"
+  timeFunc = func.match(/\([a-zA-Z0-9$]{1,6}\*[a-zA-Z0-9$]{1,6}\)/)[0];
+  ticksVar = timeFunc.split('(')[1].split("*")[0];
+  tickLengthVar = timeFunc.split("*")[1].split(')')[0];
+  realTicks=func.match(`${ticksVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
+  realTickLength=func.match(`${tickLengthVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
+  realTimeFunc = `${realTicks}*${realTickLength}`;
+  timeFunc=realTimeFunc;
+  //console.log(timeFunc)
+	//ownFuncIndex = func.indexOf(func.match(/!1}\);\([^%]{0,10}/)[0])+5; // No idea how this ever worked
+	ownFunc = "window.timeKeeper.gotApple(Math.floor("+timeFunc+"),"+scoreFunc+");"
+	//func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex); // Cool but no, just going to insert before the if 25 50 100 instead
+  if25_regex = new RegExp(/if\(25===/)
+  ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
+  func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
+  //console.log(func);
+
+
+
+	//change all apples to run gotAll()
+	func = func.slice(0,func.indexOf("WIN.play()")+11)+"window.timeKeeper.gotAll(Math.floor("+timeFunc+"),"+scoreFunc+"),"+func.slice(func.indexOf("WIN.play()")+11);
+
+	death = func.match(/if\(this.[a-zA-Z0-9$]{1,4}\|\|this.[a-zA-Z0-9$]{1,4}\)/)[0];
+	death = death.slice(death.indexOf("(")+1,death.indexOf("|"));
+	func = func.slice(0,func.indexOf("{")+1) + "if("+death+"){window.timeKeeper.death(Math.floor("+timeFunc+"),"+scoreFunc+");}" + func.slice(func.indexOf("{")+1)
+	//eval(func)
+
+  code = code.assertReplace(func_regex, func + StartOfNext);
+
+  //console.log(code)
+
+	//change start function to run gameStart() - The "start" here fails, but this section is required for the code to work
+
+  func_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}=function\(a,b\){if\(!\(a.[a-zA-Z0-9$]{1,4}[^\\]*?=function/)
+	func = code.match(/[a-zA-Z0-9_$]{1,6}=function\(a,b\){if\(!\(a.[a-zA-Z0-9$]{1,4}[^\\]*?=function/)[0];
+  StartOfNext = func.substring(func.lastIndexOf(";"),func.length);
+	func = func.substring(0, func.lastIndexOf(";"));
+	step = timeFunc.substring(0,timeFunc.indexOf("*"));
+	step = "a"+step.slice(step.indexOf("."));
+
+	func = func.slice(0,func.indexOf("{")+1)+"if("+step+"==0){window.timeKeeper.start();}"+func.slice(func.indexOf("{")+1);
+	//eval(func)
+  code = code.assertReplace(func_regex, func + StartOfNext);
+
+  //add eventhandler to click on time
+	//let id = code.match(/function\(a\){if\(\!a.[a-zA-Z0-9]{1,4}&&[^"]*?"[^"]*?"/)[0];
+	//id = id.substring(id.indexOf("\"")+1, id.lastIndexOf("\""));
+  //let id = code.match(/"[^"]{1,9}"[^"]{1,200}"00:00:000/)[0]; // Whatever this crap gives is the wrong thing sadly
+	//window.TimerID = id.substring(1, id.indexOf("\"",2));
+	//document.querySelector("div[jsname^=\""+id+"\"]").addEventListener("click",(e)=>{
+	//	window.timeKeeper.showDialog();
+	//});
+
+  // TimeKeeper stuff end
+  //console.log(code)
   // Counter stuff
 
-  console.log("Enabling Counter...")
+  console.log("Enabling Counter")
 
   reset_regex = new RegExp(/;this\.reset\(\)/)
   counter_reset_code = `;stats.inputs.game = 0;
+  window.timeKeeper.playing = false;
   window.cogOn();
   stats.plays.session++;
   stats.plays.lifetime++;
@@ -339,9 +926,15 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   code = code.assertReplace(reset_regex, counter_reset_code);
 
-  input_counter_regex = new RegExp(/=function\(a,b\){if\(!/)
+  input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
   input_counter_code =`=function\(a,b\){
       if(b !== a.direction) {
+          if(!window.timeKeeper.playing)
+          {
+            window.timeKeeper.start();
+            window.timeKeeper.playing = true;
+            //debugger
+          }
           window.cogOff();
           stats.inputs.game++;
           stats.inputs.session++;
@@ -509,7 +1102,7 @@ for (let index = 0; index < new_fruit.length; index++) {
     window.loaded_code = false;
   }
 
-  console.log("Starting to edit code...");
+  console.log("Starting to edit code");
 
   // Regex for a function that sets the src for count (I think)
   settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){""!==[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
@@ -583,7 +1176,7 @@ for (let index = 0; index < new_fruit.length; index++) {
 
 // lots of hardcoded shit here, fix it later
 // call to func2 is what makes pudding poison grey, double push is to make the pudding load later on, janky workaround but works so I'll take it
-  console.log("Adding new fruit to stack...")
+  console.log("Adding new fruit to stack")
   code = code.assertReplace(add_fruit_array_last_func_regex, add_fruit);
 
   // Too lazy to clean this code, it's "good enough" to leave untouched for now
@@ -632,11 +1225,11 @@ for (let index = 0; index < new_fruit.length; index++) {
 
   only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
 
-  console.log("Adding pixelated images...")
+  console.log("Adding pixelated images")
   code = code.assertReplace(load_pixelated_regex, new_pixelated_func);
 
   // Fixes a image calls
-  console.log("Adding images...")
+  console.log("Adding images")
   code = code.assertReplace(shh_grabber, new_shh_line);
 
   // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
@@ -652,7 +1245,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   key block sign color
   top bar
   endscreen background*/
-  console.log("Adding new themes...")
+  console.log("Adding new themes")
 
     // Settings topbar: zFl3vb
     // Settings background: wXSCdb
@@ -751,10 +1344,10 @@ for (let index = 0; index < new_fruit.length; index++) {
     topbar_color=buttons_color='#000000';
     bg_color=bottom_color='#111111';
     break;
-    case 10: window.snake.setCustomTheme('#5B50B0', '#6759B9', '#3F3478', '#110C30', '#5B50B0', '#090220', '#110C30'); // Planeptune
-    sep_color='#191230';
-    topbar_color=buttons_color='#090220';
-    bg_color=bottom_color='#110C30';
+    case 10: window.snake.setCustomTheme('#d0b4f9', '#c5a3f5', '#ba94f0', '#5b27a5', '#32115f', '#451d7c', '#a542f0'); // Planeptune
+    sep_color='#6b37b5';
+    topbar_color=buttons_color='#5b27a5';
+    bg_color=bottom_color='#a542f0';
     break;
     case 11: window.snake.setCustomTheme('#0050b0', '#0059b9', '#003478', '#000c30', '#0050b0', '#000220', '#000C30'); // Lastation
     sep_color='#101230';
@@ -833,7 +1426,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   count_score = code.match(load_image_func)[0].replaceAll("v4", "v3").replaceAll("apple", "count").replaceAll(settings_src, Count_SRC).replaceAll(get_apple_val2, get_count_val2).replaceAll("pixel/px_", "v3/")
 
   // Adds loading for counts when starting the game
-  console.log("Adding count detector at top bar...")
+  console.log("Adding count detector at top bar")
   count_score = count_score.split(')')[0].replace('||"graphics"===b','') + `){
     ${count_code}
     ${settings_var}.${settings_itself}.${Count_SRC} = count_img_arr[d];
@@ -847,7 +1440,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   check_count_undefined = `if(${settings_var}.${settings_itself}.${Count_SRC} in window){${settings_var}.${settings_itself}.${Count_SRC}="https://www.google.com/logos/fnbx/snake_arcade/v3/count_00.png";}`
 
   // Actually changes Top Bar fruit to multi count
-  console.log("Updating top bar with count...")
+  console.log("Updating top bar with count")
 
   twin_all_global = `window.snake.twinAll`
   fruit_class = document.querySelector('img[src="//www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"]').getAttribute("class")
@@ -860,7 +1453,7 @@ for (let index = 0; index < new_fruit.length; index++) {
   code = code.assertReplace(reset_regex, ";" + set_fruit_count + "this.reset()");
 
   // Volume Regex
-  console.log("Replacing volume with speed...")
+  console.log("Replacing volume with speed")
   volume_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
   code = code.assertReplace(volume_regex, `this.${settings_itself}.${Replace_Speed} ? this.${settings_itself}.${Replace_Speed} : "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" ;`)
   volume_src_regex = new RegExp(/[a-zA-Z0-9_$.]{1,7}=function\(\){this\.[a-zA-Z0-9_$]{1,8}=!this\.[a-zA-Z0-9_$]{1,8};this\.header\.[a-zA-Z0-9_$.]{1,7}\.src=/)
@@ -876,12 +1469,12 @@ for (let index = 0; index < new_fruit.length; index++) {
   `
 
   // Add loading for speed when starting the game
-  console.log("Adding speed detector...")
+  console.log("Adding speed detector")
   code = code.assertReplace(load_image_func, speed_volume + "$&");
 
   // Endscreen related image loading for new fruit - pudding. Keep this last
   // Since it effect load_image_func in a way that would break the other code that relays on it !!
-  console.log("Adding new fruit to endscreen...")
+  console.log("Adding new fruit to endscreen")
   code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';',load_code_condensed));
 
   // Attempt to get info on which mode it is
@@ -893,8 +1486,8 @@ for (let index = 0; index < new_fruit.length; index++) {
   is_soko = is_portal.replace('2', '9').replace("this", "a");
 
   // The elegent piece of code that replace the grey pudding with the skull icon
-  console.log("Making soko goals more distinct...")
-  console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)...")
+  console.log("Making soko goals more distinct")
+  console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)")
 //console.log(code)
   draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.canvas\:a\.[a-zA-Z0-9_$]{1,8}\.canvas},[a-zA-Z0-9_$]{1,8}=function\(\)/gm)
   new_draw_skull = code.match(draw_skull_func)[0].split("}")[0]
@@ -924,8 +1517,8 @@ for (let index = 0; index < new_fruit.length; index++) {
   if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} - 1;}
   if(Math.floor((Math.random() ${super_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
   $&`
-  console.log("Adding 1 in a Million Golden Apple...")
-  console.log("Adding 1 in a 10 Million Special Secret...")
+  console.log("Adding 1 in a Million Golden Apple")
+  console.log("Adding 1 in a 10 Million Special Secret")
   code = code.assertReplace(apple_info_regex, set_gold)
 
   snake_colors_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}[^]?=[^]?\[\["#4E7CF6","#17439F"\][^]*?\]\]/);
@@ -1025,12 +1618,12 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
   colors_build = colors_build + ']';
   yinyang_colors_build = yinyang_colors_build + ']';
 
-  console.log("Adding new snake colors...")
+  console.log("Adding new snake colors")
 
   code = code.assertReplace(snake_colors_regex, colors_build)
   code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
 
-  console.log("Fixing Twin All Timer...");
+  console.log("Fixing Twin All Timer");
 
   all_regex = new RegExp(/\"ALL\"\);/);
   add_direction = `"ALL");
@@ -1056,6 +1649,7 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.runCodeAfter = function() {
+
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'Pudding Mod';
