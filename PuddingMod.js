@@ -27,6 +27,7 @@ window.PuddingMod.runCodeBefore = function() {
       'https://i.postimg.cc/C53WfD61/pacman.png',
       'https://i.postimg.cc/8PLc5bjq/sonic-theme.png',
       'https://i.postimg.cc/6Q2DyGbK/jungle.png',
+      'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
       'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
@@ -858,6 +859,31 @@ window.timeKeeper.setup = function(){
 		window.timeKeeper.toggleDialog();
 	});
 
+
+  window.bootstrapVisible = false;
+
+  window.PuddingMod.ToggleBootstrap = function() {
+    if(!window.bootstrapVisible){
+      // Show it
+      window.PuddingMod.Bootstrap();
+
+    }
+    else{
+      // Hide it
+
+    }
+    window.bootstrapVisible = !window.bootstrapVisible;
+  }
+
+  window.PuddingMod.Bootstrap = function() {
+
+  }
+
+  window.PuddingMod.BootstrapUpdate = function() {
+    // Mainly for TimeKeeper, runs when "play" is clicked
+
+  }
+
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -868,6 +894,11 @@ window.PuddingMod.alterSnakeCode = function(code) {
   //console.log(code)
   // TimeKeeper stuff start
   //change stepfunction to run gotApple(), gotAll() and death()
+
+  function escapeRegex(string) {
+    return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
+  }
+
   func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)
 	let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)[0];
   StartOfNext = func.substring(func.lastIndexOf(";"),func.length);
@@ -887,7 +918,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
   ticksVar = timeFunc.split('(')[1].split("*")[0];
   tickLengthVar = timeFunc.split("*")[1].split(')')[0];
   realTicks=func.match(`${ticksVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
-  realTickLength=func.match(`${tickLengthVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
+  realTickLength=func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
   realTimeFunc = `${realTicks}*${realTickLength}`;
   timeFunc=realTimeFunc;
   //console.log(timeFunc)
@@ -1395,7 +1426,12 @@ for (let index = 0; index < new_fruit.length; index++) {
     topbar_color=buttons_color='#335B36';
     bg_color=bottom_color='#37623C';
     break;
-    case 15: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {}; // ModLoader
+    case 15: window.snake.setCustomTheme('#ffef4f', '#ffdf3f', '#dfbf1f', '#a55229', '#eeeeee', '#853209', '#853209'); // Pudding
+    sep_color='#efcf2f';
+    topbar_color=buttons_color='#752209';
+    bg_color=bottom_color='#dfbf1f';
+    break;
+    case 16: let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {}; // ModLoader
     window.snake.setCustomTheme(
       advancedSettings.themeCol1 ?? '#1D1D1D',
       advancedSettings.themeCol2 ?? '#161616',
