@@ -1421,7 +1421,7 @@ for (let index = 0; index < new_fruit.length; index++) {
     topbar_color=buttons_color='#124f00';
     bg_color=bottom_color='#0f81d8';
     break;
-    case 14: window.snake.setCustomTheme('#499D43', '#36982F', '#336E2B', '#335B36', '#37623C', '#476C42', '#13867E'); // Jungle
+    case 14: window.snake.setCustomTheme('#499D43', '#36982F', '#336E2B', '#335B36', '#ffef4f', '#476C42', '#13867E'); // Jungle
     sep_color='#47724C';
     topbar_color=buttons_color='#335B36';
     bg_color=bottom_color='#37623C';
