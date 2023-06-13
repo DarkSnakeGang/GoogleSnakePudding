@@ -18,10 +18,10 @@
 * Twin All Apples running timer bug fixed
 
 ### ~~Dice Mod~~ Deprecated
-* ~~Dice count, which spawns between 1 and 6 apples when the last available apple is eaten.
-* ~~Blue dice count, which spawns between 1 and 12 apples when the last available apple is eaten.
-* ~~Green dice count, which spawns between 4 and 9 apples when the last available apple is eaten.
-* ~~Includes Pudding Mod
+* ~~Dice count, which spawns between 1 and 6 apples when the last available apple is eaten.~~
+* ~~Blue dice count, which spawns between 1 and 12 apples when the last available apple is eaten.~~
+* ~~Green dice count, which spawns between 4 and 9 apples when the last available apple is eaten.~~
+* ~~Includes Pudding Mod~~
 * Was officially added to the game!
 
 ### Planned Features
