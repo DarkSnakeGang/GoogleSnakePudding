@@ -892,7 +892,7 @@ window.timeKeeper.setup = function(){
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function(code) {
-  //console.log(code)
+
   // TimeKeeper stuff start
   //change stepfunction to run gotApple(), gotAll() and death()
 
@@ -956,7 +956,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
 	func = func.slice(0,func.indexOf("{")+1)+"if("+step+"==0){window.timeKeeper.start();}"+func.slice(func.indexOf("{")+1);
 	//eval(func)
-  code = code.assertReplace(func_regex, func + StartOfNext);
+  //code = code.assertReplace(func_regex, func + StartOfNext);
 
   //add eventhandler to click on time
 	//let id = code.match(/function\(a\){if\(\!a.[a-zA-Z0-9]{1,4}&&[^"]*?"[^"]*?"/)[0];
@@ -984,9 +984,16 @@ window.PuddingMod.alterSnakeCode = function(code) {
 
   code = code.assertReplace(reset_regex, counter_reset_code);
 
-  input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
+  //console.log(code)
+
+  //input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
+  //debugger
+  input_counter_regex = new RegExp(/=function\(a,b\){if\(!\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  input_counter_code_end = code.match(input_counter_regex)[0].split('{')[1]
   input_counter_code =`=function\(a,b\){
+
       if(b !== a.direction) {
+
           if(!window.timeKeeper.playing)
           {
             window.timeKeeper.start();
@@ -999,7 +1006,7 @@ window.PuddingMod.alterSnakeCode = function(code) {
           stats.inputs.lifetime++;
           stats.statShown === 'inputs' && updateCounterDisplay();
         }
-  if(!`
+  ${input_counter_code_end}`
   code = code.assertReplace(input_counter_regex, input_counter_code);
 
   stop_regex = new RegExp(/stop=function\(a\){/)
