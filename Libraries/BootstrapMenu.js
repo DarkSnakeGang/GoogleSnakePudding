@@ -36,7 +36,7 @@ window.BootstrapMenu.make = function () {
 
         //settingsElement.appendChild(c);
 
-        css_stripped = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/bootstrap-stripped.css"
+        css_stripped = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css"
 
         if (window.NepDebug) {
             css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
