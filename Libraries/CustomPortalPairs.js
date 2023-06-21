@@ -6,6 +6,10 @@ window.CustomPortalPairs.make = function () {
     // Recommended to use "window." for things
     window.portal_pairs = false;
     window.toggle_portal_pairs = function toggle_portal_pairs() {
+        alert("You voted against it, so now it's disabled.")
+        console.log("Vote to allow custom portal pairs: https://discord.com/channels/723093146954760222/833411446187491410/1121204041649754163")
+        alert("I linked the message in console (ctrl + shift + j) if you want to change your vote.")
+        return;
         window.portal_pairs = !window.portal_pairs;
         for (var i = 1; i <= 6; i++) {
             var selectElement = document.getElementById('fruitSelect' + i.toString());
