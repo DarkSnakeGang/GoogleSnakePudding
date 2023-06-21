@@ -9,6 +9,7 @@ window.CustomPortalPairs.make = function () {
         alert("You voted against it, so now it's disabled.")
         console.log("Vote to allow custom portal pairs: https://discord.com/channels/723093146954760222/833411446187491410/1121204041649754163")
         alert("I linked the message in console (ctrl + shift + j) if you want to change your vote.")
+        alert("Vote to allow custom portal pairs: https://discord.com/channels/723093146954760222/833411446187491410/1121204041649754163")
         document.getElementById("PortalPairs").checked = false;
         return;
         window.portal_pairs = !window.portal_pairs;
