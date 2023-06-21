@@ -202,7 +202,7 @@ window.Counter.alterCode = function (code) {
               window.timeKeeper.playing = true;
               //debugger
             }
-            console.log("inputtttt");
+            
             stats.inputs.game++;
             stats.inputs.session++;
             stats.inputs.lifetime++;
