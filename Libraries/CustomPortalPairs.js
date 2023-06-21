@@ -6,10 +6,9 @@ window.CustomPortalPairs.make = function () {
     // Recommended to use "window." for things
     window.portal_pairs = false;
     window.toggle_portal_pairs = function toggle_portal_pairs() {
-        alert("You voted against it, so now it's disabled.")
-        console.log("Vote to allow custom portal pairs: https://discord.com/channels/723093146954760222/833411446187491410/1121204041649754163")
-        alert("I linked the message in console (ctrl + shift + j) if you want to change your vote.")
-        alert("Vote to allow custom portal pairs: https://discord.com/channels/723093146954760222/833411446187491410/1121204041649754163")
+        alert("Temporarily disabled, but please voice your opinion in favor of it (on discord) if you want to see it!")
+        console.log("Tell us you want custom portal pairs: https://discord.gg/dDuCTm62EZ")
+        alert("Tell us you want custom portal pairs: https://discord.gg/dDuCTm62EZ")
         document.getElementById("PortalPairs").checked = false;
         return;
         window.portal_pairs = !window.portal_pairs;
