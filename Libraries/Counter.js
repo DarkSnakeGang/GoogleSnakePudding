@@ -7,7 +7,7 @@ window.Counter.make = function () {
         let stats = localStorage.getItem('inputCounterMod');
         if (stats === null) {
             stats = {
-                visible: false,
+                visible: true,
                 statShown: 'inputs',
                 statDurationShown: 'game',
                 inputs: {
@@ -27,9 +27,16 @@ window.Counter.make = function () {
         stats.inputs.game = 0;
         stats.inputs.session = 0;
         stats.plays.session = 0;
-        if (stats.visible === null) {
-            stats.visible = true;
-        }
+        stats.visible = true;
+
+        stats.walls = {
+            game: 0
+        };
+
+        stats.hide = {
+            count: ""
+        };
+
         return stats;
     }
     window.stats = window.loadStatistics();
@@ -57,7 +64,7 @@ window.Counter.make = function () {
         if (userResponse === 'DELETE') {
             localStorage.removeItem('inputCounterMod');
             stats = {
-                visible: false,
+                visible: true,
                 statShown: 'inputs',
                 statDurationShown: 'game',
                 inputs: {
@@ -78,6 +85,10 @@ window.Counter.make = function () {
         }
     }
     window.promptToEditStatCount = function () {
+        if (stats.statShown === 'hide' || stats.statShown === 'walls' ) {
+            alert(`Not changing stat for "hide" or "walls"`)
+            return;
+        }
         let userResponse = prompt(`Change the stat count for "${stats.statShown} - ${stats.statDurationShown}"? This won't change any of the other stats. Current value: ${stats[stats.statShown][stats.statDurationShown]}`, stats[stats.statShown][stats.statDurationShown]);
         userResponse = parseInt(userResponse, 10);
         if (isNaN(userResponse)) {
@@ -102,6 +113,12 @@ window.Counter.make = function () {
     }
 
     window.getStatIconImageSrc = function () {
+        if(stats.statShown === 'hide'){
+            return "https://i.postimg.cc/bNFfLPCn/Empty.png"
+        }
+        if (stats.statShown === 'walls') {
+            return "https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png"
+        }
         return stats.statShown === 'plays' ? 'https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png' : 'https://www.google.com/logos/fnbx/snake_arcade/keys.svg';
     }
     window.setuphtml = function () {
@@ -203,6 +220,7 @@ window.Counter.make = function () {
         if (document.getElementById('settings-popup').style.display == 'none') {
             document.getElementById('input-counter-settings').style.display = 'inline';
         }
+        window.cogOff();
     }
 
     window.toggleCounter = function () {
@@ -220,8 +238,10 @@ window.Counter.make = function () {
         saveStatistics();
     }
 
-    window.setuphtml();
+    //window.setuphtml();
+    //window.cogOff();
 
+    /*
     if (stats.visible) {
         document.getElementById('stat-icon').style.display = 'inline';
         document.getElementById('counter-num').style.display = 'inherit';
@@ -232,11 +252,68 @@ window.Counter.make = function () {
         document.getElementById('counter-num').style.display = 'none';
         document.getElementById('toggle-counter').innerHTML = 'Show counter';
     }
+    */
 
 }
 
 window.Counter.alterCode = function (code) {
 
+    //console.log("Enabling Counter")
+
+    reset_regex = new RegExp(/;this\.reset\(\)/)
+
+    // Used to have window.cogOn(); here
+
+    counter_reset_code = `;stats.inputs.game = 0;
+    stats.walls.game = 0;
+    window.timeKeeper.playing = false;
+    window.BootstrapHide();
+    stats.plays.session++;
+    stats.plays.lifetime++;
+    saveStatistics();
+    updateCounterDisplay();this.reset();`
+
+    code = code.assertReplace(reset_regex, counter_reset_code);
+
+    ////console.log(code)
+
+    //input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
+    //debugger
+    input_counter_regex = new RegExp(/=function\(a,b\){if\(!\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+    input_counter_code_end = code.match(input_counter_regex)[0].split('{')[1]
+    // Used to have window.cogOff();
+    input_counter_code = `=function\(a,b\){
+
+        if(b !== a.direction) {
+
+            if(!window.timeKeeper.playing)
+            {
+              window.timeKeeper.start();
+              window.timeKeeper.playing = true;
+              //debugger
+            }
+
+            stats.inputs.game++;
+            stats.inputs.session++;
+            stats.inputs.lifetime++;
+            stats.statShown === 'inputs' && updateCounterDisplay();
+          }
+    ${input_counter_code_end}`
+    code = code.assertReplace(input_counter_regex, input_counter_code);
+
+    stop_regex = new RegExp(/stop=function\(a\){/)
+    save_stats_code = `stop=function(a){window.cogOn();saveStatistics();`
+
+    code = code.assertReplace(stop_regex, save_stats_code);
+
+    wall_spawn_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
+    wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
+    //debugger
+    wall_counter_code =`${code.match(wall_spawn_regex)[0]}
+    if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
+    `
+
+    code = code.assertReplace(wall_spawn_regex, wall_counter_code);
 
     return code;
 }

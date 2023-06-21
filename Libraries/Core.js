@@ -14,10 +14,22 @@ window.Core.make = function () {
 
     document.body.style.overflow = 'hidden'; // Hide scroll bar
 
+    window.escapeRegex = function (string) {
+        return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
+    }
 
 }
 
-window.Code.alterCode = function (code) {
+window.Core.alterCode = function (code) {
+
+    if (code.match(/loaded_/) !== null) {
+        console.log(code);
+        console.log("Google experiment detected, please provide the above text to Yarmiplay by pressing copy ^^^");
+        window.loaded_code = true;
+      }
+      else {
+        window.loaded_code = false;
+      }
 
     return code;
 }

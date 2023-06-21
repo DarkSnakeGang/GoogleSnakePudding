@@ -14,14 +14,14 @@ window.TimeKeeper.make = function () {
     //called on every apple
     window.timeKeeper.gotApple = function (time, score) {
         if (window.timeKeeper.debug) {
-            console.log("got Apple %s, %s", time, score);
+            //console.log("got Apple %s, %s", time, score);
         }
         window.timeKeeper.lastAppleDate = new Date();
         window.timeKeeper.lastAppleTime = time;
         //save time
         if (score == 25 || score == 50 || score == 100) {
             if (window.timeKeeper.debug) {
-                console.log("Saving PB for %s Ticks, %s Apples", time, score);
+                //console.log("Saving PB for %s Ticks, %s Apples", time, score);
             }
             window.timeKeeper.savePB(time, score, window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
         }
@@ -30,7 +30,7 @@ window.TimeKeeper.make = function () {
     //called when you get all apples
     window.timeKeeper.gotAll = function (time, score) {
         if (window.timeKeeper.debug) {
-            console.log("got All %s, %s", time, score);
+            //console.log("got All %s, %s", time, score);
         }
         window.timeKeeper.savePB(time, "ALL", window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     }
@@ -38,7 +38,7 @@ window.TimeKeeper.make = function () {
     //called when you're dead, every time.
     window.timeKeeper.death = function (time, score) {
         if (window.timeKeeper.debug) {
-            console.log("death %s, %s", time, score);
+            //console.log("death %s, %s", time, score);
         }
         if (window.timeKeeper.playing) {
             window.timeKeeper.playing = false;
@@ -49,7 +49,7 @@ window.TimeKeeper.make = function () {
     //called when you start gamed d
     window.timeKeeper.start = function () {
         if (window.timeKeeper.debug) {
-            console.log("start");
+            //console.log("start");
         }
         window.timeKeeper.playing = true;
         //save current settings
@@ -204,7 +204,7 @@ window.TimeKeeper.make = function () {
 
     window.timeKeeper.setAttempts = function (attempts) {
         if (isNaN(attempts)) {
-            console.log(attempts.toString() + " is not a number!");
+            //console.log(attempts.toString() + " is not a number!");
             return;
         }
         let storage = localStorage.getItem("snake_timeKeeper");
@@ -221,19 +221,19 @@ window.TimeKeeper.make = function () {
 
     window.timeKeeper.setPB = function (time, score, attempts, average) {
         if (isNaN(time)) {
-            console.log(time.toString() + " is not a number!");
+            //console.log(time.toString() + " is not a number!");
             return;
         }
         if (score != 25 && score != 50 && score != 100 && score != "ALL") {
-            console.log(score + " has to be 25, 50, 100 or \"ALL\"!");
+            //console.log(score + " has to be 25, 50, 100 or \"ALL\"!");
             return;
         }
         if (isNaN(attempts)) {
-            console.log(attempts.toString() + " is not a number!");
+            //console.log(attempts.toString() + " is not a number!");
             return;
         }
         if (isNaN(average)) {
-            console.log(average.toString() + " is not a number!");
+            //console.log(average.toString() + " is not a number!");
             return;
         }
         let storage = localStorage.getItem("snake_timeKeeper");
@@ -253,15 +253,15 @@ window.TimeKeeper.make = function () {
 
     window.timeKeeper.setScore = function (highscore, time, average) {
         if (isNaN(highscore)) {
-            console.log(highscore.toString() + " is not a number!");
+            //console.log(highscore.toString() + " is not a number!");
             return;
         }
         if (isNaN(time)) {
-            console.log(time.toString() + " is not a number!");
+            //console.log(time.toString() + " is not a number!");
             return;
         }
         if (isNaN(average)) {
-            console.log(average.toString() + " is not a number!");
+            //console.log(average.toString() + " is not a number!");
             return;
         }
         let storage = localStorage.getItem("snake_timeKeeper");
@@ -290,7 +290,7 @@ window.TimeKeeper.make = function () {
             old_pbs = localStorage.getItem("snake_pbs");
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
-                console.log("Converting local storage to new storage type");
+                //console.log("Converting local storage to new storage type");
                 for (mode = 0; mode < 11; mode++) {
                     modeStr = "000000000000000".split("");
                     if (mode != 0) {
@@ -304,7 +304,7 @@ window.TimeKeeper.make = function () {
                                 for (let score of ["25", "50", "100", "ALL", "att"]) {
                                     let name = score + "-" + mode + "-" + count + "-" + speed + "-" + size;
                                     if (typeof (old_pbs[name]) != "undefined") {
-                                        console.log(name, old_pbs[name]);
+                                        //console.log(name, old_pbs[name]);
                                         newName = score + "-" + modeStr + "-" + count + "-" + speed + "-" + size;
                                         storage[newName] = old_pbs[name];
                                     }
@@ -513,7 +513,7 @@ window.TimeKeeper.make = function () {
         return;
     }
 
-    console.log("Enabling TimeKeeper")
+    //console.log("Enabling TimeKeeper")
     window.timeKeeper.setup();
 
     window.timeKeeper.hideDialog = function () {
@@ -534,6 +534,7 @@ window.TimeKeeper.make = function () {
         }
     }
 
+    /*
     tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
     document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
         window.timeKeeper.toggleDialog();
@@ -542,10 +543,82 @@ window.TimeKeeper.make = function () {
     document.querySelector("div[jsname^=\"" + TimerID + "\"]").addEventListener("click", (e) => {
         window.timeKeeper.toggleDialog();
     });
-
+    */
 }
 
 window.TimeKeeper.alterCode = function (code) {
+    // TimeKeeper stuff start
+    //change stepfunction to run gotApple(), gotAll() and death()
 
+    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)
+    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)[0];
+    StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
+    func = func.substring(0, func.lastIndexOf(";"));
+    ////console.log(StartOfNext);
+
+    let modeFunc = func.match(/1}\);[^%]{0,10}/)[0];
+    modeFunc = modeFunc.substring(modeFunc.indexOf("(") + 1, modeFunc.lastIndexOf("("));
+    //scoreFunc = func.match(/25\!\=\=this.[a-zA-Z0-9$]{1,4}/)[0]; // Need to figure this out
+    scoreFuncVar = func.match(/25\=\=\=[a-zA-Z0-9$]{1,4}/)[0].split('=')[3]; // Assuming he wanted just the "this.score"
+    scoreFunc = func.match(`${scoreFuncVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1]
+    ////console.log(scoreFunc)
+    //scoreFunc = scoreFunc.substring(scoreFunc.indexOf("this."),scoreFunc.size);
+    //timeFunc = func.match(/this.[a-zA-Z0-9$]{1,6}\*this.[a-zA-Z0-9$]{1,6}/)[0];
+    // Now has weird vars that obfuscate, it's "this.ticks" * "this.{1,4}"
+    timeFunc = func.match(/\([a-zA-Z0-9$]{1,6}\*[a-zA-Z0-9$]{1,6}\)/)[0];
+    ticksVar = timeFunc.split('(')[1].split("*")[0];
+    tickLengthVar = timeFunc.split("*")[1].split(')')[0];
+    realTicks = func.match(`${ticksVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
+    realTickLength = func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
+    realTimeFunc = `${realTicks}*${realTickLength}`;
+    timeFunc = realTimeFunc;
+    ////console.log(timeFunc)
+    //ownFuncIndex = func.indexOf(func.match(/!1}\);\([^%]{0,10}/)[0])+5; // No idea how this ever worked
+    ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");"
+    //func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex); // Cool but no, just going to insert before the if 25 50 100 instead
+    if25_regex = new RegExp(/if\(25===/)
+    ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
+    func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
+    ////console.log(func);
+
+
+
+    //change all apples to run gotAll()
+    func = func.slice(0, func.indexOf("WIN.play()") + 11) + "window.timeKeeper.gotAll(Math.floor(" + timeFunc + ")," + scoreFunc + ")," + func.slice(func.indexOf("WIN.play()") + 11);
+
+    death = func.match(/if\(this.[a-zA-Z0-9$]{1,4}\|\|this.[a-zA-Z0-9$]{1,4}\)/)[0];
+    death = death.slice(death.indexOf("(") + 1, death.indexOf("|"));
+    func = func.slice(0, func.indexOf("{") + 1) + "if(" + death + "){window.timeKeeper.death(Math.floor(" + timeFunc + ")," + scoreFunc + ");}" + func.slice(func.indexOf("{") + 1)
+    //eval(func)
+
+    code = code.assertReplace(func_regex, func + StartOfNext);
+
+    ////console.log(code)
+
+    //change start function to run gameStart() - The "start" here fails, but this section is required for the code to work -- not anymore, fixed it earlier.
+
+    //func_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}=function\(a,b\){if\(!\(a.[a-zA-Z0-9$]{1,4}[^\\]*?=function/)
+    //func = code.match(/[a-zA-Z0-9_$]{1,6}=function\(a,b\){if\(!\(a.[a-zA-Z0-9$]{1,4}[^\\]*?=function/)[0];
+    //StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
+    //func = func.substring(0, func.lastIndexOf(";"));
+    //step = timeFunc.substring(0, timeFunc.indexOf("*"));
+    //step = "a" + step.slice(step.indexOf("."));
+
+    //func = func.slice(0, func.indexOf("{") + 1) + "if(" + step + "==0){window.timeKeeper.start();}" + func.slice(func.indexOf("{") + 1);
+    //eval(func)
+    //code = code.assertReplace(func_regex, func + StartOfNext);
+
+    //add eventhandler to click on time
+    //let id = code.match(/function\(a\){if\(\!a.[a-zA-Z0-9]{1,4}&&[^"]*?"[^"]*?"/)[0];
+    //id = id.substring(id.indexOf("\"")+1, id.lastIndexOf("\""));
+    //let id = code.match(/"[^"]{1,9}"[^"]{1,200}"00:00:000/)[0]; // Whatever this crap gives is the wrong thing sadly
+    //window.TimerID = id.substring(1, id.indexOf("\"",2));
+    //document.querySelector("div[jsname^=\""+id+"\"]").addEventListener("click",(e)=>{
+    //	window.timeKeeper.showDialog();
+    //});
+
+    // TimeKeeper stuff end
+    ////console.log(code)
+    // Counter stuff
     return code;
 }
