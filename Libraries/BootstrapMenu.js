@@ -4,6 +4,18 @@ window.BootstrapMenu.make = function () {
 
     window.bootstrapVisible = false;
 
+    window.BootstrapShow = function () {
+        const settingsBox = document.getElementById('settings-popup-pudding');
+        settingsBox.style.display = 'block';
+        window.bootstrapVisible = true;
+    }
+
+    window.BootstrapHide = function () {
+        const settingsBox = document.getElementById('settings-popup-pudding');
+        settingsBox.style.display = 'none';
+        window.bootstrapVisible = false;
+    }
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -14,7 +26,7 @@ window.BootstrapMenu.make = function () {
 
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
-        divList.style = 'width:25px;position:relative;left:505px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;'
+        divList.style = 'width:25px;position:relative;left:505px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
         divList.id = 'counter-num'
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
@@ -72,9 +84,9 @@ const xhr = new XMLHttpRequest();
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
 
-        <span style="color:white;font-family:Roboto,Arial,sans-serif;display: flex; justify-content: center; align-items: center; text-align: center;">Pudding Mod Settings</span>
+        <span style="color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Pudding Mod Settings</span>
 
-    <select style="margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: flex; justify-content: center; align-items: center; text-align: center;" id="stat-chooser" class="form-control">
+    <select style="margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;" id="stat-chooser" class="form-control">
         <option value="inputGame">Count game inputs</option>
         <option value="inputSession">Count session inputs</option>
         <option value="inputLifetime">Count lifetime inputs</option>
@@ -105,14 +117,35 @@ const xhr = new XMLHttpRequest();
     <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons <br>(Coming Soon)</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs" disabled>
-    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs (Coming Soon)</label>
-    </div>
-    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper" disabled>
     <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Always On TimeKeeper (Coming Soon)</label>
     </div>
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
+    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
+    </div>
+<select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row" disabled>
+    <option value="0">Apple</option>
+  </select>
+  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row" disabled>
+  <option value="1">Banana</option>
+</select><br>
+
+  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row" disabled>
+    <option value="2">Pineapple</option>
+  </select>
+  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row" disabled>
+    <option value="3">Purple Grapes</option>
+  </select><br>
+  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row" disabled>
+    <option value="4">Pumpkin</option>
+  </select>
+  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row" disabled>
+    <option value="5">Onion</option>
+  </select>
   <br>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
+
   `;
 
         settingsElement.appendChild(settingsBox);
@@ -160,8 +193,8 @@ const xhr = new XMLHttpRequest();
         //Listeners to hide/show settings box when clickng the cog, or the X - not anymore! Only back button.
         //document.querySelector('#input-counter-settings').addEventListener('click', showSettingsBox);
 
-        //const settingsCloseElements = document.getElementsByClassName('settings-close');
-        //settingsCloseElements[0].addEventListener('click', hideSettingsBox);
+        const settingsCloseElements = document.getElementById('settings-close');
+        settingsCloseElements.addEventListener('click', window.BootstrapHide);
         //settingsCloseElements[1].addEventListener('click', hideSettingsBox);
 
         document.getElementById('stat-chooser').onchange = function () {
@@ -198,18 +231,6 @@ const xhr = new XMLHttpRequest();
             // Hide it
             window.BootstrapHide();
         }
-    }
-
-    window.BootstrapShow = function () {
-        const settingsBox = document.getElementById('settings-popup-pudding');
-        settingsBox.style.display = 'block';
-        window.bootstrapVisible = true;
-    }
-
-    window.BootstrapHide = function () {
-        const settingsBox = document.getElementById('settings-popup-pudding');
-        settingsBox.style.display = 'none';
-        window.bootstrapVisible = false;
     }
 
     //Listeners to hide/show settings box

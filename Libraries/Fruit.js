@@ -128,7 +128,7 @@ window.Fruit.alterCode = function (code) {
         "Pixel": 'https://i.postimg.cc/3wS84M1M/pixel-jacko.png',
         "Poison_values": 'b,\'#fc8824\',\'#909090\',25',
     });
-
+    last_fruit_num = document.querySelector('#apple').children.length - 1;
     // Add fruit to menu
     for (let index = 0; index < new_fruit.length; index++) {
         document.querySelector('#apple').appendChild(uiImage(new_fruit[index].Normal));
@@ -165,8 +165,6 @@ window.Fruit.alterCode = function (code) {
     pixel_setting = code.match(pixel_setting_regex)[0].split('.')[2]
     // Gets the element that changed, "apple" means fruit here, in endscreen - Unused code here, but may be useful in the future.
     get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
-
-    last_fruit_num = 22
 
     load_code_condensed = ``;
 
