@@ -6,12 +6,12 @@ window.InputDisplay.make = function () {
     // Recommended to use "window." for things
     const e = document.createElement('div');
   e.id = 'input-display-container';
-  e.style = 'position:absolute;left:170px;top:350px;z-index:10000;display:block';
+  e.style = 'position:absolute;left:156px;top:516px;z-index:10000;display:block';
   document.getElementsByClassName('sEOCsb')[0].appendChild(e);
 
   const f = document.createElement('div');
   f.id = 'input-display-container';
-  f.style = 'position:absolute;left:170px;top:278px;z-index:10000;display:block';
+  f.style = 'position:absolute;left:156px;top:444px;z-index:10000;display:block';
   document.getElementsByClassName('sEOCsb')[0].appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
