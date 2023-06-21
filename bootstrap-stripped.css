@@ -369,3 +369,7 @@
     display: inline-block;
     margin-right: 1rem;
 }
+
+.flex-row {
+    flex-direction: row !important;
+}
