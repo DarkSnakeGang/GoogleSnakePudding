@@ -121,7 +121,7 @@ const xhr = new XMLHttpRequest();
     <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Always On TimeKeeper (Coming Soon)</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
+    <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs" disabled>
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
     </div>
 <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row" disabled>
