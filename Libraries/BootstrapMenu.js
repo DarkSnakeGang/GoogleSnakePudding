@@ -35,19 +35,29 @@ window.BootstrapMenu.make = function () {
         const settingsElement = document.querySelector('#input-counter-settings-container');
 
         //settingsElement.appendChild(c);
-
-        css_stripped = "https://main--starlit-llama-4c0b99.netlify.app/bootstrap-stripped.css"
-
+        css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
         if (window.NepDebug) {
             css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
         }
+
+        fetch(css_stripped)
+  .then(response => response.text())
+  .then(data => {
+    // Use the fetched data as a string
+    css = data; // Or do something else with the data
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + css;
+
+
 
         const settingsBox = document.createElement('div');
         settingsBox.style = 'position:absolute;left:135px;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:210px;height:584px;top:-45px;';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
-
-        <link href="${css_stripped}" rel="stylesheet">
 
         <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
