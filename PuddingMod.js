@@ -27,7 +27,6 @@ window.PuddingMod.runCodeBefore = function () {
     req.send();
   }
 
-
   window.NepDebug = false;
 
   window.Libraries = ["Core", "Theme", "DistinctVisual", "Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor", "BootstrapMenu"];
@@ -48,8 +47,6 @@ window.PuddingMod.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function (code) {
-
-
 
   Libraries.forEach(LibName => {
     console.log("Alter code with library: " + LibName)
