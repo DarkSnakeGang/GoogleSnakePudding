@@ -27,7 +27,12 @@ window.PuddingMod.runCodeBefore = function () {
     req.send();
   }
 
+
   window.NepDebug = false;
+  if (localStorage.getItem('snakeChosenMod') === "customUrl") {
+    console.log("Detect customUrl - enabling debug mode")
+    window.NepDebug = true;
+  }
 
   window.Libraries = ["Core", "Theme", "DistinctVisual", "Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor", "BootstrapMenu"];
   console.log("Enabling Pudding Mod");
