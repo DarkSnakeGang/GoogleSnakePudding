@@ -202,11 +202,29 @@ window.Counter.alterCode = function (code) {
               window.timeKeeper.playing = true;
               //debugger
             }
-
+            console.log("inputtttt");
             stats.inputs.game++;
             stats.inputs.session++;
             stats.inputs.lifetime++;
             stats.statShown === 'inputs' && updateCounterDisplay();
+          }
+          if(b === "RIGHT") {
+         
+            window.LightUpInput("right-button-id");
+            
+          }
+          if(b === "LEFT")
+          {
+            window.LightUpInput("left-button-id");
+            
+          }
+          if(b === "UP")
+          {
+            window.LightUpInput("top-button-id");
+          }
+          if(b === "DOWN")
+          {
+            window.LightUpInput("down-button-id");
           }
     ${input_counter_code_end}`
     code = code.assertReplace(input_counter_regex, input_counter_code);
