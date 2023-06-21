@@ -40,18 +40,27 @@ window.BootstrapMenu.make = function () {
             css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
         }
 
-        fetch(css_stripped)
-  .then(response => response.text())
-  .then(data => {
-    // Use the fetched data as a string
-    css = data; // Or do something else with the data
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
 
-        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + css;
 
+window.bootstrap_css = '';
+const xhr = new XMLHttpRequest();
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200) {
+        const data = xhr.responseText;
+        // Use the fetched data as a string
+        //console.log(data); // Or do something else with the data
+        window.bootstrap_css = data;
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+      } else {
+        console.error('An error occurred while fetching Bootstrap: ', xhr.status);
+      }
+    }
+  };
+
+  xhr.open('GET', css_stripped, true);
+  xhr.send();
 
 
         const settingsBox = document.createElement('div');

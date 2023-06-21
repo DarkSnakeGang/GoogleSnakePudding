@@ -27,7 +27,7 @@ window.PuddingMod.runCodeBefore = function () {
     req.send();
   }
 
-  window.NepDebug = false;
+  window.NepDebug = true;
 
   window.Libraries = ["Core", "Theme", "DistinctVisual", "Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor", "BootstrapMenu"];
   console.log("Enabling Pudding Mod");
