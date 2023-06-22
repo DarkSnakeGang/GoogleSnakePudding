@@ -45,7 +45,7 @@ window.CustomPortalPairs.alterCode = function (code) {
         16: { name: "Orange", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_16.png" },
         17: { name: "Peach", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_17.png" },
         18: { name: "Peanut", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_18.png" },
-        19: { name: "Red Berries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_19.png" },
+        19: { name: "Raspberries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_19.png" },
         20: { name: "Tomato", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_20.png" },
         21: { name: "Juniper Berries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_21.png" },
         22: { name: "Fruit Bowl", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_22.png" },
