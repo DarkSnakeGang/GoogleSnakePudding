@@ -136,6 +136,8 @@ window.SnakeColor.alterCode = function (code) {
     ${code.match(rainbow_usage_regex)[0].split('{')[1]}
     `
 
+    // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
+
     window.lgbtColors = {
         0: { name: "Default Rainbow", set: ['#4E7CF6', '#5499C7', '#AF7AC5', '#E74C3C', '#F39C12', '#CCC31C', '#27AE60',] },
         1: { name: "Pride", set: ['#e40303', '#ff8c00', '#ffed00', '#008026', '#004dff', '#750787',] },

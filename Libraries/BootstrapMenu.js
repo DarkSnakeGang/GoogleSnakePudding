@@ -32,8 +32,6 @@ window.BootstrapMenu.make = function () {
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
         document.getElementsByClassName('sEOCsb')[0].appendChild(divList);
 
-
-
         /*const c = new Image();
         c.src = 'https://i.postimg.cc/02xshYj1/index.png';
         c.width = c.height = 16;
@@ -51,8 +49,6 @@ window.BootstrapMenu.make = function () {
         if (window.NepDebug) {
             css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
         }
-
-
 
 window.bootstrap_css = '';
 const xhr = new XMLHttpRequest();
