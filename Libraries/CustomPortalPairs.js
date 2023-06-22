@@ -85,7 +85,7 @@ window.CustomPortalPairs.alterCode = function (code) {
         //console.log(document.querySelector('#apple').children)
         console.log(document.querySelector('#apple').children.length);
         //console.log(window.new_fruit)
-        console.log(code)
+        //console.log(code)
     }
 
 
@@ -243,7 +243,7 @@ window.CustomPortalPairs.alterCode = function (code) {
         //console.log(document.querySelector('#apple').children)
         console.log(document.querySelector('#apple').children.length);
         //console.log(window.new_fruit)
-        console.log(code)
+        //console.log(code)
     }
 
     portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{/)

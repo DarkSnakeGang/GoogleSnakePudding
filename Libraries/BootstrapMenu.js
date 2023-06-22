@@ -144,6 +144,11 @@ const xhr = new XMLHttpRequest();
     <option value="5">Onion</option>
   </select>
   <br>
+
+<select style="margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
+  <option value="0">Default Rainbow</option>
+</select>
+
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
 
   `;
