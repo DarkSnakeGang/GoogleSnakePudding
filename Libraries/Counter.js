@@ -85,7 +85,7 @@ window.Counter.make = function () {
         }
     }
     window.promptToEditStatCount = function () {
-        if (stats.statShown === 'hide' || stats.statShown === 'walls' ) {
+        if (stats.statShown === 'hide' || stats.statShown === 'walls') {
             alert(`Not changing stat for "hide" or "walls"`)
             return;
         }
@@ -113,7 +113,7 @@ window.Counter.make = function () {
     }
 
     window.getStatIconImageSrc = function () {
-        if(stats.statShown === 'hide'){
+        if (stats.statShown === 'hide') {
             return "https://i.postimg.cc/bNFfLPCn/Empty.png"
         }
         if (stats.statShown === 'walls') {
@@ -174,6 +174,7 @@ window.Counter.alterCode = function (code) {
 
     // Used to have window.cogOn(); here
 
+
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
     window.timeKeeper.playing = false;
@@ -183,6 +184,7 @@ window.Counter.alterCode = function (code) {
     saveStatistics();
     updateCounterDisplay();this.reset();`
 
+    catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, counter_reset_code);
 
     ////console.log(code)
@@ -190,6 +192,7 @@ window.Counter.alterCode = function (code) {
     //input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
     //debugger
     input_counter_regex = new RegExp(/=function\(a,b\){if\(!\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+    catchError(input_counter_regex, code)
     input_counter_code_end = code.match(input_counter_regex)[0].split('{')[1]
     // Used to have window.cogOff();
     input_counter_code = `=function\(a,b\){
@@ -202,21 +205,21 @@ window.Counter.alterCode = function (code) {
               window.timeKeeper.playing = true;
               //debugger
             }
-            
+
             stats.inputs.game++;
             stats.inputs.session++;
             stats.inputs.lifetime++;
             stats.statShown === 'inputs' && updateCounterDisplay();
           }
           if(b === "RIGHT") {
-         
+
             window.LightUpInput("right-button-id");
-            
+
           }
           if(b === "LEFT")
           {
             window.LightUpInput("left-button-id");
-            
+
           }
           if(b === "UP")
           {
@@ -230,14 +233,17 @@ window.Counter.alterCode = function (code) {
     code = code.assertReplace(input_counter_regex, input_counter_code);
 
     stop_regex = new RegExp(/stop=function\(a\){/)
+    catchError(stop_regex, code)
     save_stats_code = `stop=function(a){window.cogOn();saveStatistics();`
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
-    wall_spawn_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
+    wall_spawn_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
+    catchError(wall_spawn_regex, code)
+
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
     //debugger
-    wall_counter_code =`${code.match(wall_spawn_regex)[0]}
+    wall_counter_code = `${code.match(wall_spawn_regex)[0]}
     if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
     `
 

@@ -27,11 +27,22 @@ window.PuddingMod.runCodeBefore = function () {
     req.send();
   }
 
-
   window.NepDebug = false;
   if (localStorage.getItem('snakeChosenMod') === "customUrl") {
     console.log("Detect customUrl - enabling debug mode")
     window.NepDebug = true;
+  }
+
+  window.catchError = function catchError(culprit_regex, code) {
+    if (window.NepDebug) {
+      try {
+        something = code.match(culprit_regex)[0];
+      } catch (e) {
+        console.log("I caught it!")
+        console.log(culprit_regex)
+        console.log(code)
+      }
+    }
   }
 
   window.Libraries = ["Core", "Theme", "DistinctVisual", "Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor", "InputDisplay", "CustomPortalPairs", "BootstrapMenu"];

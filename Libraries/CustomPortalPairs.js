@@ -119,7 +119,7 @@ window.CustomPortalPairs.alterCode = function (code) {
             //debugger
             var selectElement = document.getElementById('fruitSelect' + i);
 
-            var dropdown_fruit = selected_fruit[i-1];
+            var dropdown_fruit = selected_fruit[i - 1];
             var option = document.createElement('option');
             option.value = dropdown_fruit;
             if (typeof (dropdown_fruit) === 'undefined') {
@@ -225,12 +225,12 @@ window.CustomPortalPairs.alterCode = function (code) {
     window.give_custom_pair = function () {
         window.custom_pair_call_counter = window.custom_pair_call_counter + 1;
         if (window.NepDebug) {
-            console.log("Giving fruit: " + selected_fruit[window.custom_pair_call_counter-1].toString())
+            console.log("Giving fruit: " + selected_fruit[window.custom_pair_call_counter - 1].toString())
         }
-        return selected_fruit[window.custom_pair_call_counter-1]
+        return selected_fruit[window.custom_pair_call_counter - 1]
     }
 
-    portal_pairs_code =`
+    portal_pairs_code = `
     if(window.portal_pairs){this.${apple_array}[c].${apple_type} = window.give_custom_pair();
     this.${apple_array}[c+1].${apple_type} = this.${apple_array}[c].${apple_type};}
     else this.${apple_array}[c].${apple_type} = ${give_portal_type_func}
