@@ -1,10 +1,10 @@
-window.PuddingMod = {};
+window.DiceMod = {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
 
-window.PuddingMod.runCodeBefore = function() {
+window.DiceMod.runCodeBefore = function() {
 
   console.log("Thank you for loading Yarmiplay's Pudding Mod! Hope you enjoy :)");
   console.log("Please provide feedback and report bugs in #snake-modding in the Official Google Snake Discord");
@@ -863,10 +863,10 @@ window.timeKeeper.setup = function(){
 
   window.bootstrapVisible = false;
 
-  window.PuddingMod.ToggleBootstrap = function() {
+  window.DiceMod.ToggleBootstrap = function() {
     if(!window.bootstrapVisible){
       // Show it
-      window.PuddingMod.Bootstrap();
+      window.DiceMod.Bootstrap();
 
     }
     else{
@@ -876,11 +876,11 @@ window.timeKeeper.setup = function(){
     window.bootstrapVisible = !window.bootstrapVisible;
   }
 
-  window.PuddingMod.Bootstrap = function() {
+  window.DiceMod.Bootstrap = function() {
 
   }
 
-  window.PuddingMod.BootstrapUpdate = function() {
+  window.DiceMod.BootstrapUpdate = function() {
     // Mainly for TimeKeeper, runs when "play" is clicked
 
   }
@@ -891,7 +891,7 @@ window.timeKeeper.setup = function(){
 //ALTERSNAKECODE
 ////////////////////////////////////////////////////////////////////
 
-window.PuddingMod.alterSnakeCode = function(code) {
+window.DiceMod.alterSnakeCode = function(code) {
 
   // TimeKeeper stuff start
   //change stepfunction to run gotApple(), gotAll() and death()
@@ -1722,7 +1722,7 @@ document.querySelector('#color').appendChild(uiImage('https://www.google.com/log
 //RUNCODEAFTER
 ////////////////////////////////////////////////////////////////////
 
-window.PuddingMod.runCodeAfter = function() {
+window.DiceMod.runCodeAfter = function() {
 
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
