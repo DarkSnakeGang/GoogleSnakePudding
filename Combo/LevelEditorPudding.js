@@ -1,10 +1,10 @@
-window.LevelEditorDice = {};
+window.LevelEditorPudding = {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
 
-window.LevelEditorDice.runCodeBefore = function() {
+window.LevelEditorPudding.runCodeBefore = function() {
     function loadAndRunCodeSynchronous(url) {
         let req = new XMLHttpRequest();
         req.open('GET', url, false);
@@ -36,13 +36,13 @@ window.LevelEditorDice.runCodeBefore = function() {
 //ALTERSNAKECODE
 ////////////////////////////////////////////////////////////////////
 
-window.LevelEditorDice.alterSnakeCode = function(code) {
+window.LevelEditorPudding.alterSnakeCode = function(code) {
   code = window.PuddingMod.alterSnakeCode((window.levelEditorMod.alterSnakeCode(code)));
   return code;
 }
 
 
-window.LevelEditorDice.runCodeAfter = function() {
+window.LevelEditorPudding.runCodeAfter = function() {
   window.levelEditorMod.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';

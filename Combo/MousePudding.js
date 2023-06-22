@@ -1,10 +1,10 @@
-window.MouseDice = {};
+window.MousePudding = {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
 
-window.MouseDice.runCodeBefore = function() {
+window.MousePudding.runCodeBefore = function() {
     function loadAndRunCodeSynchronous(url) {
         let req = new XMLHttpRequest();
         req.open('GET', url, false);
@@ -35,16 +35,16 @@ window.MouseDice.runCodeBefore = function() {
 //ALTERSNAKECODE
 ////////////////////////////////////////////////////////////////////
 
-window.MouseDice.alterSnakeCode = function(code) {
+window.MousePudding.alterSnakeCode = function(code) {
   return window.mouseMode.alterSnakeCode(window.PuddingMod.alterSnakeCode(code));;
 }
 
 
-window.MouseDice.runCodeAfter = function() {
+window.MousePudding.runCodeAfter = function() {
   window.mouseMode.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'Mouse Dice Mod';
+  modIndicator.textContent = 'Mouse Pudding Mod';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };

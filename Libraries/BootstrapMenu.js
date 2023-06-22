@@ -76,7 +76,7 @@ const xhr = new XMLHttpRequest();
 
 
         const settingsBox = document.createElement('div');
-        settingsBox.style = 'position:absolute;left:135px;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:210px;height:584px;top:-45px;';
+        settingsBox.style = 'position:absolute;left:135px;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:206px;height:584px;top:-45px;';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
 
@@ -114,33 +114,33 @@ const xhr = new XMLHttpRequest();
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons" checked disabled>
-    <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons <br>(Coming Soon)</label>
+    <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper" disabled>
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Always On TimeKeeper (Coming Soon)</label>
+    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">SRC SidePanel</label>
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
     </div>
-<select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row" disabled>
+<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row" disabled>
     <option value="0">Apple</option>
   </select>
-  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row" disabled>
   <option value="1">Banana</option>
 </select><br>
 
-  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row" disabled>
     <option value="2">Pineapple</option>
   </select>
-  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row" disabled>
     <option value="3">Purple Grapes</option>
   </select><br>
-  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row" disabled>
     <option value="4">Pumpkin</option>
   </select>
-  <select style="width:97px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row" disabled>
     <option value="5">Onion</option>
   </select>
   <br>
