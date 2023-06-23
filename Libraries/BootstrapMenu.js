@@ -109,7 +109,7 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="InputDisplay" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Input Display</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons" checked disabled>
+    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons" checked>
     <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
     </div>
     <div class="form-check form-check-inline">
@@ -155,8 +155,10 @@ window.BootstrapMenu.make = function () {
         skull_checkbox.addEventListener("change", toggle_skull_func, false);
         soko_checkbox = document.getElementById("DistinctSokoGoals");
         soko_checkbox.addEventListener("change", toggle_soko_goal, false);
-        Input_checkbox = document.getElementById("InputDisplay");
-        Input_checkbox.addEventListener("change", toggle_input_display, false);
+        input_checkbox = document.getElementById("InputDisplay");
+        input_checkbox.addEventListener("change", toggle_input_display, false);
+        topbar_checkbox = document.getElementById("TopBarIcons");
+        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons, false);
 
         let settingsToValues = {
             inputs: {
