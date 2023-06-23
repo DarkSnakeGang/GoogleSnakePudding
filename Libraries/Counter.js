@@ -1,8 +1,6 @@
 window.Counter = {};
 
 window.Counter.make = function () {
-
-
     window.loadStatistics = function () {
         let stats = localStorage.getItem('inputCounterMod');
         if (stats === null) {
@@ -100,17 +98,6 @@ window.Counter.make = function () {
             alert(`Changed stat count to ${userResponse}`);
         }
     }
-    window.showSettingsBox = function () {
-        const settingsBox = document.getElementById('settings-popup');
-        settingsBox.style.display = 'block';
-        window.cogOff();
-    }
-
-    window.hideSettingsBox = function () {
-        const settingsBox = document.getElementById('settings-popup');
-        settingsBox.style.display = 'none';
-        window.cogOn();
-    }
 
     window.getStatIconImageSrc = function () {
         if (stats.statShown === 'hide') {
@@ -120,17 +107,6 @@ window.Counter.make = function () {
             return "https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png"
         }
         return stats.statShown === 'plays' ? 'https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png' : 'https://www.google.com/logos/fnbx/snake_arcade/keys.svg';
-    }
-
-    window.cogOff = function () {
-        document.getElementById('input-counter-settings').style.display = 'none';
-    }
-
-    window.cogOn = function () {
-        if (document.getElementById('settings-popup').style.display == 'none') {
-            document.getElementById('input-counter-settings').style.display = 'inline';
-        }
-        window.cogOff();
     }
 
     window.toggleCounter = function () {
@@ -148,32 +124,12 @@ window.Counter.make = function () {
         saveStatistics();
     }
 
-    //window.setuphtml();
-    //window.cogOff();
-
-    /*
-    if (stats.visible) {
-        document.getElementById('stat-icon').style.display = 'inline';
-        document.getElementById('counter-num').style.display = 'inherit';
-        document.getElementById('toggle-counter').innerHTML = 'Hide counter';
-    }
-    else {
-        document.getElementById('stat-icon').style.display = 'none';
-        document.getElementById('counter-num').style.display = 'none';
-        document.getElementById('toggle-counter').innerHTML = 'Show counter';
-    }
-    */
-
 }
 
 window.Counter.alterCode = function (code) {
 
-    //console.log("Enabling Counter")
 
     reset_regex = new RegExp(/;this\.reset\(\)/)
-
-    // Used to have window.cogOn(); here
-
 
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
@@ -187,14 +143,11 @@ window.Counter.alterCode = function (code) {
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, counter_reset_code);
 
-    ////console.log(code)
 
     //input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
-    //debugger
     input_counter_regex = new RegExp(/=function\(a,b\){if\(!\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
     catchError(input_counter_regex, code)
     input_counter_code_end = code.match(input_counter_regex)[0].split('{')[1]
-    // Used to have window.cogOff();
     input_counter_code = `=function\(a,b\){
 
         if(b !== a.direction) {
@@ -203,7 +156,6 @@ window.Counter.alterCode = function (code) {
             {
               window.timeKeeper.start();
               window.timeKeeper.playing = true;
-              //debugger
             }
 
             stats.inputs.game++;
@@ -212,14 +164,11 @@ window.Counter.alterCode = function (code) {
             stats.statShown === 'inputs' && updateCounterDisplay();
           }
           if(b === "RIGHT") {
-
             window.LightUpInput("right-button-id");
-
           }
           if(b === "LEFT")
           {
             window.LightUpInput("left-button-id");
-
           }
           if(b === "UP")
           {
@@ -234,7 +183,7 @@ window.Counter.alterCode = function (code) {
 
     stop_regex = new RegExp(/stop=function\(a\){/)
     catchError(stop_regex, code)
-    save_stats_code = `stop=function(a){window.cogOn();saveStatistics();`
+    save_stats_code = `stop=function(a){saveStatistics();`
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
@@ -242,7 +191,6 @@ window.Counter.alterCode = function (code) {
     catchError(wall_spawn_regex, code)
 
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
-    //debugger
     wall_counter_code = `${code.match(wall_spawn_regex)[0]}
     if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
     `
