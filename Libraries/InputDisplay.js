@@ -39,10 +39,10 @@ window.InputDisplay.make = function () {
   window.input_toggle =false;
   window.toggle_input_display = function toggle_input_display() {
         window.input_toggle = !window.input_toggle;
-        console.log("hmmm");
+        //console.log("hmmm");
         if(window.input_toggle)
     {
-    
+
     document.getElementById('left-button-id').style.display='inline-block';
     document.getElementById('down-button-id').style.display='inline-block';
     document.getElementById('right-button-id').style.display='inline-block';
@@ -50,7 +50,7 @@ window.InputDisplay.make = function () {
     }
     else
     {
-      
+
       document.getElementById('left-button-id').style.display='none';
       document.getElementById('down-button-id').style.display='none';
       document.getElementById('right-button-id').style.display='none';
@@ -63,7 +63,7 @@ window.LightUpInput = function(direction)
     setTimeout(()=>{
       document.getElementById(direction).style.backgroundColor='#4f4f4f';
     },200);
-    
+
   }
 }
 window.InputDisplay.alterCode = function (code) {
