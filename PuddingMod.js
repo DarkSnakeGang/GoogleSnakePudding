@@ -29,27 +29,43 @@ window.PuddingMod.runCodeBefore = function () {
 
   window.NepDebug = false;
   if (localStorage.getItem('snakeChosenMod') === "customUrl") {
-    console.log("Detect customUrl - enabling debug mode")
+    console.log("Detect customUrl - enabling debug mode and printing initial code")
     window.NepDebug = true;
   }
 
   window.catchError = function catchError(culprit_regex, code) {
-    if (window.NepDebug) {
-      try {
-        something = code.match(culprit_regex)[0];
-      } catch (e) {
-        console.log("I caught it!")
+    try {
+      something = code.match(culprit_regex)[0];
+    } catch (e) {
+      console.log("I caught it!")
+      if (window.NepDebug) {
         console.log(culprit_regex)
         console.log(code)
       }
+      return true;
     }
+
+    return false;
+
+  }
+
+  //Style differently depending on if snake is centered.
+  let isSnakeCentered = !window.location.href.includes('fbx');
+  let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
+  if (advancedSettings.hasOwnProperty('fbxCentered') && advancedSettings.fbxCentered) {
+    isSnakeCentered = true;
+  }
+
+  if (!isSnakeCentered) {
+    // Move menu so it doesn't overlap panels
+    document.getElementsByClassName('bZUgDf')[0].style.width = '600px';
   }
 
   window.Libraries = ["Core", "Theme", "DistinctVisual", "Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor", "InputDisplay", "CustomPortalPairs", "BootstrapMenu"];
   console.log("Enabling Pudding Mod");
 
   libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
-  Libraries.forEach(LibName => {
+  window.Libraries.forEach(LibName => {
     console.log("Loading library: " + LibName)
     loadCode(libUrlPrefix + LibName + ".js")
     eval("window." + LibName + ".make();")
@@ -63,26 +79,32 @@ window.PuddingMod.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function (code) {
-
-  Libraries.forEach(LibName => {
+  if (window.NepDebug) {
+    console.log(code)
+  }
+  window.Libraries.forEach(LibName => {
     console.log("Alter code with library: " + LibName)
     eval("code = window." + LibName + ".alterCode(code);")
   });
 
-  console.log("Fixing Twin All Timer");
 
   all_regex = new RegExp(/\"ALL\"\);/);
+  window.catchError(all_regex, code)
   add_direction = `"ALL");
   ${twin_all_global}=true;
   `
 
   timer_update_regex = new RegExp(/&"NONE"!==this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.direction/);
-  ka_oa_fill = code.match(timer_update_regex)[0].split('.')[1] + '.' + code.match(timer_update_regex)[0].split('.')[2]
-  twin_timer_update = `&("NONE"!==this.${ka_oa_fill}.direction||${twin_all_global})`
+  if (!window.catchError(timer_update_regex, code)) {
+    ka_oa_fill = code.match(timer_update_regex)[0].split('.')[1] + '.' + code.match(timer_update_regex)[0].split('.')[2]
+    twin_timer_update = `&("NONE"!==this.${ka_oa_fill}.direction||${twin_all_global})`
 
-  code = code.assertReplace(all_regex, add_direction)
-  code = code.assertReplace(timer_update_regex, twin_timer_update)
-
+    code = code.assertReplace(all_regex, add_direction)
+    code = code.assertReplace(timer_update_regex, twin_timer_update)
+    console.log("Fixing Twin All Timer");
+  } else {
+    console.log("Twin All Timer Seems Already Fixed!");
+  }
   console.log("Done, enjoy Pudding Mod!");
 
   //console.log(code)
