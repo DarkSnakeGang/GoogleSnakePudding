@@ -18,22 +18,22 @@ window.InputDisplay.make = function () {
 
   const LeftButton = document.createElement('div');
   LeftButton.style ='position:absolute;left:460px;top"450px;z-index:10000;width:200px;';
-  LeftButton.innerHTML = '<div id="left-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:12px;padding-right:10px;padding-left:10px;">←</div>'
+  LeftButton.innerHTML = '<div id="left-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:12px;padding-right:10px;padding-left:10px;">⬅</div>'
   InpBox.appendChild(LeftButton);
 
   const DownButton = document.createElement('div');
   DownButton.style ='position:absolute;left:530px;top"452px;z-index:10000;width:200px;';
-  DownButton.innerHTML = '<div id="down-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:10px;padding-top:2px;padding-right:21px;padding-left:21px;">↓</div>'
+  DownButton.innerHTML = '<div id="down-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:10px;padding-top:2px;padding-right:21px;padding-left:21px;">⬇</div>'
   InpBox.appendChild(DownButton);
 
   const RightButton = document.createElement('div');
   RightButton.style ='position:absolute;left:601px;top"550px;z-index:10000;width:200px;';
-  RightButton.innerHTML = '<div id="right-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:12px;padding-right:10px;padding-left:10px;">→</div>'
+  RightButton.innerHTML = '<div id="right-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:12px;padding-right:10px;padding-left:10px;">➡</div>'
   InpBox.appendChild(RightButton);
 
   const TopButton = document.createElement('div');
   TopButton.style ='position:relative;left:530px;top"152px;z-index:10000;width:200px;';
-  TopButton.innerHTML = '<div id="top-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:10px;padding-top:2px;padding-right:21px;padding-left:21px;">↑</div>'
+  TopButton.innerHTML = '<div id="top-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:10px;padding-top:2px;padding-right:21px;padding-left:21px;">⬆</div>'
   f.appendChild(TopButton);
 
   window.input_toggle =false;
