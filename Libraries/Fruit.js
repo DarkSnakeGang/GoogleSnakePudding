@@ -128,6 +128,11 @@ window.Fruit.alterCode = function (code) {
         "Pixel": 'https://i.postimg.cc/3wS84M1M/pixel-jacko.png',
         "Poison_values": 'b,\'#fc8824\',\'#909090\',25',
     });
+    new_fruit.push({ // Ice
+        "Normal": 'https://i.postimg.cc/mrL8PJmK/ice.png',
+        "Pixel": 'https://i.postimg.cc/hG2MTsw-v/ice-px.png',
+        "Poison_values": 'b,\'#19ddf4\',\'#909090\',50',
+    });
     last_fruit_num = document.querySelector('#apple').children.length - 1;
     // Add fruit to menu
     for (let index = 0; index < new_fruit.length; index++) {

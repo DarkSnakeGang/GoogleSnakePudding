@@ -71,7 +71,8 @@ window.CustomPortalPairs.alterCode = function (code) {
         42: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
         43: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
         44: { name: "Soccer Ball", image: "https://i.postimg.cc/C1yT8vjL/soccer-ball.png" },
-        45: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" }
+        45: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
+        46: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" }
     };
 
 
