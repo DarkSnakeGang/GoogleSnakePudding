@@ -10,7 +10,7 @@ window.Theme.make = function () {
     'https://i.postimg.cc/8PLc5bjq/sonic-theme.png',
     'https://i.postimg.cc/6Q2DyGbK/jungle.png',
     'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
-    'https://i.postimg.cc/h4YNcvCN/ice.png',
+    'https://i.postimg.cc/1XqLvbhJ/Ice2.png',
     'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
 
