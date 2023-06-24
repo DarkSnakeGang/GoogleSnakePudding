@@ -45,6 +45,9 @@ window.Theme.alterCode = function (code) {
   window.boot_check = document.getElementsByClassName('form-check-input');
   window.boot_dropdown = document.getElementsByClassName('form-control');
 
+  window.real_topbar_color = "#4a752c";
+  window.button_color = "#1155CC";
+
   color_code = `
     for(let p of window.ui_sep) {
       let separators = sep_color;
@@ -64,6 +67,8 @@ window.Theme.alterCode = function (code) {
     }
 
     document.getElementById('settings-popup-pudding').style.background = real_top_bar;
+    window.real_topbar_color = real_top_bar;
+    window.button_color = buttons_color;
     for(let h of window.boot_button){
       h.style.backgroundColor = buttons_color;
     }

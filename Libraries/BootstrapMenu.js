@@ -40,7 +40,7 @@ window.BootstrapMenu.make = function () {
 */
         const d = document.createElement('div');
         d.id = 'input-counter-settings-container';
-        d.style = 'position:absolute;left:465px;top:45px;z-index:10000;';
+        d.style = 'position:absolute;left:465px;top:45px;z-index:10002;';
         document.getElementsByClassName('sEOCsb')[0].appendChild(d);
         const settingsElement = document.querySelector('#input-counter-settings-container');
 
@@ -94,8 +94,7 @@ window.BootstrapMenu.make = function () {
 
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat</button>
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset stats</button><br>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Show TimeKeeper</button>
-  <br>
+  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Show TimeKeeper</button>
   <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
     <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
@@ -113,8 +112,8 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper" disabled>
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">SRC SidePanel</label>
+    <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
+    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show SpeedInfo</label>
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
@@ -159,6 +158,8 @@ window.BootstrapMenu.make = function () {
         input_checkbox.addEventListener("change", toggle_input_display, false);
         topbar_checkbox = document.getElementById("TopBarIcons");
         topbar_checkbox.addEventListener("change", window.toggle_topbar_icons, false);
+        speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
+        speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo, false);
 
         let settingsToValues = {
             inputs: {
@@ -212,13 +213,13 @@ window.BootstrapMenu.make = function () {
         //document.getElementById('toggle-counter').addEventListener('click', toggleCounter);
 
         tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
-        document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
-            window.timeKeeper.toggleDialog();
-        });
+        //document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
+        //    window.timeKeeper.toggleDialog();
+        //});
         TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
-        document.querySelector("div[jsname^=\"" + TimerID + "\"]").addEventListener("click", (e) => {
-            window.timeKeeper.toggleDialog();
-        });
+        //document.querySelector("div[jsname^=\"" + TimerID + "\"]").addEventListener("click", (e) => {
+        //    window.timeKeeper.toggleDialog();
+        //});
 
         //debugger
     }
@@ -247,16 +248,11 @@ window.BootstrapMenu.make = function () {
         window.BootstrapHide();
     });
 
-
     const playButton = 'NSjDf';
     document.querySelector("div[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
     });
 
-    window.BootstrapUpdate = function () {
-        // Mainly for TimeKeeper, runs when "play" is clicked
-
-    }
 
 }
 

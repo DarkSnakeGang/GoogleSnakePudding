@@ -331,9 +331,11 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.showDialog = function () {
         //make dialog
         window.timeKeeper.dialogActive = true;
-        document.getElementById('time-keeper').innerHTML = 'Hide TimeKeeper';
+        document.getElementById('time-keeper').innerHTML = 'Hide Details';
 
-        dialog = document.createElement("dialog");
+        //dialog = document.createElement("dialog");
+        dialog = document.createElement("div");
+
         dialog.setAttribute("open", "");
         dialog.setAttribute("id", "timeKeeperDialog");
 
@@ -374,9 +376,9 @@ window.TimeKeeper.make = function () {
         gamemode = gamemode.substring(0, gamemode.lastIndexOf(","));
 
         //add level information
-        bold = document.createElement('strong');
-        textnode = document.createTextNode("TimeKeeper");
-        bold.style = 'color:white;font-family:Arial;'
+        bold = document.createElement('u');
+        textnode = document.createTextNode("Speed Info Details");
+        bold.style = 'color:white;font-family:Roboto,Arial;'
         //textnode.style = 'color:white;font-family:Arial;'
         bold.appendChild(textnode);
         //buttonClose.style = 'color:white;background:black'; font-family:roboto;
@@ -386,7 +388,7 @@ window.TimeKeeper.make = function () {
         dialog.appendChild(document.createElement("br"));
         switch (count) {
             case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
-            case 1: dialog.appendChild(document.createTextNode("3 Apples,")); break;
+            case 1: dialog.appendChild(document.createTextNode("3 Apples, ")); break;
             case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
             case 3: dialog.appendChild(document.createTextNode("Dice count, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
@@ -404,7 +406,7 @@ window.TimeKeeper.make = function () {
             case 2: dialog.appendChild(document.createTextNode("Large size")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu size")); break;
         }
-        //dialog.style = 'color:white;font-family:Arial;'\
+        //dialog.style = 'border-radius: 10px;'
 
         //add stats
         dialog.appendChild(document.createElement("br"));
@@ -416,7 +418,7 @@ window.TimeKeeper.make = function () {
             let name = score + "-" + modeStr + "-" + count + "-" + speed + "-" + size;
             if (typeof (storage[name]) != "undefined") {
 
-                bold = document.createElement('strong');
+                bold = document.createElement('span');
                 switch (score) {
                     case "25": bold.appendChild(document.createTextNode("25 Apples:")); break;
                     case "50": bold.appendChild(document.createTextNode("50 Apples:")); break;
@@ -480,13 +482,15 @@ window.TimeKeeper.make = function () {
         }
 
         //buttonClose
-        dialog.appendChild(document.createElement("br"));
+        //dialog.appendChild(document.createElement("br"));
         buttonClose = document.createElement("button");
         buttonClose.appendChild(document.createTextNode("Close"));
         buttonClose.addEventListener("click", (e) => {
             window.timeKeeper.toggleDialog();
         });
-        buttonClose.style = 'color:white;background:black';
+
+        buttonClose.style = 'color:white;background-color:' + window.button_color+';';
+        buttonClose.className = 'btn';
         dialog.appendChild(buttonClose);
 
         //buttonExport
@@ -499,7 +503,9 @@ window.TimeKeeper.make = function () {
 
         //add dialog
         div = document.querySelector("body");
-        dialog.setAttribute("style", "z-index:9999;top:-50px;right:-50px;bottom:-50px;left:-50px;background:black;color:white;font-family:Arial;");
+        dialog.setAttribute("style", "outline: none;border-radius: 10px;z-index:9999;background:"+window.real_topbar_color+";color:white;font-family:Roboto,Arial;");
+        dialog.style.outline = "none";
+        dialog.classList.add("custom-dialog");
 
         div.insertBefore(dialog, div.firstChild)
     };
@@ -521,7 +527,7 @@ window.TimeKeeper.make = function () {
         child = document.getElementById("timeKeeperDialog");
         child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
-        document.getElementById('time-keeper').innerHTML = 'Show TimeKeeper';
+        document.getElementById('time-keeper').innerHTML = 'Show Details';
 
     }
 
