@@ -356,7 +356,7 @@ window.SpeedInfo.make = function () {
         }
 
         if (typeof response["data"]["runs"][0] == "undefined") {
-            document.getElementById('100src').innerHTML = ` `
+            document.getElementById('100src').innerHTML = `100 Apples: None`
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
