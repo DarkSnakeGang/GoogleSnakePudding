@@ -111,6 +111,16 @@ window.SpeedInfo.make = function () {
             return;
         }
 
+        if (typeof window.SpeedrunVaraiblesJson == "undefined" ||
+        typeof window.SpeedrunCategoriesJson == "undefined" ||
+        typeof window.SpeedrunLevelsJson == "undefined" ||
+        typeof window.SpeedrunVaraiblesJsonCE == "undefined" ||
+        typeof window.SpeedrunCategoriesJsonCE == "undefined" ||
+        typeof window.SpeedrunLevelsJsonCE == "undefined") {
+            EmptyAll();
+            return;
+        }
+
         // Modes list
         CLASSIC = 0
         WALL = 1
@@ -471,7 +481,7 @@ window.SpeedInfo.make = function () {
         <br>
         <br>
 
-        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Speedrun.com Stats</span>
+        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">SRC World Records</span>
  <br>
         <label id="25src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="50src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
