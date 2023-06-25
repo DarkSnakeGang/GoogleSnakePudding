@@ -147,7 +147,7 @@ window.BootstrapMenu.make = function () {
   <option value="0">Default Rainbow</option>
 </select>
 
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
+  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
 
   `;
 
