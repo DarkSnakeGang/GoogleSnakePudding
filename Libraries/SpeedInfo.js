@@ -328,7 +328,7 @@ window.SpeedInfo.make = function () {
 
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
 
-        document.getElementById('25src').innerHTML = `25 Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        document.getElementById('25src').innerHTML = `25 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
 
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
@@ -347,7 +347,7 @@ window.SpeedInfo.make = function () {
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
 
-        document.getElementById('50src').innerHTML = `50 Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        document.getElementById('50src').innerHTML = `50 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
     }
     function Handle100(response) {
         if (response == "Empty") {
@@ -361,7 +361,7 @@ window.SpeedInfo.make = function () {
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
 
-        document.getElementById('100src').innerHTML = `100 Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        document.getElementById('100src').innerHTML = `100 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
     }
     function HandleAll(response) {
         if (response == "Empty") {
@@ -375,7 +375,7 @@ window.SpeedInfo.make = function () {
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
 
-        document.getElementById('Allsrc').innerHTML = `All Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        document.getElementById('Allsrc').innerHTML = `All Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
     }
 
     function HandleHighscore(response) {
