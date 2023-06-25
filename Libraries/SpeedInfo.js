@@ -375,7 +375,7 @@ window.SpeedInfo.make = function () {
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
 
-        document.getElementById('Allsrc').innerHTML = `All: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        document.getElementById('Allsrc').innerHTML = `All Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
     }
 
     function HandleHighscore(response) {
@@ -426,6 +426,10 @@ window.SpeedInfo.make = function () {
             if (milliseconds > 0) {
                 convertedTime += milliseconds + 'ms';
             }
+        }
+
+        if (convertedTime.includes('h')) {
+            convertedTime = convertedTime.split('s')[0] + "s";
         }
 
         return convertedTime;
