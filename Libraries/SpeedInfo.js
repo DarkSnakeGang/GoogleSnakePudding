@@ -390,7 +390,7 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        highscore = response["data"]["runs"][0]["run"]["times"]["primary_t"].toString().split('.')[1]
+        highscore = parseInt(response["data"]["runs"][0]["run"]["times"]["primary_t"].toString().split('.')[1]).toString();
         world_record = highscore + " Apples";
 
         document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
