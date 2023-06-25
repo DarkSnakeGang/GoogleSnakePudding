@@ -22,9 +22,11 @@ window.SpeedInfo.make = function () {
             url += "?"
         }
         url += "id=" + new Date().getTime()
-        console.log(url);
+        if (window.NepDebug) {
+            console.log(url);
+            console.log("Getting runs..." + window.requestsMade);
+        }
 
-        console.log("Getting runs..." + window.requestsMade);
         let request = new XMLHttpRequest();
         request.open("GET", url);
         request.onload = function () {
