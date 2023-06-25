@@ -388,3 +388,10 @@
     overflow: auto;
     transition: all 0.3s ease-in-out;
   }
+
+.input-button {
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: not-allowed;
+}

@@ -44,6 +44,7 @@ window.Theme.alterCode = function (code) {
   window.boot_button = document.getElementsByClassName('btn');
   window.boot_check = document.getElementsByClassName('form-check-input');
   window.boot_dropdown = document.getElementsByClassName('form-control');
+  window.input_button = document.getElementsByClassName('input-button');
 
   window.real_topbar_color = "#4a752c";
   window.button_color = "#1155CC";
@@ -57,6 +58,10 @@ window.Theme.alterCode = function (code) {
       h.style.background = topbar_color;
     }
     for(let h of window.ui_buttons){
+      h.style.background = buttons_color;
+    }
+    for(let h of window.input_button)
+    {
       h.style.background = buttons_color;
     }
     for(let h of window.ui_background){
