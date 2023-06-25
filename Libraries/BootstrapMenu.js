@@ -14,6 +14,9 @@ window.BootstrapMenu.make = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
         settingsBox.style.display = 'none';
         window.bootstrapVisible = false;
+        if (typeof window.getAllSrc != "undefined") {
+            window.getAllSrc();
+        }
     }
 
     window.BootstrapSetup = function () {

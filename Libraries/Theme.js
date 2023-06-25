@@ -67,6 +67,8 @@ window.Theme.alterCode = function (code) {
     }
 
     document.getElementById('settings-popup-pudding').style.background = real_top_bar;
+    document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+
     window.real_topbar_color = real_top_bar;
     window.button_color = buttons_color;
     for(let h of window.boot_button){

@@ -28,24 +28,8 @@ window.TopBar.alterCode = function (code) {
   muted_img = "//www.gstatic.com/images/icons/material/system/2x/volume_off_white_24dp.png"
   unmuted_img = "//www.gstatic.com/images/icons/material/system/2x/volume_up_white_24dp.png"
 
-  count_img = document.querySelector('#count').innerHTML.split('<');
-  window.count_img_arr = [];
-  for (let index = 0; index < count_img.length; index++) {
-    const element = count_img[index];
-    if (element != "") {
-      window.count_img_arr.push(getImgFromElement(element));
-    }
-  }
-
-
-  speed_img = document.querySelector('#speed').innerHTML.split('<');
-  window.speed_img_arr = [];
-  for (let index = 0; index < speed_img.length; index++) {
-    const element = speed_img[index];
-    if (element != "") {
-      window.speed_img_arr.push(getImgFromElement(element));
-    }
-  }
+  window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
+  window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
 
   count_regex = new RegExp(/case "count"\:/)
   speed_regex = new RegExp(/case "speed"\:/)

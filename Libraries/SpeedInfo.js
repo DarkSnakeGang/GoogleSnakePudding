@@ -2,9 +2,14 @@ window.SpeedInfo = {};
 
 window.SpeedInfo.make = function () {
 
+    // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
 
     window.requestsMade = 0;
+
+    function sleepFor(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
     window.makeAPIrequest = function (requestURL, callback) {
         // Add id to solve query isssue
@@ -26,10 +31,13 @@ window.SpeedInfo.make = function () {
             if (request.status == 200) {
                 window.requestsMade += 1;
                 let response = JSON.parse(request.response);
-                console.log(response);
+                //console.log(response);
                 if (callback && typeof callback === "function") {
                     callback(response);
                 }
+            }
+            else if (request.status == 404) {
+                console.error("You used the API wrong!");
             }
             else {
                 sleepFor(2000);
@@ -39,67 +47,385 @@ window.SpeedInfo.make = function () {
         request.send();
     }
 
-    function getCategories(response) {
-        if (window.isCE) {
-            window.SpeedrunCategoriesJsonCE = response;
-        }
-        else {
-            window.SpeedrunCategoriesJson = response;
-        }
-    }
-    function getVaraibles(response) {
-        if (window.isCE) {
-            window.SpeedrunVaraiblesJsonCE = response;
-        }
-        else {
-            window.SpeedrunVaraiblesJson = response;
-        }
-    }
-    function getLevels(response) {
-        if (window.isCE) {
-            window.SpeedrunLevelsJsonCE = response;
-        }
-        else {
-            window.SpeedrunLevelsJson = response;
-        }
-    }
+
 
     window.getGameDetails = function () {
-        window.isCE = false;
-        for (gameID of gameIDs) {
-            makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameID + "/variables", getVaraibles);
-            makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameID + "/categories?embed=game", getCategories);
-            makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameID + "/levels", getLevels);
-            window.isCE = true;
-        }
-        window.isCE = false;
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/o1y9pyk6/records?top=1", printMe);
+
+        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/variables", (x) => { window.SpeedrunVaraiblesJson = x });
+        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/categories?embed=game", (x) => { window.SpeedrunCategoriesJson = x });
+        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/levels", (x) => { window.SpeedrunLevelsJson = x });
+
+        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/variables", (x) => { window.SpeedrunVaraiblesJsonCE = x });
+        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/categories?embed=game", (x) => { window.SpeedrunCategoriesJsonCE = x });
+        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/levels", (x) => { window.SpeedrunLevelsJsonCE = x });
+
+        //makeAPIrequest("https://www.speedrun.com/api/v1/games/o1y9pyk6/records?top=1", printMe);
+
+
     }
 
-    window.getSomethingSRC = function () {
-        const maxAPIrequests = 5;
-        const max = 200;
-        if(typeof(offset) == "undefined"){
-            var offset = 0; // I have no idea what is this good for??
+    window.modeToTxt = {
+        0: { name: "Classic" },
+        1: { name: "Wall" },
+        2: { name: "Portal" },
+        3: { name: "Cheese" },
+        4: { name: "Borderless" },
+        5: { name: "Twin" },
+        6: { name: "Winged" },
+        7: { name: "Yin Yang" },
+        8: { name: "Key" },
+        9: { name: "Sokoban" },
+        10: { name: "Poison" },
+        11: { name: "Dimension" },
+        12: { name: "Minesweeper" },
+        13: { name: "Statue" },
+        14: { name: "Light" },
+        15: { name: "Peaceful" },
+        16: { name: "Blender" },
+    }
+
+    window.countToTxt = {
+        0: { name: "1 Apple" },
+        1: { name: "3 Apples" },
+        2: { name: "5 Apples" },
+        3: { name: "Dice" },
+    }
+
+    window.sizeToTxt = {
+        0: { name: "Standard" },
+        1: { name: "Small" },
+        2: { name: "Large" },
+    }
+
+    window.speedToTxt = {
+        0: { name: "Standard" },
+        1: { name: "Fast" },
+        2: { name: "Slow" },
+    }
+
+    window.getRecordSRC = function (level) {
+
+        if (!window.speedinfoVisible) {
+        // For those that don't want to see speedrun info, to keep the game stable without api calls
+            EmptyAll();
+            return;
         }
 
-        currGameID = window.isCE ? gameIDs[1] : gameIDs[0];
+        // Modes list
+        CLASSIC = 0
+        WALL = 1
+        PORTAL = 2
+        CHEESE = 3
+        BORDERLESS = 4
+        TWIN = 5
+        WINGED = 6
+        YINYANG = 7
+        KEY = 8
+        SOKO = 9
+        POISON = 10
+        DIMENSION = 11
+        MINESWEEPER = 12
+        STATUE = 13
+        LIGHT = 14
+        PEACEFUL = 15
+        BLENDER = 16
+
+        // Speed list
+        DEFAULT_SPEED = 0
+        FAST = 1
+        SLOW = 2
+
+        // Count settings
+        ONE_APPLE = 0;
+        THREE_APPLES = 1;
+        FIVE_APPLES = 2;
+        DICE = 3;
 
 
-        for (let i = 0; i < maxAPIrequests; i++) {
-            makeAPIrequest("https://www.speedrun.com/api/v1/games/o1y9pyk6/records?top=1&category=mke9xe9d", printMe);
-            offset += max;
+        let count = window.timeKeeper.getCurrentSetting("count");
+        let speed = window.timeKeeper.getCurrentSetting("speed");
+        let size = window.timeKeeper.getCurrentSetting("size");
+        let mode = window.CurrentModeNum;
+        // Implement new method of getting mod that excludes blender
+
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE];
+
+        if (size > 2 || count > 3) {
+            EmptyAll();
+            return;
+        }
+        if (mode == BLENDER) {
+            EmptyAll();
+            return;
+        }
+        if (!highscore_modes.includes(mode) && level == "H") {
+            HandleHighscore("Empty")
+            return;
+        }
+        if (mode == STATUE && level == "Highscore" && speed == SLOW) {
+            HandleHighscore("Empty")
+            return; // Statue isn't highscore on slow (yet?)
+        }
+
+        gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
+
+        Highscore_ID = "";
+        variable_IDs = speed != SLOW ? window.SpeedrunVaraiblesJson : window.SpeedrunVaraiblesJsonCE;
+        category_IDs = speed != SLOW ? window.SpeedrunCategoriesJson : window.SpeedrunCategoriesJsonCE;
+
+        //debugger
+        for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
+            if (variable_IDs["data"][currentVar].name.includes("Multi")) {
+                multi_var_ID = variable_IDs["data"][currentVar].id;
+                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
+                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.countToTxt[count].name) {
+                        multi_value_ID = currentValue;
+                        break;
+                    }
+                }
+            }
+
+            if (variable_IDs["data"][currentVar].name.includes("Speed")) {
+                speed_var_ID = variable_IDs["data"][currentVar].id;
+                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
+                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.speedToTxt[speed].name) {
+                        speed_value_ID = currentValue;
+                        break;
+                    }
+                }
+            }
+
+            if (variable_IDs["data"][currentVar].name.includes("Board")) {
+                size_var_ID = variable_IDs["data"][currentVar].id;
+                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
+                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.sizeToTxt[size].name) {
+                        size_value_ID = currentValue;
+                        break;
+                    }
+                }
+            }
+        }
+        catch_multi = "var-" + multi_var_ID + "=" + multi_value_ID
+        catch_speed = "&var-" + speed_var_ID + "=" + speed_value_ID
+        catch_size = "&var-" + size_var_ID + "=" + size_value_ID
+
+        if (level == "H") {
+
+            for (let index = 0; index < category_IDs["data"].length; index++) {
+                if (category_IDs["data"][index].name.includes(window.modeToTxt[mode].name)) {
+
+                    Highscore_ID = category_IDs["data"][index].id;
+                    break;
+                }
+            }
+
+            if (window.NepDebug) {
+                console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
+                    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
+            }
+
+            makeAPIrequest("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
+                "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size, HandleHighscore);
+
+            return;
+            //makeAPIrequest("https://www.speedrun.com/api/v1/categories/"+Highscore_ID+"/records?top=1&x=7kj63r42-0nwovxdl.mlnmj661-0nwomwdl.xqkkj49q-p854j77l.z19gp0jl", printMe);
+        }
+
+        level_IDs = speed != SLOW ? window.SpeedrunLevelsJson : window.SpeedrunLevelsJsonCE;
+
+        for (let index = 0; index < level_IDs["data"].length; index++) {
+            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
+            level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
+                level_ID = level_IDs["data"][index].id;
+                break;
+            }
+        }
+
+        for (let index = 0; index < category_IDs["data"].length; index++) {
+            if (category_IDs["data"][index].name.includes(level + " Apples")) {
+
+                category_ID = category_IDs["data"][index].id;
+                break;
+            }
+        }
+
+        src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
+
+        if (window.NepDebug) {
+            console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
+        }
+        switch (level) {
+            case "25":
+                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle25)
+                break;
+            case "50":
+                if (size == 1 && mode == YINYANG) {
+                    Handle50("Empty")
+                    break;
+                }
+                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle50)
+                break;
+            case "100":
+                if (size != 1) {
+                    makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle100)
+                    break;
+                }
+                Handle100("Empty");
+                break;
+            case "All":
+                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, HandleAll)
+                break;
+            default:
+                break;
+        }
+
+
+    }
+
+    function printMe(response) {
+        console.log(response);
+    }
+
+    //window.getRecordSRC("H");
+
+    function EmptyAll() {
+        emp = "Empty"
+        Handle25(emp);
+        Handle50(emp);
+        Handle100(emp);
+        HandleAll(emp);
+        HandleHighscore(emp);
+    }
+
+    window.getAllSrc = function() {
+        ["25", "50", "100", "All", "H"].forEach(element => {
+            getRecordSRC(element);
+        });
+    }
+
+    function Handle25(response) {
+        if (response == "Empty") {
+            document.getElementById('25src').innerHTML = ` `
+            return;
+        }
+
+        if (typeof response["data"]["runs"][0] == "undefined") {
+            document.getElementById('25src').innerHTML = `25 Apples: None`
+            return;
+        }
+
+        world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
+
+        document.getElementById('25src').innerHTML = `25 Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+
+        //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
+        if (window.NepDebug) {
+            console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
+        }
+    }
+    function Handle50(response) {
+        if (response == "Empty") {
+            document.getElementById('50src').innerHTML = ` `
+            return;
+        }
+
+        if (typeof response["data"]["runs"][0] == "undefined") {
+            document.getElementById('50src').innerHTML = `50 Apples: None`
+            return;
+        }
+        world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
+
+        document.getElementById('50src').innerHTML = `50 Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+    }
+    function Handle100(response) {
+        if (response == "Empty") {
+            document.getElementById('100src').innerHTML = ` `
+            return;
+        }
+
+        if (typeof response["data"]["runs"][0] == "undefined") {
+            document.getElementById('100src').innerHTML = ` `
+            return;
+        }
+        world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
+
+        document.getElementById('100src').innerHTML = `100 Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+    }
+    function HandleAll(response) {
+        if (response == "Empty") {
+            document.getElementById('Allsrc').innerHTML = ` `
+            return;
+        }
+
+        if (typeof response["data"]["runs"][0] == "undefined") {
+            document.getElementById('Allsrc').innerHTML = `All Apples: None`
+            return;
+        }
+        world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
+
+        document.getElementById('Allsrc').innerHTML = `All Apples: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+    }
+
+    function HandleHighscore(response) {
+
+        if (response == "Empty") {
+            document.getElementById('Hsrc').innerHTML = ` `
+            return;
+        }
+
+        if (typeof response["data"]["runs"][0] == "undefined") {
+            document.getElementById('Hsrc').innerHTML = `Highscore: None`
+            return;
+        }
+
+        highscore = response["data"]["runs"][0]["run"]["times"]["primary_t"].toString().split('.')[1]
+        world_record = highscore + " Apples";
+
+        document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
+        if (window.NepDebug) {
+            console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
 
-    function printMe(params) {
-        console.log(params)
+    // This shit was generated by ChatGPT
+    function convertTime(duration) {
+        const regex = /PT(?:(\d+)H)?(?:(\d+)M)?([\d.]+)S/;
+        const matches = duration.match(regex);
+
+        let convertedTime = '';
+
+        if (matches[1]) {
+          convertedTime += matches[1] + 'h';
+        }
+
+        if (matches[2]) {
+          convertedTime += matches[2] + 'm';
+        }
+
+        const seconds = parseFloat(matches[3]);
+
+        if (seconds > 0 || convertedTime === '') {
+          const wholeSeconds = Math.floor(seconds);
+          convertedTime += wholeSeconds + 's';
+
+          const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
+
+          if (milliseconds > 0) {
+            convertedTime += milliseconds + 'ms';
+          }
+        }
+
+        return convertedTime;
+      }
+
+    function countOccurrences(str, char) {
+        const regex = new RegExp(char, "g");
+        const matches = str.match(regex);
+        return matches ? matches.length : 0;
     }
 
-
-
-
-    //window.getGameDetails();
+    window.getGameDetails();
     //window.getSomethingSRC();
 
     window.speedinfoVisible = false;
@@ -145,10 +471,12 @@ window.SpeedInfo.make = function () {
         <br>
         <br>
 
-        <label id="src-title" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;justify-content: center; align-items: center; text-align: center;">SRC Stats (Unimplemetned)</label><br>        <label id="25src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Speedrun.com Stats</span>
+ <br>
+        <label id="25src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="50src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="100src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="ALLsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="Allsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Hsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <br>
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
@@ -318,6 +646,25 @@ window.SpeedInfo.alterCode = function (code) {
     switch_regex = new RegExp(/switch\(b\){case "apple"/)
     speedinfo_switch = `window.SpeedInfoUpdate();switch(b){case "apple"`
     code = code.assertReplace(switch_regex, speedinfo_switch);
+
+    window.CurrentModeNum = 0;
+    mode_regex = new RegExp(/case "trophy"\:/)
+    mode_get_code = `case "trophy":window.CurrentModeNum = `
+    code = code.assertReplace(mode_regex, mode_get_code);
+
+    /*
+    count_regex = new RegExp(/case "count"\:/)
+    count_get_code = `case "count":window.getAllSrc();`
+    code = code.assertReplace(mode_regex, count_get_code);
+
+    speed_regex = new RegExp(/case "speed"\:/)
+    speed_get_code = `case "speed":window.getAllSrc();`
+    code = code.assertReplace(speed_regex, speed_get_code);
+
+    size_regex = new RegExp(/case "size"\:/)
+    size_get_code = `case "size":window.getAllSrc();`
+    code = code.assertReplace(size_regex, size_get_code);
+    */
 
     return code;
 }
