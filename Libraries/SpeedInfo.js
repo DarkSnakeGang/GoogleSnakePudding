@@ -108,17 +108,17 @@ window.SpeedInfo.make = function () {
     window.getRecordSRC = function (level) {
 
         if (!window.speedinfoVisible) {
-        // For those that don't want to see speedrun info, to keep the game stable without api calls
+            // For those that don't want to see speedrun info, to keep the game stable without api calls
             EmptyAll();
             return;
         }
 
         if (typeof window.SpeedrunVaraiblesJson == "undefined" ||
-        typeof window.SpeedrunCategoriesJson == "undefined" ||
-        typeof window.SpeedrunLevelsJson == "undefined" ||
-        typeof window.SpeedrunVaraiblesJsonCE == "undefined" ||
-        typeof window.SpeedrunCategoriesJsonCE == "undefined" ||
-        typeof window.SpeedrunLevelsJsonCE == "undefined") {
+            typeof window.SpeedrunCategoriesJson == "undefined" ||
+            typeof window.SpeedrunLevelsJson == "undefined" ||
+            typeof window.SpeedrunVaraiblesJsonCE == "undefined" ||
+            typeof window.SpeedrunCategoriesJsonCE == "undefined" ||
+            typeof window.SpeedrunLevelsJsonCE == "undefined") {
             EmptyAll();
             return;
         }
@@ -247,7 +247,7 @@ window.SpeedInfo.make = function () {
 
         for (let index = 0; index < level_IDs["data"].length; index++) {
             if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
-            level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
+                level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
                 level_ID = level_IDs["data"][index].id;
                 break;
             }
@@ -309,7 +309,7 @@ window.SpeedInfo.make = function () {
         HandleHighscore(emp);
     }
 
-    window.getAllSrc = function() {
+    window.getAllSrc = function () {
         ["25", "50", "100", "All", "H"].forEach(element => {
             getRecordSRC(element);
         });
@@ -408,28 +408,28 @@ window.SpeedInfo.make = function () {
         let convertedTime = '';
 
         if (matches[1]) {
-          convertedTime += matches[1] + 'h';
+            convertedTime += matches[1] + 'h';
         }
 
         if (matches[2]) {
-          convertedTime += matches[2] + 'm';
+            convertedTime += matches[2] + 'm';
         }
 
         const seconds = parseFloat(matches[3]);
 
         if (seconds > 0 || convertedTime === '') {
-          const wholeSeconds = Math.floor(seconds);
-          convertedTime += wholeSeconds + 's';
+            const wholeSeconds = Math.floor(seconds);
+            convertedTime += wholeSeconds + 's';
 
-          const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
+            const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
 
-          if (milliseconds > 0) {
-            convertedTime += milliseconds + 'ms';
-          }
+            if (milliseconds > 0) {
+                convertedTime += milliseconds + 'ms';
+            }
         }
 
         return convertedTime;
-      }
+    }
 
     function countOccurrences(str, char) {
         const regex = new RegExp(char, "g");
