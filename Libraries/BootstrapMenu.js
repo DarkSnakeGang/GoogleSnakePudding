@@ -13,10 +13,10 @@ window.BootstrapMenu.make = function () {
     window.BootstrapHide = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
         settingsBox.style.display = 'none';
-        window.bootstrapVisible = false;
-        if (typeof window.getAllSrc != "undefined") {
+        if (window.bootstrapVisible && typeof window.getAllSrc != "undefined") {
             window.getAllSrc();
         }
+        window.bootstrapVisible = false;
     }
 
     window.BootstrapSetup = function () {
