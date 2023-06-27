@@ -184,7 +184,7 @@ window.SpeedInfo.make = function () {
         Highscore_ID = "";
         variable_IDs = speed != SLOW ? window.SpeedrunVaraiblesJson : window.SpeedrunVaraiblesJsonCE;
         category_IDs = speed != SLOW ? window.SpeedrunCategoriesJson : window.SpeedrunCategoriesJsonCE;
-
+        speed_var_ID = speed_value_ID = ""
         //debugger
         for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
             if (variable_IDs["data"][currentVar].name.includes("Multi")) {
@@ -217,9 +217,14 @@ window.SpeedInfo.make = function () {
                 }
             }
         }
+
         catch_multi = "var-" + multi_var_ID + "=" + multi_value_ID
         catch_speed = "&var-" + speed_var_ID + "=" + speed_value_ID
         catch_size = "&var-" + size_var_ID + "=" + size_value_ID
+
+        if (speed_var_ID = "") { // Slow stuff doesn't have speed value when it's high score
+            catch_speed = ""
+        }
 
         if (level == "H") {
 
