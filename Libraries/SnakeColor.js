@@ -125,7 +125,7 @@ window.SnakeColor.alterCode = function (code) {
 
     window.allColorsLength = document.querySelector('#color').children.length;
 
-    console.log(document.querySelector('#color').children.length)
+    //console.log(document.querySelector('#color').children.length)
 
     // Add the rainbow snake color option back
     document.querySelector('#color').appendChild(uiImage('https://www.google.com/logos/fnbx/snake_arcade/v5/color_18.png'));
