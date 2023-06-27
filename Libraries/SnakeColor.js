@@ -208,7 +208,7 @@ window.SnakeColor.alterCode = function (code) {
         const element = code.match(rainbow_bool_regex)[0];
         snake_color_num = element.split('=')[3]
         make_me_different = `10==` + element.split('=')[3]
-        new_rainbow_bool = make_me_different + `||${snake_color_num}>window.regularColors-1||window.isRainbow`
+        new_rainbow_bool = make_me_different + `||window.isRainbow`
         code = code.assertReplace(element, new_rainbow_bool)
 
     }
