@@ -212,7 +212,7 @@ window.CustomPortalPairs.alterCode = function (code) {
 
     window.custom_pair_call_counter = 0; // Reset every new game
 
-    reset_regex = new RegExp(/this\.reset\(\)/)
+    reset_regex = new RegExp(/;this\.reset\(\)/)
 
     counter_reset_code = `window.custom_pair_call_counter = 0;this.reset();`
 
