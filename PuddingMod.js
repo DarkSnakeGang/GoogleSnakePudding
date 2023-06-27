@@ -10,6 +10,17 @@ window.PuddingMod.runCodeBefore = function () {
   console.log("Please provide feedback and report bugs in #snake-modding in the Official Google Snake Discord");
   console.log("Google Snake SRC Discord link: https://discord.gg/dDuCTm62EZ");
 
+  window.getRandomBoolean = function () {
+    return Math.random() < 0.5;
+  }
+
+  window.getRandomInt = function (min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+
   window.loadCode = function loadAndRunCodeSynchronous(url) {
     let req = new XMLHttpRequest();
     req.open('GET', url, false);

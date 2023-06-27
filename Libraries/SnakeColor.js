@@ -102,6 +102,32 @@ window.SnakeColor.alterCode = function (code) {
         yinyang_colors_build = yinyang_colors_build + ',' + snake_colors[index].YinYang;
 
     }
+
+    window.regularColors = document.querySelector('#color').children.length;
+
+    window.lgbtColors = {
+        0: { name: "Default Rainbow", set: ['#4E7CF6', '#5499C7', '#AF7AC5', '#E74C3C', '#F39C12', '#CCC31C', '#27AE60',], icon: "https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png", yinyang: 10 },
+        1: { name: "Pride", set: ['#e40303', '#ff8c00', '#ffed00', '#008026', '#004dff', '#750787',], icon: "https://i.postimg.cc/htQpV5jn/pride.png", yinyang: 8 },
+        2: { name: "Bisexual", set: ['#D60270','#D60270', '#9B4F96', '#0038A8','#0038A8',], icon: "https://i.postimg.cc/L6xjhB3p/bi.png", yinyang: 5 },
+        3: { name: "Transgender", set: ['#55CDFC','#55CDFC', '#ffffff','#ffffff', '#F7A8B8','#F7A8B8',], icon: "https://i.postimg.cc/qqWqCLQm/trans.png", yinyang: 9 },
+        4: { name: "Pansexual", set: ['#FF1B8D', '#FF1B8D', '#FFDA00','#FFDA00', '#1BB3FF','#1BB3FF',], icon: "https://i.postimg.cc/FH3d32M0/pan.png", yinyang: 5 },
+        5: { name: "Asexual", set: ['#000000', '#a3a3a3', '#ffffff', '#810082',], icon: "https://i.postimg.cc/6QCPs5DT/asexual.png", yinyang: 4 },
+        6: { name: "Aromantic", set: ['#3AA63F', '#A8D47A', '#FFFFFF', '#AAAAAA', '#000000',], icon: "https://i.postimg.cc/L6fQgs8D/aromantic.png", yinyang: 4 },
+        7: { name: "Intersex", set: ['#FFDA00','#FFDA00', '#7A00AC','#7A00AC',], icon: "https://i.postimg.cc/D04Y7rZQ/intersex.png", yinyang: 3 },
+        8: { name: "Lesbian", set: ['#D62900', '#FF9B55', '#FFFFFF', '#D461A6', '#A50062',], icon: "https://i.postimg.cc/sfBVMbGm/lesbian.png", yinyang: 1 },
+        9: { name: "Non-binary", set: ['#000000', '#fff433', '#ffffff', '#9b59d0',], icon: "https://i.postimg.cc/gk2kYrqw/nonbinary.png", yinyang: 3 },
+        10: { name: "Monochrome", set: ['#808080', '#9E9E9E', '#808080', '#616161',], icon: "https://i.postimg.cc/QNw9nQr8/monochrome.png", yinyang: 0 },
+    }
+
+    for (var j = 1; j < Object.keys(window.lgbtColors).length; j++) {
+        document.querySelector('#color').appendChild(uiImage(window.lgbtColors[j].icon));
+    }
+
+    window.allColorsLength = document.querySelector('#color').children.length;
+
+    console.log(document.querySelector('#color').children.length)
+
+    // Add the rainbow snake color option back
     document.querySelector('#color').appendChild(uiImage('https://www.google.com/logos/fnbx/snake_arcade/v5/color_18.png'));
 
     colors_build = colors_build + ']';
@@ -122,6 +148,22 @@ window.SnakeColor.alterCode = function (code) {
     default_rainbow_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}[^]?=[^]?"#4E7CF6 #5499C7 #AF7AC5 #E74C3C #F39C12 #CCC31C #27AE60"\.split\(" "\)/)
     default_rainbow_array = code.match(default_rainbow_regex)[0].split('=')[0]
 
+    yinyang_rainbow_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}[^]?=[^]?\["#808080","#9E9E9E","#808080","#616161"\]/)
+    yinyang_rainbow_array = code.match(yinyang_rainbow_regex)[0].split('=')[0]
+
+    window.isRainbow = false;
+
+    color_regex = new RegExp(/case "color"\:/)
+    color_get_code = `case "color":
+    window.isRainbow = false;
+    window.randomColor = d==window.allColorsLength ? true : false;
+    if(d!=window.allColorsLength && (d==10 || d>window.regularColors-1)){
+        if(d!=10){window.snakeRainbowOverride = (d - (window.regularColors)) + 1;}
+        else{window.snakeRainbowOverride=0}
+        window.isRainbow = true;
+    }`
+    code = code.assertReplace(color_regex, color_get_code);
+
     rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${default_rainbow_array}\\\;`)
 
     if (window.NepDebug) {
@@ -133,23 +175,12 @@ window.SnakeColor.alterCode = function (code) {
 
     rainbow_code = `{
     ${default_rainbow_array} = window.lgbtColors[window.snakeRainbowOverride].set;
+    ${yinyang_rainbow_array} = window.lgbtColors[window.lgbtColors[window.snakeRainbowOverride].yinyang].set;
     ${code.match(rainbow_usage_regex)[0].split('{')[1]}
     `
 
     // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
 
-    window.lgbtColors = {
-        0: { name: "Default Rainbow", set: ['#4E7CF6', '#5499C7', '#AF7AC5', '#E74C3C', '#F39C12', '#CCC31C', '#27AE60',] },
-        1: { name: "Pride", set: ['#e40303', '#ff8c00', '#ffed00', '#008026', '#004dff', '#750787',] },
-        2: { name: "Bisexual", set: ['#D60270', '#9B4F96', '#0038A8',] },
-        3: { name: "Transgender", set: ['#55CDFC', '#ffffff', '#F7A8B8',] },
-        4: { name: "Pansexual", set: ['#FF1B8D', '#FFDA00', '#1BB3FF',] },
-        5: { name: "Asexual", set: ['#000000', '#a3a3a3', '#ffffff', '#810082',] },
-        6: { name: "Aromantic", set: ['#3AA63F', '#A8D47A', '#FFFFFF', '#AAAAAA', '#000000',] },
-        7: { name: "Intersex", set: ['#FFDA00', '#7A00AC',] },
-        8: { name: "Lesbian", set: ['#D62900', '#FF9B55', '#FFFFFF', '#D461A6', '#A50062',] },
-        9: { name: "Non-binary", set: ['#000000', '#fff433', '#ffffff', '#9b59d0',] },
-    }
 
 
     snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\)[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
@@ -162,15 +193,41 @@ window.SnakeColor.alterCode = function (code) {
     //code = code.assertReplace(/a\.Yd=qN\[0\]\[1\];/, `a.Yd=10 === a.settings.Aa ? window.lgbtColors[window.snakeRainbowOverride].set[0] : qN[0][1];`)
     //code = code.assertReplace(code.match(`${default_rainbow_array}\\\[0\\\]`)[0], `window.lgbtColors[window.snakeRainbowOverride].set[0]`)
     //console.log(code)
-// ["#4E7CF6","#17439F"]
+    // ["#4E7CF6","#17439F"]
     //code = code.assertReplace(/0===a\.settings\.Aa\|\|/, "")
     //code = code.assertReplace(/0===a\.settings\.Aa\|\|/, "")
     //code = code.assertReplace(/\["#4E7CF6","#17439F"\]/, `["#FFFFFF","#FFFFFF"]`)
 
     snake_face2_reg = new RegExp(/\|\|10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
-    snakeface2code=')'+code.match(snake_face2_reg)[0].split(')')[1]
+    snakeface2code = '&&!window.randomColor)' + code.match(snake_face2_reg)[0].split(')')[1]
     code = code.assertReplace(snake_face2_reg, snakeface2code)
 
+    rainbow_bool_regex = new RegExp(/10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/g)
+
+    is_rainbow_matches = code.match(rainbow_bool_regex).length;
+    for (let index = 0; index < is_rainbow_matches; index++) {
+        const element = code.match(rainbow_bool_regex)[0];
+        snake_color_num = element.split('=')[3]
+        make_me_different = `10==` + element.split('=')[3]
+        new_rainbow_bool = make_me_different + `||${snake_color_num}>window.regularColors-1||window.isRainbow`
+        code = code.assertReplace(element, new_rainbow_bool)
+
+    }
+
+    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var c=a.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8};/)
+
+    random_color_super_reset = `$&
+    if(window.randomColor){window.isRainbow = window.getRandomBoolean() ? window.getRandomBoolean() : false;}
+    if(window.randomColor&&window.isRainbow){
+        window.snakeRainbowOverride = getRandomInt(0, Object.keys(window.lgbtColors).length-1);
+        c = window.lgbtColors[window.snakeRainbowOverride].set[0];
+    }`
+
+    catchError(random_color_super_regex, code)
+    code = code.assertReplace(random_color_super_regex, random_color_super_reset);
+
+    //rainbow_bool_code = code.match(rainbow_bool_regex)[0] + "||window.isRainbow"
+    //code = code.assertReplaceAll(rainbow_bool_regex, rainbow_bool_code)
 
     function PopulateSnakeColorsDropdown() {
         // Populate dropdown
@@ -183,11 +240,11 @@ window.SnakeColor.alterCode = function (code) {
             }
         });
         for (var j = 1; j < Object.keys(window.lgbtColors).length; j++) {
-                var color = window.lgbtColors[j];
-                var option = document.createElement('option');
-                option.value = j;
-                option.textContent = color.name;
-                selectElement.appendChild(option);
+            var color = window.lgbtColors[j];
+            var option = document.createElement('option');
+            option.value = j;
+            option.textContent = color.name;
+            selectElement.appendChild(option);
         }
 
     }

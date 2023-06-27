@@ -143,7 +143,7 @@ window.BootstrapMenu.make = function () {
   </select>
   <br>
 
-<select style="margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
+<select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
   <option value="0">Default Rainbow</option>
 </select>
 
