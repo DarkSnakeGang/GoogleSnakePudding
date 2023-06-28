@@ -163,7 +163,10 @@ window.BootstrapMenu.make = function () {
         topbar_checkbox.addEventListener("change", window.toggle_topbar_icons, false);
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo, false);
-
+        if (localStorage.getItem('snakeChosenMod') === "MorePudding") {
+            console.log("Detect MorePudding - disabling SpeedInfo")
+            speedinfo_checkbox.disabled = true;
+        }
         let settingsToValues = {
             inputs: {
                 game: 'inputGame',
