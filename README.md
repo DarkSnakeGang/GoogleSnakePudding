@@ -1,5 +1,7 @@
 # Google Snake Pudding Mod
 * Pudding Mod is a mod for Speedrunners that makes visual changes only. Supports all other mods!
+* A browser extension is required!
+* Learn more and get the extension [here.](https://github.com/DarkSnakeGang/GoogleSnakeModLoader)
 ![image](https://static.wikia.nocookie.net/google-snake-game/images/6/67/Pudding_Mod_Showcase.png/revision/latest/scale-to-width-down/838?cb=20230605135736)
 
 ## Features
