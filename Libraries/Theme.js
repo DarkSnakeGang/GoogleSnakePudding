@@ -245,7 +245,7 @@ window.Theme.make = function () {
       dark_tiles: '#57D5F4',
       shadow: '#57B0C7',
       border: '#006080',
-      key_block_sign_color: '#005C8A',
+      key_block_sign_color: '#57D5F4',
       real_top_bar: '#00495C',
       endscreen_background: '#00E1E6',
       sep_color: '#10C1C6',
