@@ -90,6 +90,16 @@ window.SnakeColor.alterCode = function (code) {
         "Colors": '["#667da4","#4c5a73"]',
         "YinYang": '30',
     });
+    snake_colors.push({ // Hotpink 33
+        "Icon": 'https://i.postimg.cc/HLgZb9pz/hotpink.png',
+        "Colors": '["#bd2862","#a72356"]',
+        "YinYang": '34',
+    });
+    snake_colors.push({ // Navy Blue 34
+        "Icon": 'https://i.postimg.cc/wMZFMhfh/navy-blue.png',
+        "Colors": '["#000080","#000080"]',
+        "YinYang": '33',
+    });
 
     colors_build = code.match(snake_colors_regex)[0].replace(']]', ']');
     yinyang_colors_build = code.match(yinyang_colors_regex)[0].replace(']', '');
@@ -105,7 +115,7 @@ window.SnakeColor.alterCode = function (code) {
 
     window.regularColors = document.querySelector('#color').children.length;
 
-    window.lgbtColors = {
+    window.rainbowAlts = {
         0: { name: "Default Rainbow", set: ['#4E7CF6', '#5499C7', '#AF7AC5', '#E74C3C', '#F39C12', '#CCC31C', '#27AE60',], icon: "https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png", yinyang: 10 },
         1: { name: "Pride", set: ['#e40303', '#ff8c00', '#ffed00', '#008026', '#004dff', '#750787',], icon: "https://i.postimg.cc/htQpV5jn/pride.png", yinyang: 8 },
         2: { name: "Bisexual", set: ['#D60270','#D60270', '#9B4F96', '#0038A8','#0038A8',], icon: "https://i.postimg.cc/L6xjhB3p/bi.png", yinyang: 5 },
@@ -117,10 +127,11 @@ window.SnakeColor.alterCode = function (code) {
         8: { name: "Lesbian", set: ['#D62900', '#FF9B55', '#FFFFFF', '#D461A6', '#A50062',], icon: "https://i.postimg.cc/sfBVMbGm/lesbian.png", yinyang: 1 },
         9: { name: "Non-binary", set: ['#000000', '#fff433', '#ffffff', '#9b59d0',], icon: "https://i.postimg.cc/gk2kYrqw/nonbinary.png", yinyang: 3 },
         10: { name: "Monochrome", set: ['#808080', '#9E9E9E', '#808080', '#616161',], icon: "https://i.postimg.cc/QNw9nQr8/monochrome.png", yinyang: 0 },
+        11: { name: "Catalonia", set: ['#0f47af', '#ffffff', '#0f47af' ,'#ffd700', '#cc0000', '#ffd700', '#cc0000'], icon: "https://i.postimg.cc/HLNtB0mF/catalonia-Snake.png", yinyang: 10 },
     }
 
-    for (var j = 1; j < Object.keys(window.lgbtColors).length; j++) {
-        document.querySelector('#color').appendChild(uiImage(window.lgbtColors[j].icon));
+    for (var j = 1; j < Object.keys(window.rainbowAlts).length; j++) {
+        document.querySelector('#color').appendChild(uiImage(window.rainbowAlts[j].icon));
     }
 
     window.allColorsLength = document.querySelector('#color').children.length;
@@ -173,8 +184,8 @@ window.SnakeColor.alterCode = function (code) {
     window.snakeRainbowOverride = 0;
 
     rainbow_code = `{
-    ${default_rainbow_array} = window.lgbtColors[window.snakeRainbowOverride].set;
-    ${yinyang_rainbow_array} = window.lgbtColors[window.lgbtColors[window.snakeRainbowOverride].yinyang].set;
+    ${default_rainbow_array} = window.rainbowAlts[window.snakeRainbowOverride].set;
+    ${yinyang_rainbow_array} = window.rainbowAlts[window.rainbowAlts[window.snakeRainbowOverride].yinyang].set;
     ${code.match(rainbow_usage_regex)[0].split('{')[1]}
     `
 
@@ -184,13 +195,13 @@ window.SnakeColor.alterCode = function (code) {
 
     snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\)[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     snake_face_code = code.match(snake_face_regex)[0]
-    snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split(')')[0]}? window.lgbtColors[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
+    snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split(')')[0]}? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
 
     //console.log(snake_face_code)
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
     code = code.assertReplace(snake_face_regex, snake_face_code)
-    //code = code.assertReplace(/a\.Yd=qN\[0\]\[1\];/, `a.Yd=10 === a.settings.Aa ? window.lgbtColors[window.snakeRainbowOverride].set[0] : qN[0][1];`)
-    //code = code.assertReplace(code.match(`${default_rainbow_array}\\\[0\\\]`)[0], `window.lgbtColors[window.snakeRainbowOverride].set[0]`)
+    //code = code.assertReplace(/a\.Yd=qN\[0\]\[1\];/, `a.Yd=10 === a.settings.Aa ? window.rainbowAlts[window.snakeRainbowOverride].set[0] : qN[0][1];`)
+    //code = code.assertReplace(code.match(`${default_rainbow_array}\\\[0\\\]`)[0], `window.rainbowAlts[window.snakeRainbowOverride].set[0]`)
     //console.log(code)
     // ["#4E7CF6","#17439F"]
     //code = code.assertReplace(/0===a\.settings\.Aa\|\|/, "")
@@ -218,8 +229,8 @@ window.SnakeColor.alterCode = function (code) {
     random_color_super_reset = `$&
     if(window.randomColor){window.isRainbow = window.getRandomBoolean() ? window.getRandomBoolean() : false;}
     if(window.randomColor&&window.isRainbow){
-        window.snakeRainbowOverride = getRandomInt(0, Object.keys(window.lgbtColors).length-1);
-        c = window.lgbtColors[window.snakeRainbowOverride].set[0];
+        window.snakeRainbowOverride = getRandomInt(0, Object.keys(window.rainbowAlts).length-1);
+        c = window.rainbowAlts[window.snakeRainbowOverride].set[0];
     }`
 
     catchError(random_color_super_regex, code)
@@ -238,8 +249,8 @@ window.SnakeColor.alterCode = function (code) {
                 console.log(window.snakeRainbowOverride)
             }
         });
-        for (var j = 1; j < Object.keys(window.lgbtColors).length; j++) {
-            var color = window.lgbtColors[j];
+        for (var j = 1; j < Object.keys(window.rainbowAlts).length; j++) {
+            var color = window.rainbowAlts[j];
             var option = document.createElement('option');
             option.value = j;
             option.textContent = color.name;

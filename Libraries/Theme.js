@@ -230,7 +230,7 @@ window.Theme.make = function () {
       dark_tiles: '#ffdf3f',
       shadow: '#dfbf1f',
       border: '#a55229',
-      key_block_sign_color: '#eeeeee',
+      key_block_sign_color: '#ffdf3f',
       real_top_bar: '#853209',
       endscreen_background: '#853209',
       sep_color: '#efcf2f',
