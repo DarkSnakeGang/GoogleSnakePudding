@@ -124,7 +124,7 @@ window.TimeKeeper.make = function () {
 
     //save highscore
     window.timeKeeper.saveScore = function (time, score, mode, count, speed, size) {
-        if (count > 2 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or Dice, or MouseMode or Level Editor
             return;
         }
