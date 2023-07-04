@@ -398,7 +398,7 @@ window.SpeedInfo.make = function () {
         highscore = parseInt(response["data"]["runs"][0]["run"]["times"]["primary"].toString().split('.')[1]).toString();
         world_record = highscore + " Apples";
 
-        document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
             console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
