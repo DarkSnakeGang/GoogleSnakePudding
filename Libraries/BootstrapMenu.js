@@ -103,7 +103,7 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals" checked>
+    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
     <label class="form-check-label" for="DistinctSokoGoals" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Distinct Soko Goals</label>
     </div>
     <div class="form-check form-check-inline">
@@ -111,7 +111,7 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="InputDisplay" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Input Display</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons" checked>
+    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
     <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
     </div>
     <div class="form-check form-check-inline">
@@ -154,15 +154,27 @@ window.BootstrapMenu.make = function () {
         settingsElement.appendChild(settingsBox);
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
-        skull_checkbox.addEventListener("change", toggle_skull_func, false);
+        skull_checkbox.checked = window.settings.Skull;
+        skull_checkbox.addEventListener("change", toggle_skull_func);
+
         soko_checkbox = document.getElementById("DistinctSokoGoals");
-        soko_checkbox.addEventListener("change", toggle_soko_goal, false);
+        soko_checkbox.checked = window.settings.SokoGoals;
+        soko_checkbox.addEventListener("change", toggle_soko_goal);
+
         input_checkbox = document.getElementById("InputDisplay");
-        input_checkbox.addEventListener("change", toggle_input_display, false);
+        input_checkbox.addEventListener("change", toggle_input_display);
+        input_checkbox.checked = window.settings.InputDisplay;
+        toggle_input_display();
+
         topbar_checkbox = document.getElementById("TopBarIcons");
-        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons, false);
+        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
+        topbar_checkbox.checked = window.settings.TopBar;
+
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
-        speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo, false);
+        speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
+        speedinfo_checkbox.checked = window.settings.SpeedInfo;
+        ToggleSpeedInfo();
+        
         if (localStorage.getItem('snakeChosenMod') === "MorePudding") {
             console.log("Detect MorePudding - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;

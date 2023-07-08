@@ -107,7 +107,7 @@ window.SpeedInfo.make = function () {
 
     window.getRecordSRC = function (level) {
 
-        if (!window.speedinfoVisible) {
+        if (!window.settings.SpeedInfo) {
             // For those that don't want to see speedrun info, to keep the game stable without api calls
             EmptyAll();
             return;
@@ -449,19 +449,20 @@ window.SpeedInfo.make = function () {
     window.getGameDetails();
     //window.getSomethingSRC();
 
-    window.speedinfoVisible = false;
+   // window.speedinfoVisible = false;
 
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'block';
-        window.speedinfoVisible = true;
+        window.settings.SpeedInfo = true;
+        
         window.SpeedInfoUpdate();
     }
 
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'none';
-        window.speedinfoVisible = false;
+        window.settings.SpeedInfo = false;
         document.getElementById('AlwaysOnTimeKeeper').checked = false;
     }
 
@@ -521,11 +522,17 @@ window.SpeedInfo.make = function () {
     }
 
     window.SpeedInfoSetup();
-
+    let first_time_checker =0;
     window.ToggleSpeedInfo = function () {
-
-        window.speedinfoVisible = !window.speedinfoVisible;
-        if (window.speedinfoVisible) {
+          // this is so that if the thing starts on, it doesnt trigger it to be off, like what normally unchecking the box would do, since I'm using the same function in bootstrap.
+          if(first_time_checker===0){
+            first_time_checker=1;
+            
+          }
+          else
+          {window.settings.SpeedInfo = !window.settings.SpeedInfo;}
+        
+        if (window.settings.SpeedInfo) {
             // Show it
             window.SpeedInfoShow();
         }

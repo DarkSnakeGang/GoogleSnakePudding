@@ -3,11 +3,11 @@ window.DistinctVisual = {};
 window.DistinctVisual.make = function () {
 
     window.toggle_skull_func = function toggle_skull_func() {
-        window.skull_toggle = !window.skull_toggle;
+        window.settings.Skull = !window.settings.Skull;
     }
 
     window.toggle_soko_goal = function toggle_soko_goal() {
-        window.soko_toggle = !window.soko_toggle;
+        window.settings.SokoGoals = !window.settings.SokoGoals;
     }
 
     function i(src) {
@@ -23,8 +23,8 @@ window.DistinctVisual.make = function () {
     window.ghost_skull = i('https://i.postimg.cc/DZqL146Z/poison-ghost.png');
     window.px_ghost_skull = i('https://i.postimg.cc/cLF34LtP/px-poison-ghost.png');
 
-    window.skull_toggle = false;
-    window.soko_toggle = true;
+    // window.skull_toggle = false;
+    // window.soko_toggle = true;
     //document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
 
     window.distinct_soko_goal = new Image();
@@ -57,8 +57,8 @@ window.DistinctVisual.alterCode = function (code) {
     get_pixel = new_draw_skull.split(' ')[1].split('&')[0]
     pudding_skull_xd = `
 if(!a.path.includes("key")){
-if(window.soko_toggle && a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
-if(window.skull_toggle && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
+if(window.settings.SokoGoals && a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
+if(window.settings.Skull && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
 if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
 }
 ${code.match(draw_skull_func)[0].split("}")[0]};}

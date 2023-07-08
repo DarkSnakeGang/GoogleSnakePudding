@@ -8,13 +8,13 @@ window.TopBar.make = function () {
     return element.replace('class=', '').replace('width=', '').replace('height=', '').split('=')[1].split('"')[1];
   }
 
-  window.topbar_icons = true;
+ // window.topbar_icons = true;
   window.is_muted = false;
   window.count_setting = 0;
   window.speed_setting = 0;
 
   window.toggle_topbar_icons = function () {
-    window.topbar_icons = !window.topbar_icons;
+    window.settings.TopBar = !window.settings.TopBar;
   }
 
 }
@@ -57,7 +57,7 @@ window.TopBar.alterCode = function (code) {
   reset_regex = new RegExp(/;this\.reset\(\)/)
 
   set_on_reset = `;
-  if (window.topbar_icons) {
+  if (window.settings.TopBar) {
     ${mute_src} = window.speed_img_arr[${speed_var}]
     ${fruit_src} = window.count_img_arr[${count_var}]
   }
@@ -69,7 +69,7 @@ window.TopBar.alterCode = function (code) {
 
   volume_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
   disable_mute = `$&
-  if (window.topbar_icons) {
+  if (window.settings.TopBar) {
     ${mute_src} = window.speed_img_arr[${speed_var}]
   }
   `

@@ -36,11 +36,16 @@ window.InputDisplay.make = function () {
   TopButton.innerHTML = '<div class="input-button" id="top-button-id" style="border-radius: 10px;font-size:40px;color:white;display:none;background-color:#4f4f4f;font-family:Roboto,Arial,sans-serif;vertical-align:middle;padding-bottom:10px;padding-top:2px;padding-right:21px;padding-left:21px;">↑</div>'
   f.appendChild(TopButton);
 
-  window.input_toggle = false;
+  let first_time_checker =0;
   window.toggle_input_display = function toggle_input_display() {
-    window.input_toggle = !window.input_toggle;
+    // this is so that if the input display starts on, it doesnt trigger it to be off, like what normally unchecking the box would do, since I'm using the same function.
+    if(first_time_checker===0){
+      first_time_checker=1;
+    }
+    else
+    {window.settings.InputDisplay = !window.settings.InputDisplay;}
     //console.log("hmmm");
-    if (window.input_toggle) {
+    if (window.settings.InputDisplay) {
 
       document.getElementById('left-button-id').style.display = 'inline-block';
       document.getElementById('down-button-id').style.display = 'inline-block';
