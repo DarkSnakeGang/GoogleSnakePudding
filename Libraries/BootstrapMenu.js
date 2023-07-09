@@ -154,27 +154,33 @@ window.BootstrapMenu.make = function () {
         settingsElement.appendChild(settingsBox);
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
-        skull_checkbox.checked = window.settings.Skull;
+        skull_checkbox.checked = window.pudding_settings.Skull;
         skull_checkbox.addEventListener("change", toggle_skull_func);
 
         soko_checkbox = document.getElementById("DistinctSokoGoals");
-        soko_checkbox.checked = window.settings.SokoGoals;
+        soko_checkbox.checked = window.pudding_settings.SokoGoals;
         soko_checkbox.addEventListener("change", toggle_soko_goal);
 
         input_checkbox = document.getElementById("InputDisplay");
         input_checkbox.addEventListener("change", toggle_input_display);
-        input_checkbox.checked = window.settings.InputDisplay;
+        input_checkbox.checked = window.pudding_settings.InputDisplay;
         toggle_input_display();
 
         topbar_checkbox = document.getElementById("TopBarIcons");
         topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
-        topbar_checkbox.checked = window.settings.TopBar;
-
+        topbar_checkbox.checked = window.pudding_settings.TopBar;
+       
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
-        speedinfo_checkbox.checked = window.settings.SpeedInfo;
-        ToggleSpeedInfo();
+        speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
+        if(window.pudding_settings.SpeedInfo)
+            {
+                window.SpeedInfoShow();
+            }
         
+        
+     
+
         if (localStorage.getItem('snakeChosenMod') === "MorePudding") {
             console.log("Detect MorePudding - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;

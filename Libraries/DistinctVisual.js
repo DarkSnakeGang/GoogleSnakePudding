@@ -3,11 +3,11 @@ window.DistinctVisual = {};
 window.DistinctVisual.make = function () {
 
     window.toggle_skull_func = function toggle_skull_func() {
-        window.settings.Skull = !window.settings.Skull;
+        window.pudding_settings.Skull = !window.pudding_settings.Skull;
     }
 
     window.toggle_soko_goal = function toggle_soko_goal() {
-        window.settings.SokoGoals = !window.settings.SokoGoals;
+        window.pudding_settings.SokoGoals = !window.pudding_settings.SokoGoals;
     }
 
     function i(src) {
@@ -57,8 +57,8 @@ window.DistinctVisual.alterCode = function (code) {
     get_pixel = new_draw_skull.split(' ')[1].split('&')[0]
     pudding_skull_xd = `
 if(!a.path.includes("key")){
-if(window.settings.SokoGoals && a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
-if(window.settings.Skull && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
+if(window.pudding_settings.SokoGoals && a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
+if(window.pudding_settings.Skull && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
 if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
 }
 ${code.match(draw_skull_func)[0].split("}")[0]};}

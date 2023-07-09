@@ -4,26 +4,24 @@ window.CustomPortalPairs.make = function () {
 
     // Code that runs before anything else here, loading variables, etc.
     // Recommended to use "window." for things
-    window.portal_pairs = false;
+    //window.portal_pairs = false;
     window.toggle_portal_pairs = function toggle_portal_pairs() {
-        window.portal_pairs = !window.portal_pairs;
+        window.pudding_settings.PortalPairs = !window.pudding_settings.PortalPairs;
         for (var i = 1; i <= 6; i++) {
             var selectElement = document.getElementById('fruitSelect' + i.toString());
-            selectElement.disabled = !window.portal_pairs;
+            selectElement.disabled = !window.pudding_settings.PortalPairs;
         }
-        console.log(window.portal_pairs)
+        console.log(window.pudding_settings.PortalPairs)
     }
 
     window.sortFruit = function (arr) {
         return arr.slice().sort((a, b) => a - b);
     }
 
-}
-
-window.CustomPortalPairs.alterCode = function (code) {
-
     portal_pairs_checkbox = document.getElementById("PortalPairs");
-    portal_pairs_checkbox.addEventListener("change", toggle_portal_pairs, false);
+    portal_pairs_checkbox.checked = window.pudding_settings.PortalPairs;
+    portal_pairs_checkbox.addEventListener("change", toggle_portal_pairs);
+    // console.log("AAAAAAAAAAAAAAAAAAAA", window.pudding_settings.PortalPairs);
 
     var fruitToText = {
         0: { name: "Apple", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_00.png" },
@@ -90,7 +88,7 @@ window.CustomPortalPairs.alterCode = function (code) {
     }
 
 
-    function PopulateOptions() {
+    window.PopulateOptions = function PopulateOptions() {
         window.fruit_options = [];
 
         for (let index = 0; index < document.querySelector('#apple').children.length; index++) {
@@ -114,7 +112,7 @@ window.CustomPortalPairs.alterCode = function (code) {
 
 
 
-    function PopulateDropdowns() {
+    window.PopulateDropdowns = function PopulateDropdowns() {
         // Populate dropdowns
         for (var i = 1; i <= 6; i++) {
             //debugger
@@ -153,8 +151,18 @@ window.CustomPortalPairs.alterCode = function (code) {
         }
     }
 
-    PopulateOptions();
-    PopulateDropdowns();
+
+
+}
+
+window.CustomPortalPairs.alterCode = function (code) {
+
+
+    // window.PopulateOptions();
+    // window.PopulateDropdowns();
+   
+    // PopulateOptions();
+    // PopulateDropdowns();
 
 
     // Function to handle the selection change
@@ -232,7 +240,7 @@ window.CustomPortalPairs.alterCode = function (code) {
     }
 
     portal_pairs_code = `
-    if(window.portal_pairs){this.${apple_array}[c].${apple_type} = window.give_custom_pair();
+    if(window.pudding_settings.PortalPairs){this.${apple_array}[c].${apple_type} = window.give_custom_pair();
     this.${apple_array}[c+1].${apple_type} = this.${apple_array}[c].${apple_type};}
     else this.${apple_array}[c].${apple_type} = ${give_portal_type_func}
     `
@@ -255,7 +263,7 @@ window.CustomPortalPairs.alterCode = function (code) {
     portal_dice_pairs_code = `
     {
 
-        if(window.portal_pairs){
+        if(window.pudding_settings.PortalPairs){
             window.custom_pair_call_counter = 0;
             for(var apple_index=0;apple_index<${apple_dice_array}.length;apple_index+=2){
                 ${apple_dice_array}[apple_index].${apple_type} = window.give_custom_pair();

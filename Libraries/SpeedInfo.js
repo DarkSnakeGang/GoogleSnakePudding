@@ -4,7 +4,7 @@ window.SpeedInfo.make = function () {
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
-
+    window.first_time_call =true;
     window.requestsMade = 0;
 
     function sleepFor(ms) {
@@ -106,8 +106,8 @@ window.SpeedInfo.make = function () {
     }
 
     window.getRecordSRC = function (level) {
-
-        if (!window.settings.SpeedInfo) {
+       
+        if (!window.pudding_settings.SpeedInfo) {
             // For those that don't want to see speedrun info, to keep the game stable without api calls
             EmptyAll();
             return;
@@ -314,7 +314,7 @@ window.SpeedInfo.make = function () {
         HandleHighscore(emp);
     }
 
-    window.getAllSrc = function () {
+    window.getAllSrc = function () {   
         ["25", "50", "100", "All", "H"].forEach(element => {
             getRecordSRC(element);
         });
@@ -454,7 +454,7 @@ window.SpeedInfo.make = function () {
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'block';
-        window.settings.SpeedInfo = true;
+        window.pudding_settings.SpeedInfo = true;
         
         window.SpeedInfoUpdate();
     }
@@ -462,7 +462,7 @@ window.SpeedInfo.make = function () {
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'none';
-        window.settings.SpeedInfo = false;
+        window.pudding_settings.SpeedInfo = false;
         document.getElementById('AlwaysOnTimeKeeper').checked = false;
     }
 
@@ -522,17 +522,12 @@ window.SpeedInfo.make = function () {
     }
 
     window.SpeedInfoSetup();
-    let first_time_checker =0;
+ 
     window.ToggleSpeedInfo = function () {
-          // this is so that if the thing starts on, it doesnt trigger it to be off, like what normally unchecking the box would do, since I'm using the same function in bootstrap.
-          if(first_time_checker===0){
-            first_time_checker=1;
-            
-          }
-          else
-          {window.settings.SpeedInfo = !window.settings.SpeedInfo;}
+          
+          window.pudding_settings.SpeedInfo = !window.pudding_settings.SpeedInfo;
         
-        if (window.settings.SpeedInfo) {
+        if (window.pudding_settings.SpeedInfo) {
             // Show it
             window.SpeedInfoShow();
         }
@@ -665,8 +660,11 @@ window.SpeedInfo.make = function () {
 window.SpeedInfo.alterCode = function (code) {
     reset_regex = new RegExp(/;this\.reset\(\)/)
 
-    speedinfo_reset = `;window.SpeedInfoUpdate();this.reset();`
+    speedinfo_reset = `;window.SpeedInfoUpdate();
+    if(window.first_time_call){window.getAllSrc();window.first_time_call=false;}
+    ;this.reset();`
 
+    
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, speedinfo_reset);
 

@@ -14,7 +14,7 @@ window.TopBar.make = function () {
   window.speed_setting = 0;
 
   window.toggle_topbar_icons = function () {
-    window.settings.TopBar = !window.settings.TopBar;
+    window.pudding_settings.TopBar = !window.pudding_settings.TopBar;
   }
 
 }
@@ -57,7 +57,7 @@ window.TopBar.alterCode = function (code) {
   reset_regex = new RegExp(/;this\.reset\(\)/)
 
   set_on_reset = `;
-  if (window.settings.TopBar) {
+  if (window.pudding_settings.TopBar) {
     ${mute_src} = window.speed_img_arr[${speed_var}]
     ${fruit_src} = window.count_img_arr[${count_var}]
   }
@@ -69,7 +69,7 @@ window.TopBar.alterCode = function (code) {
 
   volume_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
   disable_mute = `$&
-  if (window.settings.TopBar) {
+  if (window.pudding_settings.TopBar) {
     ${mute_src} = window.speed_img_arr[${speed_var}]
   }
   `
