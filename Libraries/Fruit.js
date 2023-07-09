@@ -4,13 +4,6 @@ window.Fruit.make = function () {
 
     // Code that runs before anything else here, loading variables, etc.
     // Recommended to use "window." for things
-
-}
-
-window.Fruit.alterCode = function (code) {
-
-    // Code to alter snake code here
-
     window.new_fruit = [];
 
     new_fruit.push({ // Pudding
@@ -151,6 +144,14 @@ window.Fruit.alterCode = function (code) {
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
     });
 
+
+}
+
+window.Fruit.alterCode = function (code) {
+
+    // Code to alter snake code here
+
+    
     // Regex for a function that sets the src for count (I think)
     settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){""!==[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it

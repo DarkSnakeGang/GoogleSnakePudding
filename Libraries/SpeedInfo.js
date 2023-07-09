@@ -4,7 +4,7 @@ window.SpeedInfo.make = function () {
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
-
+    window.first_time_call =true;
     window.requestsMade = 0;
 
     function sleepFor(ms) {
@@ -106,8 +106,8 @@ window.SpeedInfo.make = function () {
     }
 
     window.getRecordSRC = function (level) {
-
-        if (!window.speedinfoVisible) {
+       
+        if (!window.pudding_settings.SpeedInfo) {
             // For those that don't want to see speedrun info, to keep the game stable without api calls
             EmptyAll();
             return;
@@ -314,7 +314,7 @@ window.SpeedInfo.make = function () {
         HandleHighscore(emp);
     }
 
-    window.getAllSrc = function () {
+    window.getAllSrc = function () {   
         ["25", "50", "100", "All", "H"].forEach(element => {
             getRecordSRC(element);
         });
@@ -449,19 +449,20 @@ window.SpeedInfo.make = function () {
     window.getGameDetails();
     //window.getSomethingSRC();
 
-    window.speedinfoVisible = false;
+   // window.speedinfoVisible = false;
 
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'block';
-        window.speedinfoVisible = true;
+        window.pudding_settings.SpeedInfo = true;
+        
         window.SpeedInfoUpdate();
     }
 
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'none';
-        window.speedinfoVisible = false;
+        window.pudding_settings.SpeedInfo = false;
         document.getElementById('AlwaysOnTimeKeeper').checked = false;
     }
 
@@ -521,11 +522,12 @@ window.SpeedInfo.make = function () {
     }
 
     window.SpeedInfoSetup();
-
+ 
     window.ToggleSpeedInfo = function () {
-
-        window.speedinfoVisible = !window.speedinfoVisible;
-        if (window.speedinfoVisible) {
+          
+          window.pudding_settings.SpeedInfo = !window.pudding_settings.SpeedInfo;
+        
+        if (window.pudding_settings.SpeedInfo) {
             // Show it
             window.SpeedInfoShow();
         }
@@ -658,8 +660,11 @@ window.SpeedInfo.make = function () {
 window.SpeedInfo.alterCode = function (code) {
     reset_regex = new RegExp(/;this\.reset\(\)/)
 
-    speedinfo_reset = `;window.SpeedInfoUpdate();this.reset();`
+    speedinfo_reset = `;window.SpeedInfoUpdate();
+    if(window.first_time_call){window.getAllSrc();window.first_time_call=false;}
+    ;this.reset();`
 
+    
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, speedinfo_reset);
 

@@ -103,7 +103,7 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals" checked>
+    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
     <label class="form-check-label" for="DistinctSokoGoals" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Distinct Soko Goals</label>
     </div>
     <div class="form-check form-check-inline">
@@ -111,7 +111,7 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="InputDisplay" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Input Display</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons" checked>
+    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
     <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
     </div>
     <div class="form-check form-check-inline">
@@ -122,23 +122,23 @@ window.BootstrapMenu.make = function () {
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
     </div>
-<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row" disabled>
+<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
     <option value="0">Apple</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
   <option value="1">Banana</option>
 </select><br>
 
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
     <option value="2">Pineapple</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
     <option value="3">Purple Grapes</option>
   </select><br>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
     <option value="4">Pumpkin</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row" disabled>
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
     <option value="5">Onion</option>
   </select>
   <br>
@@ -154,15 +154,33 @@ window.BootstrapMenu.make = function () {
         settingsElement.appendChild(settingsBox);
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
-        skull_checkbox.addEventListener("change", toggle_skull_func, false);
+        skull_checkbox.checked = window.pudding_settings.Skull;
+        skull_checkbox.addEventListener("change", toggle_skull_func);
+
         soko_checkbox = document.getElementById("DistinctSokoGoals");
-        soko_checkbox.addEventListener("change", toggle_soko_goal, false);
+        soko_checkbox.checked = window.pudding_settings.SokoGoals;
+        soko_checkbox.addEventListener("change", toggle_soko_goal);
+
         input_checkbox = document.getElementById("InputDisplay");
-        input_checkbox.addEventListener("change", toggle_input_display, false);
+        input_checkbox.addEventListener("change", toggle_input_display);
+        input_checkbox.checked = window.pudding_settings.InputDisplay;
+        toggle_input_display();
+
         topbar_checkbox = document.getElementById("TopBarIcons");
-        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons, false);
+        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
+        topbar_checkbox.checked = window.pudding_settings.TopBar;
+       
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
-        speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo, false);
+        speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
+        speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
+        if(window.pudding_settings.SpeedInfo)
+            {
+                window.SpeedInfoShow();
+            }
+        
+        
+     
+
         if (localStorage.getItem('snakeChosenMod') === "MorePudding") {
             console.log("Detect MorePudding - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
