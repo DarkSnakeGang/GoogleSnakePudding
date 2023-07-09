@@ -13,13 +13,13 @@ window.CustomPortalPairs.make = function () {
           }
           else
           {window.pudding_settings.PortalPairs = !window.pudding_settings.PortalPairs;}
-        
+
         for (var i = 1; i <= 6; i++) {
             var selectElement = document.getElementById('fruitSelect' + i.toString());
 
             selectElement.disabled = !window.pudding_settings.PortalPairs;
         }
-        console.log(window.pudding_settings.PortalPairs)
+        //console.log(window.pudding_settings.PortalPairs)
     }
 
     window.sortFruit = function (arr) {
@@ -171,7 +171,7 @@ window.CustomPortalPairs.alterCode = function (code) {
 
     // window.PopulateOptions();
     // window.PopulateDropdowns();
-   
+
     // PopulateOptions();
     // PopulateDropdowns();
 
