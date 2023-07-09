@@ -26,6 +26,7 @@ window.SettingsSaver.make = function () {
     
 
     window.saveSettings = function () {
+        window.pudding_settings.SelectedPairs = window.selected_fruit;
         if (typeof pudding_settings !== 'undefined' && typeof pudding_settings.Skull !== 'undefined' &&
         typeof pudding_settings.SokoGoals !== 'undefined' &&
         typeof pudding_settings.InputDisplay !== 'undefined' &&
@@ -42,6 +43,9 @@ window.SettingsSaver.make = function () {
 window.SettingsSaver.alterCode = function (code) {
     window.PopulateOptions();
     window.PopulateDropdowns();
+    window.PopulateOptions();
+    window.PopulateDropdowns();
+
     reset_regex = new RegExp(/;this\.reset\(\)/)
 
     settings_reset_code = `

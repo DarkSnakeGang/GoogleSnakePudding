@@ -5,10 +5,18 @@ window.CustomPortalPairs.make = function () {
     // Code that runs before anything else here, loading variables, etc.
     // Recommended to use "window." for things
     //window.portal_pairs = false;
+    let first_time_portal = true;
     window.toggle_portal_pairs = function toggle_portal_pairs() {
-        window.pudding_settings.PortalPairs = !window.pudding_settings.PortalPairs;
+          // this is so that if the input display starts on, it doesnt trigger it to be off, like what normally unchecking the box would do, since I'm using the same function.
+          if(first_time_portal){
+            first_time_portal=false;
+          }
+          else
+          {window.pudding_settings.PortalPairs = !window.pudding_settings.PortalPairs;}
+        
         for (var i = 1; i <= 6; i++) {
             var selectElement = document.getElementById('fruitSelect' + i.toString());
+
             selectElement.disabled = !window.pudding_settings.PortalPairs;
         }
         console.log(window.pudding_settings.PortalPairs)
@@ -21,6 +29,7 @@ window.CustomPortalPairs.make = function () {
     portal_pairs_checkbox = document.getElementById("PortalPairs");
     portal_pairs_checkbox.checked = window.pudding_settings.PortalPairs;
     portal_pairs_checkbox.addEventListener("change", toggle_portal_pairs);
+    toggle_portal_pairs();
     // console.log("AAAAAAAAAAAAAAAAAAAA", window.pudding_settings.PortalPairs);
 
     var fruitToText = {
@@ -75,7 +84,8 @@ window.CustomPortalPairs.make = function () {
 
 
     window.fruit_options = [];
-    window.selected_fruit = [0, 1, 2, 3, 4, 5];
+    //debugger
+    window.selected_fruit = window.pudding_settings.SelectedPairs;
     window.onscreen_fruit = [];
     window.offscreen_fruit = [];
 
@@ -114,6 +124,7 @@ window.CustomPortalPairs.make = function () {
 
     window.PopulateDropdowns = function PopulateDropdowns() {
         // Populate dropdowns
+        //debugger
         for (var i = 1; i <= 6; i++) {
             //debugger
             var selectElement = document.getElementById('fruitSelect' + i);
