@@ -169,7 +169,7 @@ window.BootstrapMenu.make = function () {
         topbar_checkbox = document.getElementById("TopBarIcons");
         topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
         topbar_checkbox.checked = window.pudding_settings.TopBar;
-       
+
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
         speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
@@ -177,13 +177,15 @@ window.BootstrapMenu.make = function () {
             {
                 window.SpeedInfoShow();
             }
-        
-        
-     
+
+
+
 
         if (localStorage.getItem('snakeChosenMod') === "MorePudding") {
             console.log("Detect MorePudding - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
+            speedinfo_checkbox.checked = false;
+            window.SpeedInfoHide();
         }
         let settingsToValues = {
             inputs: {
