@@ -109,17 +109,17 @@ window.Counter.make = function () {
         return stats.statShown === 'plays' ? 'https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png' : 'https://www.google.com/logos/fnbx/snake_arcade/keys.svg';
     }
 
-    window.toggleCounter = function () {
-        stats.visible = !stats.visible;
+    window.setCounter = function () {
+        //stats.visible = !stats.visible;
         if (stats.visible) {
             document.getElementById('stat-icon').style.display = 'inline';
             document.getElementById('counter-num').style.display = 'inherit';
-            document.getElementById('toggle-counter').innerHTML = 'Hide counter';
+            //document.getElementById('toggle-counter').innerHTML = 'Hide counter';
         }
         else {
             document.getElementById('stat-icon').style.display = 'none';
             document.getElementById('counter-num').style.display = 'none';
-            document.getElementById('toggle-counter').innerHTML = 'Show counter';
+            //document.getElementById('toggle-counter').innerHTML = 'Show counter';
         }
         saveStatistics();
     }
@@ -137,6 +137,11 @@ window.Counter.alterCode = function (code) {
     stats.plays.session++;
     stats.plays.lifetime++;
     saveStatistics();
+    stats.visible = true;
+    if(window.CurrentModeNum != 1 && stats.statShown == "walls"){
+        stats.visible = false;
+    }
+    window.setCounter();
     updateCounterDisplay();this.reset();`
 
     catchError(reset_regex, code)
