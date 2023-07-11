@@ -181,8 +181,8 @@ window.BootstrapMenu.make = function () {
 
 
 
-        if (localStorage.getItem('snakeChosenMod') === "MorePudding") {
-            console.log("Detect MorePudding - disabling SpeedInfo")
+        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "StealthMod") {
+            console.log("Detected MorePudding or StealthMod - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
