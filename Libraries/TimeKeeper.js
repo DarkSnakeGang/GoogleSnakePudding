@@ -503,7 +503,7 @@ window.TimeKeeper.make = function () {
 
         //add dialog
         div = document.querySelector("body");
-        dialog.setAttribute("style", "outline: none;border-radius: 10px;z-index:1010;background:"+window.real_topbar_color+";color:white;font-family:Roboto,Arial;");
+        dialog.setAttribute("style", "outline: none;border-radius: 10px;z-index:10100;background:"+window.real_topbar_color+";color:white;font-family:Roboto,Arial;");
         dialog.style.outline = "none";
         dialog.classList.add("custom-dialog");
 
