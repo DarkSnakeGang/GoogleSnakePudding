@@ -98,6 +98,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
     eval("code = window." + LibName + ".alterCode(code);")
   });
 
+  /*
   twin_all_global = `window.snake.twinAll`
 
   all_regex = new RegExp(/\"ALL\"\);/);
@@ -106,7 +107,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
   ${twin_all_global}=true;
   `
 
-  /*
+
   timer_update_regex = new RegExp(/&"NONE"!==this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.direction/);
   if (!window.catchError(timer_update_regex, code)) {
 
