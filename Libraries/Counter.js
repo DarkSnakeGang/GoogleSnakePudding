@@ -165,8 +165,9 @@ window.Counter.alterCode = function (code) {
     }
     
 
-    document.addEventListener('keyup', (event)=> {
-        
+    document.addEventListener('keydown', (event)=> {
+        if(!event.repeat ) 
+      {
         if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
     
           window.IncrementCounter();
@@ -182,7 +183,8 @@ window.Counter.alterCode = function (code) {
         else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
         {
             window.IncrementCounter();
-        }
+         }
+        } 
     }
       );
     
