@@ -147,16 +147,9 @@ window.Counter.alterCode = function (code) {
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, counter_reset_code);
 
-
-    //input_counter_regex = new RegExp(/=function\(a,b\){if\(/) // Without TimeKeeper it's /=function\(a,b\){if\(!/
-    input_counter_regex = new RegExp(/=function\(a,b\){if\(!\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-    catchError(input_counter_regex, code)
-    input_counter_code_end = code.match(input_counter_regex)[0].split('{')[1]
-    input_counter_code = `=function\(a,b\){
-
-        if(b !== a.direction) {
-
-            if(!window.timeKeeper.playing)
+    window.IncrementCounter = function(){
+       
+        if(!window.timeKeeper.playing)
             {
               window.timeKeeper.start();
               window.timeKeeper.playing = true;
@@ -166,29 +159,37 @@ window.Counter.alterCode = function (code) {
             stats.inputs.session++;
             stats.inputs.lifetime++;
             stats.statShown === 'inputs' && updateCounterDisplay();
-          }
-          switch (b) {
-            case "RIGHT":
-                window.LightUpInput("right-button-id");
-                break;
-            case "LEFT":
-                window.LightUpInput("left-button-id");
-                break;
-            case "UP":
-                window.LightUpInput("top-button-id");
-                break;
-            case "DOWN":
-                window.LightUpInput("down-button-id");
-                break;
+          
 
-            default:
-                break;
+
+    }
+    
+
+    document.addEventListener('keydown', (event)=> {
+        if(!event.repeat ) 
+      {
+        if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
+    
+          window.IncrementCounter();
         }
-    ${input_counter_code_end}`
+        else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
+        {
+            window.IncrementCounter();
+        }
+        else if (event.key === 'ArrowDown'|| (event.code === 'KeyS'))
+        {
+            window.IncrementCounter();
+        }
+        else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
+        {
+            window.IncrementCounter();
+         }
+        } 
+    }
+      );
+    
 
 
-
-    code = code.assertReplace(input_counter_regex, input_counter_code);
 
     stop_regex = new RegExp(/stop=function\(a\){/)
     catchError(stop_regex, code)
