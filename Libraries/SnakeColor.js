@@ -180,7 +180,8 @@ window.SnakeColor.alterCode = function (code) {
     code = code.assertReplace(color_regex, color_get_code);
 
     rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${default_rainbow_array}\\\;`)
-
+    catchError(snake_face_regex, code)
+    catchError(rainbow_usage_regex, code)
     if (window.NepDebug) {
         console.log(code.match(rainbow_usage_regex)[0])
     }
@@ -200,8 +201,6 @@ window.SnakeColor.alterCode = function (code) {
     snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\)[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     snake_face_code = code.match(snake_face_regex)[0]
     snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split(')')[0]}? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
-    catchError(snake_face_regex, code)
-    catchError(rainbow_usage_regex, code)
 
     //console.log(snake_face_code)
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
