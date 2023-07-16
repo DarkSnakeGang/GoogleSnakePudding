@@ -49,15 +49,11 @@ window.PuddingMod.runCodeBefore = function () {
       something = code.match(culprit_regex)[0];
     } catch (e) {
       console.log("I caught it!")
-      if (window.NepDebug) {
-        console.log(culprit_regex)
-        console.log(code)
-      }
-      return true;
+      console.log(culprit_regex)
+      console.log(code)
+      throw e
     }
-
     return false;
-
   }
 
   //Style differently depending on if snake is centered.
