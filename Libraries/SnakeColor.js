@@ -179,7 +179,7 @@ window.SnakeColor.alterCode = function (code) {
 
     code = code.assertReplace(color_regex, color_get_code);
 
-    rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${default_rainbow_array}\\\;`)
+    rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${window.escapeRegex(default_rainbow_array)}\\\;`)
     catchError(rainbow_usage_regex, code)
     if (window.NepDebug) {
         console.log(code.match(rainbow_usage_regex)[0])

@@ -20,6 +20,9 @@ window.PuddingMod.runCodeBefore = function () {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
 
+  window.escapeRegex = function escapeRegex(string) {
+      return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
+  }
 
   window.loadCode = function loadAndRunCodeSynchronous(url) {
     let req = new XMLHttpRequest();
