@@ -60,16 +60,18 @@ window.InputDisplay.make = function () {
       document.getElementById('top-button-id').style.display = 'none';
     }
   }
-  window.LightUpInput = function (direction) {
+  window.LightInputOn = function (direction) {
     //console.log(incrementColor(window.button_color))
     if (window.button_color == "#FFFFFF" || window.button_color == "white") {
       document.getElementById(direction).style.backgroundColor = "#999999"
     }
     document.getElementById(direction).style.backgroundColor = incrementColor(window.button_color);
-    setTimeout(() => {
-      document.getElementById(direction).style.backgroundColor = window.button_color;
-    }, 200);
+  }
 
+  window.LightInputOff= function (direction) {
+  
+    document.getElementById(direction).style.backgroundColor = window.button_color;
+  
   }
 
   function incrementColor(hexColor) {
@@ -82,6 +84,46 @@ window.InputDisplay.make = function () {
 window.InputDisplay.alterCode = function (code) {
 
   // Code to alter snake code here
+  document.addEventListener('keydown', (event)=> {
+    
+    if (event.key === 'ArrowRight' || (event.code === 'KeyD')){
 
+      window.LightInputOn("right-button-id");
+      //console.log('aaaaaas')
+    }
+    else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
+    {
+      window.LightInputOn("left-button-id");
+    }
+    else if (event.key === 'ArrowDown'|| (event.code === 'KeyS'))
+    {
+      window.LightInputOn("down-button-id");
+    }
+    else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
+    {
+      window.LightInputOn("top-button-id");
+    }
+    
+  });
+
+  document.addEventListener('keyup', (event)=> {
+    if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
+
+      window.LightInputOff("right-button-id");
+    }
+    else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
+    {
+      window.LightInputOff("left-button-id");
+    }
+    else if (event.key === 'ArrowDown'|| (event.code === 'KeyS'))
+    {
+      window.LightInputOff("down-button-id");
+    }
+    else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
+    {
+      window.LightInputOff("top-button-id");
+    }
+  });
   return code;
 }
+
