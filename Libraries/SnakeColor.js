@@ -145,6 +145,8 @@ window.SnakeColor.alterCode = function (code) {
     yinyang_colors_build = yinyang_colors_build + ']';
 
     //console.log("Adding new snake colors")
+    catchError(snake_colors_regex, code)
+    catchError(yinyang_colors_regex, code)
 
     code = code.assertReplace(snake_colors_regex, colors_build)
     code = code.assertReplace(yinyang_colors_regex, yinyang_colors_build)
@@ -173,6 +175,8 @@ window.SnakeColor.alterCode = function (code) {
         else{window.snakeRainbowOverride=0}
         window.isRainbow = true;
     }`
+    catchError(color_regex, code)
+
     code = code.assertReplace(color_regex, color_get_code);
 
     rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${default_rainbow_array}\\\;`)
@@ -196,6 +200,8 @@ window.SnakeColor.alterCode = function (code) {
     snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\)[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     snake_face_code = code.match(snake_face_regex)[0]
     snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split(')')[0]}? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
+    catchError(snake_face_regex, code)
+    catchError(rainbow_usage_regex, code)
 
     //console.log(snake_face_code)
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
@@ -213,6 +219,7 @@ window.SnakeColor.alterCode = function (code) {
     code = code.assertReplace(snake_face2_reg, snakeface2code)
 
     rainbow_bool_regex = new RegExp(/10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/g)
+    catchError(rainbow_bool_regex, code)
 
     is_rainbow_matches = code.match(rainbow_bool_regex).length;
     for (let index = 0; index < is_rainbow_matches; index++) {
