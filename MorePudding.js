@@ -41,7 +41,7 @@ window.MorePudding.alterSnakeCode = function(code) {
 
 
 window.MorePudding.runCodeAfter = function() {
-  window.moreMenu.runCodeAfter();
+  //window.moreMenu.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'More Pudding Mod';
