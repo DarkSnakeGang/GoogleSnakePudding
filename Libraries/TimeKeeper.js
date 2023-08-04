@@ -557,7 +557,6 @@ window.TimeKeeper.alterCode = function (code) {
     //change stepfunction to run gotApple(), gotAll() and death()
 
     func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)
-    console.log(code)
     window.catchError(func_regex, code)
     let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[^\\]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
