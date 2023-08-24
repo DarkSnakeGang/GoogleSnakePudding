@@ -575,7 +575,7 @@ window.TimeKeeper.alterCode = function (code) {
     timeFunc = func.match(/\([a-zA-Z0-9$]{1,6}\*[a-zA-Z0-9$]{1,6}\)/)[0];
     ticksVar = timeFunc.split('(')[1].split("*")[0];
     tickLengthVar = timeFunc.split("*")[1].split(')')[0];
-    realTicks = func.match(`${ticksVar}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
+    realTicks = func.match(`${escapeRegex(ticksVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
     realTickLength = func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
     realTimeFunc = `${realTicks}*${realTickLength}`;
     timeFunc = realTimeFunc;
