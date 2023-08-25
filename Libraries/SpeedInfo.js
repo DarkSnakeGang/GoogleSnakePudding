@@ -106,7 +106,7 @@ window.SpeedInfo.make = function () {
     }
 
     window.getRecordSRC = function (level) {
-       
+
         if (!window.pudding_settings.SpeedInfo) {
             // For those that don't want to see speedrun info, to keep the game stable without api calls
             EmptyAll();
@@ -185,9 +185,13 @@ window.SpeedInfo.make = function () {
         variable_IDs = speed != SLOW ? window.SpeedrunVaraiblesJson : window.SpeedrunVaraiblesJsonCE;
         category_IDs = speed != SLOW ? window.SpeedrunCategoriesJson : window.SpeedrunCategoriesJsonCE;
         speed_var_ID = speed_value_ID = ""
+
+        // reset the stuff, blame moterstorm for CE having issues
+        multi_value_ID = ""
+        size_value_ID = ""
         //debugger
         for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
-            if (variable_IDs["data"][currentVar].name.includes("Multi")) {
+            if (multi_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Multi")) {
                 multi_var_ID = variable_IDs["data"][currentVar].id;
                 for (var currentValue in variable_IDs["data"][currentVar].values.values) {
                     if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.countToTxt[count].name) {
@@ -197,7 +201,7 @@ window.SpeedInfo.make = function () {
                 }
             }
 
-            if (variable_IDs["data"][currentVar].name.includes("Speed")) {
+            if (speed_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Speed")) {
                 speed_var_ID = variable_IDs["data"][currentVar].id;
                 for (var currentValue in variable_IDs["data"][currentVar].values.values) {
                     if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.speedToTxt[speed].name) {
@@ -207,7 +211,7 @@ window.SpeedInfo.make = function () {
                 }
             }
 
-            if (variable_IDs["data"][currentVar].name.includes("Board")) {
+            if (size_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Board")) {
                 size_var_ID = variable_IDs["data"][currentVar].id;
                 for (var currentValue in variable_IDs["data"][currentVar].values.values) {
                     if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.sizeToTxt[size].name) {
@@ -314,7 +318,7 @@ window.SpeedInfo.make = function () {
         HandleHighscore(emp);
     }
 
-    window.getAllSrc = function () {   
+    window.getAllSrc = function () {
         ["25", "50", "100", "All", "H"].forEach(element => {
             getRecordSRC(element);
         });
@@ -455,7 +459,7 @@ window.SpeedInfo.make = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'block';
         window.pudding_settings.SpeedInfo = true;
-        
+
         window.SpeedInfoUpdate();
     }
 
@@ -522,11 +526,11 @@ window.SpeedInfo.make = function () {
     }
 
     window.SpeedInfoSetup();
- 
+
     window.ToggleSpeedInfo = function () {
-          
+
           window.pudding_settings.SpeedInfo = !window.pudding_settings.SpeedInfo;
-        
+
         if (window.pudding_settings.SpeedInfo) {
             // Show it
             window.SpeedInfoShow();
@@ -664,7 +668,7 @@ window.SpeedInfo.alterCode = function (code) {
     if(window.first_time_call){window.getAllSrc();window.first_time_call=false;}
     ;this.reset();`
 
-    
+
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, speedinfo_reset);
 
