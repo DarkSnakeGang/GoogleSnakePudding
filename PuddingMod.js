@@ -92,6 +92,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
     console.log(code)
   }
+
   if (!window.catchError(/\$\$/gm, code)) {
     code = code.assertReplaceAll(/\$\$/gm, `double_dollar`)
   }
