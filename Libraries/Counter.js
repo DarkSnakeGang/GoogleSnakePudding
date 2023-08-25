@@ -148,7 +148,7 @@ window.Counter.alterCode = function (code) {
     code = code.assertReplace(reset_regex, counter_reset_code);
 
     window.IncrementCounter = function(){
-       
+
         if(!window.timeKeeper.playing)
             {
               window.timeKeeper.start();
@@ -159,17 +159,17 @@ window.Counter.alterCode = function (code) {
             stats.inputs.session++;
             stats.inputs.lifetime++;
             stats.statShown === 'inputs' && updateCounterDisplay();
-          
+
 
 
     }
-    
+
 
     document.addEventListener('keydown', (event)=> {
-        if(!event.repeat ) 
+        if(!event.repeat )
       {
         if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
-    
+
           window.IncrementCounter();
         }
         else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
@@ -184,10 +184,10 @@ window.Counter.alterCode = function (code) {
         {
             window.IncrementCounter();
          }
-        } 
+        }
     }
       );
-    
+
 
 
 
@@ -199,12 +199,16 @@ window.Counter.alterCode = function (code) {
 
     wall_spawn_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
     catchError(wall_spawn_regex, code)
-
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
-    wall_counter_code = `${code.match(wall_spawn_regex)[0]}
-    if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
-    `
 
+
+    wall_counter_code = `${code.match(wall_spawn_regex)[0]}
+    if(${escapeRegex(wall_pos)}){stats.walls.game++;updateCounterDisplay();}
+    `
+    if (window.NepDebug) {
+        console.log("Wall thing: " + wall_pos)
+        console.log("Wall thing 2: " + wall_counter_code)
+    }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
 
     return code;

@@ -92,6 +92,10 @@ window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
     console.log(code)
   }
+
+  code = code.assertReplaceAll(/\$\$/gm, `double_dollar`)
+  //code = code.assertReplaceAll(/\$i/gm, `something_i`)
+
   window.Libraries.forEach(LibName => {
     console.log("Alter code with library: " + LibName)
     eval("code = window." + LibName + ".alterCode(code);")
@@ -124,6 +128,13 @@ window.PuddingMod.alterSnakeCode = function (code) {
   console.log("Done, enjoy Pudding Mod!");
 
   //console.log(code)
+
+  //console.log( code.match(/\$\$i/gm) )
+
+
+
+  //console.log( code.match(/\$i/gm) )
+
 
   return code;
 };
