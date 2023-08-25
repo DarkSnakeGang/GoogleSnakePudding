@@ -93,9 +93,8 @@ window.PuddingMod.alterSnakeCode = function (code) {
     console.log(code)
   }
 
-  if (!window.catchError(/\$\$/gm, code)) {
-    code = code.assertReplaceAll(/\$\$/gm, `double_dollar`)
-  }
+  code = code.replaceAll(/\$\$/gm, `double_dollar`)
+
   //code = code.assertReplaceAll(/\$i/gm, `something_i`)
 
   window.Libraries.forEach(LibName => {
