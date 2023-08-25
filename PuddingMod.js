@@ -93,7 +93,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
     console.log(code)
   }
 
-  code = code.replaceAll(/\$\$/gm, `double_dollar`)
+  code = code.replaceAll(/\$\$/gm, `doubleD`)
 
   //code = code.assertReplaceAll(/\$i/gm, `something_i`)
 
