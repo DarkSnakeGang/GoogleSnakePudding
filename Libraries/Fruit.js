@@ -126,6 +126,12 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/hG2MTsw-v/ice-px.png',
         "Poison_values": 'b,\'#19ddf4\',\'#909090\',50',
     });
+    new_fruit.push({ // Red Pudding
+        "Normal": 'https://i.postimg.cc/15kNH2Y5/pudding-red.png',
+        "Pixel": 'https://i.postimg.cc/sXW6w8Qm/Red-Pixel-Pudding170-Small.png',
+        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
+    });
+
     last_fruit_num = document.querySelector('#apple').children.length - 1;
     // Add fruit to menu
     for (let index = 0; index < new_fruit.length; index++) {
@@ -138,9 +144,9 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/MGDg1gBQ/px-gold-apple.png',
         "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
     });
-    new_fruit.push({ // Red Pudding
-        "Normal": 'https://i.postimg.cc/15kNH2Y5/pudding-red.png',
-        "Pixel": 'https://i.postimg.cc/sXW6w8Qm/Red-Pixel-Pudding170-Small.png',
+    new_fruit.push({ // Cabbage
+        "Normal": 'https://i.postimg.cc/j59z8v1m/cabbage.png',
+        "Pixel": 'https://i.postimg.cc/FR1ygwT0/cabbage-px.png',
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
     });
 
@@ -151,7 +157,7 @@ window.Fruit.alterCode = function (code) {
 
     // Code to alter snake code here
 
-    
+
     // Regex for a function that sets the src for count (I think)
     settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){""!==[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
