@@ -203,7 +203,7 @@ window.Counter.alterCode = function (code) {
 
 
     wall_counter_code = `${code.match(wall_spawn_regex)[0]}
-    if(${escapeRegex(wall_pos)}){stats.walls.game++;updateCounterDisplay();}
+    if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
     `
     if (window.NepDebug) {
         console.log("Wall thing: " + wall_pos)
