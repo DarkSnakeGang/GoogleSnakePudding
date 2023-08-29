@@ -8,7 +8,7 @@ window.Fruit.make = function () {
 
     new_fruit.push({ // Pudding
         "Normal": 'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
-        "Pixel": 'https://i.postimg.cc/J72xMMYX/Pixel-Pudding170-Small.png',
+        "Pixel": 'https://i.postimg.cc/25nt4bX4/pudding-px.png',
         "Poison_values": 'b,\'#eaca23\',\'#909090\',10',
     });
     new_fruit.push({ // Blueberries
@@ -128,7 +128,7 @@ window.Fruit.make = function () {
     });
     new_fruit.push({ // Red Pudding
         "Normal": 'https://i.postimg.cc/15kNH2Y5/pudding-red.png',
-        "Pixel": 'https://i.postimg.cc/sXW6w8Qm/Red-Pixel-Pudding170-Small.png',
+        "Pixel": 'https://i.postimg.cc/C5rrFjzV/red-pudding-px.png',
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
     });
 
