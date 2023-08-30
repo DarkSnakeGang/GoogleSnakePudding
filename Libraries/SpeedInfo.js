@@ -174,7 +174,7 @@ window.SpeedInfo.make = function () {
             HandleHighscore("Empty")
             return;
         }
-        if (mode == STATUE && level == "Highscore" && speed == SLOW) {
+        if (mode == STATUE && level == "H" && speed == SLOW) {
             HandleHighscore("Empty")
             return; // Statue isn't highscore on slow (yet?)
         }
