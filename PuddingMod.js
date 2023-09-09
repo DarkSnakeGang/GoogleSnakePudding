@@ -71,7 +71,7 @@ window.PuddingMod.runCodeBefore = function () {
     document.getElementsByClassName('bZUgDf')[0].style.width = '600px';
   }
 
-  window.Libraries = ["Core", "Theme", "DistinctVisual", "InputDisplay","Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor",  "SettingsSaver", "SpeedInfo", "BootstrapMenu","CustomPortalPairs"];
+  window.Libraries = ["Core", "Theme", "DistinctVisual", "InputDisplay","Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor",  "SettingsSaver", "SpeedInfo", "BootstrapMenu","CustomPortalPairs","Theme"];
   console.log("Enabling Pudding Mod");
 
   libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
