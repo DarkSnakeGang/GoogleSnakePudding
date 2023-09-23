@@ -74,7 +74,7 @@ window.PuddingMod.runCodeBefore = function () {
   window.Libraries = ["Core", "Theme", "DistinctVisual", "InputDisplay","Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor",  "SettingsSaver", "SpeedInfo", "BootstrapMenu","CustomPortalPairs", "Timer"];
   console.log("Enabling Pudding Mod");
 
-  libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5501/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
+  libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
   window.Libraries.forEach(LibName => {
     console.log("Loading library: " + LibName)
     loadCode(libUrlPrefix + LibName + ".js")
