@@ -128,14 +128,9 @@ window.PuddingMod.alterSnakeCode = function (code) {
   */
   console.log("Done, enjoy Pudding Mod!");
 
-  //console.log(code)
-
-  //console.log( code.match(/\$\$i/gm) )
-
-
-
-  //console.log( code.match(/\$i/gm) )
-
+  if (window.NepDebug) {
+    console.log(code)
+  }
 
   return code;
 };
