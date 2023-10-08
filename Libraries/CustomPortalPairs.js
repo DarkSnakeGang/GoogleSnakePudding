@@ -125,7 +125,7 @@ window.CustomPortalPairs.make = function () {
 
     window.PopulateDropdowns = function PopulateDropdowns() {
         // Populate dropdowns
-        //debugger
+
         for (var i = 1; i <= 6; i++) {
             //debugger
             var selectElement = document.getElementById('fruitSelect' + i);

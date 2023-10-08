@@ -478,9 +478,11 @@ window.SpeedInfo.make = function () {
         document.getElementsByClassName('sEOCsb')[0].appendChild(d);
         const speedinfoElement = document.querySelector('#speedinfo-container');
 
+
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = 'position:absolute;left:135px;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:-45px;';
+        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
         speedinfoBox.id = 'speedinfo-popup-pudding';
+        window.speedinfoInput = speedinfoBox;
         speedinfoBox.innerHTML = `
 
         <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Speed Info</span>
@@ -508,7 +510,7 @@ window.SpeedInfo.make = function () {
 
   `;
 
-        speedinfoElement.appendChild(speedinfoBox);
+  document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
         speedinfoCloseElements.addEventListener('click', window.SpeedInfoHide);

@@ -18,6 +18,8 @@ window.Core.make = function () {
         return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
     }
 
+    window.graphics_selected = 0;
+
 }
 
 window.Core.alterCode = function (code) {

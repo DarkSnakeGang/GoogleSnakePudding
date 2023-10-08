@@ -75,7 +75,7 @@ window.BootstrapMenu.make = function () {
 
 
         const settingsBox = document.createElement('div');
-        settingsBox.style = 'position:absolute;left:135px;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:-45px;';
+        settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
 
@@ -151,7 +151,7 @@ window.BootstrapMenu.make = function () {
 
   `;
 
-        settingsElement.appendChild(settingsBox);
+  document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;

@@ -6,13 +6,13 @@ window.InputDisplay.make = function () {
   // Recommended to use "window." for things
   const e = document.createElement('div');
   e.id = 'input-display-container';
-  e.style = 'position:absolute;left:152px;top:516px;z-index:10001;display:block;line-height:normal;';
-  document.getElementsByClassName('sEOCsb')[0].appendChild(e);
+  e.style = 'position:absolute;left:-447px;top:530px;z-index:10001;display:block;line-height:normal;';
+  window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
   f.id = 'input-display-container';
-  f.style = 'position:absolute;left:152px;top:444px;z-index:10001;display:block;line-height:normal;';
-  document.getElementsByClassName('sEOCsb')[0].appendChild(f);
+  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;';
+  window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
 
@@ -69,9 +69,9 @@ window.InputDisplay.make = function () {
   }
 
   window.LightInputOff= function (direction) {
-  
+
     document.getElementById(direction).style.backgroundColor = window.button_color;
-  
+
   }
 
   function incrementColor(hexColor) {
@@ -85,7 +85,7 @@ window.InputDisplay.alterCode = function (code) {
 
   // Code to alter snake code here
   document.addEventListener('keydown', (event)=> {
-    
+
     if (event.key === 'ArrowRight' || (event.code === 'KeyD')){
 
       window.LightInputOn("right-button-id");
@@ -103,7 +103,7 @@ window.InputDisplay.alterCode = function (code) {
     {
       window.LightInputOn("top-button-id");
     }
-    
+
   });
 
   document.addEventListener('keyup', (event)=> {
@@ -126,4 +126,3 @@ window.InputDisplay.alterCode = function (code) {
   });
   return code;
 }
-
