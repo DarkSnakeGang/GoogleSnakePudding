@@ -86,8 +86,8 @@ window.Fruit.make = function () {
     });
     new_fruit.push({ // Steak
         "Normal": 'https://i.postimg.cc/J4n1dBsP/steak2.png',
-        "Pixel": 'https://i.postimg.cc/x16bC3wW/steak-px.png',
-        "Real": "https://i.postimg.cc/mrV8L5VQ/steak-real.png",
+        "Pixel": 'https://i.postimg.cc/cHmsNT56/steak-px.png',
+        "Real": "https://i.postimg.cc/QxHZCjyX/steak-real.png",
         "Poison_values": 'b,\'#D99E82\',\'#909090\',70',
     });
     new_fruit.push({ // Coconut
