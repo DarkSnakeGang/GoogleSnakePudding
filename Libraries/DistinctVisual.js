@@ -159,8 +159,8 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     code = code.assertReplace(sokondeez, sokondeez_nuts)
 
-    keep_running = new RegExp(/;if\([a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{1,8},9\)\)/)
-
+    //keep_running = new RegExp(/;if\([a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{1,8},9\)\)/)
+/*
     code = code.assertReplace(keep_running, `;
     if (window.pudding_settings.SokoGoals) {
         window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DistinctSokoFinal;
@@ -169,6 +169,19 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
         window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DefaultSokoGoal;
     }
     ${code.match(keep_running)[0]}`)
+*/
+    reset_regex = new RegExp(/;this\.reset\(\)/)
+
+    set_on_reset = `;
+    if (window.pudding_settings.SokoGoals) {
+        window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DistinctSokoFinal;
+    }
+    else {
+        window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DefaultSokoGoal;
+    }
+    $&`
+    code = code.assertReplace(reset_regex, set_on_reset)
+
     //code = code.assertReplace(/this.Ja.canvas,/, `window.distinct_soko_goal,`)
 
 /*
