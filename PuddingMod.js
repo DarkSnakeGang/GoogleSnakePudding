@@ -66,10 +66,10 @@ window.PuddingMod.runCodeBefore = function () {
     isSnakeCentered = true;
   }
 
-  if (!isSnakeCentered) {
+  //if (!isSnakeCentered) {
     // Move menu so it doesn't overlap panels
-    document.getElementsByClassName('bZUgDf')[0].style.width = '600px';
-  }
+    //document.getElementsByClassName('bZUgDf')[0].style.width = '50%';
+  //}
 
   window.Libraries = ["Core", "Theme", "DistinctVisual", "Counter", "TimeKeeper", "Fruit", "TopBar", "SnakeColor",  "SettingsSaver", "SpeedInfo", "InputDisplay", "BootstrapMenu","CustomPortalPairs", "Timer"];
   console.log("Enabling Pudding Mod");
