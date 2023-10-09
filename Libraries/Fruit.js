@@ -85,7 +85,7 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
     });
     new_fruit.push({ // Steak
-        "Normal": 'https://i.postimg.cc/XYjC4zzf/steak.png',
+        "Normal": 'https://i.postimg.cc/J4n1dBsP/steak2.png',
         "Pixel": 'https://i.postimg.cc/x16bC3wW/steak-px.png',
         "Real": "https://i.postimg.cc/mrV8L5VQ/steak-real.png",
         "Poison_values": 'b,\'#D99E82\',\'#909090\',70',
@@ -103,7 +103,7 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#6d4c41\',\'#909090\',50',
     });
     new_fruit.push({ // Egg
-        "Normal": 'https://i.postimg.cc/ZRg1jkrg/egg.png',
+        "Normal": 'https://i.postimg.cc/R0fR8mtv/egg.png',
         "Pixel": 'https://i.postimg.cc/pd0Nh5yP/px-egg.png',
         "Real": "https://i.postimg.cc/ncX0G22k/egg-real.png",
         "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
@@ -156,6 +156,7 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
     });
+
 
     last_fruit_num = document.querySelector('#apple').children.length - 1;
     // Add fruit to menu
