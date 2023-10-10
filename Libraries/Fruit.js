@@ -75,7 +75,7 @@ window.Fruit.make = function () {
     new_fruit.push({ // Pacman Ghost
         "Normal": 'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
         "Pixel": 'https://i.postimg.cc/BvtK8fxb/px-pacman-ghost.png',
-        "Real": "https://i.postimg.cc/VkrthH07/ghost-real.png",
+        "Real": "https://i.postimg.cc/3Nc4x2Ch/ghost-real.png",
         "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
     });
     new_fruit.push({ // Sonic Rings
@@ -99,7 +99,7 @@ window.Fruit.make = function () {
     new_fruit.push({ // These apples are shit
         "Normal": 'https://i.postimg.cc/66719KfJ/poop.png',
         "Pixel": 'https://i.postimg.cc/T2ZN1sty/poop-px.png',
-        "Real": "https://i.postimg.cc/TYTTyycf/poop-real.png",
+        "Real": "https://i.postimg.cc/8c19z6kZ/poop-real.png",
         "Poison_values": 'b,\'#6d4c41\',\'#909090\',50',
     });
     new_fruit.push({ // Egg
@@ -155,6 +155,12 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/C5rrFjzV/red-pudding-px.png',
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
+    });
+    new_fruit.push({ // Dirt Block
+        "Normal": 'https://i.postimg.cc/9FwzBRY4/mc-dirt.png',
+        "Pixel": 'https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png',
+        "Real": "https://i.postimg.cc/Z5rR1Gg4/mc-dirt-real.png",
+        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
 
 
