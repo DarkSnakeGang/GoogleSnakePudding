@@ -162,6 +162,12 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/Z5rR1Gg4/mc-dirt-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
+    new_fruit.push({ // Bread
+        "Normal": 'https://i.postimg.cc/YSMVtPr1/bread.png',
+        "Pixel": 'https://i.postimg.cc/265KZBBy/bread-px.png',
+        "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
+        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
+    });
 
 
     last_fruit_num = document.querySelector('#apple').children.length - 1;
