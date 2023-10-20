@@ -140,8 +140,8 @@ window.Fruit.make = function () {
     });
     new_fruit.push({ // Jacko
         "Normal": 'https://i.postimg.cc/rwMX5hbg/true-jacko.png',
-        "Pixel": 'https://i.postimg.cc/3wS84M1M/pixel-jacko.png',
-        "Real": "https://i.postimg.cc/NjtZ0G53/jacko-real.png",
+        "Pixel": 'https://i.postimg.cc/Pfy42QXc/jacko-px.png',
+        "Real": "https://i.postimg.cc/6qMfqtbw/jacko-real.png",
         "Poison_values": 'b,\'#fc8824\',\'#909090\',25',
     });
     new_fruit.push({ // Ice
