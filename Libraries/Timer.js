@@ -20,20 +20,20 @@ window.Timer = {
         )[0] || [0, 0]
       )[1]
     }
-    
+
     String.prototype.color = function(c) { return `<span style="color:${c}">${this.toString()}</span>` }
-    
+
     Number.prototype.timeFormat = function() {
       const time = +this
-    
+
       const hours   = Math.floor(time / 3600)
       const minutes = Math.floor((time / 60) % 60)
       const seconds = Math.floor(time % 60)
       const millis  = Math.floor((time % 1).toFixed(4) * 1000)
-    
+
       let out = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2,'0')}.${millis.toString().padStart(3, '0')}`
       out = out.slice(out.search(/[^0:]/))
-    
+
       return (out[0] === '.' ? '0' : '') + out
     }
     String.prototype.timeFormat = function() {
@@ -49,16 +49,16 @@ window.Timer = {
 
     localStorage._snake_show_delta = localStorage._snake_show_delta ?? 0
     window._showDelta = +localStorage._snake_show_delta
-  
+
     localStorage._snake_pb = localStorage._snake_pb ?? '{}'
     window._pb = JSON.parse(localStorage._snake_pb)
 
-    
+
     localStorage._snake_aheadg  = localStorage._snake_aheadg  ?? '#008010'
     localStorage._snake_aheadl  = localStorage._snake_aheadl  ?? '#53dd87'
     localStorage._snake_behindg = localStorage._snake_behindg ?? '#dd3333'
     localStorage._snake_behindl = localStorage._snake_behindl ?? '#a00000'
-  
+
     const nullFormats = [
       '-:--:--:---',
         '--:--:---',
@@ -72,8 +72,8 @@ window.Timer = {
             '-.---',
     ]
     localStorage._snake_null_split = localStorage._snake_null_split ?? nullFormats[_format]
-    
-    
+
+
     const timerSplitDiv = document.getElementsByClassName('Jc72He rc48Qb')[0]
     const deltaDiv = document.createElement('div')
     deltaDiv.id = 'timerDelta'
@@ -88,12 +88,12 @@ window.Timer = {
     const wholeTimerDiv = document.getElementsByClassName('A2vT0')[0]
     wholeTimerDiv.style.cursor = 'pointer'
 
-  
+
     wholeTimerDiv.addEventListener('click', function() {
       let editBox = document.getElementById('edit-box')
       if(editBox) {
         editBox.remove()
-      } else { 
+      } else {
         editBox = document.createElement('div')
         editBox.id = 'edit-box'
         editBox.style = `
@@ -123,11 +123,11 @@ window.Timer = {
             color: black;
             font-size: 0.9em;
           ">&#x2715</span>
-  
+
           <h1 style="font-size: 3.4vh">
             Edit PB/Comparison
           </h1>
-  
+
           <div id="edit-mode">
             <img class="sel" style="cursor: pointer; border: 4px ridge #af4490ff; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png" width="32px" height="32px"/>
             <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png" width="32px" height="32px"/>
@@ -166,7 +166,7 @@ window.Timer = {
             <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png" width="32px" height="32px"/>
           </div>
           <br/>
-          
+
           <div id="edit-cat">
             <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://i.postimg.cc/d1R1Y648/25.png"  width="32px" height="32px"/>
             <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://i.postimg.cc/7hmZC6vh/50.png"  width="32px" height="32px"/>
@@ -176,7 +176,7 @@ window.Timer = {
 
           <br/>
           <div id="edit-times" style="left:0px;">
-            
+
             <div>
               <label for="edit-25"> 25</label>
               <input size="9" name="edit-25" id="edit-25" type="text" style="font-family:Consolas;font-size:1.5vh"/>
@@ -194,11 +194,11 @@ window.Timer = {
               <input size="9" name="edit-ALL" id="edit-ALL" type="text" style="font-family:Consolas;font-size:1.5vh"/>
             </div>
           </div>
-  
+
           <div id="edit-customsplit" style="border-top:1px solid black">
-  
+
           </div>
-  
+
           <div id="edit-split">
             <label for="edit-splitscore">New Split</label>
             <input style="font-family:Consolas;font-size:1.5vh" size="6" name="edit-splitscore" id="edit-splitscore" type="number" placeholder="Score"/>
@@ -234,13 +234,13 @@ window.Timer = {
             <br/>
             <label for="edit-behindl">Behind (losing  time)</label>
             <input name="edit-behindl" id="edit-behindl" type="color"/>
-            
-            
+
+
           </div>
         `
         document.body.appendChild(editBox)
         document.getElementById('close-box').addEventListener('click', function() { document.getElementById('edit-box').remove() })
-  
+
         const toggleDelta = document.getElementById('edit-delta')
         toggleDelta.checked = +_showDelta
         toggleDelta.addEventListener('change', function() {
@@ -255,7 +255,7 @@ window.Timer = {
             realTimerDiv.style.bottom = '0px'
           }
         })
-        
+
 
         const formatSelect = document.getElementById('edit-format')
         formatSelect.value = _format
@@ -263,29 +263,29 @@ window.Timer = {
           window._format = +formatSelect.value
           localStorage._snake_timer_format = _format
 
-          if(nullFormats.includes(localStorage._snake_null_split)) 
+          if(nullFormats.includes(localStorage._snake_null_split))
             localStorage._snake_null_split = nullFormats
         })
 
         const customSplitSectionDiv = document.getElementById('edit-customsplit')
         const newSplitInput = document.getElementById('edit-splitscore')
         newSplitInput.addEventListener('keydown', function() {
-          setTimeout(function() { 
+          setTimeout(function() {
             newSplitInput.value = newSplitInput.value.replace(/\D/g, '')
           }, 1)
         })
         document.getElementById('edit-addsplit').addEventListener('click', function() {
           const splitScore = document.getElementById('edit-splitscore').value
           if(!+splitScore) return
-          
+
           const splitDiv = document.createElement('div')
-          
+
           const splitName = `edit-${splitScore}`
-  
+
           const splitLabel = document.createElement('label')
           splitLabel.for = splitName
           splitLabel.innerText = splitScore.toString().padStart(3, ' ') + ' '
-          
+
           const splitInput = document.createElement('input')
           splitInput.id = splitInput.name = splitName
           splitInput.size = 6
@@ -295,7 +295,7 @@ window.Timer = {
           splitDeleteButton.innerText = 'Delete'
           splitDeleteButton.addEventListener('click', function() {
             splitDiv.remove()
-            
+
             const _mode  = getSelected('#edit-mode',  'sel')
             const _count = getSelected('#edit-count', 'sel')
             const _speed = getSelected('#edit-speed', 'sel')
@@ -309,9 +309,9 @@ window.Timer = {
               _splits.splice(_splits.indexOf(+splitScore), 1)
             }
           })
-  
+
           if(!window._splits.includes(+splitScore)) window._splits.push(+splitScore)
-  
+
           function handleChange() {
             const val = splitInput.value.split(':')
             let time = 0
@@ -320,9 +320,9 @@ window.Timer = {
               time += s * +val.at(-i)
             }
 
-            
+
             const key = splitInput.name.replace('edit-', '')
-            
+
 
             const _mode  = getSelected('#edit-mode',  'sel')
             const _count = getSelected('#edit-count', 'sel')
@@ -330,38 +330,38 @@ window.Timer = {
             const _size  = getSelected('#edit-size',  'sel')
 
             window._cat  = getSelected('#edit-cat',   'sel')
-  
+
             if(!_pb[_mode]) _pb[_mode] = {}
             if(!_pb[_mode][_count]) _pb[_mode][_count] = {}
             if(!_pb[_mode][_count][_speed]) _pb[_mode][_count][_speed] = {}
             if(!_pb[_mode][_count][_speed][_size]) _pb[_mode][_count][_speed][_size] = {}
             if(!_pb[_mode][_count][_speed][_size][_cat]) _pb[_mode][_count][_speed][_size][_cat] = {}
             _pb[_mode][_count][_speed][_size][_cat][key] = time || ''
-  
+
             localStorage._snake_pb = JSON.stringify(_pb)
-  
-  
+
+
             splitInput.value = time === 0 ? '' : time.timeFormat()
           }
           handleChange()
-  
+
           splitInput.addEventListener('keydown', function(evt) {
             if(evt.key === 'Escape' || evt.key === 'Enter') handleChange()
-  
-            setTimeout(function() { 
+
+            setTimeout(function() {
               splitInput.value = splitInput.value.replace(/[^\d.:]/g, '')
             }, 1)
           })
           splitInput.addEventListener('change', handleChange)
-  
+
           splitDiv.appendChild(splitLabel)
           splitDiv.appendChild(splitInput)
           splitDiv.appendChild(splitDeleteButton )
-  
+
           customSplitSectionDiv.appendChild(splitDiv)
-  
+
         })
-        
+
         const divs = ['edit-mode', 'edit-count', 'edit-speed', 'edit-size'].map(q => document.getElementById(q))
         const selectors = ['#trophy', '#count', '#speed', '#size']
         for(let j = 0; j < 4; j++) {
@@ -379,11 +379,11 @@ window.Timer = {
           q.style.border = i === _cat ? '4px ridge #af4490ff' : '4px ridge #00000000'
           q.className = i === _cat ? 'sel' : 'uns'
         })
-          
-  
+
+
         for(const inp of document.getElementById('edit-times').children) {
           const el = inp.children[1]
-  
+
           function handleChange() {
             const val = el.value.split(':')
             let time = 0
@@ -391,73 +391,73 @@ window.Timer = {
               let s = i === 1 ? 1 : i === 2 ? 60 : i === 3 ? 3600 : 0
               time += s * +val.at(-i)
             }
-  
+
             const key = el.name.replace('edit-', '')
-  
+
             const _mode  = getSelected('#edit-mode',  'sel')
             const _count = getSelected('#edit-count', 'sel')
             const _speed = getSelected('#edit-speed', 'sel')
             const _size  = getSelected('#edit-size',  'sel')
 
             window._cat  = getSelected('#edit-cat',   'sel')
-  
+
             if(!_pb[_mode]) _pb[_mode] = {}
             if(!_pb[_mode][_count]) _pb[_mode][_count] = {}
             if(!_pb[_mode][_count][_speed]) _pb[_mode][_count][_speed] = {}
             if(!_pb[_mode][_count][_speed][_size]) _pb[_mode][_count][_speed][_size] = {}
             if(!_pb[_mode][_count][_speed][_size][_cat]) _pb[_mode][_count][_speed][_size][_cat] = {}
             _pb[_mode][_count][_speed][_size][_cat][key] = time || ''
-  
+
             localStorage._snake_pb = JSON.stringify(_pb)
-  
-  
+
+
             el.value = time === 0 ? '' : time.timeFormat()
           }
-  
+
           el.addEventListener('keydown', function(evt) {
             if(evt.key === 'Escape' || evt.key === 'Enter') handleChange()
-  
-            setTimeout(function() { 
+
+            setTimeout(function() {
               el.value = el.value.replace(/[^\d.:]/g, '')
             }, 1)
           })
-  
+
           el.addEventListener('change', handleChange)
         }
-  
+
         function updateToMode() {
-          
+
           const _mode  = getSelected('#edit-mode',  'sel')
           const _count = getSelected('#edit-count', 'sel')
           const _speed = getSelected('#edit-speed', 'sel')
           const _size  = getSelected('#edit-size',  'sel')
-          
+
           window._cat  = getSelected('#edit-cat',   'sel')
-  
+
           const time = _pb[_mode] && _pb[_mode][_count] && _pb[_mode][_count][_speed] && _pb[_mode][_count][_speed][_size] && _pb[_mode][_count][_speed][_size][_cat] ? _pb[_mode][_count][_speed][_size][_cat] : {}
-  
+
           for(const inp of document.getElementById('edit-times').children) {
             const el = inp.children[1]
             const key = el.name.replace('edit-', '')
-  
-  
+
+
             el.value = time[key] ? time[key].timeFormat() : ''
-  
+
           }
-  
+
           for(let i = customSplitSectionDiv.children.length - 1; i >= 0; i--) {
             customSplitSectionDiv.removeChild(customSplitSectionDiv.children[i])
           }
-  
+
           for(const [_splitName, _splitTime] of Object.entries(time)) {
             if(!['25', '50', '100', 'ALL'].includes(_splitName)) {
               const splitDiv = document.createElement('div')
               const splitName = `edit-${_splitName}`
-  
+
               const splitLabel = document.createElement('label')
               splitLabel.for = splitName
               splitLabel.innerText = _splitName.padStart(3, ' ') + ' '
-              
+
               const splitInput = document.createElement('input')
               splitInput.id = splitInput.name = splitName
               splitInput.size = 6
@@ -476,10 +476,10 @@ window.Timer = {
                   window._splits.splice(window._splits.indexOf(+_splitName), 1)
                 }
               })
-  
+
               if(!window._splits.includes(+_splitName)) window._splits.push(+_splitName)
-  
-  
+
+
               function handleChange() {
                 const val = splitInput.value.split(':')
                 let time = 0
@@ -487,52 +487,52 @@ window.Timer = {
                   let s = i === 1 ? 1 : i === 2 ? 60 : i === 3 ? 3600 : 0
                   time += s * +val.at(-i)
                 }
-      
+
                 const key = splitInput.name.replace('edit-', '')
 
-      
+
                 const _mode  = getSelected('#edit-mode',  'sel')
                 const _count = getSelected('#edit-count', 'sel')
                 const _speed = getSelected('#edit-speed', 'sel')
                 const _size  = getSelected('#edit-size',  'sel')
 
                 window._cat  = getSelected('#edit-cat',   'sel')
-      
+
                 if(!_pb[_mode]) _pb[_mode] = {}
                 if(!_pb[_mode][_count]) _pb[_mode][_count] = {}
                 if(!_pb[_mode][_count][_speed]) _pb[_mode][_count][_speed] = {}
                 if(!_pb[_mode][_count][_speed][_size]) _pb[_mode][_count][_speed][_size] = {}
                 if(!_pb[_mode][_count][_speed][_size][_cat]) _pb[_mode][_count][_speed][_size][_cat] = {}
                 _pb[_mode][_count][_speed][_size][_cat][key] = time || ''
-      
+
                 localStorage._snake_pb = JSON.stringify(_pb)
-      
+
                 splitInput.value = time === 0 ? '' : time.timeFormat()
               }
               handleChange()
-      
+
               splitInput.addEventListener('keydown', function(evt) {
                 if(evt.key === 'Escape' || evt.key === 'Enter') handleChange()
-      
-                setTimeout(function() { 
+
+                setTimeout(function() {
                   splitInput.value = splitInput.value.replace(/[^\d.:]/g, '')
                 }, 1)
               })
               splitInput.addEventListener('change', handleChange)
-      
-  
+
+
               splitDiv.appendChild(splitLabel)
               splitDiv.appendChild(splitInput)
               splitDiv.appendChild(splitDeleteButton)
-              
+
               customSplitSectionDiv.appendChild(splitDiv)
-  
+
             }
           }
         }
         updateToMode()
-  
-  
+
+
         for(const id of ['edit-mode', 'edit-count', 'edit-speed', 'edit-size', 'edit-cat'])
           for(const opt of document.getElementById(id).children) {
             opt.addEventListener('click', function() {
@@ -542,12 +542,12 @@ window.Timer = {
               }
               opt.style.border = '4px ridge #af4490ff'
               opt.className = 'sel'
-  
+
               updateToMode()
             })
           }
 
-        
+
 
         for(const subid of ['aheadg', 'aheadl', 'behindg', 'behindl']) {
           // console.log(localStorage[subid])
@@ -558,27 +558,27 @@ window.Timer = {
           })
         }
 
-          
-        
-  
-  
+
+
+
+
       }
     })
-  
-  
-  
-    
-  
+
+
+
+
+
   },
   alterCode: function(code) {
-  
+
     code = code.replace('"--:--:---"', 'localStorage._snake_null_split')
     code = code.replace('"25"', 'Math.min(...(window._splits.length === 0 ? [25] : window._splits)) || 25')
-  
+
     const resetFunction = code.match(
       /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var( |\n)a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?new( |\n)Set\n?\)\n?}/
     )[0]
-  
+
     const modeKey = resetFunction.match(
       /0===this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('0===this.settings.', '')
@@ -591,61 +591,60 @@ window.Timer = {
     const sizeKey = resetFunction.match(
       /1!==this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('1!==this.settings.', '')
-  
+
     code = code.replace(resetFunction,
       resetFunction.replace(
         'function(){',
-        `
-        function() {
-  
+        `function(){this.xdddd=[];
+
           const _mode  = getSelected('#trophy')
           const _count = getSelected('#count')
           const _speed = getSelected('#speed')
           const _size  = getSelected('#size')
-  
+
           window._run = {}
           window._run[_mode] = {}
           window._run[_mode][_count] = {}
           window._run[_mode][_count][_speed] = {}
           window._run[_mode][_count][_speed][_size] = {}
           window._run[_mode][_count][_speed][_size][_cat] = {}
-          
-  
+
+
           if(!window._pb) window._pb = {}
           if(!window._pb[_mode]) window._pb[_mode] = {}
           if(!window._pb[_mode][_count]) window._pb[_mode][_count] = {}
           if(!window._pb[_mode][_count][_speed]) window._pb[_mode][_count][_speed] = {}
           if(!window._pb[_mode][_count][_speed][_size]) window._pb[_mode][_count][_speed][_size] = {}
           if(!window._pb[_mode][_count][_speed][_size][_cat]) window._pb[_mode][_count][_speed][_size][_cat] = {}
-  
+
           for(let __ind = window._splits.length - 1; __ind >= 0; __ind--) {
             if(!window._pb[_mode][_count][_speed][_size][_cat][window._splits[__ind]]) {
               window._splits.splice(__ind, 1)
             }
           }
-  
+
           for(let __key of Object.keys(window._pb[_mode][_count][_speed][_size][_cat])) {
             if(!['25','50','100','ALL'].includes(__key) && !window._splits.includes(+__key)) {
               window._splits.push(+__key)
             }
           }
-  
-  
+
+
           const deltaDiv = document.getElementById('timerDelta')
           deltaDiv.innerHTML = '-'.color('white')
 
           window._lastDelta = 0
-  
+
         `
-      )  
+      )
     )
-    
-    
+
+
     const timeFormatFunction = code.match(
       /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(0>=a\)return[^]*?3,"0"\)}/
     )[0]
 
-  
+
     code = code.replace(timeFormatFunction,
       timeFormatFunction.replace(
         'function(a){',
@@ -672,7 +671,7 @@ window.Timer = {
           _hours + _minutes.toString().padStart(2,_hours ? "0" : " ") + ":" + _seconds.padStart(2,"0") + ":" + _millis,
           _hours + (_minutes ? _minutes.toString().padStart(2,_hours ? "0" : " ") + ":" : _hours ? "00:" : "   ") + _seconds.padStart(2,"0") + ":" + _millis,
           _hours + (_minutes ? _minutes.toString().padStart(2,_hours ? "0" : " ") + ":" : _hours ? "00:" : "   ") + _seconds.padStart(2,_hours || _minutes ? "0" : " ") + ":" + _millis,
-          
+
           c.toString() + ":" + _minutes.toString().padStart(2,"0") + ":" + _seconds.padStart(2,"0") + "." + _millis,
           _hours + _minutes.toString().padStart(2,"0") + ":" + _seconds.padStart(2,"0") + "." + _millis,
           _hours + _minutes.toString().padStart(2,_hours ? "0" : " ") + ":" + _seconds.padStart(2,"0") + "." + _millis,
@@ -681,20 +680,20 @@ window.Timer = {
         ][_format]`
       )
     )
-  
+
     const stuffBlock = code.match(
       /[a-zA-Z0-9_$]{1,8}=this\.header,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}=this\.ticks,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8};/
     )[0]
     const score = stuffBlock.match(/header,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}/)[0].replace(/header,[a-zA-Z0-9_$]{1,8}=/,'')
     const ticks = stuffBlock.match(/[a-zA-Z0-9_$]{1,8}=this\.ticks/)[0].replace(/[a-zA-Z0-9_$]{1,8}=/,'')
     const dt    = stuffBlock.match(/ticks,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}/)[0].replace(/ticks,[a-zA-Z0-9_$]{1,8}=/,'')
-    
-  
-  
+
+
+
     const splitStuff = code.match(
       /if\(25===[a-zA-Z0-9_$]{1,8}\|\|50===[a-zA-Z0-9_$]{1,8}\|\|100===[a-zA-Z0-9_$]{1,8}\)/
     )[0]
-  
+
     code = code.replace(
       splitStuff,
       `
@@ -704,11 +703,11 @@ window.Timer = {
         const _count = getSelected('#count')
         const _speed = getSelected('#speed')
         const _size  = getSelected('#size')
-  
+
         const _split = ${ticks} * ${dt} * 1e-3
-  
+
         window._run[_mode][_count][_speed][_size][_cat][${score}] = _split
-        
+
         if(window._pb[_mode][_count][_speed][_size][_cat][${score}]) {
           const _delta = _split - window._pb[_mode][_count][_speed][_size][_cat][${score}]
           const _absDeltaString = Math.abs(_delta).timeFormat()
@@ -717,14 +716,14 @@ window.Timer = {
               localStorage[
                 _delta > 0 ?
                   _delta > _lastDelta ? 'behindl' : 'behindg'
-                : 
+                :
                   _delta > _lastDelta ? 'aheadl'  : 'aheadg'
               ]
             )
           else
             deltaDiv.innerHTML = '-'.color('white')
 
-          
+
 
           window._lastDelta = _delta
         } else {
@@ -733,8 +732,8 @@ window.Timer = {
 
         if(
           (
-            (${score} === 25  && _cat === 0) || 
-            (${score} === 50  && _cat === 1) || 
+            (${score} === 25  && _cat === 0) ||
+            (${score} === 50  && _cat === 1) ||
             (${score} === 100 && _cat === 2)
           ) && (
             !window._pb[_mode][_count][_speed][_size][_cat][${score}] ||
@@ -746,21 +745,21 @@ window.Timer = {
         }
 
 
-        
 
-        
+
+
       }
 
-      
+
       if([25, 50, 100].includes(${score}) || window._splits.includes(${score}))
-      
+
       `
     )
-  
+
     const winStuff = code.match(
       /_\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},"ALL"\);/
     )[0]
-  
+
     code = code.replace(
       winStuff,
       `
@@ -770,9 +769,9 @@ window.Timer = {
       const _count = getSelected('#count')
       const _speed = getSelected('#speed')
       const _size  = getSelected('#size')
-  
+
       const _time = ${ticks} * ${dt} * 1e-3
-  
+
       let _delta = NaN
 
       window._run[_mode][_count][_speed][_size][_cat]['ALL'] = _time
@@ -784,7 +783,7 @@ window.Timer = {
             localStorage[
               _delta > 0 ?
                 _delta > _lastDelta ? 'behindl' : 'behindg'
-              : 
+              :
                 _delta > _lastDelta ? 'aheadl'  : 'aheadg'
             ]
           )
@@ -793,23 +792,23 @@ window.Timer = {
       } else {
         deltaDiv.innerHTML = '-'.color('white')
       }
-      
+
       if(_delta < 0 || isNaN(_delta)) {
         window._pb[_mode][_count][_speed][_size][_cat] = window._run[_mode][_count][_speed][_size][_cat]
         localStorage._snake_pb = JSON.stringify(window._pb)
       }
-      
 
-      
+
+
       `
     )
 
 
 
 
-  
-  
-  
+
+
+
     return code
   }
 }
