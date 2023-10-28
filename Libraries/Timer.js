@@ -7,6 +7,21 @@
 // const [standard, small, large] = arrayIndices(3)
 
 
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  return {
+    r: parseInt(hex.substring(0, 2), 16),
+    g: parseInt(hex.substring(2, 4), 16),
+    b: parseInt(hex.substring(4, 6), 16),
+  };
+}
+function rgbToHex(rgb) {
+  let hex = '#';
+  hex += rgb.r.toString(16).padStart(2, '0');
+  hex += rgb.g.toString(16).padStart(2, '0');
+  hex += rgb.b.toString(16).padStart(2, '0');
+  return hex;
+}
 
 
 window.Timer = {
@@ -81,37 +96,42 @@ window.Timer = {
     timerSplitDiv.appendChild(deltaDiv)
     if(!_showDelta) deltaDiv.style.display = 'none'
 
-    const realTimerDiv = document.getElementsByClassName('Jc72He gmwAbc')[0]
-    realTimerDiv.style.position = 'relative'
-    if(_showDelta) realTimerDiv.style.bottom = window.location.href.includes('fbx') ? '9px' : '13px'
+    // const realTimerDiv = document.getElementsByClassName('Jc72He gmwAbc')[0]
+    // realTimerDiv.style.position = 'relative'
+    // if(_showDelta) realTimerDiv.style.bottom = window.location.href.includes('fbx') ? '9px' : '13px'
 
-    const wholeTimerDiv = document.getElementsByClassName('A2vT0')[0]
-    wholeTimerDiv.style.cursor = 'pointer'
+    // const wholeTimerDiv = document.getElementsByClassName('A2vT0')[0]
+    // wholeTimerDiv.style.cursor = 'pointer'
 
 
-    wholeTimerDiv.addEventListener('click', function() {
+    window.editTimer = function() {
+      // console.warn(window.themes)
+
       let editBox = document.getElementById('edit-box')
       if(editBox) {
         editBox.remove()
       } else {
+        const theme = window.themes[getSelected('#theme', 'DqMRee tuJOWd') || getSelected('#theme', 'tuJOWd')]
+
         editBox = document.createElement('div')
         editBox.id = 'edit-box'
         editBox.style = `
-          background-color: #aaaaff;
+          background-color: ${theme.bg_color ?? '#aaaaff'};
           border-radius: 1.5vh;
           position: absolute;
           height: unset;
-          z-index: 10000000000;
+          z-index: 1000000;
           top: 30px;
           left: 50%;
           backdrop-filter: blur(5px);
           text-align: center;
-          padding: 40px;
+          padding: 4px;
           transform: translate(-50%, 0);
           box-shadow: 0px 0px 8px rgba(0,0,0,0.4);
-          border: 1px solid #4444dd;
-          font-size: 2.4vh;
-          color: black;
+          border: 1px solid ${theme.topbar_color ?? '#4444dd'};
+          font-size: 2.5vh;
+          color: #ffffff;
+          width: 70vw;
           font-family: Consolas;
         `
         editBox.innerHTML = `
@@ -120,58 +140,58 @@ window.Timer = {
             top: 10px;
             right: 15px;
             cursor: pointer;
-            color: black;
+            color: #ffffff;
             font-size: 0.9em;
           ">&#x2715</span>
 
-          <h1 style="font-size: 3.4vh">
+          <h1 style="font-size: 3.5vh">
             Edit PB/Comparison
           </h1>
 
           <div id="edit-mode">
-            <img class="sel" style="cursor: pointer; border: 4px ridge #af4490ff; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_02.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_03.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_04.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_05.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_06.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_07.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_08.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_09.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_10.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_11.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_12.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" width="32px" height="32px"/>
+            <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_02.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_03.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_04.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_05.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_06.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_07.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_08.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_09.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_10.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_11.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_12.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png"/>
           </div>
           <br/>
           <div id="edit-count">
-            <img class="sel" style="cursor: pointer; border: 4px ridge #af4490ff; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_03.png" width="32px" height="32px"/>
+            <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_03.png"/>
           </div>
           <br/>
           <div id="edit-speed">
-            <img class="sel" style="cursor: pointer; border: 4px ridge #af4490ff; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_01.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_02.png" width="32px" height="32px"/>
+            <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_01.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_02.png"/>
           </div>
           <br/>
           <div id="edit-size">
-            <img class="sel" style="cursor: pointer; border: 4px ridge #af4490ff; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_00.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_01.png" width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png" width="32px" height="32px"/>
+            <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_00.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_01.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png"/>
           </div>
           <br/>
 
           <div id="edit-cat">
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://i.postimg.cc/d1R1Y648/25.png"  width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://i.postimg.cc/7hmZC6vh/50.png"  width="32px" height="32px"/>
-            <img class="uns" style="cursor: pointer; border: 4px ridge #00000000; border-radius: 8px;" src="https://i.postimg.cc/qqk7MK5W/100.png" width="32px" height="32px"/>
-            <img class="sel" style="cursor: pointer; border: 4px ridge #af4490ff; border-radius: 8px;" src="https://i.postimg.cc/52j6Cw2V/all.png" width="32px" height="32px"/>
+            <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/d1R1Y648/25.png" />
+            <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/7hmZC6vh/50.png" />
+            <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/qqk7MK5W/100.png"/>
+            <img class="sel" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/52j6Cw2V/all.png"/>
           </div>
 
           <br/>
@@ -202,11 +222,11 @@ window.Timer = {
           <div id="edit-split">
             <label for="edit-splitscore">New Split</label>
             <input style="font-family:Consolas;font-size:1.5vh" size="6" name="edit-splitscore" id="edit-splitscore" type="number" placeholder="Score"/>
-            <button id="edit-addsplit">Add</button>
+            <button style="font-family:Consolas;font-size:1.5vh;" id="edit-addsplit">Add</button>
           </div>
 
           <div id="edit-layout" style="border-top:1px solid black;">
-            Timer Format:
+            Timer Format
             <select id="edit-format" style="font-family: Consolas; font-size: 1.5vh">
               <option value="0">0:00:00:000</option>
               <option value="1">  00:00:000</option>
@@ -220,20 +240,20 @@ window.Timer = {
               <option value="9">      0.000</option>
             </select>
             <br/>
-            <input type="checkbox" checked="true" name="edit-delta" id="edit-delta"/>
+            <input style="width: 1.5vh; height: 1.5vh;" type="checkbox" checked="true" name="edit-delta" id="edit-delta"/>
             <label for="edit-delta">Show Delta</label>
             <br/>
             <label for="edit-aheadg">Ahead  (gaining time)</label>
-            <input name="edit-aheadg" id="edit-aheadg" type="color"/>
-            <br/>
+            <input style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-aheadg" id="edit-aheadg" type="color"/>
+               
             <label for="edit-aheadl">Ahead  (losing  time)</label>
-            <input name="edit-aheadl" id="edit-aheadl" type="color"/>
+            <input style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-aheadl" id="edit-aheadl" type="color"/>
             <br/>
             <label for="edit-behindg">Behind (gaining time)</label>
-            <input name="edit-behindg" id="edit-behindg" type="color"/>
-            <br/>
+            <input style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-behindg" id="edit-behindg" type="color"/>
+               
             <label for="edit-behindl">Behind (losing  time)</label>
-            <input name="edit-behindl" id="edit-behindl" type="color"/>
+            <input style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-behindl" id="edit-behindl" type="color"/>
 
 
           </div>
@@ -249,10 +269,10 @@ window.Timer = {
 
           if(_showDelta) {
             deltaDiv.style.display = ''
-            realTimerDiv.style.bottom = window.location.href.includes('fbx') ? '9px' : '13px'
+            // realTimerDiv.style.bottom = window.location.href.includes('fbx') ? '9px' : '13px'
           } else {
             deltaDiv.style.display = 'none'
-            realTimerDiv.style.bottom = '0px'
+            // realTimerDiv.style.bottom = '0px'
           }
         })
 
@@ -288,10 +308,13 @@ window.Timer = {
 
           const splitInput = document.createElement('input')
           splitInput.id = splitInput.name = splitName
-          splitInput.size = 6
+          splitInput.size = 9
           splitInput.type = 'text'
+          splitInput.style.fontSize = '1.5vh'
+
 
           const splitDeleteButton = document.createElement('button')
+          splitDeleteButton.style.fontSize = '1.5vh'
           splitDeleteButton.innerText = 'Delete'
           splitDeleteButton.addEventListener('click', function() {
             splitDiv.remove()
@@ -368,7 +391,7 @@ window.Timer = {
           let temp = [...document.querySelector(selectors[j]).children]
           temp.forEach((q, i) => {
             if(_r = divs[j].children[i]) {
-              _r.style.border = i === getSelected(selectors[j]) ? '4px ridge #af4490ff' : '4px ridge #00000000'
+              _r.style.border = i === getSelected(selectors[j]) ? '0.5vh ridge #af4490ff' : '0.5vh ridge #00000000'
               _r.className = i === getSelected(selectors[j]) ? 'sel' : 'uns'
             }
           })
@@ -376,7 +399,7 @@ window.Timer = {
 
         const cats = [...document.getElementById('edit-cat').children]
         cats.forEach((q, i) => {
-          q.style.border = i === _cat ? '4px ridge #af4490ff' : '4px ridge #00000000'
+          q.style.border = i === _cat ? '0.5vh ridge #af4490ff' : '0.5vh ridge #00000000'
           q.className = i === _cat ? 'sel' : 'uns'
         })
 
@@ -460,12 +483,14 @@ window.Timer = {
 
               const splitInput = document.createElement('input')
               splitInput.id = splitInput.name = splitName
-              splitInput.size = 6
+              splitInput.size = 9
               splitInput.type = 'text'
+              splitInput.style.fontSize = '1.5vh'
               splitInput.value = +_splitTime ? _splitTime.timeFormat() : ''
 
               const splitDeleteButton = document.createElement('button')
               // splitDeleteButton.id = `delete-${splitName}`
+              splitDeleteButton.style.fontSize = '1.5vh'
               splitDeleteButton.innerText = 'Delete'
               splitDeleteButton.addEventListener('click', function() {
                 splitDiv.remove()
@@ -537,10 +562,10 @@ window.Timer = {
           for(const opt of document.getElementById(id).children) {
             opt.addEventListener('click', function() {
               for(const opt1 of document.getElementById(id).children) {
-                opt1.style.border = '4px ridge #00000000'
+                opt1.style.border = '0.5vh ridge #00000000'
                 opt1.className = 'uns'
               }
-              opt.style.border = '4px ridge #af4490ff'
+              opt.style.border = '0.5vh ridge #af4490ff'
               opt.className = 'sel'
 
               updateToMode()
@@ -563,7 +588,7 @@ window.Timer = {
 
 
       }
-    })
+    }
 
 
 
@@ -715,9 +740,9 @@ window.Timer = {
             deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
               localStorage[
                 _delta > 0 ?
-                  _delta > _lastDelta ? 'behindl' : 'behindg'
+                  _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
                 :
-                  _delta > _lastDelta ? 'aheadl'  : 'aheadg'
+                  _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
               ]
             )
           else
@@ -782,9 +807,9 @@ window.Timer = {
           deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
             localStorage[
               _delta > 0 ?
-                _delta > _lastDelta ? 'behindl' : 'behindg'
+                _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
               :
-                _delta > _lastDelta ? 'aheadl'  : 'aheadg'
+                _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
             ]
           )
         else
