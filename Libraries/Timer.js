@@ -140,7 +140,7 @@ window.Timer = {
             top: 10px;
             right: 15px;
             cursor: pointer;
-            color: black;
+            color: #ffffff;
             font-size: 0.9em;
           ">&#x2715</span>
 
