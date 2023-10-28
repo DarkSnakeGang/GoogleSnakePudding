@@ -740,9 +740,9 @@ window.Timer = {
             deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
               localStorage[
                 _delta > 0 ?
-                  _delta > _lastDelta ? 'behindl' : 'behindg'
+                  _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
                 :
-                  _delta > _lastDelta ? 'aheadl'  : 'aheadg'
+                  _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
               ]
             )
           else
@@ -807,9 +807,9 @@ window.Timer = {
           deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
             localStorage[
               _delta > 0 ?
-                _delta > _lastDelta ? 'behindl' : 'behindg'
+                _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
               :
-                _delta > _lastDelta ? 'aheadl'  : 'aheadg'
+                _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
             ]
           )
         else
