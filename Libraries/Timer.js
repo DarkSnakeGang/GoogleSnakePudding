@@ -282,9 +282,7 @@ window.Timer = {
         formatSelect.addEventListener('change', function() {
           window._format = +formatSelect.value
           localStorage._snake_timer_format = _format
-
-          if(nullFormats.includes(localStorage._snake_null_split))
-            localStorage._snake_null_split = nullFormats
+          localStorage._snake_null_split = nullFormats[window._format]
         })
 
         const customSplitSectionDiv = document.getElementById('edit-customsplit')
