@@ -117,9 +117,9 @@ window.Timer = {
         editBox.id = 'edit-box'
         editBox.style = `
           background-color: ${theme.bg_color ?? '#aaaaff'};
-          border-radius: 1.5vh;
+          border-radius: 0.5vw;
           position: absolute;
-          height: unset;
+          height: 93vh;
           z-index: 1000000;
           top: 30px;
           left: 50%;
@@ -133,6 +133,7 @@ window.Timer = {
           color: #ffffff;
           width: 70vw;
           font-family: Consolas;
+          overflow-y: auto;
         `
         editBox.innerHTML = `
           <span id="close-box" style="
@@ -282,9 +283,7 @@ window.Timer = {
         formatSelect.addEventListener('change', function() {
           window._format = +formatSelect.value
           localStorage._snake_timer_format = _format
-
-          if(nullFormats.includes(localStorage._snake_null_split))
-            localStorage._snake_null_split = nullFormats
+          localStorage._snake_null_split = nullFormats[window._format]
         })
 
         const customSplitSectionDiv = document.getElementById('edit-customsplit')
@@ -598,7 +597,7 @@ window.Timer = {
   alterCode: function(code) {
 
     code = code.replace('"--:--:---"', 'localStorage._snake_null_split')
-    code = code.replace('"25"', 'Math.min(...(window._splits.length === 0 ? [25] : window._splits)) || 25')
+    code = code.replace('"25"', 'Math.min(25, ...(window._splits.length === 0 ? [25] : window._splits)) || 25')
 
     const resetFunction = code.match(
       /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var( |\n)a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?new( |\n)Set\n?\)\n?}/
