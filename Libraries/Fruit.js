@@ -245,7 +245,7 @@ window.Fruit.alterCode = function (code) {
 
     //final_realism_code = realism_image_code.split('}')[0] + '}' + realism_image_code.split('}')[1] + ';' + new_realism_code
 
-    final_realism_test = `;; debugger ;;`
+    //final_realism_test = `;; debugger ;;`
 
     final_realism_code = `
 ${realism_image_code.split('}')[0]};
