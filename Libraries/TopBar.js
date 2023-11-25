@@ -25,8 +25,8 @@ window.TopBar.alterCode = function (code) {
   count_var = "window.count_setting"
   speed_var = "window.speed_setting"
 
-  muted_img = "//www.gstatic.com/images/icons/material/system/2x/volume_off_white_24dp.png"
-  unmuted_img = "//www.gstatic.com/images/icons/material/system/2x/volume_up_white_24dp.png"
+  muted_img = "volume_off_white_24dp.png"
+  unmuted_img = "volume_up_white_24dp.png"
 
   window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
   window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
@@ -40,13 +40,13 @@ window.TopBar.alterCode = function (code) {
   fruit_jsname = document.querySelector('img[src$="apple_00.png"]').getAttribute("jsname")
   fruit_src = `document.querySelector('img[jsname="${fruit_jsname}"]').src `
   try {
-    mute_jsname = document.querySelector(`img[src="${unmuted_img}"`).getAttribute("jsname")
+    mute_jsname = document.querySelector(`img[src$="${unmuted_img}"`).getAttribute("jsname")
     window.is_muted = false;
   } catch (error) {
     if (window.NepDebug) {
       console.log("Noticed it's muted, adjusting.")
     }
-    mute_jsname = document.querySelector(`img[src="${muted_img}"`).getAttribute("jsname")
+    mute_jsname = document.querySelector(`img[src$="${muted_img}"`).getAttribute("jsname")
     window.is_muted = true;
   }
   mute_src = `document.querySelector('img[jsname="${mute_jsname}"]').src `
