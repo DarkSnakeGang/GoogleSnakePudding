@@ -72,7 +72,7 @@ window.TimeKeeper.make = function () {
         for (child of element.parentElement.parentElement.parentElement.children) {
             counter++;
             if (counter == 0) { continue; };
-            if (child.firstChild.classList.length > 1 && child.firstChild.children.length > 0) {
+            if (child.firstElementChild.classList.length > 1 && child.firstElementChild.children.length > 0) {
                 modeStr += "1";
             }
             else {
