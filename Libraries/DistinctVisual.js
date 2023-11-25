@@ -185,13 +185,9 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     //code = code.assertReplace(/this.Ja.canvas,/, `window.distinct_soko_goal,`)
 
 /*
-KNOWN BUGS
-1. Mixed graphics turns "default" skull during animation even when it was a real or pixel skull before
-Because: in-game bug.
 
 Generally speaking, there is a "shadow" apple that is just the skull icon
 And the code recognizes poison apples and changes their "type" (fruit) to that skull
-
 
 */
 

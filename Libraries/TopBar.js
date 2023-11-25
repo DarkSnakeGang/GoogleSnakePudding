@@ -37,7 +37,7 @@ window.TopBar.alterCode = function (code) {
   set_count_code = `$&${count_var}=`
   set_speed_code = `$&${speed_var}=`
 
-  fruit_jsname = document.querySelector('img[src="//www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"]').getAttribute("jsname")
+  fruit_jsname = document.querySelector('img[src$="apple_00.png"]').getAttribute("jsname")
   fruit_src = `document.querySelector('img[jsname="${fruit_jsname}"]').src `
   try {
     mute_jsname = document.querySelector(`img[src="${unmuted_img}"`).getAttribute("jsname")
