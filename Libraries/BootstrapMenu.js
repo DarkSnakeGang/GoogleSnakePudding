@@ -1,7 +1,7 @@
 window.BootstrapMenu = {};
 
 window.BootstrapMenu.make = function () {
-
+debugger
     window.bootstrapVisible = false;
 
     window.BootstrapShow = function () {
@@ -178,13 +178,6 @@ window.BootstrapMenu.make = function () {
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
         speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
-        if(window.pudding_settings.SpeedInfo)
-            {
-                window.SpeedInfoShow();
-            }
-
-
-
 
         if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "StealthMod") {
             console.log("Detected MorePudding or StealthMod - disabling SpeedInfo")
@@ -288,6 +281,9 @@ window.BootstrapMenu.make = function () {
 }
 
 window.BootstrapMenu.alterCode = function (code) {
-
+    if(window.pudding_settings.SpeedInfo)
+    {
+        window.SpeedInfoShow();
+    }
     return code;
 }
