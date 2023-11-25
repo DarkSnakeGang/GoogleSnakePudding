@@ -1,7 +1,7 @@
 window.BootstrapMenu = {};
 
 window.BootstrapMenu.make = function () {
-debugger
+
     window.bootstrapVisible = false;
 
     window.BootstrapShow = function () {
