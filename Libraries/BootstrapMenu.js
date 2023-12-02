@@ -19,6 +19,24 @@ window.BootstrapMenu.make = function () {
         window.bootstrapVisible = false;
     }
 
+    random_button_jsname = 'qycu7d' // Hardcoded because I'm lazy
+
+    // Get the button by its jsname attribute
+    window.random_button = document.querySelector(`[jsname="${random_button_jsname}"]`);
+
+    // Disable the button
+    window.ToggleRandom = function () {
+        window.pudding_settings.DisableRandom = !window.pudding_settings.DisableRandom;
+        if (window.pudding_settings.DisableRandom) {
+            // Disable it
+            random_button.style.pointerEvents = 'none';
+        }
+        else {
+            // Enable it
+            random_button.style.pointerEvents = 'auto';
+        }
+    }
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -119,7 +137,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show SpeedInfo</label>
     </div>
     <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
-
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
+    <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
+    </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
@@ -178,6 +199,19 @@ window.BootstrapMenu.make = function () {
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
         speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
+
+        randombtn_checkbox = document.getElementById("DisableRandom");
+        randombtn_checkbox.addEventListener("change", window.ToggleRandom);
+        randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
+
+        if (window.pudding_settings.DisableRandom) {
+            // Disable it
+            random_button.style.pointerEvents = 'none';
+        }
+        else {
+            // Enable it
+            random_button.style.pointerEvents = 'auto';
+        }
 
         if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "StealthMod") {
             console.log("Detected MorePudding or StealthMod - disabling SpeedInfo")

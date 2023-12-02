@@ -11,19 +11,19 @@ window.SettingsSaver.make = function () {
                 TopBar: true,
                 SpeedInfo: false,
                 PortalPairs: false,
-                SelectedPairs: [0, 1, 2, 3, 4, 5]
+                SelectedPairs: [0, 1, 2, 3, 4, 5],
+                DisableRandom: false
             };
-                
+
             }
          else {
             pudding_settings = JSON.parse(pudding_settings);
         }
-        
-        
+
         return pudding_settings;
     }
     window.pudding_settings = window.loadSettings();
-    
+
 
     window.saveSettings = function () {
         window.pudding_settings.SelectedPairs = window.selected_fruit;
@@ -32,7 +32,8 @@ window.SettingsSaver.make = function () {
         typeof pudding_settings.InputDisplay !== 'undefined' &&
         typeof pudding_settings.TopBar !== 'undefined' &&
         typeof pudding_settings.SpeedInfo !== 'undefined' &&
-        typeof pudding_settings.PortalPairs !== 'undefined' 
+        typeof pudding_settings.PortalPairs !== 'undefined' &&
+        typeof pudding_settings.DisableRandom !== 'undefined'
         ) {
             localStorage.setItem('PuddingSettings', JSON.stringify(pudding_settings));
         }
