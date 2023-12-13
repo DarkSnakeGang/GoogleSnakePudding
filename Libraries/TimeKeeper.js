@@ -83,7 +83,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 15; t++) {
+            for (t = 1; t <= 16; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -364,7 +364,8 @@ window.TimeKeeper.make = function () {
                     case 11: gamemode += "Minesweeper, "; break;
                     case 12: gamemode += "Statue, "; break;
                     case 13: gamemode += "Light, "; break;
-                    case 14: gamemode += "Peaceful, "; break;
+                    case 14: gamemode += "Shield, "; break;
+                    case 15: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
