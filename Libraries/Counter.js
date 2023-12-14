@@ -138,7 +138,7 @@ window.Counter.alterCode = function (code) {
     stats.plays.lifetime++;
     saveStatistics();
     stats.visible = true;
-    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 16) && stats.statShown == "walls"){
+    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 17) && stats.statShown == "walls"){
         stats.visible = false;
     }
     window.setCounter();
