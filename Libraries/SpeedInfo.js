@@ -566,7 +566,6 @@ window.SpeedInfo.make = function () {
 
         //change modeStr to gamemode
         var counter = 0
-        debugger
         var gamemode = "";
         for (t of modeStr) {
             if (t == 1) {
