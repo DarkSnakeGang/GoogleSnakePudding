@@ -43,7 +43,7 @@ window.BootstrapMenu.make = function () {
         a.src = getStatIconImageSrc();
         a.id = 'stat-icon';
         a.width = a.height = 25;
-        a.style = 'position:relative;left:475px;top:70px;';
+        a.style = 'position:relative;left:200px;top:70px;';
 
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
@@ -213,11 +213,15 @@ window.BootstrapMenu.make = function () {
             random_button.style.pointerEvents = 'auto';
         }
 
-        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "StealthMod") {
-            console.log("Detected MorePudding or StealthMod - disabling SpeedInfo")
+        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
+            console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
+            if(window.isSnakeMobileVersion){
+                input_checkbox.disabled = true;
+            }
+
         }
         let settingsToValues = {
             inputs: {
@@ -299,18 +303,44 @@ window.BootstrapMenu.make = function () {
     const settingsButton = 'iyH4Cb';
     document.querySelector("div[jsname^=\"" + settingsButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapShow();
+        if (window.isSnakeMobileVersion) {
+            window.enableScrollMobile();
+        }
     });
 
     const backButton = 'p17HVe';
     document.querySelector("img[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
+        if (window.isSnakeMobileVersion) {
+            window.disableScrollMobile();
+        }
     });
 
     const playButton = 'NSjDf';
     document.querySelector("div[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
+        if (window.isSnakeMobileVersion) {
+            window.disableScrollMobile();
+        }
     });
 
+    window.disableScrollMobile = function () {
+        // Save the current scroll position
+        const scrollX = window.scrollX || window.pageXOffset || document.documentElement.scrollLeft;
+
+        // Disable scroll by setting overflow to hidden
+        document.body.style.overflowX = 'hidden';
+
+        // Set the scroll position back to its original value
+        window.scrollTo(scrollX, 0);
+      }
+
+      // Function to enable horizontal scroll
+      window.enableScrollMobile = function () {
+        // Enable scroll by setting overflow to auto
+        document.body.style.overflowX = 'auto';
+        document.documentElement.scrollLeft = document.documentElement.scrollWidth;
+      }
 
 }
 
