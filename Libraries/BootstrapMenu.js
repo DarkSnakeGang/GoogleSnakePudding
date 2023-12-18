@@ -305,6 +305,9 @@ window.BootstrapMenu.make = function () {
         window.BootstrapShow();
         if (window.isSnakeMobileVersion) {
             window.enableScrollMobile();
+            if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
+                document.getElementById('delete-stuff-popup').hidden = false;
+            }
         }
     });
 
@@ -313,6 +316,9 @@ window.BootstrapMenu.make = function () {
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
             window.disableScrollMobile();
+            if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
+                document.getElementById('delete-stuff-popup').hidden = true;
+            }
         }
     });
 
@@ -321,6 +327,9 @@ window.BootstrapMenu.make = function () {
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
             window.disableScrollMobile();
+            if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
+                document.getElementById('delete-stuff-popup').hidden = true;
+            }
         }
     });
 
