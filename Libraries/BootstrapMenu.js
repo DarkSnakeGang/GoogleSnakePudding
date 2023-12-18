@@ -315,7 +315,6 @@ window.BootstrapMenu.make = function () {
     document.querySelector("img[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
-            window.disableScrollMobile();
             if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
                 document.getElementById('delete-stuff-popup').hidden = true;
             }
@@ -326,30 +325,19 @@ window.BootstrapMenu.make = function () {
     document.querySelector("div[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
-            window.disableScrollMobile();
             if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
                 document.getElementById('delete-stuff-popup').hidden = true;
             }
         }
     });
 
-    window.disableScrollMobile = function () {
-        // Save the current scroll position
-        const scrollX = window.scrollX || window.pageXOffset || document.documentElement.scrollLeft;
 
-        // Disable scroll by setting overflow to hidden
-        document.body.style.overflowX = 'hidden';
-
-        // Set the scroll position back to its original value
-        window.scrollTo(scrollX, 0);
-      }
-
-      // Function to enable horizontal scroll
-      window.enableScrollMobile = function () {
+    // Function to enable horizontal scroll
+    window.enableScrollMobile = function () {
         // Enable scroll by setting overflow to auto
         document.body.style.overflowX = 'auto';
         document.documentElement.scrollLeft = document.documentElement.scrollWidth;
-      }
+    }
 
 }
 

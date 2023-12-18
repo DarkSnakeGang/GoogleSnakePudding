@@ -12,7 +12,7 @@ window.Core.make = function () {
         return img;
     };
 
-    document.body.style.overflow = 'hidden'; // Hide scroll bar
+    //document.body.style.overflow = 'hidden'; // Hide scroll bar
 
     window.escapeRegex = function (string) {
         return string.replace(/[/\-\\^$*+?.()|[\]{}]/g, '\\$&');
