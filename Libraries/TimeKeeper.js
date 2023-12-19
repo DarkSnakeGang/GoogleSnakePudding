@@ -57,7 +57,6 @@ window.TimeKeeper.make = function () {
         window.timeKeeper.count = window.timeKeeper.getCurrentSetting("count");
         window.timeKeeper.speed = window.timeKeeper.getCurrentSetting("speed");
         window.timeKeeper.size = window.timeKeeper.getCurrentSetting("size");
-        window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     }
 
     window.timeKeeper.getCurrentMode = function () {

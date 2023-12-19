@@ -136,6 +136,7 @@ window.Counter.alterCode = function (code) {
     window.BootstrapHide();
     stats.plays.session++;
     stats.plays.lifetime++;
+    window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     saveStatistics();
     stats.visible = true;
     if((window.CurrentModeNum != 1 && window.CurrentModeNum != 17) && stats.statShown == "walls"){
@@ -150,40 +151,37 @@ window.Counter.alterCode = function (code) {
     window.IncrementCounter = function(){
 
         if(!window.timeKeeper.playing)
-            {
-              window.timeKeeper.start();
-              window.timeKeeper.playing = true;
-            }
+        {
+            window.timeKeeper.start();
+            window.timeKeeper.playing = true;
+        }
 
-            stats.inputs.game++;
-            stats.inputs.session++;
-            stats.inputs.lifetime++;
-            stats.statShown === 'inputs' && updateCounterDisplay();
-
-
+        stats.inputs.game++;
+        stats.inputs.session++;
+        stats.inputs.lifetime++;
+        stats.statShown === 'inputs' && updateCounterDisplay();
 
     }
 
 
     document.addEventListener('keydown', (event)=> {
-        if(!event.repeat )
-      {
-        if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
-
-          window.IncrementCounter();
-        }
-        else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
+        if(!event.repeat)
         {
-            window.IncrementCounter();
-        }
-        else if (event.key === 'ArrowDown'|| (event.code === 'KeyS'))
-        {
-            window.IncrementCounter();
-        }
-        else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
-        {
-            window.IncrementCounter();
-         }
+            if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
+                window.IncrementCounter();
+            }
+            else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
+            {
+                window.IncrementCounter();
+            }
+            else if (event.key === 'ArrowDown'|| (event.code === 'KeyS'))
+            {
+                window.IncrementCounter();
+            }
+            else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
+            {
+                window.IncrementCounter();
+            }
         }
     }
       );
