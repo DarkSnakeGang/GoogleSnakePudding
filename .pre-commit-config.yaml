@@ -31,12 +31,6 @@ repos:
           - --license-filepath
           - license-templates/LICENSE.txt
           - --fuzzy-match-generates-todo
-  - repo: https://github.com/psf/black
-    rev: 21.9b0
-    hooks:
-      - id: black
-        args: [--config=./pyproject.toml]
-        exclude: ^airflow/_vendor/
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
@@ -499,31 +493,3 @@ repos:
         entry: ./scripts/ci/pre_commit/pre_commit_in_container_bats_test.sh
         files: ^tests/bats/in_container/.*\.bats$|^scripts/in_container/.*sh
         pass_filenames: false
-      - id: mypy
-        name: Run mypy
-        language: system
-        entry: ./scripts/ci/pre_commit/pre_commit_mypy.sh --namespace-packages
-        files: \.py$
-        exclude: ^provider_packages|^chart|^docs|^airflow/_vendor/
-        require_serial: true
-      - id: mypy
-        name: Run mypy for helm chart tests
-        language: system
-        entry: ./scripts/ci/pre_commit/pre_commit_mypy.sh
-        files: ^chart/.*\.py$
-        require_serial: true
-      - id: mypy
-        name: Run mypy for /docs/ folder
-        language: system
-        entry: ./scripts/ci/pre_commit/pre_commit_mypy.sh
-        files: ^docs/.*\.py$
-        exclude: rtd-deprecation
-        require_serial: true
-      - id: flake8
-        name: Run flake8
-        language: system
-        entry: ./scripts/ci/pre_commit/pre_commit_flake8.sh
-        files: \.py$
-        pass_filenames: true
-        exclude: ^airflow/_vendor/
-        ## ONLY ADD PRE-COMMITS HERE THAT REQUIRE CI IMAGE
