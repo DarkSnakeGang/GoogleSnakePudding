@@ -47,7 +47,7 @@ window.BootstrapMenu.make = function () {
 
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
-        divList.style = 'width:25px;z-index:10002;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
+        divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
         divList.id = 'counter-num'
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
