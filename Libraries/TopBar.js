@@ -51,6 +51,9 @@ window.TopBar.alterCode = function (code) {
   }
   mute_src = `document.querySelector('img[jsname="${mute_jsname}"]').src `
 
+  muted_img = "https://i.postimg.cc/dQdCRwyH/volume-off-white-24dp.png"
+  unmuted_img = "https://i.postimg.cc/HsgyBR0p/volume-up-white-24dp.png"
+
   code = code.assertReplace(count_regex, set_count_code);
   code = code.assertReplace(speed_regex, set_speed_code);
 
