@@ -1726,6 +1726,12 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
+    new_fruit.push({ // Santa
+        "Normal": 'https://i.postimg.cc/kgV7FKDL/santa.png',
+        "Pixel": 'https://i.postimg.cc/SN1yMDQW/santa-px.png',
+        "Real": "https://i.postimg.cc/FsHrz2vr/santa-rtx.png",
+        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
+    });
 
 
     last_fruit_num = document.querySelector('#apple').children.length - 1;
@@ -4501,7 +4507,8 @@ window.CustomPortalPairs.make = function () {
         46: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
         47: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
         48: { name: "Dirt Block", image: "https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png" },
-        49: { name: "Bread", image: "https://i.postimg.cc/YSMVtPr1/bread.png" }
+        49: { name: "Bread", image: "https://i.postimg.cc/YSMVtPr1/bread.png" },
+        50: { name: "Santa", image: "https://i.postimg.cc/kgV7FKDL/santa.png" }
     };
 
 

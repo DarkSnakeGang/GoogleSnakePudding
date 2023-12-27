@@ -168,6 +168,12 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
+    new_fruit.push({ // Santa
+        "Normal": 'https://i.postimg.cc/kgV7FKDL/santa.png',
+        "Pixel": 'https://i.postimg.cc/SN1yMDQW/santa-px.png',
+        "Real": "https://i.postimg.cc/FsHrz2vr/santa-rtx.png",
+        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
+    });
 
 
     last_fruit_num = document.querySelector('#apple').children.length - 1;
