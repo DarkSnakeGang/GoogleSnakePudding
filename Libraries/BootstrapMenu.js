@@ -213,8 +213,8 @@ window.BootstrapMenu.make = function () {
             random_button.style.pointerEvents = 'auto';
         }
 
-        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
-            console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
+        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion || localStorage.getItem('snakeChosenMod') === "LevelEditorPudding") {
+            console.log("Detected not pudding mod - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
