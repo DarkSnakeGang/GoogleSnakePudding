@@ -182,7 +182,7 @@ window.SnakeColor.alterCode = function (code) {
     rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${window.escapeRegex(default_rainbow_array)}\\\;`)
     catchError(rainbow_usage_regex, code)
     if (window.NepDebug) {
-        console.log(code.match(rainbow_usage_regex)[0])
+        //console.log(code.match(rainbow_usage_regex)[0])
     }
 
     window.snakeRainbowOverride = 0;
@@ -252,7 +252,7 @@ window.SnakeColor.alterCode = function (code) {
         selectElement.addEventListener("change", function () {
             window.snakeRainbowOverride = document.getElementById('snakePride').value;
             if (window.NepDebug) {
-                console.log(window.snakeRainbowOverride)
+                //console.log(window.snakeRainbowOverride)
             }
         });
         for (var j = 1; j < Object.keys(window.rainbowAlts).length; j++) {

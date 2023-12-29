@@ -23,8 +23,8 @@ window.SpeedInfo.make = function () {
         }
         url += "id=" + new Date().getTime()
         if (window.NepDebug) {
-            console.log(url);
-            console.log("Getting runs..." + window.requestsMade);
+            //console.log(url);
+            //console.log("Getting runs..." + window.requestsMade);
         }
 
         let request = new XMLHttpRequest();
@@ -243,8 +243,8 @@ window.SpeedInfo.make = function () {
             }
 
             if (window.NepDebug) {
-                console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
+                //console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
+                //    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
             }
 
             makeAPIrequest("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
@@ -275,7 +275,7 @@ window.SpeedInfo.make = function () {
         src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
 
         if (window.NepDebug) {
-            console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
+            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
         }
         switch (level) {
             case "25":
@@ -306,7 +306,7 @@ window.SpeedInfo.make = function () {
     }
 
     function printMe(response) {
-        console.log(response);
+        //console.log(response);
     }
 
     //window.getRecordSRC("H");
@@ -343,7 +343,7 @@ window.SpeedInfo.make = function () {
 
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
-            console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
+            //console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
     function Handle50(response) {
@@ -407,7 +407,7 @@ window.SpeedInfo.make = function () {
         document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
-            console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
+            //console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
 

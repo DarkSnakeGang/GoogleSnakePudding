@@ -204,8 +204,8 @@ window.Counter.alterCode = function (code) {
     if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
     `
     if (window.NepDebug) {
-        console.log("Wall thing: " + wall_pos)
-        console.log("Wall thing 2: " + wall_counter_code)
+        //console.log("Wall thing: " + wall_pos)
+        //console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
 

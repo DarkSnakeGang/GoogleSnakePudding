@@ -25,7 +25,7 @@ window.Core.make = function () {
 window.Core.alterCode = function (code) {
 
     if (code.match(/loaded_/) !== null) {
-        console.log(code);
+        //console.log(code);
         console.log("Google experiment detected, please provide the above text to Yarmiplay by pressing copy ^^^");
         window.loaded_code = true;
       }
@@ -591,7 +591,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     code = code.assertReplace(disable_real_grey,new_grey_code)
 
     if (window.NepDebug) {
-        console.log(code)
+        //console.log(code)
     }
 
     sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new.*box\..*}/gm)
@@ -914,8 +914,8 @@ window.Counter.alterCode = function (code) {
     if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
     `
     if (window.NepDebug) {
-        console.log("Wall thing: " + wall_pos)
-        console.log("Wall thing 2: " + wall_counter_code)
+        //console.log("Wall thing: " + wall_pos)
+        //console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
 
@@ -1485,7 +1485,7 @@ window.TimeKeeper.alterCode = function (code) {
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {
-        console.log(func);
+        //console.log(func);
     }
     //let modeFunc = func.match(/1}\);[^%]{0,10}/)[0];
     //let modeFunc = func.match(/[a-zA-Z0-9$]{1,4}\([a-zA-Z0-9$]{1,4}.[a-zA-Z0-9$]{1,8},11\)&&/)[0];
@@ -2336,7 +2336,7 @@ window.SnakeColor.alterCode = function (code) {
     rainbow_usage_regex = new RegExp(`{var [a-zA-Z0-9_$]{1,6}\\\=[a-zA-Z0-9_$]{1,6}\\\?[a-zA-Z0-9_$]{1,6}\\:${window.escapeRegex(default_rainbow_array)}\\\;`)
     catchError(rainbow_usage_regex, code)
     if (window.NepDebug) {
-        console.log(code.match(rainbow_usage_regex)[0])
+        //console.log(code.match(rainbow_usage_regex)[0])
     }
 
     window.snakeRainbowOverride = 0;
@@ -2406,7 +2406,7 @@ window.SnakeColor.alterCode = function (code) {
         selectElement.addEventListener("change", function () {
             window.snakeRainbowOverride = document.getElementById('snakePride').value;
             if (window.NepDebug) {
-                console.log(window.snakeRainbowOverride)
+                //console.log(window.snakeRainbowOverride)
             }
         });
         for (var j = 1; j < Object.keys(window.rainbowAlts).length; j++) {
@@ -2516,8 +2516,8 @@ window.SpeedInfo.make = function () {
         }
         url += "id=" + new Date().getTime()
         if (window.NepDebug) {
-            console.log(url);
-            console.log("Getting runs..." + window.requestsMade);
+            //console.log(url);
+            //console.log("Getting runs..." + window.requestsMade);
         }
 
         let request = new XMLHttpRequest();
@@ -2736,8 +2736,8 @@ window.SpeedInfo.make = function () {
             }
 
             if (window.NepDebug) {
-                console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
+                //console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
+                //    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
             }
 
             makeAPIrequest("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
@@ -2768,7 +2768,7 @@ window.SpeedInfo.make = function () {
         src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
 
         if (window.NepDebug) {
-            console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
+            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
         }
         switch (level) {
             case "25":
@@ -2799,7 +2799,7 @@ window.SpeedInfo.make = function () {
     }
 
     function printMe(response) {
-        console.log(response);
+        //console.log(response);
     }
 
     //window.getRecordSRC("H");
@@ -2836,7 +2836,7 @@ window.SpeedInfo.make = function () {
 
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
-            console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
+            //console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
     function Handle50(response) {
@@ -2900,7 +2900,7 @@ window.SpeedInfo.make = function () {
         document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
-            console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
+            //console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
 
@@ -4915,7 +4915,7 @@ window.PuddingMod.runCodeBefore = function () {
 
 window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
-    console.log(code)
+    //console.log(code)
   }
 
   code = code.replaceAll(/\$\$/gm, `doubleD`)
@@ -4956,7 +4956,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
   console.log("Done, enjoy Pudding Mod!");
 
   if (window.NepDebug) {
-    console.log(code)
+    //console.log(code)
   }
 
   return code;

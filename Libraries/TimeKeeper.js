@@ -562,7 +562,7 @@ window.TimeKeeper.alterCode = function (code) {
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {
-        console.log(func);
+        //console.log(func);
     }
     //let modeFunc = func.match(/1}\);[^%]{0,10}/)[0];
     //let modeFunc = func.match(/[a-zA-Z0-9$]{1,4}\([a-zA-Z0-9$]{1,4}.[a-zA-Z0-9$]{1,8},11\)&&/)[0];
