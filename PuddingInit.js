@@ -103,7 +103,7 @@ window.PuddingMod.runCodeBefore = function () {
 
 window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
-    console.log(code)
+    //console.log(code)
   }
 
   code = code.replaceAll(/\$\$/gm, `doubleD`)
@@ -144,7 +144,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
   console.log("Done, enjoy Pudding Mod!");
 
   if (window.NepDebug) {
-    console.log(code)
+    //console.log(code)
   }
 
   return code;

@@ -145,7 +145,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     code = code.assertReplace(disable_real_grey,new_grey_code)
 
     if (window.NepDebug) {
-        console.log(code)
+        //console.log(code)
     }
 
     sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new.*box\..*}/gm)

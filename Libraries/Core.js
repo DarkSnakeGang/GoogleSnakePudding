@@ -25,7 +25,7 @@ window.Core.make = function () {
 window.Core.alterCode = function (code) {
 
     if (code.match(/loaded_/) !== null) {
-        console.log(code);
+        //console.log(code);
         console.log("Google experiment detected, please provide the above text to Yarmiplay by pressing copy ^^^");
         window.loaded_code = true;
       }
