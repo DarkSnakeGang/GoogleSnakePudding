@@ -1740,6 +1740,95 @@ window.Fruit.make = function () {
         document.querySelector('#apple').appendChild(uiImage(new_fruit[index].Normal));
     }
 
+    // Chess mode only fruit, don't show up on the menu
+    if (localStorage.getItem('snakeChosenMod') === "ChessMod" || localStorage.getItem('snakeChosenMod') === "customUrl") {
+        new_fruit.push({ // Black Bishop
+            "Normal": 'https://i.postimg.cc/NG8bwZw7/bb.png',
+            "Pixel": 'https://i.postimg.cc/kGwpMpL4/bb.png',
+            "Real": "https://i.postimg.cc/NG8bwZw7/bb.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // Black King
+            "Normal": 'https://i.postimg.cc/zGNyYP8W/bk.png',
+            "Pixel": 'https://i.postimg.cc/YCyBzhn9/bk.png',
+            "Real": "https://i.postimg.cc/zGNyYP8W/bk.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // Black Knight
+            "Normal": 'https://i.postimg.cc/ZqK0CB95/bn.png',
+            "Pixel": 'https://i.postimg.cc/PJMBpxvd/bn.png',
+            "Real": "https://i.postimg.cc/ZqK0CB95/bn.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // Black Pawn
+            "Normal": 'https://i.postimg.cc/fLVLfGf4/bp.png',
+            "Pixel": 'https://i.postimg.cc/zfsm441Y/bp.png',
+            "Real": "https://i.postimg.cc/fLVLfGf4/bp.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // Black Queen
+            "Normal": 'https://i.postimg.cc/g0SjRzRq/bq.png',
+            "Pixel": 'https://i.postimg.cc/JzFSBS0H/bq.png',
+            "Real": "https://i.postimg.cc/g0SjRzRq/bq.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // Black Rook
+            "Normal": 'https://i.postimg.cc/fL1b288V/br.png',
+            "Pixel": 'https://i.postimg.cc/kXJrrxLG/br.png',
+            "Real": "https://i.postimg.cc/fL1b288V/br.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // White Bishop
+            "Normal": 'https://i.postimg.cc/nc4L2YBL/wb.png',
+            "Pixel": 'https://i.postimg.cc/8Pt2T7VH/wb.png',
+            "Real": "https://i.postimg.cc/nc4L2YBL/wb.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // White King
+            "Normal": 'https://i.postimg.cc/4ytxrp0B/wk.png',
+            "Pixel": 'https://i.postimg.cc/B62W3NqL/wk.png',
+            "Real": "https://i.postimg.cc/4ytxrp0B/wk.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // White Knight
+            "Normal": 'https://i.postimg.cc/ncbzqws5/wn.png',
+            "Pixel": 'https://i.postimg.cc/fysGRXLH/wn.png',
+            "Real": "https://i.postimg.cc/ncbzqws5/wn.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // White Pawn
+            "Normal": 'https://i.postimg.cc/VsbvrcNn/wp.png',
+            "Pixel": 'https://i.postimg.cc/XvymKxBH/wp.png',
+            "Real": "https://i.postimg.cc/VsbvrcNn/wp.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // White Queen
+            "Normal": 'https://i.postimg.cc/mgTg5zyy/wq.png',
+            "Pixel": 'https://i.postimg.cc/wv8PwJh6/wq.png',
+            "Real": "https://i.postimg.cc/mgTg5zyy/wq.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        new_fruit.push({ // White Rook
+            "Normal": 'https://i.postimg.cc/kgwg3Jj3/wr.png',
+            "Pixel": 'https://i.postimg.cc/hjLY6jrV/wr.png',
+            "Real": "https://i.postimg.cc/kgwg3Jj3/wr.png",
+            "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+        });
+
+        window.wrook = 22 + window.new_fruit.length;
+    }
+
     // Secret fruit, can't be selected by menu
     new_fruit.push({ // Golden Apple
         "Normal": 'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
@@ -4288,8 +4377,8 @@ window.BootstrapMenu.make = function () {
             random_button.style.pointerEvents = 'auto';
         }
 
-        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
-            console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
+        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion || localStorage.getItem('snakeChosenMod') === "LevelEditorPudding") {
+            console.log("Detected not pudding mod - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
