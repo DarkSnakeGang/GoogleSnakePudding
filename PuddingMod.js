@@ -1744,84 +1744,84 @@ window.Fruit.make = function () {
     if (localStorage.getItem('snakeChosenMod') === "ChessMod" || localStorage.getItem('snakeChosenMod') === "customUrl") {
         new_fruit.push({ // Black Bishop
             "Normal": 'https://i.postimg.cc/NG8bwZw7/bb.png',
-            "Pixel": 'https://i.postimg.cc/kGwpMpL4/bb.png',
+            "Pixel": 'https://i.postimg.cc/zvbZcVNz/Chess-bishop.png',
             "Real": "https://i.postimg.cc/NG8bwZw7/bb.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // Black King
             "Normal": 'https://i.postimg.cc/zGNyYP8W/bk.png',
-            "Pixel": 'https://i.postimg.cc/YCyBzhn9/bk.png',
+            "Pixel": 'https://i.postimg.cc/tRwHVtdY/Chess-king.png',
             "Real": "https://i.postimg.cc/zGNyYP8W/bk.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // Black Knight
             "Normal": 'https://i.postimg.cc/ZqK0CB95/bn.png',
-            "Pixel": 'https://i.postimg.cc/PJMBpxvd/bn.png',
+            "Pixel": 'https://i.postimg.cc/rwC6bBBr/Chess-knight.png',
             "Real": "https://i.postimg.cc/ZqK0CB95/bn.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // Black Pawn
             "Normal": 'https://i.postimg.cc/fLVLfGf4/bp.png',
-            "Pixel": 'https://i.postimg.cc/zfsm441Y/bp.png',
+            "Pixel": 'https://i.postimg.cc/jjxVr8Tk/Chess-pawn.png',
             "Real": "https://i.postimg.cc/fLVLfGf4/bp.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // Black Queen
             "Normal": 'https://i.postimg.cc/g0SjRzRq/bq.png',
-            "Pixel": 'https://i.postimg.cc/JzFSBS0H/bq.png',
+            "Pixel": 'https://i.postimg.cc/J4XC3DKK/Chess-queen.png',
             "Real": "https://i.postimg.cc/g0SjRzRq/bq.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // Black Rook
             "Normal": 'https://i.postimg.cc/fL1b288V/br.png',
-            "Pixel": 'https://i.postimg.cc/kXJrrxLG/br.png',
+            "Pixel": 'https://i.postimg.cc/CLTmFLXt/Chess-Rook.png',
             "Real": "https://i.postimg.cc/fL1b288V/br.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // White Bishop
             "Normal": 'https://i.postimg.cc/nc4L2YBL/wb.png',
-            "Pixel": 'https://i.postimg.cc/8Pt2T7VH/wb.png',
+            "Pixel": 'https://i.postimg.cc/QtnZmcRY/Chess-bishop-white.png',
             "Real": "https://i.postimg.cc/nc4L2YBL/wb.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // White King
             "Normal": 'https://i.postimg.cc/4ytxrp0B/wk.png',
-            "Pixel": 'https://i.postimg.cc/B62W3NqL/wk.png',
+            "Pixel": 'https://i.postimg.cc/vTJFFb8W/Chess-king-white.png',
             "Real": "https://i.postimg.cc/4ytxrp0B/wk.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // White Knight
             "Normal": 'https://i.postimg.cc/ncbzqws5/wn.png',
-            "Pixel": 'https://i.postimg.cc/fysGRXLH/wn.png',
+            "Pixel": 'https://i.postimg.cc/VkcQKfVw/chess-knight-white.png',
             "Real": "https://i.postimg.cc/ncbzqws5/wn.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // White Pawn
             "Normal": 'https://i.postimg.cc/VsbvrcNn/wp.png',
-            "Pixel": 'https://i.postimg.cc/XvymKxBH/wp.png',
+            "Pixel": 'https://i.postimg.cc/vBTp4ccr/chess-pawn-white.png',
             "Real": "https://i.postimg.cc/VsbvrcNn/wp.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // White Queen
             "Normal": 'https://i.postimg.cc/mgTg5zyy/wq.png',
-            "Pixel": 'https://i.postimg.cc/wv8PwJh6/wq.png',
+            "Pixel": 'https://i.postimg.cc/JhPf7b47/chess-queen-white.png',
             "Real": "https://i.postimg.cc/mgTg5zyy/wq.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
 
         new_fruit.push({ // White Rook
             "Normal": 'https://i.postimg.cc/kgwg3Jj3/wr.png',
-            "Pixel": 'https://i.postimg.cc/hjLY6jrV/wr.png',
+            "Pixel": 'https://i.postimg.cc/xCZBMnzW/chess-rook-white.png',
             "Real": "https://i.postimg.cc/kgwg3Jj3/wr.png",
             "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
         });
@@ -4377,7 +4377,7 @@ window.BootstrapMenu.make = function () {
             random_button.style.pointerEvents = 'auto';
         }
 
-        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion || localStorage.getItem('snakeChosenMod') === "LevelEditorPudding") {
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod" || window.isSnakeMobileVersion) {
             console.log("Detected not pudding mod - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
