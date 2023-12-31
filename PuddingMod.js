@@ -4316,7 +4316,7 @@ window.BootstrapMenu.make = function () {
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
     <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show SpeedInfo</label>
     </div>
-    <div class="form-check form-check-inline">>
+    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
     </div>
