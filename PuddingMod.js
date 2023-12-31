@@ -292,6 +292,21 @@ window.Theme.make = function () {
       bottom_color: '#00B1B6'
     },
     {
+      name: 'Chess',
+      light_tiles: '#769656',
+      dark_tiles: '#eeeed2',
+      shadow: '#525252',
+      border: '#292b2a',
+      key_block_sign_color: '#baca44',
+      real_top_bar: '#111111',
+      endscreen_background: '#292b2a',
+      sep_color: '#212121',
+      topbar_color: '#292b2a',
+      buttons_color: '#292b2a',
+      bg_color: '#111111',
+      bottom_color: '#111111'
+    },
+    {
       name: "ModLoader",
       light_tiles: advancedSettings.themeCol1 ?? '#1D1D1D',
       dark_tiles: advancedSettings.themeCol2 ?? '#161616',
@@ -319,6 +334,7 @@ window.Theme.make = function () {
     'https://i.postimg.cc/6Q2DyGbK/jungle.png',
     'https://i.postimg.cc/5y7gwwGY/pudding-cr.png',
     'https://i.postimg.cc/1XqLvbhJ/Ice2.png',
+    'https://i.postimg.cc/ZqK0CB95/bn.png',
     'https://i.postimg.cc/HLr5YJmb/modloader-icon.png',
     'https://i.postimg.cc/cCr9LrNZ/neptune-planet.png',
   ]) document.querySelector('#theme').appendChild(uiImage(src));
