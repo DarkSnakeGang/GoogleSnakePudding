@@ -4354,8 +4354,8 @@ window.BootstrapMenu.make = function () {
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
 
-        timer_settings = document.getElementById("TimerSettings");
-        timer_settings.addEventListener("click", window.editTimer);
+        //timer_settings = document.getElementById("TimerSettings");
+        //timer_settings.addEventListener("click", window.editTimer);
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;
