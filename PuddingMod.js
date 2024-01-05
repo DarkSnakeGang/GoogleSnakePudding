@@ -1097,7 +1097,7 @@ window.TimeKeeper.make = function () {
 
     //save 25, 50, 100 or 'ALL' score
     window.timeKeeper.savePB = function (time, score, mode, count, speed, size) {
-
+        return;
         if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or MouseMode or Level Editor
             return;
