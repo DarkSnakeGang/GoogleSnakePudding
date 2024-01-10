@@ -1005,7 +1005,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 16; t++) {
+            for (t = 1; t <= 17; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -1213,8 +1213,8 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 11; mode++) {
-                    modeStr = "000000000000000".split("");
+                for (mode = 0; mode < 16; mode++) {
+                    modeStr = "0000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
@@ -1287,7 +1287,8 @@ window.TimeKeeper.make = function () {
                     case 12: gamemode += "Statue, "; break;
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Peaceful, "; break;
+                    case 15: gamemode += "Arrow, "; break;
+                    case 16: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -2487,8 +2488,9 @@ window.SpeedInfo.make = function () {
         13: { name: "Statue" },
         14: { name: "Light" },
         15: { name: "Shield" },
-        16: { name: "Peaceful" },
-        17: { name: "Blender" },
+        16: { name: "Arrow" },
+        17: { name: "Peaceful" },
+        18: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -2545,8 +2547,9 @@ window.SpeedInfo.make = function () {
         STATUE = 13
         LIGHT = 14
         SHIELD = 15
-        PEACEFUL = 16
-        BLENDER = 17
+        ARROW = 16
+        PEACEFUL = 17
+        BLENDER = 18
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -2973,7 +2976,6 @@ window.SpeedInfo.make = function () {
         var gamemode = "";
         for (t of modeStr) {
             if (t == 1) {
-
                 switch (counter) {
                     case 0: gamemode += "Wall, "; break;
                     case 1: gamemode += "Portal, "; break;
@@ -2990,7 +2992,8 @@ window.SpeedInfo.make = function () {
                     case 12: gamemode += "Statue, "; break;
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Peaceful, "; break;
+                    case 15: gamemode += "Arrow, "; break;
+                    case 16: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -3402,6 +3405,7 @@ window.Timer = {
             <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png"/>
             <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png"/>
             <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png"/>
+            <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png"/>
             <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png"/>
           </div>
           <br/>
