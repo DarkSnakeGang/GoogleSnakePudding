@@ -4338,6 +4338,7 @@ window.BootstrapMenu.make = function () {
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
             if(window.isSnakeMobileVersion){
+                ScrollLeftBtn.disabled = true;
                 input_checkbox.disabled = true;
                 ScrollLeftBtn.style.display = '';
             }
