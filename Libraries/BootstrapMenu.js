@@ -37,6 +37,10 @@ window.BootstrapMenu.make = function () {
         }
     }
 
+    window.ScrollLeftFunc = function () {
+        document.body.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    }
+
     window.ToggleScrollbar = function () {
         window.pudding_settings.ScrollBar = !window.pudding_settings.ScrollBar;
         if (window.pudding_settings.ScrollBar) {
@@ -189,7 +193,7 @@ window.BootstrapMenu.make = function () {
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
 
   <br>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeft">Scroll Left</button><br>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeftBtn">Scroll Left</button><br>
 
   `;
 
@@ -198,11 +202,7 @@ window.BootstrapMenu.make = function () {
         timer_settings = document.getElementById("TimerSettings");
         timer_settings.addEventListener("click", window.editTimer);
 
-        window.ScrollLeftFunc = function () {
-            document.documentElement.scrollLeft = 0;
-        }
-
-        ScrollLeftBtn = document.getElementById("ScrollLeft");
+        ScrollLeftBtn = document.getElementById("ScrollLeftBtn");
         ScrollLeftBtn.addEventListener("click", window.ScrollLeftFunc);
         ScrollLeftBtn.style.display = 'none';
 
