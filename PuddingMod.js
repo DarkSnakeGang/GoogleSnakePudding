@@ -4116,6 +4116,18 @@ window.BootstrapMenu.make = function () {
         }
     }
 
+    window.ToggleScrollbar = function () {
+        window.pudding_settings.ScrollBar = !window.pudding_settings.ScrollBar;
+        if (window.pudding_settings.ScrollBar) {
+            // Disable it
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            // Enable it
+            document.body.style.overflow = '';
+        }
+    }
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -4221,6 +4233,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
     </div>
     <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
+    <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
+    </div>
+    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
     </div>
@@ -4251,12 +4267,23 @@ window.BootstrapMenu.make = function () {
 
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
 
+  <br>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeft">Scroll Left</button><br>
+
   `;
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
 
         timer_settings = document.getElementById("TimerSettings");
         timer_settings.addEventListener("click", window.editTimer);
+
+        window.ScrollLeftFunc = function () {
+            document.documentElement.scrollLeft = 0;
+        }
+
+        ScrollLeftBtn = document.getElementById("ScrollLeft");
+        ScrollLeftBtn.addEventListener("click", window.ScrollLeftFunc);
+        ScrollLeftBtn.style.display = 'none';
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;
@@ -4292,6 +4319,19 @@ window.BootstrapMenu.make = function () {
             random_button.style.pointerEvents = 'auto';
         }
 
+        scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
+        scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
+        scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
+
+        if (window.pudding_settings.ScrollBar) {
+            // Disable it
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            // Enable it
+            document.body.style.overflow = '';
+        }
+
         if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
             console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
@@ -4299,6 +4339,7 @@ window.BootstrapMenu.make = function () {
             window.SpeedInfoHide();
             if(window.isSnakeMobileVersion){
                 input_checkbox.disabled = true;
+                ScrollLeftBtn.style.display = '';
             }
 
         }
