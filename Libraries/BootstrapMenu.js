@@ -37,10 +37,6 @@ window.BootstrapMenu.make = function () {
         }
     }
 
-    window.ScrollLeftFunc = function () {
-        document.body.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
-    }
-
     window.ToggleScrollbar = function () {
         window.pudding_settings.ScrollBar = !window.pudding_settings.ScrollBar;
         if (window.pudding_settings.ScrollBar) {
@@ -203,7 +199,6 @@ window.BootstrapMenu.make = function () {
         timer_settings.addEventListener("click", window.editTimer);
 
         ScrollLeftBtn = document.getElementById("ScrollLeftBtn");
-        ScrollLeftBtn.addEventListener("click", window.ScrollLeftFunc);
         ScrollLeftBtn.style.display = 'none';
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
@@ -259,9 +254,11 @@ window.BootstrapMenu.make = function () {
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
             if(window.isSnakeMobileVersion){
-                ScrollLeftBtn.disabled = true;
                 input_checkbox.disabled = true;
                 ScrollLeftBtn.style.display = '';
+                ScrollLeftBtn.addEventListener("click", function () {
+                    document.documentElement.scrollLeft -= 800;
+                });
             }
 
         }
