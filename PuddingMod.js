@@ -4218,6 +4218,18 @@ window.BootstrapMenu.make = function () {
         }
     }
 
+    window.ToggleScrollbar = function () {
+        window.pudding_settings.ScrollBar = !window.pudding_settings.ScrollBar;
+        if (window.pudding_settings.ScrollBar) {
+            // Disable it
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            // Enable it
+            document.body.style.overflow = '';
+        }
+    }
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -4320,7 +4332,12 @@ window.BootstrapMenu.make = function () {
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
-    </div><br>
+    </div>
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
+    <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
+    </div>
+    <br>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
@@ -4350,7 +4367,8 @@ window.BootstrapMenu.make = function () {
   <option value="0">Default Rainbow</option>
 </select>
 
-  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
+  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button><br>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeftBtn">Scroll Left</button><br>
 
   `;
 
@@ -4358,6 +4376,9 @@ window.BootstrapMenu.make = function () {
 
         //timer_settings = document.getElementById("TimerSettings");
         //timer_settings.addEventListener("click", window.editTimer);
+
+        ScrollLeftBtn = document.getElementById("ScrollLeftBtn");
+        ScrollLeftBtn.style.display = 'none';
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;
@@ -4384,6 +4405,19 @@ window.BootstrapMenu.make = function () {
         randombtn_checkbox.addEventListener("change", window.ToggleRandom);
         randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
 
+        scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
+        scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
+        scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
+
+        if (window.pudding_settings.ScrollBar) {
+            // Disable it
+            document.body.style.overflow = 'hidden';
+        }
+        else {
+            // Enable it
+            document.body.style.overflow = '';
+        }
+
         if (window.pudding_settings.DisableRandom) {
             // Disable it
             random_button.style.pointerEvents = 'none';
@@ -4400,6 +4434,10 @@ window.BootstrapMenu.make = function () {
             window.SpeedInfoHide();
             if(window.isSnakeMobileVersion){
                 input_checkbox.disabled = true;
+                ScrollLeftBtn.style.display = '';
+                ScrollLeftBtn.addEventListener("click", function () {
+                    document.documentElement.scrollLeft -= 800;
+                });
             }
 
         }
