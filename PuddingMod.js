@@ -4244,7 +4244,7 @@ window.BootstrapMenu.make = function () {
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
-    <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">"Dragon Fruit"</label>
+    <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="EatThemeRandomizer2">"Dragon Fruit"</label>
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
@@ -4291,6 +4291,7 @@ window.BootstrapMenu.make = function () {
         ScrollLeftBtn.style.display = 'none';
 
         EatThemeRandomizer = document.getElementById("EatThemeRandomizer");
+        EatThemeRandomizer2 = document.getElementById("EatThemeRandomizer2");
         EatThemeRandomizer.checked = window.pudding_settings.randomizeThemeApple;
         EatThemeRandomizer.addEventListener("change", function() {
             window.pudding_settings.randomizeThemeApple = !window.pudding_settings.randomizeThemeApple;
@@ -4346,6 +4347,7 @@ window.BootstrapMenu.make = function () {
 
         if (localStorage.getItem('snakeChosenMod') === "PuddingMod") {
             EatThemeRandomizer.style.display = 'none';
+            EatThemeRandomizer2.style.display = 'none';
             EatThemeRandomizer.checked = false;
             window.pudding_settings.randomizeThemeApple = false;
         }
