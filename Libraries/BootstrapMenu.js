@@ -158,6 +158,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
     </div>
     <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
+    <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">"Dragon Fruit"</label>
+    </div>
+    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
     </div>
@@ -200,6 +204,13 @@ window.BootstrapMenu.make = function () {
 
         ScrollLeftBtn = document.getElementById("ScrollLeftBtn");
         ScrollLeftBtn.style.display = 'none';
+
+        EatThemeRandomizer = document.getElementById("EatThemeRandomizer");
+        EatThemeRandomizer.checked = window.pudding_settings.randomizeThemeApple;
+        EatThemeRandomizer.addEventListener("change", function() {
+            window.pudding_settings.randomizeThemeApple = !window.pudding_settings.randomizeThemeApple;
+        });
+
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;
@@ -248,6 +259,10 @@ window.BootstrapMenu.make = function () {
             document.body.style.overflow = '';
         }
 
+        if (localStorage.getItem('snakeChosenMod') === "PuddingMod") {
+            EatThemeRandomizer.style.display = 'none';
+        }
+
         if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
             console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
@@ -260,7 +275,6 @@ window.BootstrapMenu.make = function () {
                     document.documentElement.scrollLeft -= 800;
                 });
             }
-
         }
         let settingsToValues = {
             inputs: {

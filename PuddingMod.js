@@ -936,6 +936,10 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.debug = false;
     //called on every apple
     window.timeKeeper.gotApple = function (time, score) {
+        debugger
+        if (window.pudding_settings.randomizeThemeApple) {
+            window.setTheme(window.getRandomThemeName());
+        }
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
@@ -2352,7 +2356,8 @@ window.SettingsSaver.make = function () {
                 SpeedInfo: false,
                 PortalPairs: false,
                 SelectedPairs: [0, 1, 2, 3, 4, 5],
-                DisableRandom: false
+                DisableRandom: false,
+                randomizeThemeApple: false
             };
 
             }
@@ -2373,7 +2378,8 @@ window.SettingsSaver.make = function () {
         typeof pudding_settings.TopBar !== 'undefined' &&
         typeof pudding_settings.SpeedInfo !== 'undefined' &&
         typeof pudding_settings.PortalPairs !== 'undefined' &&
-        typeof pudding_settings.DisableRandom !== 'undefined'
+        typeof pudding_settings.DisableRandom !== 'undefined' &&
+        typeof pudding_settings.randomizeThemeApple !== 'undefined'
         ) {
             localStorage.setItem('PuddingSettings', JSON.stringify(pudding_settings));
         }
@@ -4237,6 +4243,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
     </div>
     <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
+    <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">"Dragon Fruit"</label>
+    </div>
+    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
     <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
     </div>
@@ -4279,6 +4289,13 @@ window.BootstrapMenu.make = function () {
 
         ScrollLeftBtn = document.getElementById("ScrollLeftBtn");
         ScrollLeftBtn.style.display = 'none';
+
+        EatThemeRandomizer = document.getElementById("EatThemeRandomizer");
+        EatThemeRandomizer.checked = window.pudding_settings.randomizeThemeApple;
+        EatThemeRandomizer.addEventListener("change", function() {
+            window.pudding_settings.randomizeThemeApple = !window.pudding_settings.randomizeThemeApple;
+        });
+
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;
@@ -4327,6 +4344,10 @@ window.BootstrapMenu.make = function () {
             document.body.style.overflow = '';
         }
 
+        if (localStorage.getItem('snakeChosenMod') === "PuddingMod") {
+            EatThemeRandomizer.style.display = 'none';
+        }
+
         if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
             console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
@@ -4339,7 +4360,6 @@ window.BootstrapMenu.make = function () {
                     document.documentElement.scrollLeft -= 800;
                 });
             }
-
         }
         let settingsToValues = {
             inputs: {

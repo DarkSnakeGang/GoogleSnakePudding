@@ -12,7 +12,8 @@ window.SettingsSaver.make = function () {
                 SpeedInfo: false,
                 PortalPairs: false,
                 SelectedPairs: [0, 1, 2, 3, 4, 5],
-                DisableRandom: false
+                DisableRandom: false,
+                randomizeThemeApple: false
             };
 
             }
@@ -33,7 +34,8 @@ window.SettingsSaver.make = function () {
         typeof pudding_settings.TopBar !== 'undefined' &&
         typeof pudding_settings.SpeedInfo !== 'undefined' &&
         typeof pudding_settings.PortalPairs !== 'undefined' &&
-        typeof pudding_settings.DisableRandom !== 'undefined'
+        typeof pudding_settings.DisableRandom !== 'undefined' &&
+        typeof pudding_settings.randomizeThemeApple !== 'undefined'
         ) {
             localStorage.setItem('PuddingSettings', JSON.stringify(pudding_settings));
         }

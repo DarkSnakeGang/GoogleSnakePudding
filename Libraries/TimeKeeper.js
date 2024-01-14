@@ -13,6 +13,10 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.debug = false;
     //called on every apple
     window.timeKeeper.gotApple = function (time, score) {
+        debugger
+        if (window.pudding_settings.randomizeThemeApple) {
+            window.setTheme(window.getRandomThemeName());
+        }
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
