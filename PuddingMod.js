@@ -4346,6 +4346,8 @@ window.BootstrapMenu.make = function () {
 
         if (localStorage.getItem('snakeChosenMod') === "PuddingMod") {
             EatThemeRandomizer.style.display = 'none';
+            EatThemeRandomizer.checked = false;
+            window.pudding_settings.randomizeThemeApple = false;
         }
 
         if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
