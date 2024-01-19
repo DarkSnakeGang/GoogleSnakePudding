@@ -178,10 +178,10 @@ window.SpeedInfo.make = function () {
             HandleHighscore("Empty")
             return;
         }
-        if (mode == STATUE && level == "H" && speed == SLOW) {
-            HandleHighscore("Empty")
-            return; // Statue isn't highscore on slow (yet?)
-        }
+        //if (mode == STATUE && level == "H" && speed == SLOW) {
+        //    HandleHighscore("Empty")
+        //    return; // Statue isn't highscore on slow (yet?)
+        //}
 
         gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
 

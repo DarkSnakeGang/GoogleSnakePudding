@@ -2589,10 +2589,10 @@ window.SpeedInfo.make = function () {
             HandleHighscore("Empty")
             return;
         }
-        if (mode == STATUE && level == "H" && speed == SLOW) {
-            HandleHighscore("Empty")
-            return; // Statue isn't highscore on slow (yet?)
-        }
+        //if (mode == STATUE && level == "H" && speed == SLOW) {
+        //    HandleHighscore("Empty")
+        //    return; // Statue isn't highscore on slow (yet?)
+        //}
 
         gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
 
@@ -4350,21 +4350,26 @@ window.BootstrapMenu.make = function () {
             EatThemeRandomizer2.style.display = 'none';
             EatThemeRandomizer.checked = false;
             window.pudding_settings.randomizeThemeApple = false;
-        }
-
-        if (localStorage.getItem('snakeChosenMod') === "MorePudding" || localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isSnakeMobileVersion) {
-            console.log("Detected MorePudding or VisibilityMod or mobile - disabling SpeedInfo")
+        } else
+        {
+            console.log("Disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
-            if(window.isSnakeMobileVersion){
-                input_checkbox.disabled = true;
-                ScrollLeftBtn.style.display = '';
-                ScrollLeftBtn.addEventListener("click", function () {
-                    document.documentElement.scrollLeft -= 800;
-                });
-            }
         }
+
+        if(window.isSnakeMobileVersion){
+            speedinfo_checkbox.disabled = true;
+            speedinfo_checkbox.checked = false;
+            window.SpeedInfoHide();
+
+            input_checkbox.disabled = true;
+            ScrollLeftBtn.style.display = '';
+            ScrollLeftBtn.addEventListener("click", function () {
+                document.documentElement.scrollLeft -= 800;
+            });
+        }
+
         let settingsToValues = {
             inputs: {
                 game: 'inputGame',
