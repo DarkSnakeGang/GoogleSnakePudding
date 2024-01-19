@@ -116,7 +116,7 @@ window.Timer = {
         editBox = document.createElement('div')
         editBox.id = 'edit-box'
         editBox.style = `
-          background-color: ${theme.bg_color ?? '#aaaaff'};
+          background-color: ${theme.real_top_bar ?? '#aaaaff'};
           border-radius: 0.5vw;
           position: absolute;
           height: 93vh;

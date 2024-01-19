@@ -377,13 +377,25 @@ window.Theme.alterCode = function (code) {
     window.real_topbar_color = real_top_bar;
     window.button_color = buttons_color;
 
-
     if (theme_name != "Globe") {
       window.snake.setCustomTheme(light_tiles, dark_tiles, shadow, border, key_block_sign_color, real_top_bar, endscreen_background)
     }
     else {
       window.snake.clearCustomTheme();
     }
+
+    if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
+      document.getElementById('delete-stuff-draggable').style.background = real_top_bar;
+      document.getElementById('delete-stuff-draggable').style.borderColor = bg_color;
+
+      document.getElementById('drag-handle').style.background = sep_color;
+      document.getElementById('drag-handle').style.borderColor = bg_color;
+
+      document.getElementById('visi-title').style.background = sep_color;
+
+    }
+
+
   }
 
   window.getRandomThemeName = function getRandomThemeName() {
