@@ -320,6 +320,12 @@
     opacity: 0.5;
 }
 
+.form-check-label {
+    margin:3px;
+    color:white;
+    font-family:Roboto,Arial,sans-serif;
+}
+
 .form-check-input[disabled]~.form-check-label,
 .form-check-input:disabled~.form-check-label {
     cursor: default;
