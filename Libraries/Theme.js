@@ -388,11 +388,11 @@ window.Theme.alterCode = function (code) {
       document.getElementById('delete-stuff-draggable').style.backgroundColor = real_top_bar;
       document.getElementById('delete-stuff-draggable').style.borderColor = bg_color;
 
-      document.getElementById('drag-handle').style.backgroundColor = sep_color;
+      document.getElementById('drag-handle').style.backgroundColor = real_top_bar;
       document.getElementById('drag-handle').style.borderColor = bg_color;
 
-      document.getElementById('visi-title').style.backgroundColor = sep_color;
-
+      document.getElementById('visi-title').style.backgroundColor = real_top_bar;
+      document.getElementById('visi-boxes').style.backgroundColor = real_top_bar;
     }
 
 
