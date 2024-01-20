@@ -422,13 +422,13 @@ window.Theme.alterCode = function (code) {
     }
 
     if (localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isVisi) {
-      document.getElementById('delete-stuff-draggable').style.backgroundColor = real_top_bar;
-      document.getElementById('delete-stuff-draggable').style.borderColor = real_top_bar;
+      document.getElementById('delete-stuff-draggable').style.backgroundColor = border;
+      document.getElementById('delete-stuff-draggable').style.borderColor = border;
 
       document.getElementById('drag-handle').style.borderColor = real_top_bar;
 
-      document.getElementById('visi-title').style.backgroundColor = border;
-      document.getElementById('visi-boxes').style.backgroundColor = border;
+      document.getElementById('visi-title').style.backgroundColor = real_top_bar;
+      document.getElementById('visi-boxes').style.backgroundColor = real_top_bar;
     }
 
 
