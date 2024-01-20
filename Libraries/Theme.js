@@ -384,7 +384,7 @@ window.Theme.alterCode = function (code) {
       window.snake.clearCustomTheme();
     }
 
-    if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
+    if (localStorage.getItem('snakeChosenMod') === "VisibilityMod" || window.isVisi) {
       document.getElementById('delete-stuff-draggable').style.backgroundColor = real_top_bar;
       document.getElementById('delete-stuff-draggable').style.borderColor = bg_color;
 

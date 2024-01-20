@@ -5,6 +5,7 @@ window.PuddingMod = {};
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.runCodeBefore = function () {
+  window.isVisi = false;
 
   console.log("Thank you for loading Yarmiplay's Pudding Mod! Hope you enjoy :)");
   console.log("Please provide feedback and report bugs in #snake-modding in the Official Google Snake Discord");
