@@ -4977,7 +4977,6 @@ moreMenu.runCodeBefore = function() {
     return img;
   };
 
-
   /*--sizes--*/
   for(let src of [
     'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Micro.png?raw=true',
