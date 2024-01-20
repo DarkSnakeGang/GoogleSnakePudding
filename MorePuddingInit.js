@@ -29,6 +29,7 @@ window.MorePudding.runCodeBefore = function() {
 
     console.log("Enabling Pudding Mod");
     window.PuddingMod.runCodeBefore();
+    window.VisibilityModCode.runCodeBefore();
     window.moreMenu.runCodeBefore();
 
 }
@@ -38,7 +39,7 @@ window.MorePudding.runCodeBefore = function() {
 ////////////////////////////////////////////////////////////////////
 
 window.MorePudding.alterSnakeCode = function(code) {
-  return window.moreMenu.alterSnakeCode(window.PuddingMod.alterSnakeCode(code));;
+  return window.moreMenu.alterSnakeCode(window.VisibilityModCode.alterSnakeCode(window.PuddingMod.alterSnakeCode(code)));
 }
 
 
