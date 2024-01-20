@@ -425,7 +425,7 @@ window.Theme.alterCode = function (code) {
       document.getElementById('delete-stuff-draggable').style.backgroundColor = border;
       document.getElementById('delete-stuff-draggable').style.borderColor = border;
 
-      document.getElementById('drag-handle').style.borderColor = real_top_bar;
+      document.getElementById('drag-handle').style.borderColor = border;
 
       document.getElementById('visi-title').style.backgroundColor = real_top_bar;
       document.getElementById('visi-boxes').style.backgroundColor = real_top_bar;
@@ -4934,7 +4934,6 @@ window.PuddingMod.alterSnakeCode = function (code) {
   code = code.replaceAll(/\$\$/gm, `doubleD`)
   code = code.replaceAll(/\$\&/gm, `$ &`)
 
-
   //code = code.assertReplaceAll(/\$i/gm, `something_i`)
 
   window.Libraries.forEach(LibName => {
@@ -4942,30 +4941,6 @@ window.PuddingMod.alterSnakeCode = function (code) {
     eval("code = window." + LibName + ".alterCode(code);")
   });
 
-  /*
-  twin_all_global = `window.snake.twinAll`
-
-  all_regex = new RegExp(/\"ALL\"\);/);
-  window.catchError(all_regex, code)
-  add_direction = `"ALL");
-  ${twin_all_global}=true;
-  `
-
-  timer_update_regex = new RegExp(/&"NONE"!==this\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.direction/);
-  if (!window.catchError(timer_update_regex, code)) {
-
-    ka_oa_fill = code.match(timer_update_regex)[0].split('.')[1] + '.' + code.match(timer_update_regex)[0].split('.')[2]
-    twin_timer_update = `&("NONE"!==this.${ka_oa_fill}.direction||${twin_all_global})`
-    reset_regex = new RegExp(/;this\.reset\(\)/)
-    set_twinall = `${twin_all_global}=false;`
-    code = code.assertReplace(reset_regex, ";" + set_twinall + "this.reset()");
-    code = code.assertReplace(all_regex, add_direction)
-    code = code.assertReplace(timer_update_regex, twin_timer_update)
-    console.log("Fixing Twin All Timer");
-  } else {
-    console.log("Twin All Timer Seems Already Fixed!");
-  }
-  */
   console.log("Done, enjoy Pudding Mod!");
 
   if (window.NepDebug) {

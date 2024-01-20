@@ -5332,7 +5332,7 @@ window.mouseMode.runCodeAfter = function() {
     document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
   }
 
-}
+};
 window.VisibilityModCode = {};
 
 ////////////////////////////////////////////////////////////////////
@@ -5546,8 +5546,8 @@ window.VisibilityModCode.runCodeBefore = function () {
   function injectInitialHtml() {
     let initialHtml =
       `<div id="delete-stuff-popup" style="margin:0px;position:fixed;z-index:9001;width:100%;">
-  <div id="delete-stuff-draggable" style="width: 320px; background-color: rgb(87, 138, 52); z-index: 9002; border-color: rgb(87, 138, 52); border-style: solid; border-width: 4px; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 10px; position: fixed; left: 5px; top: 5px;">
-    <div id="drag-handle" style="width: 22px; height: 22px; background-color: rgb(77, 193, 249); position: absolute; border-top-left-radius: 4px; border-bottom-right-radius: 18px; border-right: 3px solid rgb(74, 117, 44); border-bottom: 3px solid rgb(74, 117, 44); cursor: move; border-top-color: rgb(74, 117, 44); border-left-color: rgb(74, 117, 44);"></div>
+  <div id="delete-stuff-draggable" style="width: 320px; background-color: rgb(87, 138, 52); z-index: 9002; border-color: rgb(87, 138, 52); border-style: solid; border-width: 4px; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 10px; position: fixed; left: 5px; top: 5px;border-width: 0px;">
+    <div id="drag-handle" style="width: 22px; height: 22px; background-color: rgb(77, 193, 249); position: absolute; border-top-left-radius: 10px; border-bottom-right-radius: 18px; border-right: 3px solid rgb(87, 138, 52); border-bottom: 3px solid rgb(87, 138, 52); cursor: move; border-top-color: rgb(87, 138, 52); border-left-color: rgb(87, 138, 52);"></div>
     <div style="padding:10px;width:300px;margin:0;">
       <div id="visi-title" class="form-check-label" style="text-align: center; padding: 5px; background-color: rgb(74, 117, 44); color: white; font-size: 20px;">Visibility Mod</div>
       <div id="visi-boxes" style="background-color: rgb(74, 117, 44); margin-top: 5px; padding: 0px 0px 10px;">
@@ -5663,7 +5663,7 @@ window.VisibilityModCode.runCodeBefore = function () {
           </ul>
         </div>
         <div style="box-sizing: border-box;padding:2px;margin: 0px;width: 55%;display:inline-block;">
-          <label class="form-check-label" style="padding:5px;display:inline-block;float:left;">Flash time:</label>
+          <label class="form-check-label" style="padding-top:5px;display:inline-block;float:left;">Flash time:</label>
             <select id="flash-snake-timing" style="margin-top: 9px; margin-right: 10px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: space-evenly; align-items: center; text-align: center;border-radius:0.375rem;float:right;">
               <option value="20">0.05s</option>
               <option value="200">0.2s</option>
