@@ -388,7 +388,7 @@ window.Theme.alterCode = function (code) {
       document.getElementById('delete-stuff-draggable').style.backgroundColor = border;
       document.getElementById('delete-stuff-draggable').style.borderColor = border;
 
-      document.getElementById('drag-handle').style.borderColor = real_top_bar;
+      document.getElementById('drag-handle').style.borderColor = border;
 
       document.getElementById('visi-title').style.backgroundColor = real_top_bar;
       document.getElementById('visi-boxes').style.backgroundColor = real_top_bar;
