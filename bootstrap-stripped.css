@@ -263,7 +263,7 @@
     height: 1em;
     margin-top: 0.25em;
     vertical-align: top;
-    background-color: var(--bs-form-check-bg);
+    background-color: rgb(17, 85, 204);
     background-image: var(--bs-form-check-bg-image);
     background-repeat: no-repeat;
     background-position: center;
