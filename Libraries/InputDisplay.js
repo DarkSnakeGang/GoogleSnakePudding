@@ -51,6 +51,13 @@ window.InputDisplay.make = function () {
       document.getElementById('down-button-id').style.display = 'inline-block';
       document.getElementById('right-button-id').style.display = 'inline-block';
       document.getElementById('top-button-id').style.display = 'inline-block';
+
+      document.getElementById('left-button-id').style.visibility = 'visible';
+      document.getElementById('down-button-id').style.visibility = 'visible';
+      document.getElementById('right-button-id').style.visibility = 'visible';
+      document.getElementById('top-button-id').style.visibility = 'visible';
+      window.ToggleSpeedInfo();
+      window.ToggleSpeedInfo();
     }
     else {
 

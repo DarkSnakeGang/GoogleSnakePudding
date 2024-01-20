@@ -2970,6 +2970,7 @@ window.SpeedInfo.make = function () {
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'block';
+        speedinfoBox.style.visibility = 'visible';
         window.pudding_settings.SpeedInfo = true;
 
         window.SpeedInfoUpdate();
@@ -2977,7 +2978,8 @@ window.SpeedInfo.make = function () {
 
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
-        speedinfoBox.style.display = 'none';
+        speedinfoBox.style.display = 'block';
+        speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
         document.getElementById('AlwaysOnTimeKeeper').checked = false;
     }
@@ -3265,6 +3267,13 @@ window.InputDisplay.make = function () {
       document.getElementById('down-button-id').style.display = 'inline-block';
       document.getElementById('right-button-id').style.display = 'inline-block';
       document.getElementById('top-button-id').style.display = 'inline-block';
+
+      document.getElementById('left-button-id').style.visibility = 'visible';
+      document.getElementById('down-button-id').style.visibility = 'visible';
+      document.getElementById('right-button-id').style.visibility = 'visible';
+      document.getElementById('top-button-id').style.visibility = 'visible';
+      window.ToggleSpeedInfo();
+      window.ToggleSpeedInfo();
     }
     else {
 
