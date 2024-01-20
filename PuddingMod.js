@@ -426,6 +426,8 @@ window.Theme.alterCode = function (code) {
       document.getElementById('delete-stuff-draggable').style.borderColor = real_top_bar;
 
       document.getElementById('drag-handle').style.backgroundColor = bg_color;
+      document.getElementById('drag-handle').style.borderColor = real_top_bar;
+
 
       document.getElementById('visi-title').style.backgroundColor = border;
       document.getElementById('visi-boxes').style.backgroundColor = border;
@@ -4970,7 +4972,6 @@ window.PuddingMod.alterSnakeCode = function (code) {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.runCodeAfter = function () {
-
   let modIndicator = document.createElement('div');
   modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'Pudding Mod';
