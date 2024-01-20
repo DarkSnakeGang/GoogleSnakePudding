@@ -7,12 +7,13 @@ window.BootstrapMenu.make = function () {
     window.BootstrapShow = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
         settingsBox.style.display = 'block';
+        settingsBox.style.visibility = 'visible';
         window.bootstrapVisible = true;
     }
 
     window.BootstrapHide = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
-        settingsBox.style.display = 'none';
+        settingsBox.style.visibility = 'hidden';
         if (window.bootstrapVisible && typeof window.getAllSrc != "undefined") {
             window.getAllSrc();
         }
@@ -260,7 +261,7 @@ window.BootstrapMenu.make = function () {
             document.body.style.overflow = '';
         }
 
-        if (localStorage.getItem('snakeChosenMod') === "PuddingMod") {
+        if (localStorage.getItem('snakeChosenMod') === "PuddingMod" || window.NepDebug) {
             EatThemeRandomizer.style.display = 'none';
             EatThemeRandomizer2.style.display = 'none';
             EatThemeRandomizer.checked = false;

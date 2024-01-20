@@ -2885,6 +2885,7 @@ window.SpeedInfo.make = function () {
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
         speedinfoBox.style.display = 'block';
+        speedinfoBox.style.visibility = 'visible';
         window.pudding_settings.SpeedInfo = true;
 
         window.SpeedInfoUpdate();
@@ -2892,7 +2893,8 @@ window.SpeedInfo.make = function () {
 
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
-        speedinfoBox.style.display = 'none';
+        speedinfoBox.style.display = 'block';
+        speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
         document.getElementById('AlwaysOnTimeKeeper').checked = false;
     }
@@ -3175,14 +3177,19 @@ window.InputDisplay.make = function () {
     {window.pudding_settings.InputDisplay = !window.pudding_settings.InputDisplay;}
     //console.log("hmmm");
     if (window.pudding_settings.InputDisplay) {
-
       document.getElementById('left-button-id').style.display = 'inline-block';
       document.getElementById('down-button-id').style.display = 'inline-block';
       document.getElementById('right-button-id').style.display = 'inline-block';
       document.getElementById('top-button-id').style.display = 'inline-block';
+
+      document.getElementById('left-button-id').style.visibility = 'visible';
+      document.getElementById('down-button-id').style.visibility = 'visible';
+      document.getElementById('right-button-id').style.visibility = 'visible';
+      document.getElementById('top-button-id').style.visibility = 'visible';
+      window.ToggleSpeedInfo();
+      window.ToggleSpeedInfo();
     }
     else {
-
       document.getElementById('left-button-id').style.display = 'none';
       document.getElementById('down-button-id').style.display = 'none';
       document.getElementById('right-button-id').style.display = 'none';
@@ -4104,12 +4111,13 @@ window.BootstrapMenu.make = function () {
     window.BootstrapShow = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
         settingsBox.style.display = 'block';
+        settingsBox.style.visibility = 'visible';
         window.bootstrapVisible = true;
     }
 
     window.BootstrapHide = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
-        settingsBox.style.display = 'none';
+        settingsBox.style.visibility = 'hidden';
         if (window.bootstrapVisible && typeof window.getAllSrc != "undefined") {
             window.getAllSrc();
         }
@@ -4357,7 +4365,7 @@ window.BootstrapMenu.make = function () {
             document.body.style.overflow = '';
         }
 
-        if (localStorage.getItem('snakeChosenMod') === "PuddingMod") {
+        if (localStorage.getItem('snakeChosenMod') === "PuddingMod" || window.NepDebug) {
             EatThemeRandomizer.style.display = 'none';
             EatThemeRandomizer2.style.display = 'none';
             EatThemeRandomizer.checked = false;

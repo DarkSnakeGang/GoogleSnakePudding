@@ -46,14 +46,19 @@ window.InputDisplay.make = function () {
     {window.pudding_settings.InputDisplay = !window.pudding_settings.InputDisplay;}
     //console.log("hmmm");
     if (window.pudding_settings.InputDisplay) {
-
       document.getElementById('left-button-id').style.display = 'inline-block';
       document.getElementById('down-button-id').style.display = 'inline-block';
       document.getElementById('right-button-id').style.display = 'inline-block';
       document.getElementById('top-button-id').style.display = 'inline-block';
+
+      document.getElementById('left-button-id').style.visibility = 'visible';
+      document.getElementById('down-button-id').style.visibility = 'visible';
+      document.getElementById('right-button-id').style.visibility = 'visible';
+      document.getElementById('top-button-id').style.visibility = 'visible';
+      window.ToggleSpeedInfo();
+      window.ToggleSpeedInfo();
     }
     else {
-
       document.getElementById('left-button-id').style.display = 'none';
       document.getElementById('down-button-id').style.display = 'none';
       document.getElementById('right-button-id').style.display = 'none';
