@@ -1,10 +1,10 @@
-window.MousePudding = {};
+window.MoreMouse = {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
 
-window.MousePudding.runCodeBefore = function() {
+window.MoreMouse.runCodeBefore = function() {
     function loadAndRunCodeSynchronous(url) {
         let req = new XMLHttpRequest();
         req.open('GET', url, false);
@@ -22,12 +22,11 @@ window.MousePudding.runCodeBefore = function() {
         req.send();
       }
 
-    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/PuddingMod.js');
-    loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeMouseMode/main/modloadercode.js');
+    //loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/main/modloadercode.js');
+    //loadAndRunCodeSynchronous('https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeMouseMode/main/MouseMod.js');
 
-    console.log("Enabling Pudding Mod");
-    window.PuddingMod.runCodeBefore();
     window.mouseMode.runCodeBefore();
+    window.moreMenu.runCodeBefore();
 
 }
 
@@ -35,16 +34,16 @@ window.MousePudding.runCodeBefore = function() {
 //ALTERSNAKECODE
 ////////////////////////////////////////////////////////////////////
 
-window.MousePudding.alterSnakeCode = function(code) {
-  return window.mouseMode.alterSnakeCode(window.PuddingMod.alterSnakeCode(code));;
+window.MoreMouse.alterSnakeCode = function(code) {
+  return window.moreMenu.alterSnakeCode(window.mouseMode.alterSnakeCode(code));;
 }
 
 
-window.MousePudding.runCodeAfter = function() {
+window.MoreMouse.runCodeAfter = function() {
   window.mouseMode.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'Mouse Pudding Mod';
+  modIndicator.textContent = 'More Mouse Mod';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
