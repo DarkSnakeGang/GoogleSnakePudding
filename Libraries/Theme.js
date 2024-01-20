@@ -392,6 +392,8 @@ window.Theme.alterCode = function (code) {
 
       document.getElementById('visi-title').style.backgroundColor = real_top_bar;
       document.getElementById('visi-boxes').style.backgroundColor = real_top_bar;
+      document.getElementById('flash-snake-timing').style.backgroundColor = buttons_color;
+
     }
 
 
