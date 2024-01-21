@@ -240,11 +240,18 @@ window.CustomPortalPairs.alterCode = function (code) {
     counter_reset_code = `window.custom_pair_call_counter = 0;this.reset();`
 
     code = code.assertReplace(reset_regex, counter_reset_code);
-
-    portal_pairs_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\[c\]\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\)/)
+    portal_pairs_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\[[a-zA-Z0-9_$]{1,8}\]\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\)/)
+    catchError(portal_pairs_regex, code) // Third {1,8} here should be "type" - since this is where portal pair type is determined
     apple_array = code.match(portal_pairs_regex)[0].split('.')[1].split('[')[0]
     give_portal_type_func = code.match(portal_pairs_regex)[0].split('=')[1]
     apple_type = code.match(portal_pairs_regex)[0].split('.')[2].split('=')[0]
+    apple_index = code.match(portal_pairs_regex)[0].split('[')[1].split(']')[0]
+    if (window.NepDebug) {
+
+        console.log("Apple array: " + apple_array)
+        console.log("portal type func: " + give_portal_type_func)
+        console.log("apple type: " + apple_type)
+    }
 
     window.give_custom_pair = function () {
         window.custom_pair_call_counter = window.custom_pair_call_counter + 1;
@@ -255,9 +262,9 @@ window.CustomPortalPairs.alterCode = function (code) {
     }
 
     portal_pairs_code = `
-    if(window.pudding_settings.PortalPairs){this.${apple_array}[c].${apple_type} = window.give_custom_pair();
-    this.${apple_array}[c+1].${apple_type} = this.${apple_array}[c].${apple_type};}
-    else this.${apple_array}[c].${apple_type} = ${give_portal_type_func}
+    if(window.pudding_settings.PortalPairs){this.${apple_array}[${apple_index}].${apple_type} = window.give_custom_pair();
+    this.${apple_array}[${apple_index}+1].${apple_type} = this.${apple_array}[${apple_index}].${apple_type};}
+    else this.${apple_array}[${apple_index}].${apple_type} = ${give_portal_type_func}
     `
 
     code = code.assertReplace(portal_pairs_regex, portal_pairs_code);
@@ -271,8 +278,10 @@ window.CustomPortalPairs.alterCode = function (code) {
     }
 
     portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{/)
+    catchError(portal_dice_regex, code)
     apple_dice_array = code.match(portal_dice_regex)[0].split('<')[1].split('.')[0];
     portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{[^]*type}/gm)
+    catchError(portal_dice_full_regex, code)
     portal_pairs_dice_code = code.match(portal_dice_full_regex)[0]
 
     portal_dice_pairs_code = `
