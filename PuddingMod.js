@@ -4849,7 +4849,7 @@ window.CustomPortalPairs.alterCode = function (code) {
     // Code to alter snake code here
     if (window.NepDebug) {
         //console.log(document.querySelector('#apple').children)
-        console.log(document.querySelector('#apple').children.length);
+        //console.log(document.querySelector('#apple').children.length);
         //console.log(window.new_fruit)
         //console.log(code)
     }
