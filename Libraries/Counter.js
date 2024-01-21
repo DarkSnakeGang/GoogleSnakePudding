@@ -16,15 +16,28 @@ window.Counter.make = function () {
                 plays: {
                     session: 0,
                     lifetime: 0
+                },
+                apples: {
+                    session: 0,
+                    lifetime: 0
                 }
             };
         } else {
             stats = JSON.parse(stats);
         }
+
+        if (typeof stats.apples === 'undefined') {
+            stats.apples = {
+                session: 0,
+                lifetime: 0
+            }
+        }
+
         //Make sure these get reset
         stats.inputs.game = 0;
         stats.inputs.session = 0;
         stats.plays.session = 0;
+        stats.apples.session = 0;
         stats.visible = true;
 
         stats.walls = {
@@ -49,6 +62,8 @@ window.Counter.make = function () {
             typeof stats.inputs.lifetime !== 'undefined' &&
             typeof stats.plays.session !== 'undefined' &&
             typeof stats.plays.lifetime !== 'undefined' &&
+            typeof stats.apples.session !== 'undefined' &&
+            typeof stats.apples.lifetime !== 'undefined' &&
             typeof stats.visible !== 'undefined'
         ) {
             localStorage.setItem('inputCounterMod', JSON.stringify(stats));
@@ -73,6 +88,10 @@ window.Counter.make = function () {
                 plays: {
                     session: 0,
                     lifetime: 0
+                },
+                apples: {
+                    session: 0,
+                    lifetime: 0
                 }
             };
             saveStatistics();
@@ -82,6 +101,7 @@ window.Counter.make = function () {
             alert('Did not reset all stats');
         }
     }
+
     window.promptToEditStatCount = function () {
         if (stats.statShown === 'hide' || stats.statShown === 'walls') {
             alert(`Not changing stat for "hide" or "walls"`)
@@ -100,13 +120,18 @@ window.Counter.make = function () {
     }
 
     window.getStatIconImageSrc = function () {
-        if (stats.statShown === 'hide') {
-            return "https://i.postimg.cc/bNFfLPCn/Empty.png"
+        switch (stats.statShown) {
+            case 'hide':
+                return "https://i.postimg.cc/bNFfLPCn/Empty.png"
+            case 'walls':
+                return "https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png"
+            case 'apples':
+                return "https://www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"
+            case 'plays':
+                return "https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png"
+            default:
+                return "https://www.google.com/logos/fnbx/snake_arcade/keys.svg"
         }
-        if (stats.statShown === 'walls') {
-            return "https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png"
-        }
-        return stats.statShown === 'plays' ? 'https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png' : 'https://www.google.com/logos/fnbx/snake_arcade/keys.svg';
     }
 
     window.setCounter = function () {

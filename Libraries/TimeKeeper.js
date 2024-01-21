@@ -13,6 +13,9 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.debug = false;
     //called on every apple
     window.timeKeeper.gotApple = function (time, score) {
+        stats.apples.session++;
+        stats.apples.lifetime++;
+        updateCounterDisplay();
         if (window.pudding_settings.randomizeThemeApple) {
             window.setTheme(window.getRandomThemeName());
         }

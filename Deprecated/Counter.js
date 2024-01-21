@@ -231,6 +231,10 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
       plays: {
         session: 'playsSession',
         lifetime: 'playsLifetime'
+      },
+      apples: {
+        session: 'applesSession',
+        lifetime: 'applesLifetime'
       }
     }
 
@@ -240,6 +244,8 @@ window.findFunctionInCode = function(code, functionSignature, somethingInsideFun
       inputLifetime:{stat: 'inputs',duration: 'lifetime'},
       playsSession:{stat: 'plays',duration: 'session'},
       playsLifetime:{stat: 'plays',duration: 'lifetime'},
+      applesSession:{stat: 'apples',duration: 'session'},
+      applesLifetime:{stat: 'apples',duration: 'lifetime'},
     }
 
     //preselect based on saved settings
