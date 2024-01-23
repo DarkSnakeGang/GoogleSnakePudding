@@ -983,6 +983,9 @@ window.TimeKeeper.make = function () {
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+            return;
+        }
         window.timeKeeper.lastAppleDate = new Date();
         window.timeKeeper.lastAppleTime = time;
         //save time
@@ -999,6 +1002,9 @@ window.TimeKeeper.make = function () {
         if (window.timeKeeper.debug) {
             //console.log("got All %s, %s", time, score);
         }
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+            return;
+        }
         window.timeKeeper.savePB(time, "ALL", window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     }
 
@@ -1006,6 +1012,9 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.death = function (time, score) {
         if (window.timeKeeper.debug) {
             //console.log("death %s, %s", time, score);
+        }
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+            return;
         }
         if (window.timeKeeper.playing) {
             window.timeKeeper.playing = false;
@@ -4246,7 +4255,7 @@ window.BootstrapMenu.make = function () {
 
         <span style="color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Pudding Mod Settings</span>
 
-    <select style="margin-top:3px;margin-left: auto; margin-right: auto;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center; align:center;" id="stat-chooser" class="form-control">
+    <select style="margin-top:3px;margin-bottom:3px;margin-left: auto; margin-right: auto;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center; align:center;" id="stat-chooser" class="form-control">
         <option value="inputGame">Count game inputs</option>
         <option value="inputSession">Count session inputs</option>
         <option value="inputLifetime">Count lifetime inputs</option>

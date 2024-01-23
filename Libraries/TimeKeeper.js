@@ -22,6 +22,9 @@ window.TimeKeeper.make = function () {
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+            return;
+        }
         window.timeKeeper.lastAppleDate = new Date();
         window.timeKeeper.lastAppleTime = time;
         //save time
@@ -38,6 +41,9 @@ window.TimeKeeper.make = function () {
         if (window.timeKeeper.debug) {
             //console.log("got All %s, %s", time, score);
         }
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+            return;
+        }
         window.timeKeeper.savePB(time, "ALL", window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     }
 
@@ -45,6 +51,9 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.death = function (time, score) {
         if (window.timeKeeper.debug) {
             //console.log("death %s, %s", time, score);
+        }
+        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+            return;
         }
         if (window.timeKeeper.playing) {
             window.timeKeeper.playing = false;
