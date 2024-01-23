@@ -116,7 +116,7 @@ window.BootstrapMenu.make = function () {
 
         <span style="color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Pudding Mod Settings</span>
 
-    <select style="margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;" id="stat-chooser" class="form-control">
+    <select style="margin-top:3px;margin-bottom:3px;margin-left: auto; margin-right: auto;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center; align:center;" id="stat-chooser" class="form-control">
         <option value="inputGame">Count game inputs</option>
         <option value="inputSession">Count session inputs</option>
         <option value="inputLifetime">Count lifetime inputs</option>
