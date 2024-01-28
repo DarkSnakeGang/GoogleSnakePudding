@@ -302,7 +302,6 @@ window.Theme.make = function () {
       endscreen_background: advancedSettings.themeCol7 ?? '#000000',
       sep_color: '#7eccfa',
       topbar_color: '#3a91bb',
-      real_top_bar: '#4a752c',
       buttons_color: '#1155CC',
       bg_color: '#4dc1f9',
       bottom_color: '#4dc1f9'
