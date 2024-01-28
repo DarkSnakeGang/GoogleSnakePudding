@@ -15,6 +15,7 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.gotApple = function (time, score) {
         stats.apples.session++;
         stats.apples.lifetime++;
+        updateCounterDisplay();
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
