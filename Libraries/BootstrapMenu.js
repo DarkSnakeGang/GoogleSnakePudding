@@ -121,6 +121,8 @@ window.BootstrapMenu.make = function () {
         <option value="inputLifetime">Count lifetime inputs</option>
         <option value="playsSession">Count session resets</option>
         <option value="playsLifetime">Count lifetime resets</option>
+        <option value="applesSession">Count fruit session</option>
+        <option value="applesLifetime">Count fruit lifetime</option>
         <option value="wallsGame">Count walls</option>
         <option value="hideCount">Counter hidden</option>
     </select>
@@ -270,6 +272,10 @@ window.BootstrapMenu.make = function () {
                 session: 'playsSession',
                 lifetime: 'playsLifetime'
             },
+            apples: {
+                session: 'applesSession',
+                lifetime: 'applesLifetime'
+            },
             walls: {
                 game: 'wallsGame'
             },
@@ -284,6 +290,8 @@ window.BootstrapMenu.make = function () {
             inputLifetime: { stat: 'inputs', duration: 'lifetime' },
             playsSession: { stat: 'plays', duration: 'session' },
             playsLifetime: { stat: 'plays', duration: 'lifetime' },
+            applesSession: { stat: 'apples', duration: 'session' },
+            applesLifetime: { stat: 'apples', duration: 'lifetime' },
             wallsGame: { stat: 'walls', duration: 'game' },
             hideCount: { stat: 'hide', duration: 'count' },
         }

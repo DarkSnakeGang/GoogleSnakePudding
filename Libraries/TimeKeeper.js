@@ -13,6 +13,8 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.debug = false;
     //called on every apple
     window.timeKeeper.gotApple = function (time, score) {
+        stats.apples.session++;
+        stats.apples.lifetime++;
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
