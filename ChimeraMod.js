@@ -1487,8 +1487,6 @@ window.TimeKeeper.make = function () {
         div.insertBefore(dialog, div.firstChild)
     };
 
-
-
     //Function to find the snake code, and apply changes.
     window.timeKeeper.setup = function () {
         //just make storage, this used to also alter snake code
@@ -5237,7 +5235,7 @@ window.mouseMode.alterSnakeCode = function(code) {
   //Add warning if the game is started with a mode that is broken
   let funcWithNewGame, funcWithNewGameOrig;
   funcWithNewGame = funcWithNewGameOrig = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,8}=function\(\)$/,
-  /}\);this\.reset\(\)/,
+  /this\.reset\(\)\}\}/,
   false);
 
   let [,modeCheck, settingsProperty] = code.assertMatch(/([$a-zA-Z0-9_]{0,8})\(this\.([$a-zA-Z0-9_]{0,8}),6\)/);
@@ -6365,7 +6363,7 @@ moreMenu.alterSnakeCode = function(code) {
     /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?return [a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?2\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(a\n?,\n?8\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?9\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?10\n?\)\n?}/
   )[0].match(/[a-zA-Z0-9_$]{1,8}/)[0];
   const isModeSelected = code.match(
-    /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?,\n?b\n?\)\n?{\n?return 18\n?===\n?a[^}]*?===\n?b\n?}/
+    /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?,\n?b\n?\)\n?{\n?return a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.has\(b\):18\n?===\n?a[^]*?===\n?b\n?}/
   )[0].match(/[a-zA-Z0-9_$]{1,8}/)[0];
 
 
@@ -6611,7 +6609,7 @@ moreMenu.alterSnakeCode = function(code) {
   );
 
   const resetFunction1 = code.match(
-    /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\n?\(a\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
+    /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\n?\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
   )[0];
 
   code = code.assertReplace(resetFunction1,
