@@ -153,7 +153,7 @@ window.Counter.make = function () {
 
 window.Counter.alterCode = function (code) {
 
-    reset_regex = new RegExp(/;this\.reset\(\)/)
+    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
@@ -168,7 +168,8 @@ window.Counter.alterCode = function (code) {
         stats.visible = false;
     }
     window.setCounter();
-    updateCounterDisplay();this.reset();`
+    updateCounterDisplay();
+    $&`
 
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, counter_reset_code);

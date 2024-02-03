@@ -23,8 +23,8 @@ window.SpeedInfo.make = function () {
         }
         url += "id=" + new Date().getTime()
         if (window.NepDebug) {
-            console.log(url);
-            console.log("Getting runs..." + window.requestsMade);
+            //console.log(url);
+            //console.log("Getting runs..." + window.requestsMade);
         }
 
         let request = new XMLHttpRequest();
@@ -83,9 +83,8 @@ window.SpeedInfo.make = function () {
         13: { name: "Statue" },
         14: { name: "Light" },
         15: { name: "Shield" },
-        16: { name: "Arrow" },
-        17: { name: "Peaceful" },
-        18: { name: "Blender" },
+        16: { name: "Peaceful" },
+        17: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -142,9 +141,8 @@ window.SpeedInfo.make = function () {
         STATUE = 13
         LIGHT = 14
         SHIELD = 15
-        ARROW = 16
-        PEACEFUL = 17
-        BLENDER = 18
+        PEACEFUL = 16
+        BLENDER = 17
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -178,10 +176,10 @@ window.SpeedInfo.make = function () {
             HandleHighscore("Empty")
             return;
         }
-        //if (mode == STATUE && level == "H" && speed == SLOW) {
-        //    HandleHighscore("Empty")
-        //    return; // Statue isn't highscore on slow (yet?)
-        //}
+        if (mode == STATUE && level == "H" && speed == SLOW) {
+            HandleHighscore("Empty")
+            return; // Statue isn't highscore on slow (yet?)
+        }
 
         gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
 
@@ -245,8 +243,8 @@ window.SpeedInfo.make = function () {
             }
 
             if (window.NepDebug) {
-                console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
+                //console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
+                //    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
             }
 
             makeAPIrequest("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
@@ -277,7 +275,7 @@ window.SpeedInfo.make = function () {
         src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
 
         if (window.NepDebug) {
-            console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
+            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
         }
         switch (level) {
             case "25":
@@ -305,10 +303,6 @@ window.SpeedInfo.make = function () {
         }
 
 
-    }
-
-    function printMe(response) {
-        console.log(response);
     }
 
     //window.getRecordSRC("H");
@@ -345,7 +339,7 @@ window.SpeedInfo.make = function () {
 
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
-            console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
+            //console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
     function Handle50(response) {
@@ -409,7 +403,7 @@ window.SpeedInfo.make = function () {
         document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
         //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
-            console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
+            //console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
         }
     }
 
@@ -551,12 +545,12 @@ window.SpeedInfo.make = function () {
 
     //Listeners to hide/show speedinfo box
     const backButton = 'p17HVe';
-    document.querySelector("img[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
+    document.querySelector("[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
         window.SpeedInfoUpdate();
     });
 
     const playButton = 'NSjDf';
-    document.querySelector("div[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
+    document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
         window.SpeedInfoUpdate();
     });
 
@@ -573,6 +567,7 @@ window.SpeedInfo.make = function () {
         var gamemode = "";
         for (t of modeStr) {
             if (t == 1) {
+
                 switch (counter) {
                     case 0: gamemode += "Wall, "; break;
                     case 1: gamemode += "Portal, "; break;
@@ -589,8 +584,7 @@ window.SpeedInfo.make = function () {
                     case 12: gamemode += "Statue, "; break;
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 15: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -671,11 +665,11 @@ window.SpeedInfo.make = function () {
 }
 
 window.SpeedInfo.alterCode = function (code) {
-    reset_regex = new RegExp(/;this\.reset\(\)/)
+    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     speedinfo_reset = `;window.SpeedInfoUpdate();
     if(window.first_time_call){window.getAllSrc();window.first_time_call=false;}
-    ;this.reset();`
+    ;$&`
 
 
     catchError(reset_regex, code)

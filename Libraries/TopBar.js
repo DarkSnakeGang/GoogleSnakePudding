@@ -9,7 +9,6 @@ window.TopBar.make = function () {
   }
 
  // window.topbar_icons = true;
-  window.is_muted = false;
   window.count_setting = 0;
   window.speed_setting = 0;
 
@@ -25,9 +24,6 @@ window.TopBar.alterCode = function (code) {
   count_var = "window.count_setting"
   speed_var = "window.speed_setting"
 
-  muted_img = "volume_off_white_24dp.png"
-  unmuted_img = "volume_up_white_24dp.png"
-
   window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
   window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
 
@@ -37,46 +33,47 @@ window.TopBar.alterCode = function (code) {
   set_count_code = `$&${count_var}=`
   set_speed_code = `$&${speed_var}=`
 
-  fruit_jsname = document.querySelector('img[src$="apple_00.png"]').getAttribute("jsname")
-  fruit_src = `document.querySelector('img[jsname="${fruit_jsname}"]').src `
-  try {
-    mute_jsname = document.querySelector(`img[src$="${unmuted_img}"`).getAttribute("jsname")
-    window.is_muted = false;
-  } catch (error) {
-    if (window.NepDebug) {
-      console.log("Noticed it's muted, adjusting.")
-    }
-    mute_jsname = document.querySelector(`img[src$="${muted_img}"`).getAttribute("jsname")
-    window.is_muted = true;
-  }
-  mute_src = `document.querySelector('img[jsname="${mute_jsname}"]').src `
+  fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
+  fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
 
-  muted_img = "https://i.postimg.cc/dQdCRwyH/volume-off-white-24dp.png"
-  unmuted_img = "https://i.postimg.cc/HsgyBR0p/volume-up-white-24dp.png"
+  window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
+  window.mute_default_innerHTML = [window.mute_divs[0].innerHTML, window.mute_divs[1].innerHTML]
+  window.mute_speed_element = document.createElement('img');
+  window.mute_speed_element.classList.add('EFcTud')
+  window.mute_speed_element.src = "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png"
+  window.mute_speed_element.style.padding = '0px';
+  window.mute_speed_copy = window.mute_speed_element.cloneNode(true);
+
+  window.control_mute_img = function control_mute_img(TopBar, SpeedSrc) {
+    if (TopBar) {
+      for (let index = 0; index < window.mute_divs.length; index++) {
+        const element = window.mute_divs[index];
+        element.innerHTML = ''
+      }
+      window.mute_speed_element.src = SpeedSrc
+      window.mute_speed_copy.src = SpeedSrc
+      window.mute_divs[0].appendChild(window.mute_speed_element)
+      window.mute_divs[1].appendChild(window.mute_speed_copy)
+      return;
+    }
+    for (let index = 0; index < window.mute_divs.length; index++) {
+      const element = window.mute_divs[index];
+      element.innerHTML = window.mute_default_innerHTML[index]
+    }
+  }
 
   code = code.assertReplace(count_regex, set_count_code);
   code = code.assertReplace(speed_regex, set_speed_code);
 
-  reset_regex = new RegExp(/;this\.reset\(\)/)
+  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
   set_on_reset = `;
   if (window.pudding_settings.TopBar) {
-    ${mute_src} = window.speed_img_arr[${speed_var}]
     ${fruit_src} = window.count_img_arr[${count_var}]
   }
-  else {
-    ${mute_src} = window.is_muted ? "${muted_img}" : "${unmuted_img}";
-  }
+  window.control_mute_img(window.pudding_settings.TopBar, window.speed_img_arr[${speed_var}])
   $&`
   code = code.assertReplace(reset_regex, set_on_reset)
-
-  volume_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\?\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_off_white_24dp.png\"\:\"\/\/www\.gstatic\.com\/images\/icons\/material\/system\/2x\/volume_up_white_24dp\.png\"\;/)
-  disable_mute = `$&
-  if (window.pudding_settings.TopBar) {
-    ${mute_src} = window.speed_img_arr[${speed_var}]
-  }
-  `
-  code = code.assertReplace(volume_regex, disable_mute)
 
   return code;
 }

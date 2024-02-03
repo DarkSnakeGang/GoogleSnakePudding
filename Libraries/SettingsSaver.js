@@ -49,10 +49,11 @@ window.SettingsSaver.alterCode = function (code) {
     window.PopulateOptions();
     window.PopulateDropdowns();
 
-    reset_regex = new RegExp(/;this\.reset\(\)/)
+    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     settings_reset_code = `
-    saveSettings();this.reset();`
+    saveSettings();
+    $&`
 
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, settings_reset_code);

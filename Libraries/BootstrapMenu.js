@@ -383,7 +383,7 @@ window.BootstrapMenu.make = function () {
     });
 
     const backButton = 'p17HVe';
-    document.querySelector("img[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
+    document.querySelector("[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
             if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
@@ -393,7 +393,7 @@ window.BootstrapMenu.make = function () {
     });
 
     const playButton = 'NSjDf';
-    document.querySelector("div[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
+    document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
             if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {

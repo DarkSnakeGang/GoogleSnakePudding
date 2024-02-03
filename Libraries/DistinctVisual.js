@@ -170,7 +170,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     }
     ${code.match(keep_running)[0]}`)
 */
-    reset_regex = new RegExp(/;this\.reset\(\)/)
+    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     set_on_reset = `;
     if (window.pudding_settings.SokoGoals) {
