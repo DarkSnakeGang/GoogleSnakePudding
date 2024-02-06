@@ -2538,8 +2538,9 @@ window.SpeedInfo.make = function () {
         13: { name: "Statue" },
         14: { name: "Light" },
         15: { name: "Shield" },
-        16: { name: "Peaceful" },
-        17: { name: "Blender" },
+        16: { name: "Arrow" },
+        17: { name: "Peaceful" },
+        18: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -3039,7 +3040,8 @@ window.SpeedInfo.make = function () {
                     case 12: gamemode += "Statue, "; break;
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Peaceful, "; break;
+                    case 15: gamemode += "Arrow, "; break;
+                    case 16: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
