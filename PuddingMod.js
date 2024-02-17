@@ -2101,7 +2101,7 @@ window.TopBar.alterCode = function (code) {
 
   count_ref = code.match(count_regex)[0].split('.')[2]
   speed_ref = code.match(speed_regex)[0].split('.')[2]
-  size_ref = code.match(speed_regex)[0].split('.')[2]
+  size_ref = code.match(size_regex)[0].split('.')[2]
 
   settings_reference = code.match(count_regex)[0].split(':')[1].split('.')[0] + '.' + code.match(count_regex)[0].split('.')[1]
 
