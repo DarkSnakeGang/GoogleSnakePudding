@@ -107,7 +107,18 @@ window.SpeedInfo.make = function () {
         2: { name: "Slow" },
     }
 
+    daily_button.addEventListener("click", function() {
+        SpeedInfoUpdate()
+        EmptyAll()
+      });
+
     window.getRecordSRC = function (level) {
+        debugger
+        if(window.daily_challenge){
+
+            EmptyAll();
+            return;
+        }
 
         if (!window.pudding_settings.SpeedInfo) {
             // For those that don't want to see speedrun info, to keep the game stable without api calls
@@ -522,7 +533,9 @@ window.SpeedInfo.make = function () {
 
         tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
         document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
-            window.timeKeeper.toggleDialog();
+            if(!window.daily_challenge){
+                window.timeKeeper.toggleDialog();
+            }
         });
 
         //debugger
@@ -607,6 +620,10 @@ window.SpeedInfo.make = function () {
         for (let score of ["att", "25", "50", "100", "ALL", "H"]) {
             let name = score + "-" + modeStr + "-" + count + "-" + speed + "-" + size;
             bold = document.getElementById(score);
+            if(window.daily_challenge) {
+                bold.innerHTML = '';
+                continue;
+            }
 
             if (typeof (storage[name]) != "undefined") {
 
@@ -633,6 +650,11 @@ window.SpeedInfo.make = function () {
             else {
                 bold.innerHTML = "";
             }
+        }
+
+        if(window.daily_challenge) {
+            mode_label.innerHTML = 'Daily Challenge'
+            mode_label2.innerHTML = '(TimeKeeper disabled)'
         }
 
     }

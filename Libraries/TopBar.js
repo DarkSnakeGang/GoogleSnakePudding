@@ -20,18 +20,31 @@ window.TopBar.make = function () {
 
 window.TopBar.alterCode = function (code) {
 
-  // Code to alter snake code here
-  count_var = "window.count_setting"
-  speed_var = "window.speed_setting"
-
   window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
   window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
 
-  count_regex = new RegExp(/case "count"\:/)
-  speed_regex = new RegExp(/case "speed"\:/)
+  count_regex = new RegExp(/case "count"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  speed_regex = new RegExp(/case "speed"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  size_regex = new RegExp(/case "size"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
 
-  set_count_code = `$&${count_var}=`
-  set_speed_code = `$&${speed_var}=`
+  count_ref = code.match(count_regex)[0].split('.')[2]
+  speed_ref = code.match(speed_regex)[0].split('.')[2]
+  size_ref = code.match(speed_regex)[0].split('.')[2]
+
+  settings_reference = code.match(count_regex)[0].split(':')[1].split('.')[0] + '.' + code.match(count_regex)[0].split('.')[1]
+
+  //set_count_code = `$&${count_var}=`
+  //set_speed_code = `$&${speed_var}=`
+
+  code = code.assertReplace(/switch\(b\){case "apple"\:/, `window.set_ref = ${settings_reference}; $&`);
+
+  count_var = `window.set_ref.${count_ref}`
+  speed_var = `window.set_ref.${speed_ref}`
+  size_var = `window.set_ref.${size_ref}`
+
+
+  //code = code.assertReplace(count_regex, set_count_code);
+  //code = code.assertReplace(speed_regex, set_speed_code);
 
   fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
   fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
@@ -62,18 +75,23 @@ window.TopBar.alterCode = function (code) {
     }
   }
 
-  code = code.assertReplace(count_regex, set_count_code);
-  code = code.assertReplace(speed_regex, set_speed_code);
-
   reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
   set_on_reset = `;
-  if (window.pudding_settings.TopBar) {
+  if (window.pudding_settings.TopBar && !window.daily_challenge) {
     ${fruit_src} = window.count_img_arr[${count_var}]
   }
   window.control_mute_img(window.pudding_settings.TopBar, window.speed_img_arr[${speed_var}])
+  if(window.daily_challenge){
+    window.control_mute_img(false, window.speed_img_arr[${speed_var}])
+  }
   $&`
   code = code.assertReplace(reset_regex, set_on_reset)
+
+  window.set_ref = {};
+  eval(speed_var + `=0`)
+  eval(count_var + `=0`)
+  eval(size_var + `=0`)
 
   return code;
 }

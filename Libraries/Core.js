@@ -6,9 +6,8 @@ window.Core.make = function () {
     window.uiImage = function (src) {
         let img = new Image();
         img.src = src;
-        img.width = 40;
-        img.height = 40;
-        img.class = 'DqMRee SsAred'; // Hardcoded, need to figure out what this is and how to make it dynamic or something.
+        img.classList.add('DqMRee');
+        img.classList.add('SsAred'); // Hardcoded, need to figure out what this is and how to make it dynamic or something.
         return img;
     };
 
@@ -19,6 +18,35 @@ window.Core.make = function () {
     }
 
     window.graphics_selected = 0;
+
+    daily_button = document.querySelector('[jsname="Prvkrf"]');
+    window.daily_challenge = false
+
+    // Options for the Intersection Observer
+    var options = {
+        root: null, // Use the viewport as the root
+        threshold: 0.5 // Trigger when 50% of the element is visible
+    };
+
+    // Callback function to handle intersection changes
+    function handleIntersection(entries, observer) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // The element is now visible
+                window.daily_challenge = false;
+            }
+        });
+    }
+
+    // Create an Intersection Observer
+    var observer = new IntersectionObserver(handleIntersection, options);
+
+    // Start observing the button
+    observer.observe(daily_button);
+
+    daily_button.addEventListener("click", function() {
+        window.daily_challenge = true;
+      });
 
 }
 

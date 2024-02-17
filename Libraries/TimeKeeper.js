@@ -19,6 +19,9 @@ window.TimeKeeper.make = function () {
         if (window.pudding_settings.randomizeThemeApple) {
             window.setTheme(window.getRandomThemeName());
         }
+        if(window.daily_challenge) {
+            return;
+        }
         if (window.timeKeeper.debug) {
             //console.log("got Apple %s, %s", time, score);
         }
@@ -133,6 +136,11 @@ window.TimeKeeper.make = function () {
             }
             return 0;
         }
+
+        if(name != 'trophy'){
+            return eval(window[name + '_var'])
+        }
+
         return getSelectedIndex(name);
     }
 

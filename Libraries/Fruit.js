@@ -219,6 +219,13 @@ window.Fruit.alterCode = function (code) {
     settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
     // ${settings_itself}
 
+    get_graphics = new RegExp(/case "graphics":/);
+    code = code.assertReplace(get_graphics, "$& window.graphics_selected=")
+    get_fruit = new RegExp(/case "apple":/);
+    code = code.assertReplace(get_fruit, "$& window.fruit_selected=")
+    fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}="/gm)[0].split('(')[1].split('=')[0]
+    // Very poorly coded, get back here using this: "https://www.google.com/logos/fnbx/"+(1===
+    /*
     // Full function that sets the current fruit icon
     realism_load_image = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\).*;if/);
     realism_image_code = code.match(realism_load_image)[0];
@@ -229,42 +236,35 @@ window.Fruit.alterCode = function (code) {
     graphics_selected_code = realism_image_code.split(',')[1];
 
     fruit_image = realism_image_code.split('{')[1].split('=')[0]
+    */
 
     new_realism_code = `
-    window.graphics_selected = ${graphics_selected_code};
-    if(${selected_fruit_num} >= ${last_fruit_num + 1}){
-        fruit_index = ${selected_fruit_num} - ${last_fruit_num + 1};
+    if(window.fruit_selected >= ${last_fruit_num + 1}){
+        fruit_index = window.fruit_selected - ${last_fruit_num + 1};
         switch (window.graphics_selected) {
             default:
             case 0:
-                d = window.new_fruit[fruit_index].Normal;
+                window.current_fruit_img = window.new_fruit[fruit_index].Normal;
                 break;
             case 1:
-                d = window.new_fruit[fruit_index].Pixel;
+                window.current_fruit_img = window.new_fruit[fruit_index].Pixel;
                 break;
             case 2:
-                d = window.new_fruit[fruit_index].Real;
+                window.current_fruit_img = window.new_fruit[fruit_index].Real;
         }
-        ${fruit_image} = d;
+        ${fruit_image} = window.current_fruit_img;
     }
     `
 
-    //final_realism_code = realism_image_code.split('}')[0] + '}' + realism_image_code.split('}')[1] + ';' + new_realism_code
+    rude_insert = new RegExp(/"\.png"\)\)}/gm)
+    code = code.assertReplace(rude_insert, `".png")); ${new_realism_code} }`);
 
-    //final_realism_test = `;; debugger ;;`
+    daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
 
-    final_realism_code = `
-${realism_image_code.split('}')[0]};
-        ${new_realism_code}
-    }
-    ${realism_image_code.split('}')[1]}
-    `
 
-    //console.log(final_realism_code)
-
-    //code = code.assertReplace(code.match(realism_load_image)[0], final_realism_test + '$&');
-    code = code.assertReplace(code.match(realism_load_image)[0], final_realism_code);
-
+    rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
+    code = code.assertReplace(rude_insert2,
+        `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
     /*
     load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\),\n?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\?"snake_arcade\/pixel\/[a-zA-Z0-9_$]{1,8}\/px_apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png":"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png"\);/)
 
@@ -389,10 +389,10 @@ ${realism_image_code.split('}')[0]};
     code = code.assertReplace(shh_grabber, new_shh_line);
 
     // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
-    get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
-    get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-    get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-    get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+    //get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
+    //get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+    //get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
+    //get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
 
     // Endscreen related image loading for new fruit - pudding. Keep this last
     // Since it effect load_image_func in a way that would break the other code that relies on it !!
