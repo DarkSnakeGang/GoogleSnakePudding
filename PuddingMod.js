@@ -46,6 +46,7 @@ window.Core.make = function () {
 
     daily_button.addEventListener("click", function() {
         window.daily_challenge = true;
+        window.first_time_call = true;
       });
 
 }
