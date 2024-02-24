@@ -1304,7 +1304,7 @@ window.TimeKeeper.make = function () {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
                 for (mode = 0; mode < 16; mode++) {
-                    modeStr = "0000000000000000".split("");
+                    modeStr = "00000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
