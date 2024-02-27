@@ -41,6 +41,9 @@ window.TimeKeeper.make = function () {
 
     //called when you get all apples
     window.timeKeeper.gotAll = function (time, score) {
+        if(window.daily_challenge) {
+            return;
+        }
         if (window.timeKeeper.debug) {
             //console.log("got All %s, %s", time, score);
         }
