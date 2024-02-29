@@ -8,7 +8,7 @@ window.Bowl.make = function () {
 // 10 icons per row
 // IconsControl radio group: Select all, Default Bowl, Pudding bowl, Custom (auto switched on a click on any fruit)
 // BehaviorControl radio group: Random, cycle, stack (Only show on Portal)
-//
+// Need some javascript for making icons
 
 }
 
