@@ -5194,7 +5194,7 @@ window.mouseMode.alterSnakeCode = function(code) {
   window.bodyArray = code.assertMatch(/[a-z]=\n?this\.[$a-zA-Z0-9_]{0,8}\.([$a-zA-Z0-9_]{0,8}\.[$a-zA-Z0-9_]{0,8})\[0\]\.clone\(\),"LEFT"/)[1];
 
   //Start and end point of snake segment for doing corners with quadraticCurveTo
-  [, window.endPoint, window.startPoint] = code.assertMatch(/break}}var ([$a-zA-Z0-9_]{0,8})=[$a-zA-Z0-9_]{0,8}\.clone\(\),([$a-zA-Z0-9_]{0,8})=[$a-zA-Z0-9_]{0,8}\.clone\(\);/);
+  [, window.endPoint, window.startPoint] = code.assertMatch(/continue}var ([$a-zA-Z0-9_]{0,8})=[$a-zA-Z0-9_]{0,8}\.clone\(\),([$a-zA-Z0-9_]{0,8})=[$a-zA-Z0-9_]{0,8}\.clone\(\);/);
 
   //Twiddle the out of bounds hitreg to be slightly friendlier. Note the change to strict inequality to disallow -1. Perhaps it would've been better to make a new bounds checking function instead.
   let funcWithBoundsHitReg, funcWithBoundsHitRegOrig;
@@ -6112,17 +6112,19 @@ Same as replace, but throws an error if nothing is changed
 
   //  eval(funcWithSokoban);
 
+  SokoGoalRegex = /[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z],0,128,128,[a-z]\.x-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[a-z],[a-z]\.y-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\+\n?[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/
+
   //Sokoban goal func
   let funcWithSokobanGoal_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e\)$/,
-    /[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z],0,128,128,[a-z]\.x-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[a-z],[a-z]\.y-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\+[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/,
+    SokoGoalRegex,
     deleteModDebug);
 
   let funcWithSokobanGoal = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e\)$/,
-    /[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z],0,128,128,[a-z]\.x-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[a-z],[a-z]\.y-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\+[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/,
+    SokoGoalRegex,
     deleteModDebug);
 
   //Sokoban goal
-  funcWithSokobanGoal = assertReplace(funcWithSokobanGoal, /[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z],0,128,128,[a-z]\.x-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[a-z],[a-z]\.y-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\+[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/,
+  funcWithSokobanGoal = assertReplace(funcWithSokobanGoal, SokoGoalRegex,
     'window.checkboxes.checkboxStatuses.sokobanGoal && $&');
 
   //eval(funcWithSokobanGoal);
