@@ -83,7 +83,10 @@ window.CustomPortalPairs.make = function () {
         47: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
         48: { name: "Dirt Block", image: "https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png" },
         49: { name: "Bread", image: "https://i.postimg.cc/YSMVtPr1/bread.png" },
-        50: { name: "Santa", image: "https://i.postimg.cc/kgV7FKDL/santa.png" }
+        50: { name: "Santa", image: "https://i.postimg.cc/kgV7FKDL/santa.png" },
+        51: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
+        52: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
+
     };
 
 
