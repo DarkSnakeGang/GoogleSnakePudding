@@ -2677,8 +2677,9 @@ window.SpeedInfo.make = function () {
         STATUE = 13
         LIGHT = 14
         SHIELD = 15
-        PEACEFUL = 16
-        BLENDER = 17
+        ARROW = 16
+        PEACEFUL = 17
+        BLENDER = 18
 
         // Speed list
         DEFAULT_SPEED = 0
