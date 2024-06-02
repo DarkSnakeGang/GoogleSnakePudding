@@ -1306,7 +1306,7 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 16; mode++) {
+                for (mode = 0; mode < 17; mode++) {
                     modeStr = "00000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
@@ -2677,8 +2677,9 @@ window.SpeedInfo.make = function () {
         STATUE = 13
         LIGHT = 14
         SHIELD = 15
-        PEACEFUL = 16
-        BLENDER = 17
+        ARROW = 16
+        PEACEFUL = 17
+        BLENDER = 18
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -2711,10 +2712,6 @@ window.SpeedInfo.make = function () {
         if (!highscore_modes.includes(mode) && level == "H") {
             HandleHighscore("Empty")
             return;
-        }
-        if (mode == STATUE && level == "H" && speed == SLOW) {
-            HandleHighscore("Empty")
-            return; // Statue isn't highscore on slow (yet?)
         }
 
         gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
@@ -3016,8 +3013,9 @@ window.SpeedInfo.make = function () {
 
 
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
+        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:208px;height:584px;top:0px;';
         speedinfoBox.id = 'speedinfo-popup-pudding';
+        speedinfoBox.style.visibility = 'hidden';
         window.speedinfoInput = speedinfoBox;
         speedinfoBox.innerHTML = `
 
@@ -3260,8 +3258,8 @@ window.InputDisplay.make = function () {
   window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
-  f.id = 'input-display-container';
-  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;';
+  f.id = 'input-display-container2';
+  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;';
   window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
@@ -3305,8 +3303,6 @@ window.InputDisplay.make = function () {
       document.getElementById('down-button-id').style.visibility = 'visible';
       document.getElementById('right-button-id').style.visibility = 'visible';
       document.getElementById('top-button-id').style.visibility = 'visible';
-      window.ToggleSpeedInfo();
-      window.ToggleSpeedInfo();
     }
     else {
       document.getElementById('left-button-id').style.display = 'none';

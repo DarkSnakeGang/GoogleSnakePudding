@@ -3013,8 +3013,9 @@ window.SpeedInfo.make = function () {
 
 
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
+        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:208px;height:584px;top:0px;';
         speedinfoBox.id = 'speedinfo-popup-pudding';
+        speedinfoBox.style.visibility = 'hidden';
         window.speedinfoInput = speedinfoBox;
         speedinfoBox.innerHTML = `
 
@@ -3257,8 +3258,8 @@ window.InputDisplay.make = function () {
   window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
-  f.id = 'input-display-container';
-  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;';
+  f.id = 'input-display-container2';
+  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;';
   window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
@@ -3302,8 +3303,6 @@ window.InputDisplay.make = function () {
       document.getElementById('down-button-id').style.visibility = 'visible';
       document.getElementById('right-button-id').style.visibility = 'visible';
       document.getElementById('top-button-id').style.visibility = 'visible';
-      window.ToggleSpeedInfo();
-      window.ToggleSpeedInfo();
     }
     else {
       document.getElementById('left-button-id').style.display = 'none';

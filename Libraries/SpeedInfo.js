@@ -489,8 +489,9 @@ window.SpeedInfo.make = function () {
 
 
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
+        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:208px;height:584px;top:0px;';
         speedinfoBox.id = 'speedinfo-popup-pudding';
+        speedinfoBox.style.visibility = 'hidden';
         window.speedinfoInput = speedinfoBox;
         speedinfoBox.innerHTML = `
 

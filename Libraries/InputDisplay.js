@@ -10,8 +10,8 @@ window.InputDisplay.make = function () {
   window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
-  f.id = 'input-display-container';
-  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;';
+  f.id = 'input-display-container2';
+  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;';
   window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
@@ -55,8 +55,6 @@ window.InputDisplay.make = function () {
       document.getElementById('down-button-id').style.visibility = 'visible';
       document.getElementById('right-button-id').style.visibility = 'visible';
       document.getElementById('top-button-id').style.visibility = 'visible';
-      window.ToggleSpeedInfo();
-      window.ToggleSpeedInfo();
     }
     else {
       document.getElementById('left-button-id').style.display = 'none';
