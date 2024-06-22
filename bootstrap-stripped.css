@@ -436,3 +436,15 @@
     pointer-events: none;
     will-change: opacity;
 }
+
+.blender_icon_img_selected {
+    max-width: 100%;
+    height: auto;
+    transform: scale(0.85);
+    opacity: 1;
+    -webkit-transition: transform 0.25s, opacity 0.25s;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    will-change: opacity;
+}
