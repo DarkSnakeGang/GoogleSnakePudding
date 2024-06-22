@@ -437,7 +437,7 @@
     will-change: opacity;
 }
 
-.blender_icon_img_selected {
+.blender_icon_img.blender_icon_img_selected {
     max-width: 100%;
     height: auto;
     transform: scale(0.85);
