@@ -411,3 +411,16 @@
     vertical-align: middle;
     cursor: not-allowed;
 }
+
+.blender_icon {
+    border-radius: 10px;
+    -webkit-transition: background 0.25s;
+    background: rgba(95, 142, 184, 0.3);
+    cursor: pointer;
+    height: 0;
+    padding-bottom: 100%;
+    width: 100%;
+}
+.blender_icon.blender_icon_on {
+    background: white;
+}
