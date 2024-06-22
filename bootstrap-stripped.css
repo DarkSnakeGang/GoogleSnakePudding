@@ -424,3 +424,15 @@
 .blender_icon.blender_icon_on {
     background: white;
 }
+
+.blender_icon.blender_icon_img {
+    max-width: 100%;
+    height: auto;
+    transform: scale(0.65);
+    opacity: 0.65;
+    -webkit-transition: transform 0.25s, opacity 0.25s;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    pointer-events: none;
+    will-change: opacity;
+}
