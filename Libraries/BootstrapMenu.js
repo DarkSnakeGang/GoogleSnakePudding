@@ -57,7 +57,6 @@ window.BootstrapMenu.make = function () {
         a.id = 'stat-icon';
         a.width = a.height = 25;
         a.style = 'position:relative;left:200px;top:70px;';
-
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
         divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
