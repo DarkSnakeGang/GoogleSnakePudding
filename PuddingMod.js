@@ -905,9 +905,11 @@ window.Counter.make = function () {
 window.Counter.alterCode = function (code) {
 
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    window.wallCoords = [];
 
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
+    window.wallCoords = [];
     window.timeKeeper.playing = false;
     window.BootstrapHide();
     stats.plays.session++;
@@ -976,15 +978,40 @@ window.Counter.alterCode = function (code) {
     catchError(wall_spawn_regex, code)
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
 
-
     wall_counter_code = `${code.match(wall_spawn_regex)[0]}
-    if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
+    if(${wall_pos}){stats.walls.game++;
+    window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
+    console.log(${wall_pos}.y);
+    console.log(${wall_pos}.x);
+    console.log(${wall_pos});
+    updateCounterDisplay();}
     `
     if (window.NepDebug) {
         console.log("Wall thing: " + wall_pos)
         console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
+    
+    window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
+        // Initialize an array of 90 tiles, all initialized to '1' (empty)
+        let board = Array(90).fill('1');
+    
+        // Set '2' (wall) for each coordinate in the list
+        coordinates.forEach(coord => {
+            let [x, y] = coord;
+            let index = y * 10 + x; // Calculate the index in the 1D array
+            board[index] = '2'; // Set '2' at the calculated index
+        });
+    
+        // Join the array into a single string of 90 characters
+        return board.join('');
+    }
+
+    let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
+
+    death_wall_icon.addEventListener("click", function () {
+        navigator.clipboard.writeText("pattern " + window.coordinatesToBoardString(window.wallCoords));
+    });
 
     return code;
 }
@@ -4274,7 +4301,6 @@ window.BootstrapMenu.make = function () {
         a.id = 'stat-icon';
         a.width = a.height = 25;
         a.style = 'position:relative;left:200px;top:70px;';
-
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
         divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
