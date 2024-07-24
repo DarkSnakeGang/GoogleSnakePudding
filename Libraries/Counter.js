@@ -230,9 +230,6 @@ window.Counter.alterCode = function (code) {
     wall_counter_code = `${code.match(wall_spawn_regex)[0]}
     if(${wall_pos}){stats.walls.game++;
     window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
-    console.log(${wall_pos}.y);
-    console.log(${wall_pos}.x);
-    console.log(${wall_pos});
     updateCounterDisplay();}
     `
     if (window.NepDebug) {
@@ -242,6 +239,9 @@ window.Counter.alterCode = function (code) {
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
     
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
+        if(window.timeKeeper.getCurrentSetting("size") != 1)
+            return false;
+
         // Initialize an array of 90 tiles, all initialized to '1' (empty)
         let board = Array(90).fill('1');
     
@@ -259,7 +259,10 @@ window.Counter.alterCode = function (code) {
     let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
 
     death_wall_icon.addEventListener("click", function () {
-        navigator.clipboard.writeText("pattern " + window.coordinatesToBoardString(window.wallCoords));
+        pattern_string = window.coordinatesToBoardString(window.wallCoords)
+        if(pattern_string){
+            navigator.clipboard.writeText("pattern " + pattern_string);
+        }
     });
 
     return code;
