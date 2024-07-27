@@ -166,7 +166,7 @@ window.Counter.alterCode = function (code) {
     window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     saveStatistics();
     stats.visible = true;
-    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 17) && stats.statShown == "walls"){
+    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 19) && stats.statShown == "walls"){
         stats.visible = false;
     }
     window.setCounter();
@@ -237,21 +237,21 @@ window.Counter.alterCode = function (code) {
         console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
-    
+
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
         if(window.timeKeeper.getCurrentSetting("size") != 1)
             return false;
 
         // Initialize an array of 90 tiles, all initialized to '1' (empty)
         let board = Array(90).fill('1');
-    
+
         // Set '2' (wall) for each coordinate in the list
         coordinates.forEach(coord => {
             let [x, y] = coord;
             let index = y * 10 + x; // Calculate the index in the 1D array
             board[index] = '2'; // Set '2' at the calculated index
         });
-    
+
         // Join the array into a single string of 90 characters
         return board.join('');
     }
