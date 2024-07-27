@@ -181,8 +181,8 @@ window.Theme.make = function () {
     },
     {
       name: 'Pacman',
-      light_tiles: '#010101',
-      dark_tiles: '#000000',
+      light_tiles: '#1D1D1D',
+      dark_tiles: '#161616',
       shadow: '#000000',
       border: '#0805c6',
       key_block_sign_color: '#000000',

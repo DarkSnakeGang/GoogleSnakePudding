@@ -316,8 +316,8 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 17; mode++) {
-                    modeStr = "00000000000000000".split("");
+                for (mode = 0; mode < 18; mode++) {
+                    modeStr = "000000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
@@ -391,7 +391,8 @@ window.TimeKeeper.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }

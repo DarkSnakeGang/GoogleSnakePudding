@@ -30,12 +30,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/LXFmtS7M/lime-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',70',
     });
-    new_fruit.push({ // Blackberries
-        "Normal": 'https://i.postimg.cc/hPTVGdNX/blackberries.png',
-        "Pixel": 'https://i.postimg.cc/RZTf7zS9/px-blackberries.png',
-        "Real": "https://i.postimg.cc/RVgCjj3c/blackberries-real.png",
-        "Poison_values": 'b,\'#000044\',\'#909090\',50',
-    });
     new_fruit.push({ // Green Grapes
         "Normal": 'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
         "Pixel": 'https://i.postimg.cc/J79bmqYw/px-green-grapes.png',
@@ -72,18 +66,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/D0vyKmjv/pizza-real.png",
         "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
     });
-    new_fruit.push({ // Pacman Ghost
-        "Normal": 'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
-        "Pixel": 'https://i.postimg.cc/BvtK8fxb/px-pacman-ghost.png',
-        "Real": "https://i.postimg.cc/3Nc4x2Ch/ghost-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
-    new_fruit.push({ // Sonic Rings
-        "Normal": 'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
-        "Pixel": 'https://i.postimg.cc/BvzJqWhs/ring-1.png',
-        "Real": "https://i.postimg.cc/W3WrCR8H/ring-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
     new_fruit.push({ // Steak
         "Normal": 'https://i.postimg.cc/J4n1dBsP/steak2.png',
         "Pixel": 'https://i.postimg.cc/cHmsNT56/steak-px.png',
@@ -108,18 +90,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/ncX0G22k/egg-real.png",
         "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
     });
-    new_fruit.push({ // Mango
-        "Normal": 'https://i.postimg.cc/R0NbYNSH/Mango.png',
-        "Pixel": 'https://i.postimg.cc/bNny7wv4/mango-px.png',
-        "Real": "https://i.postimg.cc/Hsb6V2tP/mango-real.png",
-        "Poison_values": 'b,\'#fc8824\',\'#909090\',50',
-    });
-    new_fruit.push({ // Melon
-        "Normal": 'https://i.postimg.cc/8knkL3WN/melon.png',
-        "Pixel": 'https://i.postimg.cc/Qt8NqZ0x/pixel-melon.png',
-        "Real": "https://i.postimg.cc/kG6h1PKn/melon-real.png",
-        "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
     new_fruit.push({ // Musa Banana
         "Normal": 'https://i.postimg.cc/3JsKcvnq/musa-banana.png',
         "Pixel": 'https://i.postimg.cc/bwSh0wPR/pixel-musa-banana.png',
@@ -131,12 +101,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/RZp3PRWz/pixel-pear.png',
         "Real": "https://i.postimg.cc/63dDtXTY/pear-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
-    new_fruit.push({ // Soccer Ball
-        "Normal": 'https://i.postimg.cc/C1yT8vjL/soccer-ball.png',
-        "Pixel": 'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
-        "Real": "https://i.postimg.cc/J7cnn0n8/soccer-real.png",
-        "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
     });
     new_fruit.push({ // Jacko
         "Normal": 'https://i.postimg.cc/rwMX5hbg/true-jacko.png',
@@ -155,24 +119,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/C5rrFjzV/red-pudding-px.png',
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
-    });
-    new_fruit.push({ // Dirt Block
-        "Normal": 'https://i.postimg.cc/9FwzBRY4/mc-dirt.png',
-        "Pixel": 'https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png',
-        "Real": "https://i.postimg.cc/Z5rR1Gg4/mc-dirt-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Bread
-        "Normal": 'https://i.postimg.cc/YSMVtPr1/bread.png',
-        "Pixel": 'https://i.postimg.cc/265KZBBy/bread-px.png',
-        "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Santa
-        "Normal": 'https://i.postimg.cc/kgV7FKDL/santa.png',
-        "Pixel": 'https://i.postimg.cc/SN1yMDQW/santa-px.png',
-        "Real": "https://i.postimg.cc/FsHrz2vr/santa-rtx.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
     new_fruit.push({ // Cabbage
         "Normal": 'https://i.postimg.cc/j59z8v1m/cabbage.png',

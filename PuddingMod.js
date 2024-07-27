@@ -247,8 +247,8 @@ window.Theme.make = function () {
     },
     {
       name: 'Pacman',
-      light_tiles: '#010101',
-      dark_tiles: '#000000',
+      light_tiles: '#1D1D1D',
+      dark_tiles: '#161616',
       shadow: '#000000',
       border: '#0805c6',
       key_block_sign_color: '#000000',
@@ -1337,8 +1337,8 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 17; mode++) {
-                    modeStr = "00000000000000000".split("");
+                for (mode = 0; mode < 18; mode++) {
+                    modeStr = "000000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
@@ -1412,7 +1412,8 @@ window.TimeKeeper.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -1711,12 +1712,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/LXFmtS7M/lime-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',70',
     });
-    new_fruit.push({ // Blackberries
-        "Normal": 'https://i.postimg.cc/hPTVGdNX/blackberries.png',
-        "Pixel": 'https://i.postimg.cc/RZTf7zS9/px-blackberries.png',
-        "Real": "https://i.postimg.cc/RVgCjj3c/blackberries-real.png",
-        "Poison_values": 'b,\'#000044\',\'#909090\',50',
-    });
     new_fruit.push({ // Green Grapes
         "Normal": 'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
         "Pixel": 'https://i.postimg.cc/J79bmqYw/px-green-grapes.png',
@@ -1753,18 +1748,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/D0vyKmjv/pizza-real.png",
         "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
     });
-    new_fruit.push({ // Pacman Ghost
-        "Normal": 'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
-        "Pixel": 'https://i.postimg.cc/BvtK8fxb/px-pacman-ghost.png',
-        "Real": "https://i.postimg.cc/3Nc4x2Ch/ghost-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
-    new_fruit.push({ // Sonic Rings
-        "Normal": 'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
-        "Pixel": 'https://i.postimg.cc/BvzJqWhs/ring-1.png',
-        "Real": "https://i.postimg.cc/W3WrCR8H/ring-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
     new_fruit.push({ // Steak
         "Normal": 'https://i.postimg.cc/J4n1dBsP/steak2.png',
         "Pixel": 'https://i.postimg.cc/cHmsNT56/steak-px.png',
@@ -1789,18 +1772,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/ncX0G22k/egg-real.png",
         "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
     });
-    new_fruit.push({ // Mango
-        "Normal": 'https://i.postimg.cc/R0NbYNSH/Mango.png',
-        "Pixel": 'https://i.postimg.cc/bNny7wv4/mango-px.png',
-        "Real": "https://i.postimg.cc/Hsb6V2tP/mango-real.png",
-        "Poison_values": 'b,\'#fc8824\',\'#909090\',50',
-    });
-    new_fruit.push({ // Melon
-        "Normal": 'https://i.postimg.cc/8knkL3WN/melon.png',
-        "Pixel": 'https://i.postimg.cc/Qt8NqZ0x/pixel-melon.png',
-        "Real": "https://i.postimg.cc/kG6h1PKn/melon-real.png",
-        "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
     new_fruit.push({ // Musa Banana
         "Normal": 'https://i.postimg.cc/3JsKcvnq/musa-banana.png',
         "Pixel": 'https://i.postimg.cc/bwSh0wPR/pixel-musa-banana.png',
@@ -1812,12 +1783,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/RZp3PRWz/pixel-pear.png',
         "Real": "https://i.postimg.cc/63dDtXTY/pear-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
-    new_fruit.push({ // Soccer Ball
-        "Normal": 'https://i.postimg.cc/C1yT8vjL/soccer-ball.png',
-        "Pixel": 'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
-        "Real": "https://i.postimg.cc/J7cnn0n8/soccer-real.png",
-        "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
     });
     new_fruit.push({ // Jacko
         "Normal": 'https://i.postimg.cc/rwMX5hbg/true-jacko.png',
@@ -1836,24 +1801,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/C5rrFjzV/red-pudding-px.png',
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
-    });
-    new_fruit.push({ // Dirt Block
-        "Normal": 'https://i.postimg.cc/9FwzBRY4/mc-dirt.png',
-        "Pixel": 'https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png',
-        "Real": "https://i.postimg.cc/Z5rR1Gg4/mc-dirt-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Bread
-        "Normal": 'https://i.postimg.cc/YSMVtPr1/bread.png',
-        "Pixel": 'https://i.postimg.cc/265KZBBy/bread-px.png',
-        "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Santa
-        "Normal": 'https://i.postimg.cc/kgV7FKDL/santa.png',
-        "Pixel": 'https://i.postimg.cc/SN1yMDQW/santa-px.png',
-        "Real": "https://i.postimg.cc/FsHrz2vr/santa-rtx.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
     new_fruit.push({ // Cabbage
         "Normal": 'https://i.postimg.cc/j59z8v1m/cabbage.png',
@@ -4734,32 +4681,23 @@ window.CustomPortalPairs.make = function () {
         24: { name: "Blue Berries", image: "https://i.postimg.cc/8cmVPfGd/blueberries.png" },
         25: { name: "Red Pepper", image: "https://i.postimg.cc/BQqHMbDc/redpepper.png" },
         26: { name: "Lime", image: "https://i.postimg.cc/k5kWcyFB/lime.png" },
-        27: { name: "Black Berries", image: "https://i.postimg.cc/hPTVGdNX/blackberries.png" },
-        28: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
-        29: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
-        30: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
-        31: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
-        32: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
-        33: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
-        34: { name: "Pacman Ghost", image: "https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png" },
-        35: { name: "Sonic Ring", image: "https://i.postimg.cc/pX1xYGp9/sonic-ring.png" },
-        36: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
-        37: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
-        38: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
-        39: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
-        40: { name: "Mango", image: "https://i.postimg.cc/R0NbYNSH/Mango.png" },
-        41: { name: "Melon", image: "https://i.postimg.cc/8knkL3WN/melon.png" },
-        42: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
-        43: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
-        44: { name: "Soccer Ball", image: "https://i.postimg.cc/C1yT8vjL/soccer-ball.png" },
-        45: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
-        46: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
-        47: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
-        48: { name: "Dirt Block", image: "https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png" },
-        49: { name: "Bread", image: "https://i.postimg.cc/YSMVtPr1/bread.png" },
-        50: { name: "Santa", image: "https://i.postimg.cc/kgV7FKDL/santa.png" },
-        51: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
-        52: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
+        27: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
+        28: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
+        29: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
+        30: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
+        31: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
+        32: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
+        33: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
+        34: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
+        35: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
+        36: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
+        37: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
+        38: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
+        39: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
+        40: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
+        41: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
+        42: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
+        43: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
 
     };
 
