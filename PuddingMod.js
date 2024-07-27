@@ -1742,8 +1742,8 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
     });
     new_fruit.push({ // Hotdog
-        "Normal": 'https://i.postimg.cc/BbQf4Vgs/hotdog.png',
-        "Pixel": 'https://i.postimg.cc/xTcnz1kL/px-hotdog.png',
+        "Normal": 'https://i.postimg.cc/bwYq44f1/hotdog.png',
+        "Pixel": 'https://i.postimg.cc/zXFJt86J/px-trophy-17.png',
         "Real": "https://i.postimg.cc/Y0RcM953/hotdog-real.png",
         "Poison_values": 'b,\'#9b441c\',\'#909090\',30',
     });
