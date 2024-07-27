@@ -281,10 +281,10 @@ window.CustomPortalPairs.alterCode = function (code) {
         //console.log(code)
     }
 
-    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{/)
+    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0?<?[a-zA-Z0-9_$]{1,8}\.length>?0?\)\{/)
     catchError(portal_dice_regex, code)
-    apple_dice_array = code.match(portal_dice_regex)[0].split('<')[1].split('.')[0];
-    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{[^]*type}/gm)
+    apple_dice_array = code.match(portal_dice_regex)[0].replace("0<", "").split('&')[2].split('.')[0];
+    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0?<?[a-zA-Z0-9_$]{1,8}\.length>?0?\)\{[^]*type}/gm)
     catchError(portal_dice_full_regex, code)
     portal_pairs_dice_code = code.match(portal_dice_full_regex)[0]
 

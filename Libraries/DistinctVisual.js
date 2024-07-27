@@ -41,6 +41,7 @@ window.DistinctVisual.make = function () {
 }
 
 window.DistinctVisual.alterCode = function (code) {
+
     // Attempt to get info on which mode it is
     spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
 
@@ -54,11 +55,11 @@ window.DistinctVisual.alterCode = function (code) {
     //console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)")
     ////console.log(code)
 
-    realism_draw = new RegExp(/switch\(void.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
     realism_switch = code.match(realism_draw)[0];
     //actual_canvas_regexp = new RegExp(/a.[a-zA-Z0-9_$]{1,8}.canvas,/);
     //actual_canvas = code.match(actual_canvas_regexp)[0]
-    realism_path = new RegExp(/switch\(void.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
     get_graphics = realism_switch.split(':')[1].split(')')[0];
@@ -85,7 +86,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     get_apple_code = `
     if(window.pudding_settings.Skull){
-        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[2].split('?')[0]} - 1 : b.type;
+        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[1].split('?')[0]} - 1 : b.type;
     }
     ${poison_default}
     `
@@ -129,9 +130,9 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
      `*/
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/null==\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[3]
+    real_grey_path = real_grey.split(')')[0].split('=')[1]
 
     new_grey_code = `
     if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {

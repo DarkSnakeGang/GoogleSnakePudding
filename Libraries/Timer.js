@@ -168,6 +168,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>
@@ -603,6 +604,7 @@ window.Timer = {
       /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?\)\}\;/
     )[0]
 
+    /*
     const modeKey = resetFunction.match(
       /0===this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('0===this.settings.', '')
@@ -615,6 +617,7 @@ window.Timer = {
     const sizeKey = resetFunction.match(
       /1!==this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('1!==this.settings.', '')
+*/
 
     code = code.replace(resetFunction,
       resetFunction.replace(
@@ -665,7 +668,7 @@ window.Timer = {
 
 
     const timeFormatFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(0>=a\)return[^]*?3,"0"\)}/
+      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(a<=0\)return[^]*?3,"0"\)}/
     )[0]
 
 
@@ -715,7 +718,7 @@ window.Timer = {
 
 
     const splitStuff = code.match(
-      /if\(25===\n?[a-zA-Z0-9_$]{1,8}\|\|50===[a-zA-Z0-9_$]{1,8}\|\|100===[a-zA-Z0-9_$]{1,8}\)/
+      /if\(2?5?=?=?=?\n?[a-zA-Z0-9_$]{1,8}=?=?=?2?5?\|\|5?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?5?0?\|\|1?0?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?1?0?0?\)/
     )[0]
 
     code = code.replace(

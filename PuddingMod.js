@@ -528,6 +528,7 @@ window.DistinctVisual.make = function () {
 }
 
 window.DistinctVisual.alterCode = function (code) {
+
     // Attempt to get info on which mode it is
     spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
 
@@ -541,11 +542,11 @@ window.DistinctVisual.alterCode = function (code) {
     //console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)")
     ////console.log(code)
 
-    realism_draw = new RegExp(/switch\(void.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
     realism_switch = code.match(realism_draw)[0];
     //actual_canvas_regexp = new RegExp(/a.[a-zA-Z0-9_$]{1,8}.canvas,/);
     //actual_canvas = code.match(actual_canvas_regexp)[0]
-    realism_path = new RegExp(/switch\(void.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
     get_graphics = realism_switch.split(':')[1].split(')')[0];
@@ -572,7 +573,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     get_apple_code = `
     if(window.pudding_settings.Skull){
-        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[2].split('?')[0]} - 1 : b.type;
+        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[1].split('?')[0]} - 1 : b.type;
     }
     ${poison_default}
     `
@@ -616,9 +617,9 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
      `*/
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/null==\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[3]
+    real_grey_path = real_grey.split(')')[0].split('=')[1]
 
     new_grey_code = `
     if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
@@ -988,21 +989,21 @@ window.Counter.alterCode = function (code) {
         console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
-    
+
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
         if(window.timeKeeper.getCurrentSetting("size") != 1)
             return false;
 
         // Initialize an array of 90 tiles, all initialized to '1' (empty)
         let board = Array(90).fill('1');
-    
+
         // Set '2' (wall) for each coordinate in the list
         coordinates.forEach(coord => {
             let [x, y] = coord;
             let index = y * 10 + x; // Calculate the index in the 1D array
             board[index] = '2'; // Set '2' at the calculated index
         });
-    
+
         // Join the array into a single string of 90 characters
         return board.join('');
     }
@@ -1123,7 +1124,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 17; t++) {
+            for (t = 1; t <= 18; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -1601,9 +1602,9 @@ window.TimeKeeper.alterCode = function (code) {
     // TimeKeeper stuff start
     //change stepfunction to run gotApple(), gotAll() and death()
 
-    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[\s\S]*?=function/)
+    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)
     window.catchError(func_regex, code)
-    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[\s\S]*?=function/)[0];
+    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {
@@ -1615,7 +1616,7 @@ window.TimeKeeper.alterCode = function (code) {
     //modeFunc = modeFunc.substring(modeFunc.indexOf("(") + 1, modeFunc.lastIndexOf("("));
     //modeFunc = modeFunc.split('(')[0];
     //scoreFunc = func.match(/25\!\=\=this.[a-zA-Z0-9$]{1,4}/)[0]; // Need to figure this out
-    scoreFuncVar = func.match(/25\=\=\=\n?[a-zA-Z0-9$]{1,4}/)[0].split('=')[3]; // Assuming he wanted just the "this.score"
+    scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,4}\=\=\=\n?25/)[0].split('=')[0]; // Assuming he wanted just the "this.score"
     scoreFunc = func.match(`${window.escapeRegex(scoreFuncVar.replace('\n', ''))}=\n?this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1]
     ////console.log(scoreFunc)
     //scoreFunc = scoreFunc.substring(scoreFunc.indexOf("this."),scoreFunc.size);
@@ -1632,7 +1633,7 @@ window.TimeKeeper.alterCode = function (code) {
     //ownFuncIndex = func.indexOf(func.match(/!1}\);\([^%]{0,10}/)[0])+5; // No idea how this ever worked
     ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");"
     //func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex); // Cool but no, just going to insert before the if 25 50 100 instead
-    if25_regex = new RegExp(/if\(25===/)
+    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,4}\=\=\=\n?25/)
     ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
     func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
     ////console.log(func);
@@ -1904,10 +1905,10 @@ window.Fruit.alterCode = function (code) {
     // Code to alter snake code here
 
     // Regex for a function that sets the src for count (I think)
-    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){""!==[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
-    settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
+    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
-    settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
+    settings_src = code.match(settings_src_regex)[0].split('.')[2].split('!')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
     // ${settings_itself}
 
     get_graphics = new RegExp(/case "graphics":/);
@@ -1984,7 +1985,7 @@ window.Fruit.alterCode = function (code) {
 */
 
     //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"/)
-    get_apple_make_func = new RegExp(/for\(a=0;22>a;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
+    get_apple_make_func = new RegExp(/for\(a=0;a<22;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
     //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"`, "")
     func_name = code.match(get_apple_make_func)[0].split(' ')[1]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
@@ -2409,11 +2410,11 @@ window.SnakeColor.alterCode = function (code) {
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
 
     // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
-
-    snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
+debugger
+    snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}=?=?=?1?0?\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     catchError(snake_face_regex, code)
     snake_face_code = code.match(snake_face_regex)[0]
-    snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split('?')[0]}? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
+    snake_face_code = `window.isRainbow ? ${code.match(snake_face_regex)[0].split('?')[1].split('=')[0]}= window.isRainbow ? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].replace("===10","").split('?')[1].split('=')[1]}`
 
     //console.log(snake_face_code)
     code = code.assertReplace(snake_face_regex, snake_face_code)
@@ -2425,18 +2426,18 @@ window.SnakeColor.alterCode = function (code) {
     //code = code.assertReplace(/0===a\.settings\.Aa\|\|/, "")
     //code = code.assertReplace(/\["#4E7CF6","#17439F"\]/, `["#FFFFFF","#FFFFFF"]`)
 
-    snake_face2_reg = new RegExp(/\|\|10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
+    snake_face2_reg = new RegExp(/\|\|1?0?=?=?=?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=?=?=?=1?0?\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
     snakeface2code = '&&!window.randomColor&&!window.isRainbow)' + code.match(snake_face2_reg)[0].split(')')[1]
     code = code.assertReplace(snake_face2_reg, snakeface2code)
 
-    rainbow_bool_regex = new RegExp(/10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/g)
+    rainbow_bool_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}===10/g)
     catchError(rainbow_bool_regex, code)
 
     is_rainbow_matches = code.match(rainbow_bool_regex).length;
     for (let index = 0; index < is_rainbow_matches; index++) {
         const element = code.match(rainbow_bool_regex)[0];
-        snake_color_num = element.split('=')[3]
-        make_me_different = `10==` + element.split('=')[3]
+        snake_color_num = element.split('=')[0]
+        make_me_different = element.split('=')[0] + `==10`
         new_rainbow_bool = make_me_different + `||window.isRainbow`
         code = code.assertReplace(element, new_rainbow_bool)
 
@@ -2638,8 +2639,9 @@ window.SpeedInfo.make = function () {
         14: { name: "Light" },
         15: { name: "Shield" },
         16: { name: "Arrow" },
-        17: { name: "Peaceful" },
-        18: { name: "Blender" },
+        17: { name: "Hotdog" },
+        18: { name: "Peaceful" },
+        19: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -2708,8 +2710,9 @@ window.SpeedInfo.make = function () {
         LIGHT = 14
         SHIELD = 15
         ARROW = 16
-        PEACEFUL = 17
-        BLENDER = 18
+        HOTDOG = 17
+        PEACEFUL = 18
+        BLENDER = 19
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -2729,7 +2732,7 @@ window.SpeedInfo.make = function () {
         let mode = window.CurrentModeNum;
         // Implement new method of getting mod that excludes blender
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG];
 
         if (size > 2 || count > 3) {
             EmptyAll();
@@ -3151,7 +3154,8 @@ window.SpeedInfo.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -3577,6 +3581,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>
@@ -4012,6 +4017,7 @@ window.Timer = {
       /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?\)\}\;/
     )[0]
 
+    /*
     const modeKey = resetFunction.match(
       /0===this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('0===this.settings.', '')
@@ -4024,6 +4030,7 @@ window.Timer = {
     const sizeKey = resetFunction.match(
       /1!==this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('1!==this.settings.', '')
+*/
 
     code = code.replace(resetFunction,
       resetFunction.replace(
@@ -4074,7 +4081,7 @@ window.Timer = {
 
 
     const timeFormatFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(0>=a\)return[^]*?3,"0"\)}/
+      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(a<=0\)return[^]*?3,"0"\)}/
     )[0]
 
 
@@ -4124,7 +4131,7 @@ window.Timer = {
 
 
     const splitStuff = code.match(
-      /if\(25===\n?[a-zA-Z0-9_$]{1,8}\|\|50===[a-zA-Z0-9_$]{1,8}\|\|100===[a-zA-Z0-9_$]{1,8}\)/
+      /if\(2?5?=?=?=?\n?[a-zA-Z0-9_$]{1,8}=?=?=?2?5?\|\|5?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?5?0?\|\|1?0?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?1?0?0?\)/
     )[0]
 
     code = code.replace(
@@ -4948,10 +4955,10 @@ window.CustomPortalPairs.alterCode = function (code) {
         //console.log(code)
     }
 
-    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{/)
+    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0?<?[a-zA-Z0-9_$]{1,8}\.length>?0?\)\{/)
     catchError(portal_dice_regex, code)
-    apple_dice_array = code.match(portal_dice_regex)[0].split('<')[1].split('.')[0];
-    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{[^]*type}/gm)
+    apple_dice_array = code.match(portal_dice_regex)[0].replace("0<", "").split('&')[2].split('.')[0];
+    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0?<?[a-zA-Z0-9_$]{1,8}\.length>?0?\)\{[^]*type}/gm)
     catchError(portal_dice_full_regex, code)
     portal_pairs_dice_code = code.match(portal_dice_full_regex)[0]
 

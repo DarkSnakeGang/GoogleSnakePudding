@@ -84,8 +84,9 @@ window.SpeedInfo.make = function () {
         14: { name: "Light" },
         15: { name: "Shield" },
         16: { name: "Arrow" },
-        17: { name: "Peaceful" },
-        18: { name: "Blender" },
+        17: { name: "Hotdog" },
+        18: { name: "Peaceful" },
+        19: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -154,8 +155,9 @@ window.SpeedInfo.make = function () {
         LIGHT = 14
         SHIELD = 15
         ARROW = 16
-        PEACEFUL = 17
-        BLENDER = 18
+        HOTDOG = 17
+        PEACEFUL = 18
+        BLENDER = 19
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -175,7 +177,7 @@ window.SpeedInfo.make = function () {
         let mode = window.CurrentModeNum;
         // Implement new method of getting mod that excludes blender
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG];
 
         if (size > 2 || count > 3) {
             EmptyAll();
@@ -597,7 +599,8 @@ window.SpeedInfo.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
