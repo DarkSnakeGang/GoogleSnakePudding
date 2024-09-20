@@ -103,7 +103,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 18; t++) {
+            for (t = 1; t <= 19; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -316,8 +316,8 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 18; mode++) {
-                    modeStr = "000000000000000000".split("");
+                for (mode = 0; mode < 19; mode++) {
+                    modeStr = "0000000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
@@ -392,7 +392,8 @@ window.TimeKeeper.make = function () {
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
                     case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Peaceful, "; break;
+                    case 17: gamemode += "Magnet, "; break;
+                    case 18: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -582,9 +583,9 @@ window.TimeKeeper.alterCode = function (code) {
     // TimeKeeper stuff start
     //change stepfunction to run gotApple(), gotAll() and death()
 
-    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)
+    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,4000}light=Math.max[\s\S]*?=function/)
     window.catchError(func_regex, code)
-    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)[0];
+    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,4000}light=Math.max[\s\S]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {

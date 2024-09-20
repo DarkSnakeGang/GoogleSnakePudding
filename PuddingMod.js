@@ -530,7 +530,7 @@ window.DistinctVisual.make = function () {
 window.DistinctVisual.alterCode = function (code) {
 
     // Attempt to get info on which mode it is
-    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
+    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
 
     spawn_func_code = code.match(spawn_func_regex)[0]
 
@@ -1124,7 +1124,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 18; t++) {
+            for (t = 1; t <= 19; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -1337,8 +1337,8 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 18; mode++) {
-                    modeStr = "000000000000000000".split("");
+                for (mode = 0; mode < 19; mode++) {
+                    modeStr = "0000000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
@@ -1413,7 +1413,8 @@ window.TimeKeeper.make = function () {
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
                     case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Peaceful, "; break;
+                    case 17: gamemode += "Magnet, "; break;
+                    case 18: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -1603,9 +1604,9 @@ window.TimeKeeper.alterCode = function (code) {
     // TimeKeeper stuff start
     //change stepfunction to run gotApple(), gotAll() and death()
 
-    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)
+    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,4000}light=Math.max[\s\S]*?=function/)
     window.catchError(func_regex, code)
-    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)[0];
+    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,4000}light=Math.max[\s\S]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {
@@ -1852,7 +1853,7 @@ window.Fruit.alterCode = function (code) {
     // Code to alter snake code here
 
     // Regex for a function that sets the src for count (I think)
-    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&/)
     settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
     settings_src = code.match(settings_src_regex)[0].split('.')[2].split('!')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
@@ -1891,19 +1892,33 @@ window.Fruit.alterCode = function (code) {
             case 2:
                 window.current_fruit_img = window.new_fruit[fruit_index].Real;
         }
+                
         ${fruit_image} = window.current_fruit_img;
+        document.querySelector('[jsname="Jesp7b"]').src = window.current_fruit_img;
     }
     `
-
-    rude_insert = new RegExp(/"\.png"\)\)}/gm)
+    
+    rude_insert = new RegExp(/"\.png"\)\)}/gm);
     code = code.assertReplace(rude_insert, `".png")); ${new_realism_code} }`);
 
-    daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
+    //daily_ds_fruit = new RegExp(/"\.png"\)\);_\.[a-zA-Z0-9_$]{1,8}\.add\(c,"[a-zA-Z0-9_$]{1,8}"\)/gm);
+    //code = code.assertReplace(code.match(daily_ds_fruit)[0], code.match(daily_ds_fruit)[0].split(';')[0] + new_realism_code.replace(fruit_image, "c.src") + code.match(daily_ds_fruit)[0].split(';')[1]);
 
+    // Old hotdog code
+    //daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
+    //rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
+    //code = code.assertReplace(rude_insert2,
+    //    `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
 
-    rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
-    code = code.assertReplace(rude_insert2,
-        `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
+    deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
+    code.match(deathscreen_fruit).forEach(element => {
+        console.log(element)
+        code.assertReplace(element, element + new_realism_code);
+    });
+    
+    image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
+    code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
+
     /*
     load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\),\n?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\?"snake_arcade\/pixel\/[a-zA-Z0-9_$]{1,8}\/px_apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png":"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png"\);/)
 
@@ -2357,7 +2372,7 @@ window.SnakeColor.alterCode = function (code) {
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
 
     // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
-debugger
+
     snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}=?=?=?1?0?\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     catchError(snake_face_regex, code)
     snake_face_code = code.match(snake_face_regex)[0]
@@ -2587,8 +2602,9 @@ window.SpeedInfo.make = function () {
         15: { name: "Shield" },
         16: { name: "Arrow" },
         17: { name: "Hotdog" },
-        18: { name: "Peaceful" },
-        19: { name: "Blender" },
+        18: { name: "Magnet" },
+        19: { name: "Peaceful" },
+        20: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -2658,8 +2674,9 @@ window.SpeedInfo.make = function () {
         SHIELD = 15
         ARROW = 16
         HOTDOG = 17
-        PEACEFUL = 18
-        BLENDER = 19
+        MAGNET = 18
+        PEACEFUL = 19
+        BLENDER = 20
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -3102,7 +3119,8 @@ window.SpeedInfo.make = function () {
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
                     case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Peaceful, "; break;
+                    case 17: gamemode += "Magnet, "; break;
+                    case 18: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -3529,6 +3547,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>

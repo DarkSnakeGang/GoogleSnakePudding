@@ -170,7 +170,7 @@ window.Fruit.alterCode = function (code) {
     // Code to alter snake code here
 
     // Regex for a function that sets the src for count (I think)
-    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&/)
     settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
     settings_src = code.match(settings_src_regex)[0].split('.')[2].split('!')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
@@ -209,19 +209,33 @@ window.Fruit.alterCode = function (code) {
             case 2:
                 window.current_fruit_img = window.new_fruit[fruit_index].Real;
         }
+                
         ${fruit_image} = window.current_fruit_img;
+        document.querySelector('[jsname="Jesp7b"]').src = window.current_fruit_img;
     }
     `
-
-    rude_insert = new RegExp(/"\.png"\)\)}/gm)
+    
+    rude_insert = new RegExp(/"\.png"\)\)}/gm);
     code = code.assertReplace(rude_insert, `".png")); ${new_realism_code} }`);
 
-    daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
+    //daily_ds_fruit = new RegExp(/"\.png"\)\);_\.[a-zA-Z0-9_$]{1,8}\.add\(c,"[a-zA-Z0-9_$]{1,8}"\)/gm);
+    //code = code.assertReplace(code.match(daily_ds_fruit)[0], code.match(daily_ds_fruit)[0].split(';')[0] + new_realism_code.replace(fruit_image, "c.src") + code.match(daily_ds_fruit)[0].split(';')[1]);
 
+    // Old hotdog code
+    //daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
+    //rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
+    //code = code.assertReplace(rude_insert2,
+    //    `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
 
-    rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
-    code = code.assertReplace(rude_insert2,
-        `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
+    deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
+    code.match(deathscreen_fruit).forEach(element => {
+        console.log(element)
+        code.assertReplace(element, element + new_realism_code);
+    });
+    
+    image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
+    code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
+
     /*
     load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\),\n?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\?"snake_arcade\/pixel\/[a-zA-Z0-9_$]{1,8}\/px_apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png":"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png"\);/)
 

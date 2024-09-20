@@ -85,8 +85,9 @@ window.SpeedInfo.make = function () {
         15: { name: "Shield" },
         16: { name: "Arrow" },
         17: { name: "Hotdog" },
-        18: { name: "Peaceful" },
-        19: { name: "Blender" },
+        18: { name: "Magnet" },
+        19: { name: "Peaceful" },
+        20: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -156,8 +157,9 @@ window.SpeedInfo.make = function () {
         SHIELD = 15
         ARROW = 16
         HOTDOG = 17
-        PEACEFUL = 18
-        BLENDER = 19
+        MAGNET = 18
+        PEACEFUL = 19
+        BLENDER = 20
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -600,7 +602,8 @@ window.SpeedInfo.make = function () {
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
                     case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Peaceful, "; break;
+                    case 17: gamemode += "Magnet, "; break;
+                    case 18: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }

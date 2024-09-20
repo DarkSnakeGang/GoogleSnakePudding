@@ -196,7 +196,7 @@ window.SnakeColor.alterCode = function (code) {
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
 
     // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
-debugger
+
     snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}=?=?=?1?0?\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     catchError(snake_face_regex, code)
     snake_face_code = code.match(snake_face_regex)[0]
