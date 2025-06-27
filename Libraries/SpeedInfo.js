@@ -207,7 +207,7 @@ window.SpeedInfo.make = function () {
         // reset the stuff, blame moterstorm for CE having issues
         multi_value_ID = ""
         size_value_ID = ""
-        debugger
+        
         for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
             if (multi_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Multi")) {
                 multi_var_ID = variable_IDs["data"][currentVar].id;
