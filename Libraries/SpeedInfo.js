@@ -86,8 +86,9 @@ window.SpeedInfo.make = function () {
         16: { name: "Arrow" },
         17: { name: "Hotdog" },
         18: { name: "Magnet" },
-        19: { name: "Peaceful" },
-        20: { name: "Blender" },
+        19: { name: "Magnet" },
+        20: { name: "Peaceful" },
+        21: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -104,7 +105,7 @@ window.SpeedInfo.make = function () {
     }
 
     window.speedToTxt = {
-        0: { name: "Standard" },
+        0: { name: "Normal" },
         1: { name: "Fast" },
         2: { name: "Slow" },
     }
@@ -158,8 +159,9 @@ window.SpeedInfo.make = function () {
         ARROW = 16
         HOTDOG = 17
         MAGNET = 18
-        PEACEFUL = 19
-        BLENDER = 20
+        GATE = 19
+        PEACEFUL = 20
+        BLENDER = 21
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -179,7 +181,7 @@ window.SpeedInfo.make = function () {
         let mode = window.CurrentModeNum;
         // Implement new method of getting mod that excludes blender
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
 
         if (size > 2 || count > 3) {
             EmptyAll();
@@ -194,17 +196,18 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
+        gameID = gameIDs[0]; 
 
         Highscore_ID = "";
-        variable_IDs = speed != SLOW ? window.SpeedrunVaraiblesJson : window.SpeedrunVaraiblesJsonCE;
-        category_IDs = speed != SLOW ? window.SpeedrunCategoriesJson : window.SpeedrunCategoriesJsonCE;
+        variable_IDs = window.SpeedrunVaraiblesJson;
+        category_IDs = window.SpeedrunCategoriesJson;
         speed_var_ID = speed_value_ID = ""
+        speed_var_ID2 = speed_value_ID2 = ""
 
         // reset the stuff, blame moterstorm for CE having issues
         multi_value_ID = ""
         size_value_ID = ""
-        //debugger
+        debugger
         for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
             if (multi_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Multi")) {
                 multi_var_ID = variable_IDs["data"][currentVar].id;
@@ -226,6 +229,17 @@ window.SpeedInfo.make = function () {
                 }
             }
 
+            // This hardcoded crap is to avoid the speed setting for high score and work with the speed setting for levels
+            if (speed_value_ID2 == "" && variable_IDs["data"][currentVar].name.includes("Speed") && "0nwomwdl" != variable_IDs["data"][currentVar].id) {
+                speed_var_ID2 = variable_IDs["data"][currentVar].id;
+                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
+                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.speedToTxt[speed].name) {
+                        speed_value_ID2 = currentValue;
+                        break;
+                    }
+                }
+            }
+
             if (size_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Board")) {
                 size_var_ID = variable_IDs["data"][currentVar].id;
                 for (var currentValue in variable_IDs["data"][currentVar].values.values) {
@@ -239,11 +253,13 @@ window.SpeedInfo.make = function () {
 
         catch_multi = "var-" + multi_var_ID + "=" + multi_value_ID
         catch_speed = "&var-" + speed_var_ID + "=" + speed_value_ID
+        catch_speed2 = "&var-" + speed_var_ID2 + "=" + speed_value_ID2
         catch_size = "&var-" + size_var_ID + "=" + size_value_ID
 
-        if (speed_var_ID = "") { // Slow stuff doesn't have speed value when it's high score
-            catch_speed = ""
-        }
+        // This piece of shit code actually ruins speed_var_ID as it changes its value, I have no clue how this EVER worked
+        //if (speed_var_ID = "") { // Slow stuff doesn't have speed value when it's high score
+        //    catch_speed = ""
+        //}
 
         if (level == "H") {
 
@@ -267,11 +283,10 @@ window.SpeedInfo.make = function () {
             //makeAPIrequest("https://www.speedrun.com/api/v1/categories/"+Highscore_ID+"/records?top=1&x=7kj63r42-0nwovxdl.mlnmj661-0nwomwdl.xqkkj49q-p854j77l.z19gp0jl", printMe);
         }
 
-        level_IDs = speed != SLOW ? window.SpeedrunLevelsJson : window.SpeedrunLevelsJsonCE;
+        level_IDs = window.SpeedrunLevelsJson;
 
         for (let index = 0; index < level_IDs["data"].length; index++) {
-            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
-                level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
+            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name)) {
                 level_ID = level_IDs["data"][index].id;
                 break;
             }
@@ -288,28 +303,28 @@ window.SpeedInfo.make = function () {
         src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
 
         if (window.NepDebug) {
-            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
+            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
         }
         switch (level) {
             case "25":
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle25)
+                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, Handle25)
                 break;
             case "50":
                 if (size == 1 && mode == YINYANG) {
                     Handle50("Empty")
                     break;
                 }
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle50)
+                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, Handle50)
                 break;
             case "100":
                 if (size != 1) {
-                    makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle100)
+                    makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, Handle100)
                     break;
                 }
                 Handle100("Empty");
                 break;
             case "All":
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, HandleAll)
+                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, HandleAll)
                 break;
             default:
                 break;
@@ -603,7 +618,8 @@ window.SpeedInfo.make = function () {
                     case 15: gamemode += "Arrow, "; break;
                     case 16: gamemode += "Hotdog, "; break;
                     case 17: gamemode += "Magnet, "; break;
-                    case 18: gamemode += "Peaceful, "; break;
+                    case 18: gamemode += "Gate, "; break;
+                    case 19: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -693,6 +709,7 @@ window.SpeedInfo.make = function () {
 }
 
 window.SpeedInfo.alterCode = function (code) {
+    
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     speedinfo_reset = `;window.SpeedInfoUpdate();

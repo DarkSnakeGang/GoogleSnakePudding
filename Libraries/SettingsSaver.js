@@ -44,6 +44,7 @@ window.SettingsSaver.make = function () {
 }
 
 window.SettingsSaver.alterCode = function (code) {
+    
     window.PopulateOptions();
     window.PopulateDropdowns();
     window.PopulateOptions();
@@ -59,9 +60,9 @@ window.SettingsSaver.alterCode = function (code) {
     code = code.assertReplace(reset_regex, settings_reset_code);
 
 
-    stop_regex = new RegExp(/stop=function\(a\){/)
+    stop_regex = new RegExp(/stop\(a\){/)
     catchError(stop_regex, code)
-    save_settings_code = `stop=function(a){saveSettings();`
+    save_settings_code = `stop\(a\){saveSettings();`
 
     code = code.assertReplace(stop_regex, save_settings_code);
     return code;

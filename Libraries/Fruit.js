@@ -180,7 +180,7 @@ window.Fruit.alterCode = function (code) {
     code = code.assertReplace(get_graphics, "$& window.graphics_selected=")
     get_fruit = new RegExp(/case "apple":/);
     code = code.assertReplace(get_fruit, "$& window.fruit_selected=")
-    fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}="/gm)[0].split('(')[1].split('=')[0]
+    fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=`/gm)[0].split('(')[1].split('=')[0]
     // Very poorly coded, get back here using this: "https://www.google.com/logos/fnbx/"+(1===
     /*
     // Full function that sets the current fruit icon
@@ -215,8 +215,8 @@ window.Fruit.alterCode = function (code) {
     }
     `
     
-    rude_insert = new RegExp(/"\.png"\)\)}/gm);
-    code = code.assertReplace(rude_insert, `".png")); ${new_realism_code} }`);
+    rude_insert = new RegExp(/trophy_\${b}\.png`}`\)}/gm);
+    code = code.assertReplace(rude_insert, "trophy_\${b}\.png`}`\); " + `${new_realism_code}` + " }");
 
     //daily_ds_fruit = new RegExp(/"\.png"\)\);_\.[a-zA-Z0-9_$]{1,8}\.add\(c,"[a-zA-Z0-9_$]{1,8}"\)/gm);
     //code = code.assertReplace(code.match(daily_ds_fruit)[0], code.match(daily_ds_fruit)[0].split(';')[0] + new_realism_code.replace(fruit_image, "c.src") + code.match(daily_ds_fruit)[0].split(';')[1]);
@@ -308,7 +308,7 @@ window.Fruit.alterCode = function (code) {
     // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
     // The if statements are janky and get be condensed
     // This fixes errors in console but doesn't "change" anything in-game
-    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.path/);
+    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=`\${"https:\/\/www.google.com\/logos\/fnbx\/"}\${a\.path}`/);
     firstvar_name = code.match(shh_grabber)[0].split('.')[0];
     Hr_name = code.match(shh_grabber)[0].split('.')[1];
 

@@ -217,13 +217,13 @@ window.Counter.alterCode = function (code) {
 
 
 
-    stop_regex = new RegExp(/stop=function\(a\){/)
+    stop_regex = new RegExp(/stop\(a\){/)
     catchError(stop_regex, code)
-    save_stats_code = `stop=function(a){saveStatistics();`
+    save_stats_code = `stop\(a\){saveStatistics();`
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
-    wall_spawn_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
+    wall_spawn_regex = new RegExp(/const [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
     catchError(wall_spawn_regex, code)
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
 
