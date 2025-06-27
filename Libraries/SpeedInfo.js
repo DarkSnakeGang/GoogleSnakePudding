@@ -86,7 +86,7 @@ window.SpeedInfo.make = function () {
         16: { name: "Arrow" },
         17: { name: "Hotdog" },
         18: { name: "Magnet" },
-        19: { name: "Magnet" },
+        19: { name: "Gate" },
         20: { name: "Peaceful" },
         21: { name: "Blender" },
     }
