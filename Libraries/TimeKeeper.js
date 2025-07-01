@@ -103,7 +103,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 19; t++) {
+            for (t = 1; t <= 20; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
