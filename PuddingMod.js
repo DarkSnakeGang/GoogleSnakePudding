@@ -2523,66 +2523,142 @@ window.SpeedInfo.make = function () {
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
-    window.first_time_call =true;
+    window.first_time_call = true;
     window.requestsMade = 0;
+
+    // FastSnakeStats cache configuration
+    const FASTSNAKE_CACHE_BASE = "https://raw.githubusercontent.com/DarkSnakeGang/FastSnakeStats/main/time-travel-cache/daily";
+    const CACHE_STALE_THRESHOLD = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+    let cacheData = null;
+    let lastCacheUpdate = 0;
 
     function sleepFor(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    window.makeAPIrequest = function (requestURL, callback) {
-        // Add id to solve query isssue
-        hasQuery = requestURL.includes("?")
-        url = requestURL
-        if (hasQuery) {
-            url += "&"
+    // New function to fetch from FastSnakeStats cache
+    async function fetchFromFastSnakeCache(date = null) {
+        try {
+            // If no date specified, use today's date
+            if (!date) {
+                const today = new Date();
+                date = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+            }
+
+            // Parse date to get year/month/day
+            const [year, month, day] = date.split('-');
+            const paddedMonth = month.padStart(2, '0');
+            const paddedDay = day.padStart(2, '0');
+
+            // Construct cache URL
+            const cacheUrl = `${FASTSNAKE_CACHE_BASE}/${year}/${paddedMonth}/${date}.json`;
+
+            if (window.NepDebug) {
+                console.log(`Fetching from FastSnake cache: ${cacheUrl}`);
+            }
+
+            const response = await fetch(cacheUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            cacheData = data;
+            lastCacheUpdate = Date.now();
+            window.requestsMade += 1;
+
+            if (window.NepDebug) {
+                console.log(`Successfully fetched cache data for ${date}`);
+            }
+
+            return data;
+        } catch (error) {
+            if (window.NepDebug) {
+                console.error(`Failed to fetch from FastSnake cache: ${error.message}`);
+            }
+            throw error;
         }
-        else {
-            url += "?"
-        }
-        url += "id=" + new Date().getTime()
-        if (window.NepDebug) {
-            //console.log(url);
-            //console.log("Getting runs..." + window.requestsMade);
+    }
+
+    // Check if cache is valid (not stale)
+    function isCacheValid() {
+        return cacheData && (Date.now() - lastCacheUpdate) < CACHE_STALE_THRESHOLD;
+    }
+
+    // Get the most recent available cache data
+    async function getLatestCacheData() {
+        if (isCacheValid()) {
+            return cacheData;
         }
 
-        let request = new XMLHttpRequest();
-        request.open("GET", url);
-        request.onload = function () {
-            if (request.status == 200) {
-                window.requestsMade += 1;
-                let response = JSON.parse(request.response);
-                //console.log(response);
-                if (callback && typeof callback === "function") {
-                    callback(response);
+        // Try to get today's data first
+        try {
+            return await fetchFromFastSnakeCache();
+        } catch (error) {
+            // If today's data isn't available, try yesterday
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            try {
+                return await fetchFromFastSnakeCache(yesterdayStr);
+            } catch (error2) {
+                // If yesterday's data isn't available, try a few days back
+                for (let i = 2; i <= 7; i++) {
+                    const pastDate = new Date();
+                    pastDate.setDate(pastDate.getDate() - i);
+                    const pastDateStr = pastDate.toISOString().split('T')[0];
+                    
+                    try {
+                        return await fetchFromFastSnakeCache(pastDateStr);
+                    } catch (error3) {
+                        continue;
+                    }
                 }
-            }
-            else if (request.status == 404) {
-                console.error("You used the API wrong!");
-            }
-            else {
-                sleepFor(2000);
-                makeAPIrequest(requestURL);
+                throw new Error("No recent cache data available");
             }
         }
-        request.send();
+    }
+
+    // Legacy function for compatibility (now uses cache)
+    window.makeAPIrequest = function (requestURL, callback) {
+        // This is now a legacy function - we'll use the cache instead
+        if (window.NepDebug) {
+            console.log("Legacy API request called, using cache instead");
+        }
+        
+        // For compatibility, we'll still call the callback but with cached data
+        getLatestCacheData().then(data => {
+            if (callback && typeof callback === "function") {
+                callback(data);
+            }
+        }).catch(error => {
+            if (window.NepDebug) {
+                console.error("Cache fetch failed:", error);
+            }
+            // Call callback with empty data to maintain compatibility
+            if (callback && typeof callback === "function") {
+                callback({ data: { runs: [] } });
+            }
+        });
     }
 
 
 
+    // Legacy function for compatibility
     window.getGameDetails = function () {
-
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/variables", (x) => { window.SpeedrunVaraiblesJson = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/categories?embed=game", (x) => { window.SpeedrunCategoriesJson = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/levels", (x) => { window.SpeedrunLevelsJson = x });
-
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/variables", (x) => { window.SpeedrunVaraiblesJsonCE = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/categories?embed=game", (x) => { window.SpeedrunCategoriesJsonCE = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/levels", (x) => { window.SpeedrunLevelsJsonCE = x });
-
-        //makeAPIrequest("https://www.speedrun.com/api/v1/games/o1y9pyk6/records?top=1", printMe);
-
-
+        // This function is no longer needed as we're using cached data
+        // But we'll keep it for compatibility
+        if (window.NepDebug) {
+            console.log("getGameDetails called - using cached data instead");
+        }
+        
+        // Initialize cache data if not already done
+        getLatestCacheData().catch(error => {
+            if (window.NepDebug) {
+                console.error("Failed to initialize cache data:", error);
+            }
+        });
     }
 
     window.modeToTxt = {
@@ -2630,14 +2706,13 @@ window.SpeedInfo.make = function () {
     }
 
     daily_button.addEventListener("click", function() {
-        SpeedInfoUpdate()
+        SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e))
         EmptyAll()
       });
 
-    window.getRecordSRC = function (level) {
+    window.getRecordSRC = async function (level) {
 
         if(window.daily_challenge){
-
             EmptyAll();
             return;
         }
@@ -2648,12 +2723,14 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        if (typeof window.SpeedrunVaraiblesJson == "undefined" ||
-            typeof window.SpeedrunCategoriesJson == "undefined" ||
-            typeof window.SpeedrunLevelsJson == "undefined" ||
-            typeof window.SpeedrunVaraiblesJsonCE == "undefined" ||
-            typeof window.SpeedrunCategoriesJsonCE == "undefined" ||
-            typeof window.SpeedrunLevelsJsonCE == "undefined") {
+        // Get cache data
+        let cacheData;
+        try {
+            cacheData = await getLatestCacheData();
+        } catch (error) {
+            if (window.NepDebug) {
+                console.error("Failed to get cache data:", error);
+            }
             EmptyAll();
             return;
         }
@@ -2698,7 +2775,6 @@ window.SpeedInfo.make = function () {
         let speed = window.timeKeeper.getCurrentSetting("speed");
         let size = window.timeKeeper.getCurrentSetting("size");
         let mode = window.CurrentModeNum;
-        // Implement new method of getting mod that excludes blender
 
         const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
 
@@ -2715,139 +2791,200 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        gameID = gameIDs[0]; 
-
-        Highscore_ID = "";
-        variable_IDs = window.SpeedrunVaraiblesJson;
-        category_IDs = window.SpeedrunCategoriesJson;
-        speed_var_ID = speed_value_ID = ""
-        speed_var_ID2 = speed_value_ID2 = ""
-
-        // reset the stuff, blame moterstorm for CE having issues
-        multi_value_ID = ""
-        size_value_ID = ""
+        // Build cache key based on FastSnakeStats format
+        const modeName = window.modeToTxt[mode].name;
+        const countName = window.countToTxt[count].name;
+        const speedName = window.speedToTxt[speed].name;
+        const sizeName = window.sizeToTxt[size].name;
         
-        for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
-            if (multi_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Multi")) {
-                multi_var_ID = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.countToTxt[count].name) {
-                        multi_value_ID = currentValue;
-                        break;
-                    }
-                }
-            }
-
-            if (speed_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Speed")) {
-                speed_var_ID = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.speedToTxt[speed].name) {
-                        speed_value_ID = currentValue;
-                        break;
-                    }
-                }
-            }
-
-            // This hardcoded crap is to avoid the speed setting for high score and work with the speed setting for levels
-            if (speed_value_ID2 == "" && variable_IDs["data"][currentVar].name.includes("Speed") && "0nwomwdl" != variable_IDs["data"][currentVar].id) {
-                speed_var_ID2 = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.speedToTxt[speed].name) {
-                        speed_value_ID2 = currentValue;
-                        break;
-                    }
-                }
-            }
-
-            if (size_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Board")) {
-                size_var_ID = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.sizeToTxt[size].name) {
-                        size_value_ID = currentValue;
-                        break;
-                    }
-                }
-            }
+        // Determine category name
+        let categoryName;
+        if (level === "H") {
+            categoryName = "High Score";
+        } else {
+            categoryName = level + " Apples";
         }
 
-        catch_multi = "var-" + multi_var_ID + "=" + multi_value_ID
-        catch_speed = "&var-" + speed_var_ID + "=" + speed_value_ID
-        catch_speed2 = "&var-" + speed_var_ID2 + "=" + speed_value_ID2
-        catch_size = "&var-" + size_var_ID + "=" + size_value_ID
-
-        // This piece of shit code actually ruins speed_var_ID as it changes its value, I have no clue how this EVER worked
-        //if (speed_var_ID = "") { // Slow stuff doesn't have speed value when it's high score
-        //    catch_speed = ""
-        //}
-
-        if (level == "H") {
-
-            for (let index = 0; index < category_IDs["data"].length; index++) {
-                if (category_IDs["data"][index].name.includes(window.modeToTxt[mode].name)) {
-
-                    Highscore_ID = category_IDs["data"][index].id;
-                    break;
-                }
-            }
-
-            if (window.NepDebug) {
-                //console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                //    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
-            }
-
-            makeAPIrequest("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size, HandleHighscore);
-
-            return;
-            //makeAPIrequest("https://www.speedrun.com/api/v1/categories/"+Highscore_ID+"/records?top=1&x=7kj63r42-0nwovxdl.mlnmj661-0nwomwdl.xqkkj49q-p854j77l.z19gp0jl", printMe);
-        }
-
-        level_IDs = window.SpeedrunLevelsJson;
-
-        for (let index = 0; index < level_IDs["data"].length; index++) {
-            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name)) {
-                level_ID = level_IDs["data"][index].id;
-                break;
-            }
-        }
-
-        for (let index = 0; index < category_IDs["data"].length; index++) {
-            if (category_IDs["data"][index].name.includes(level + " Apples")) {
-
-                category_ID = category_IDs["data"][index].id;
-                break;
-            }
-        }
-
-        src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
+        // Build the cache key in FastSnakeStats format
+        const cacheKey = `${countName}|${speedName}|${sizeName}|${modeName}|${categoryName}`;
 
         if (window.NepDebug) {
-            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
+            console.log(`Looking for cache key: ${cacheKey}`);
         }
+
+        // Look up the record in cache data
+        if (!cacheData.records) {
+            if (window.NepDebug) {
+                console.error("Cache data does not have records property:", cacheData);
+            }
+            EmptyAll();
+            return;
+        }
+        
+        const recordData = cacheData.records[cacheKey];
+
+        if (window.NepDebug) {
+            console.log(`Record data for key ${cacheKey}:`, recordData);
+        }
+
+        if (!recordData) {
+            if (window.NepDebug) {
+                console.log(`No record found for key: ${cacheKey}`);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Check if record exists and has runs
+        if (!recordData.success || !recordData.runs || recordData.runs === "" || (Array.isArray(recordData.runs) && recordData.runs.length === 0)) {
+            if (window.NepDebug) {
+                console.log(`No successful runs found for key: ${cacheKey}`);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Check if runs is a string (empty data) or has actual run data
+        if (!recordData.runs || recordData.runs.length === 0) {
+            if (window.NepDebug) {
+                console.log(`No run data available for key: ${cacheKey}`);
+            }
+            // Handle based on level type with empty data
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Parse PowerShell object strings into JavaScript objects
+        let parsedRuns = [];
+        for (let i = 0; i < recordData.runs.length; i++) {
+            const runString = recordData.runs[i];
+            if (typeof runString === "string" && runString.startsWith("@{") && runString.endsWith("}")) {
+                // Parse PowerShell object string format: @{times=; date=2024-12-15; id=y2nqwrjy; weblink=...}
+                const parsedRun = {};
+                const content = runString.slice(2, -1); // Remove @{ and }
+                const pairs = content.split(';');
+                
+                for (const pair of pairs) {
+                    const [key, value] = pair.split('=');
+                    if (key && value !== undefined) {
+                        parsedRun[key.trim()] = value.trim();
+                    }
+                }
+                
+                // Convert times string to proper times object
+                if (parsedRun.times) {
+                    // Parse times like "PT26.595S" into { primary: "PT26.595S" }
+                    parsedRun.times = { primary: parsedRun.times };
+                }
+                
+                parsedRuns.push(parsedRun);
+            } else if (typeof runString === "object") {
+                // Already a proper object
+                parsedRuns.push(runString);
+            }
+        }
+
+        if (parsedRuns.length === 0) {
+            if (window.NepDebug) {
+                console.log(`No valid runs found after parsing for key: ${cacheKey}`);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Get the first (best) run from parsed runs
+        const bestRun = parsedRuns[0];
+
+        // Check if bestRun exists and has the expected structure
+        if (!bestRun || !bestRun.times || !bestRun.times.primary || !bestRun.weblink) {
+            if (window.NepDebug) {
+                console.log(`Invalid run data structure for key: ${cacheKey}`, bestRun);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Create standardized run data structure
+        const runData = {
+            data: {
+                runs: [{
+                    run: {
+                        times: { primary: bestRun.times.primary },
+                        weblink: bestRun.weblink
+                    }
+                }]
+            }
+        };
+
+        // Handle based on level type using switch statement
         switch (level) {
-            case "25":
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, Handle25)
-                break;
-            case "50":
-                if (size == 1 && mode == YINYANG) {
-                    Handle50("Empty")
-                    break;
-                }
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, Handle50)
-                break;
-            case "100":
-                if (size != 1) {
-                    makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, Handle100)
-                    break;
-                }
-                Handle100("Empty");
-                break;
-            case "All":
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_speed2 + catch_size, HandleAll)
-                break;
+            case "H": HandleHighscore(runData); break;
+            case "25": Handle25(runData); break;
+            case "50": Handle50(runData); break;
+            case "100": Handle100(runData); break;
+            case "All": HandleAll(runData); break;
             default:
+                if (window.NepDebug) {
+                    console.warn(`No handler found for level: ${level}`);
+                }
                 break;
         }
+        
+
 
 
     }
@@ -2863,10 +3000,11 @@ window.SpeedInfo.make = function () {
         HandleHighscore(emp);
     }
 
-    window.getAllSrc = function () {
-        ["25", "50", "100", "All", "H"].forEach(element => {
-            getRecordSRC(element);
-        });
+    window.getAllSrc = async function () {
+        const levels = ["25", "50", "100", "All", "H"];
+        for (const element of levels) {
+            await getRecordSRC(element);
+        }
     }
 
     function Handle25(response) {
@@ -2995,8 +3133,12 @@ window.SpeedInfo.make = function () {
         return matches ? matches.length : 0;
     }
 
-    window.getGameDetails();
-    //window.getSomethingSRC();
+    // Initialize cache data on startup
+    getLatestCacheData().catch(error => {
+        if (window.NepDebug) {
+            console.error("Failed to initialize cache data:", error);
+        }
+    });
 
    // window.speedinfoVisible = false;
 
@@ -3006,7 +3148,7 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style.visibility = 'visible';
         window.pudding_settings.SpeedInfo = true;
 
-        window.SpeedInfoUpdate();
+        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     }
 
     window.SpeedInfoHide = function () {
@@ -3096,15 +3238,15 @@ window.SpeedInfo.make = function () {
     //Listeners to hide/show speedinfo box
     const backButton = 'p17HVe';
     document.querySelector("[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
-        window.SpeedInfoUpdate();
+        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     });
 
     const playButton = 'NSjDf';
     document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
-        window.SpeedInfoUpdate();
+        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     });
 
-    window.SpeedInfoUpdate = function () {
+    window.SpeedInfoUpdate = async function () {
         // Mainly for TimeKeeper, runs when "play" is clicked
         let count = window.timeKeeper.getCurrentSetting("count");
         let speed = window.timeKeeper.getCurrentSetting("speed");
@@ -3231,8 +3373,8 @@ window.SpeedInfo.alterCode = function (code) {
     
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
-    speedinfo_reset = `;window.SpeedInfoUpdate();
-    if(window.first_time_call){window.getAllSrc();window.first_time_call=false;}
+    speedinfo_reset = `;window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
+    if(window.first_time_call){window.getAllSrc().catch(e=>console.error('getAllSrc error:',e));window.first_time_call=false;}
     ;$&`
 
 
@@ -3240,7 +3382,7 @@ window.SpeedInfo.alterCode = function (code) {
     code = code.assertReplace(reset_regex, speedinfo_reset);
 
     switch_regex = new RegExp(/switch\(b\){case "apple"/)
-    speedinfo_switch = `window.SpeedInfoUpdate();switch(b){case "apple"`
+    speedinfo_switch = `window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));switch(b){case "apple"`
     code = code.assertReplace(switch_regex, speedinfo_switch);
 
     window.CurrentModeNum = 0;
