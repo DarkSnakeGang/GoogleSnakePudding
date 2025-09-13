@@ -107,6 +107,17 @@ window.PuddingMod.alterSnakeCode = function (code) {
     console.log(code)
   }
 
+  // Make it so Shift + Esc resets the game
+  document.addEventListener('keydown', function(e){
+    if(e.key === "Shift"){
+        const keydownEvent = new KeyboardEvent('keydown', {
+            keyCode: 27
+        });
+        document.dispatchEvent(keydownEvent);
+        document.querySelector('[jsname="NSjDf"]').click();
+    }
+  });
+
   code = code.replaceAll(/\$\$/gm, `doubleD`)
   code = code.replaceAll(/\$\&/gm, `$ &`)
 
