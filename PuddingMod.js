@@ -1852,7 +1852,7 @@ window.Fruit.make = function () {
 window.Fruit.alterCode = function (code) {
 
     // Code to alter snake code here
-
+debugger
     // Regex for a function that sets the src for count (I think)
     settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&/)
     settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
@@ -1948,7 +1948,7 @@ window.Fruit.alterCode = function (code) {
 */
 
     //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"/)
-    get_apple_make_func = new RegExp(/for\(a=0;a<22;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
+    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
     //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"`, "")
     func_name = code.match(get_apple_make_func)[0].split(' ')[1]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
@@ -4851,28 +4851,30 @@ window.CustomPortalPairs.make = function () {
         19: { name: "Raspberries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_19.png" },
         20: { name: "Tomato", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_20.png" },
         21: { name: "Juniper Berries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_21.png" },
-        22: { name: "Fruit Bowl", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_22.png" },
-        23: { name: "Pudding", image: "https://i.postimg.cc/5y7gwwGY/pudding-cr.png" },
-        24: { name: "Blue Berries", image: "https://i.postimg.cc/8cmVPfGd/blueberries.png" },
-        25: { name: "Red Pepper", image: "https://i.postimg.cc/BQqHMbDc/redpepper.png" },
-        26: { name: "Lime", image: "https://i.postimg.cc/k5kWcyFB/lime.png" },
-        27: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
-        28: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
-        29: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
-        30: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
-        31: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
-        32: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
-        33: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
-        34: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
-        35: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
-        36: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
-        37: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
-        38: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
-        39: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
-        40: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
-        41: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
-        42: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
-        43: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
+        22: { name: "Mango", image: "https://www.google.com/logos/fnbx/snake_arcade/v18/apple_22.png" },
+        23: { name: "Avocado", image: "https://www.google.com/logos/fnbx/snake_arcade/v18/apple_23.png" },
+        24: { name: "Fruit Bowl", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_22.png" },
+        25: { name: "Pudding", image: "https://i.postimg.cc/5y7gwwGY/pudding-cr.png" },
+        26: { name: "Blue Berries", image: "https://i.postimg.cc/8cmVPfGd/blueberries.png" },
+        27: { name: "Red Pepper", image: "https://i.postimg.cc/BQqHMbDc/redpepper.png" },
+        28: { name: "Lime", image: "https://i.postimg.cc/k5kWcyFB/lime.png" },
+        29: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
+        30: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
+        31: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
+        32: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
+        33: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
+        34: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
+        35: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
+        36: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
+        37: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
+        38: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
+        39: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
+        40: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
+        41: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
+        42: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
+        43: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
+        44: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
+        45: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
 
     };
 
