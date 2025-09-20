@@ -102,7 +102,7 @@ window.CustomPortalPairs.make = function () {
         window.fruit_options = [];
 
         for (let index = 0; index < document.querySelector('#apple').children.length; index++) {
-            if (index == 22) {
+            if (index == 24) {
                 index++; // Skip fruit bowl
             }
             window.fruit_options.push(index);

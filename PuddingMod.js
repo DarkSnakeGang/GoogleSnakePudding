@@ -4431,6 +4431,7 @@ window.BootstrapMenu.make = function () {
         }
     }
 
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -4568,6 +4569,11 @@ window.BootstrapMenu.make = function () {
     <option value="5">Onion</option>
   </select>
   <br>
+</div>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
+    </br>
+
+    </div>
 
 <select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
   <option value="0">Default Rainbow</option>
@@ -4633,6 +4639,31 @@ window.BootstrapMenu.make = function () {
         scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
         scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
+
+        keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
+
+        // Code for reset key
+        let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+        function setupKeybindPicker(buttonId, keybindType) {
+            const button = document.getElementById(buttonId);
+            if(!keybinds[keybindType]){
+                keybinds[keybindType] = "Shift";
+            }
+            button.textContent = `Reset Key: ${keybinds[keybindType]}`;
+
+            button.addEventListener("click", () => {
+                button.textContent = "Press any key...";
+                document.addEventListener("keydown", function handler(e) {
+                keybinds[keybindType] = e.key;
+                button.textContent = `Reset Key: ${e.key}`;
+                localStorage.setItem("keybinds", JSON.stringify(keybinds));
+                document.removeEventListener("keydown", handler);
+                });
+            });
+        }
+
+        // Apply to each bind
+        setupKeybindPicker("ResetKeybind", "resetKey");
 
         if (window.pudding_settings.ScrollBar) {
             // Disable it
@@ -4905,7 +4936,7 @@ window.CustomPortalPairs.make = function () {
         window.fruit_options = [];
 
         for (let index = 0; index < document.querySelector('#apple').children.length; index++) {
-            if (index == 22) {
+            if (index == 24) {
                 index++; // Skip fruit bowl
             }
             window.fruit_options.push(index);
@@ -5216,14 +5247,18 @@ window.PuddingMod.alterSnakeCode = function (code) {
 
   // Make it so Shift + Esc resets the game
   document.addEventListener('keydown', function(e){
-    if(e.key === "Shift"){
-        const keydownEvent = new KeyboardEvent('keydown', {
-            keyCode: 27
-        });
-        document.dispatchEvent(keydownEvent);
-        document.querySelector('[jsname="NSjDf"]').click();
+    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    if(!(document.getElementById('reset-key').style.display === 'inline-block' || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
+        if(e.key === keybinds["resetKey"]){
+            const keydownEvent = new KeyboardEvent('keydown', {
+                keyCode: 27
+            });
+            document.dispatchEvent(keydownEvent);
+            document.querySelector('[jsname="NSjDf"]').click();
+        }
     }
   });
+
 
   code = code.replaceAll(/\$\$/gm, `doubleD`)
   code = code.replaceAll(/\$\&/gm, `$ &`)
