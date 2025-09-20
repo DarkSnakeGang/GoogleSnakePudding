@@ -50,6 +50,14 @@ window.BootstrapMenu.make = function () {
         }
     }
 
+    window.ShowResetKey = function () {
+        if(document.getElementById('reset-key').style.display === 'inline-block'){
+            document.getElementById('reset-key').style.display = "none";
+        }else{
+            document.getElementById('reset-key').style.display = "inline-block";
+        }
+    }
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -187,6 +195,25 @@ window.BootstrapMenu.make = function () {
     <option value="5">Onion</option>
   </select>
   <br>
+</div>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Edit Reset Keybind</button><br>
+  <div id="reset-key" style="
+      display:none;
+      padding:3px 6px;
+      border-radius:0;
+      border:4px solid #000000;
+      background: #ffffff;
+      color:#000000;
+      font-family:Roboto,Arial,sans-serif;
+      font-size:1.2vh;
+      cursor:pointer;
+      user-select:none;
+      transition:all 0.2s ease;
+      margin-left:5px;
+    ">None</div>
+    </br>
+
+    </div>
 
 <select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
   <option value="0">Default Rainbow</option>
@@ -252,6 +279,32 @@ window.BootstrapMenu.make = function () {
         scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
         scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
+
+        keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
+        keybind_settings.addEventListener("click", window.ShowResetKey);
+
+        // Code for reset key
+        let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+        function setupKeybindPicker(id, keybindType) {
+            const box = document.getElementById(id);
+            if(!keybinds[keybindType]){
+                keybinds[keybindType] = "Shift";
+            }
+            box.textContent = keybinds[keybindType];
+
+            box.addEventListener("click", () => {
+                box.textContent = "Press any key...";
+                document.addEventListener("keydown", function handler(e) {
+                keybinds[keybindType] = e.key;
+                box.textContent = e.key;
+                localStorage.setItem("keybinds", JSON.stringify(keybinds));
+                document.removeEventListener("keydown", handler);
+                });
+            });
+        }
+
+        // Apply to each bind
+        setupKeybindPicker("reset-key", "resetKey");
 
         if (window.pudding_settings.ScrollBar) {
             // Disable it
