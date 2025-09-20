@@ -267,8 +267,10 @@ window.BootstrapMenu.make = function () {
             EatThemeRandomizer2.style.display = 'none';
             EatThemeRandomizer.checked = false;
             window.pudding_settings.randomizeThemeApple = false;
+            EatThemeRandomizer.parentElement.style.display = 'none';
         } else
         {
+            EatThemeRandomizer.parentElement.style.display = 'block';
             console.log("Disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
