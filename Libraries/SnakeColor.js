@@ -266,6 +266,11 @@ window.SnakeColor.alterCode = function (code) {
 
     PopulateSnakeColorsDropdown()
 
+    code = code.assertReplace(/a=_.fGc\(a\)/,`
+        if (typeof a === 'undefined') {
+            a = "#4E7CF6";
+        }
+        a=_.fGc(a)`)
 
     //code = code.assertReplace(/this\.zd=qN\[0\]\[0\];/,`this.zd=qN[0][0];debugger;`)
 

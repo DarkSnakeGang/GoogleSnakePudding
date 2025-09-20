@@ -1852,7 +1852,7 @@ window.Fruit.make = function () {
 window.Fruit.alterCode = function (code) {
 
     // Code to alter snake code here
-debugger
+
     // Regex for a function that sets the src for count (I think)
     settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&/)
     settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
@@ -2443,6 +2443,11 @@ window.SnakeColor.alterCode = function (code) {
 
     PopulateSnakeColorsDropdown()
 
+    code = code.assertReplace(/a=_.fGc\(a\)/,`
+        if (typeof a === 'undefined') {
+            a = "#4E7CF6";
+        }
+        a=_.fGc(a)`)
 
     //code = code.assertReplace(/this\.zd=qN\[0\]\[0\];/,`this.zd=qN[0][0];debugger;`)
 
