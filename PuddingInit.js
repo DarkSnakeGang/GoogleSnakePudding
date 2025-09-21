@@ -155,4 +155,5 @@ window.PuddingMod.runCodeAfter = function () {
   }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
+
 };

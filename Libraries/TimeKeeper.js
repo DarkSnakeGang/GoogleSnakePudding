@@ -537,6 +537,9 @@ window.TimeKeeper.make = function () {
         dialog.classList.add("custom-dialog");
 
         div.insertBefore(dialog, div.firstChild)
+
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+
     };
 
     //Function to find the snake code, and apply changes.
@@ -555,6 +558,7 @@ window.TimeKeeper.make = function () {
         child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
         document.getElementById('time-keeper').innerHTML = 'Show Details';
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
 
     }
 

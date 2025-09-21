@@ -9,6 +9,8 @@ window.BootstrapMenu.make = function () {
         settingsBox.style.display = 'block';
         settingsBox.style.visibility = 'visible';
         window.bootstrapVisible = true;
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+
     }
 
     window.BootstrapHide = function () {
@@ -18,6 +20,8 @@ window.BootstrapMenu.make = function () {
             window.getAllSrc();
         }
         window.bootstrapVisible = false;
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+
     }
 
     random_button_jsname = 'qycu7d' // Hardcoded because I'm lazy

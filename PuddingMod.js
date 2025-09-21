@@ -1558,6 +1558,9 @@ window.TimeKeeper.make = function () {
         dialog.classList.add("custom-dialog");
 
         div.insertBefore(dialog, div.firstChild)
+
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+
     };
 
     //Function to find the snake code, and apply changes.
@@ -1576,6 +1579,7 @@ window.TimeKeeper.make = function () {
         child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
         document.getElementById('time-keeper').innerHTML = 'Show Details';
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
 
     }
 
@@ -4390,6 +4394,8 @@ window.BootstrapMenu.make = function () {
         settingsBox.style.display = 'block';
         settingsBox.style.visibility = 'visible';
         window.bootstrapVisible = true;
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+
     }
 
     window.BootstrapHide = function () {
@@ -4399,6 +4405,8 @@ window.BootstrapMenu.make = function () {
             window.getAllSrc();
         }
         window.bootstrapVisible = false;
+        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+
     }
 
     random_button_jsname = 'qycu7d' // Hardcoded because I'm lazy
@@ -5134,6 +5142,8 @@ window.CustomPortalPairs.alterCode = function (code) {
 
     code = code.assertReplace(portal_dice_full_regex, portal_pairs_dice_code);
 
+
+    document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
     return code;
 }
 window.PuddingMod = {};
@@ -5293,4 +5303,5 @@ window.PuddingMod.runCodeAfter = function () {
   }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
+
 };
