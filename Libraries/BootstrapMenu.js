@@ -107,31 +107,38 @@ window.BootstrapMenu.make = function () {
         // xhr.open('GET', css_stripped, true);
         // xhr.send();
 
-
         const css_stripped = window.NepDebug 
         ? "http://127.0.0.1:5500/bootstrap-stripped.css"
         : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-        
-        // Check if already loaded to prevent duplicates
-        if (document.querySelector('link[href="' + css_stripped + '"]')) {
-            return;
+    
+    const xhr = new XMLHttpRequest();
+    
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            const cssText = xhr.responseText;
+            window.bootstrap_css = cssText;
+            
+            // Inject into existing style element (same as original)
+            const styleElement = document.getElementsByTagName('style')[0];
+            if (styleElement) {
+                styleElement.innerHTML = styleElement.innerHTML + cssText;
+            }
+        } else {
+            console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
         }
-        
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = css_stripped;
-        
-        link.onload = () => {
-            console.log('Bootstrap CSS loaded successfully');
-            window.bootstrap_css = 'loaded';
-        };
-        
-        link.onerror = () => {
-            console.error('Failed to load Bootstrap CSS from:', css_stripped);
-        };
-        
-        document.head.appendChild(link);
+    };
+    
+    xhr.onerror = function() {
+        console.error('Network error while loading Bootstrap CSS');
+    };
+    
+    xhr.ontimeout = function() {
+        console.error('Timeout while loading Bootstrap CSS');
+    };
+    
+    xhr.timeout = 10000; // 10 second timeout
+    xhr.open('GET', css_stripped, true);
+    xhr.send();
 
         const settingsBox = document.createElement('div');
         settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
