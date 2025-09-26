@@ -1559,7 +1559,6 @@ window.TimeKeeper.make = function () {
 
         div.insertBefore(dialog, div.firstChild)
 
-        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
 
     };
 
@@ -1579,7 +1578,6 @@ window.TimeKeeper.make = function () {
         child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
         document.getElementById('time-keeper').innerHTML = 'Show Details';
-        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
 
     }
 
@@ -4394,7 +4392,6 @@ window.BootstrapMenu.make = function () {
         settingsBox.style.display = 'block';
         settingsBox.style.visibility = 'visible';
         window.bootstrapVisible = true;
-        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
 
     }
 
@@ -4405,7 +4402,6 @@ window.BootstrapMenu.make = function () {
             window.getAllSrc();
         }
         window.bootstrapVisible = false;
-        document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
 
     }
 
@@ -4468,31 +4464,57 @@ window.BootstrapMenu.make = function () {
         const settingsElement = document.querySelector('#input-counter-settings-container');
 
         //settingsElement.appendChild(c);
-        css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-        if (window.NepDebug) {
-            css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
+        // css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
+        // if (window.NepDebug) {
+        //     css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
+        // }
+
+        // window.bootstrap_css = '';
+        // const xhr = new XMLHttpRequest();
+
+        // xhr.onreadystatechange = function () {
+        //     if (xhr.readyState === XMLHttpRequest.DONE) {
+        //         if (xhr.status === 200) {
+        //             const data = xhr.responseText;
+        //             // Use the fetched data as a string
+        //             //console.log(data); // Or do something else with the data
+        //             window.bootstrap_css = data;
+        //             document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+                    
+        //         } else {
+        //             console.error('An error occurred while fetching Bootstrap: ', xhr.status);
+        //         }
+        //     }
+        // };
+
+        // xhr.open('GET', css_stripped, true);
+        // xhr.send();
+
+
+        const css_stripped = window.NepDebug 
+        ? "http://127.0.0.1:5500/bootstrap-stripped.css"
+        : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
+        
+        // Check if already loaded to prevent duplicates
+        if (document.querySelector('link[href="' + css_stripped + '"]')) {
+            return;
         }
-
-        window.bootstrap_css = '';
-        const xhr = new XMLHttpRequest();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    const data = xhr.responseText;
-                    // Use the fetched data as a string
-                    //console.log(data); // Or do something else with the data
-                    window.bootstrap_css = data;
-                    document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
-                } else {
-                    console.error('An error occurred while fetching Bootstrap: ', xhr.status);
-                }
-            }
+        
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = css_stripped;
+        
+        link.onload = () => {
+            console.log('Bootstrap CSS loaded successfully');
+            window.bootstrap_css = 'loaded';
         };
-
-        xhr.open('GET', css_stripped, true);
-        xhr.send();
-
+        
+        link.onerror = () => {
+            console.error('Failed to load Bootstrap CSS from:', css_stripped);
+        };
+        
+        document.head.appendChild(link);
 
         const settingsBox = document.createElement('div');
         settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
@@ -5142,8 +5164,6 @@ window.CustomPortalPairs.alterCode = function (code) {
 
     code = code.assertReplace(portal_dice_full_regex, portal_pairs_dice_code);
 
-
-    document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
     return code;
 }
 window.PuddingMod = {};
