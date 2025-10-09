@@ -111,34 +111,61 @@ window.BootstrapMenu.make = function () {
         ? "http://127.0.0.1:5500/bootstrap-stripped.css"
         : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
     
-    const xhr = new XMLHttpRequest();
-    
-    xhr.onload = function() {
-        if (xhr.status >= 200 && xhr.status < 300) {
-            const cssText = xhr.responseText;
-            window.bootstrap_css = cssText;
-            
-            // Inject into existing style element (same as original)
-            const styleElement = document.getElementsByTagName('style')[0];
-            if (styleElement) {
-                styleElement.innerHTML = styleElement.innerHTML + cssText;
+        const xhr = new XMLHttpRequest();
+        
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                const cssText = xhr.responseText;
+                window.bootstrap_css = cssText;
+                
+                // Inject into existing style element (same as original)
+                const styleElement = document.getElementsByTagName('style')[0];
+                if (styleElement) {
+                    styleElement.innerHTML = styleElement.innerHTML + cssText;
+                }
+
+                let styleElnew = document.getElementById('custom-style');
+                if (!styleElnew) {
+                    styleElnew = document.createElement('style');
+                    styleElnew.id = 'custom-style';
+                    document.head.appendChild(styleElnew);
+                    styleElnew.innerHTML = cssText;
+                }
+
+            } else {
+                console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
             }
-        } else {
-            console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
-        }
-    };
-    
-    xhr.onerror = function() {
-        console.error('Network error while loading Bootstrap CSS');
-    };
-    
-    xhr.ontimeout = function() {
-        console.error('Timeout while loading Bootstrap CSS');
-    };
-    
-    xhr.timeout = 10000; // 10 second timeout
-    xhr.open('GET', css_stripped, true);
-    xhr.send();
+        };
+
+        const styleEl = document.getElementsByTagName('style')[0];
+
+        const observer = new MutationObserver((mutations) => {
+            console.log('Style tag changed:', mutations);
+            observer.disconnect();
+            const styleElement = document.getElementsByTagName('style')[0];
+            styleElement.innerHTML = styleElement.innerHTML + window.bootstrap_css;
+            observer.observe(styleEl, { childList: true, characterData: true, subtree: true });
+        });
+
+        // This is the original observer, disabled because adding a new style should fix it instead
+        //observer.observe(styleEl, {
+        //    childList: true,      // watch for added/removed nodes
+        //    characterData: true,  // watch for text changes
+        //    subtree: true         // watch inside the style tag
+        //});
+
+        
+        xhr.onerror = function() {
+            console.error('Network error while loading Bootstrap CSS');
+        };
+        
+        xhr.ontimeout = function() {
+            console.error('Timeout while loading Bootstrap CSS');
+        };
+        
+        xhr.timeout = 10000; // 10 second timeout
+        xhr.open('GET', css_stripped, true);
+        xhr.send();
 
         const settingsBox = document.createElement('div');
         settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
