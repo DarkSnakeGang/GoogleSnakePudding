@@ -45,10 +45,10 @@ window.SettingsSaver.make = function () {
 
 window.SettingsSaver.alterCode = function (code) {
     
-    window.PopulateOptions();
-    window.PopulateDropdowns();
-    window.PopulateOptions();
-    window.PopulateDropdowns();
+    //window.PopulateOptions();
+    //window.PopulateDropdowns();
+    //window.PopulateOptions();
+    //window.PopulateDropdowns();
 
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 

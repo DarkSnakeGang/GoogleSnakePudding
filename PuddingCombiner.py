@@ -13,8 +13,9 @@ lib_list = [
     "SpeedInfo",
     "InputDisplay",
     "Timer",
-    "BootstrapMenu",
-    "CustomPortalPairs"]
+    "BootstrapMenu"
+    #,"CustomPortalPairs"
+    ]
 for lib in lib_list:
     lib_file = open(f"Libraries/{lib}.js", encoding='utf-8')
     pudding_file.write(lib_file.read())

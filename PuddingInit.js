@@ -85,8 +85,9 @@ window.PuddingMod.runCodeBefore = function () {
     "SpeedInfo",
     "InputDisplay",
     "Timer",
-    "BootstrapMenu",
-    "CustomPortalPairs"];
+    "BootstrapMenu"
+    //,"CustomPortalPairs"
+  ];
   console.log("Enabling Pudding Mod");
 
   libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";

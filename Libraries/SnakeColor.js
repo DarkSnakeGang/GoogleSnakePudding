@@ -266,11 +266,13 @@ window.SnakeColor.alterCode = function (code) {
 
     PopulateSnakeColorsDropdown()
 
-    code = code.assertReplace(/a=_.fGc\(a\)/,`
+    // This fixes gate color issue, hardcoded is a poor choice but it works
+    // Better search: /a=_....\(a\)/ -> 3 dots should match some function name that sets gate color or something similar
+    code = code.assertReplace(/a=_.zJc\(a\)/,`
         if (typeof a === 'undefined') {
             a = "#4E7CF6";
         }
-        a=_.fGc(a)`)
+        a=_.zJc(a)`)
 
     //code = code.assertReplace(/this\.zd=qN\[0\]\[0\];/,`this.zd=qN[0][0];debugger;`)
 
