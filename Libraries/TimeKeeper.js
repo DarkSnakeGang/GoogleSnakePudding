@@ -149,7 +149,7 @@ window.TimeKeeper.make = function () {
 
     //save highscore
     window.timeKeeper.saveScore = function (time, score, mode, count, speed, size) {
-        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or Dice, or MouseMode or Level Editor
             return;
         }
@@ -184,7 +184,7 @@ window.TimeKeeper.make = function () {
     //save 25, 50, 100 or 'ALL' score
     window.timeKeeper.savePB = function (time, score, mode, count, speed, size) {
 
-        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or MouseMode or Level Editor
             return;
         }
@@ -323,7 +323,7 @@ window.TimeKeeper.make = function () {
                     }
                     modeStr = modeStr.join('');
 
-                    for (count = 0; count < 3; count++) {
+                    for (count = 0; count < 5; count++) {
                         for (speed = 0; speed < 3; speed++) {
                             for (size = 0; size < 3; size++) {
                                 for (let score of ["25", "50", "100", "ALL", "att"]) {
@@ -419,7 +419,9 @@ window.TimeKeeper.make = function () {
             case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
             case 1: dialog.appendChild(document.createTextNode("3 Apples, ")); break;
             case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
-            case 3: dialog.appendChild(document.createTextNode("Dice count, ")); break;
+            case 3: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
+            case 4: dialog.appendChild(document.createTextNode("Dice count, ")); break;
+            case 5: dialog.appendChild(document.createTextNode("Bomb count, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
         }
         switch (speed) {

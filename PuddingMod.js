@@ -1170,7 +1170,7 @@ window.TimeKeeper.make = function () {
 
     //save highscore
     window.timeKeeper.saveScore = function (time, score, mode, count, speed, size) {
-        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or Dice, or MouseMode or Level Editor
             return;
         }
@@ -1205,7 +1205,7 @@ window.TimeKeeper.make = function () {
     //save 25, 50, 100 or 'ALL' score
     window.timeKeeper.savePB = function (time, score, mode, count, speed, size) {
 
-        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or MouseMode or Level Editor
             return;
         }
@@ -1344,7 +1344,7 @@ window.TimeKeeper.make = function () {
                     }
                     modeStr = modeStr.join('');
 
-                    for (count = 0; count < 3; count++) {
+                    for (count = 0; count < 5; count++) {
                         for (speed = 0; speed < 3; speed++) {
                             for (size = 0; size < 3; size++) {
                                 for (let score of ["25", "50", "100", "ALL", "att"]) {
@@ -1440,7 +1440,9 @@ window.TimeKeeper.make = function () {
             case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
             case 1: dialog.appendChild(document.createTextNode("3 Apples, ")); break;
             case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
-            case 3: dialog.appendChild(document.createTextNode("Dice count, ")); break;
+            case 3: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
+            case 4: dialog.appendChild(document.createTextNode("Dice count, ")); break;
+            case 5: dialog.appendChild(document.createTextNode("Bomb count, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
         }
         switch (speed) {
@@ -2699,7 +2701,9 @@ window.SpeedInfo.make = function () {
         0: { name: "1 Apple" },
         1: { name: "3 Apples" },
         2: { name: "5 Apples" },
-        3: { name: "Dice" },
+        3: { name: "10 Apples" },
+        4: { name: "Dice" },
+        5: { name: "Bomb" },
     }
 
     window.sizeToTxt = {
@@ -2777,7 +2781,9 @@ window.SpeedInfo.make = function () {
         ONE_APPLE = 0;
         THREE_APPLES = 1;
         FIVE_APPLES = 2;
-        DICE = 3;
+        TEN_APPLES = 3;
+        DICE = 4;
+        BOMB = 5;
 
 
         let count = window.timeKeeper.getCurrentSetting("count");
@@ -2787,7 +2793,7 @@ window.SpeedInfo.make = function () {
 
         const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
 
-        if (size > 2 || count > 3) {
+        if (size > 2 || count > 5) {
             EmptyAll();
             return;
         }
@@ -3354,7 +3360,9 @@ window.SpeedInfo.make = function () {
             case 0: return "1 Apple, "; break;
             case 1: return "3 Apples, "; break;
             case 2: return "5 Apples, "; break;
-            case 3: return "Dice count, "; break;
+            case 3: return "10 Apples, "; break;
+            case 4: return "Dice count, "; break;
+            case 5: return "Bomb count, "; break;
             default: return "MoreMenu Apples, "; break;
         }
     }
@@ -3726,7 +3734,10 @@ window.Timer = {
   <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_03.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
+
 </div>
 <br/>
 <div id="edit-speed">

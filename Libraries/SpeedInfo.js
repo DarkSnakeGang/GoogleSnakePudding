@@ -171,7 +171,9 @@ window.SpeedInfo.make = function () {
         0: { name: "1 Apple" },
         1: { name: "3 Apples" },
         2: { name: "5 Apples" },
-        3: { name: "Dice" },
+        3: { name: "10 Apples" },
+        4: { name: "Dice" },
+        5: { name: "Bomb" },
     }
 
     window.sizeToTxt = {
@@ -249,7 +251,9 @@ window.SpeedInfo.make = function () {
         ONE_APPLE = 0;
         THREE_APPLES = 1;
         FIVE_APPLES = 2;
-        DICE = 3;
+        TEN_APPLES = 3;
+        DICE = 4;
+        BOMB = 5;
 
 
         let count = window.timeKeeper.getCurrentSetting("count");
@@ -259,7 +263,7 @@ window.SpeedInfo.make = function () {
 
         const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
 
-        if (size > 2 || count > 3) {
+        if (size > 2 || count > 5) {
             EmptyAll();
             return;
         }
@@ -826,7 +830,9 @@ window.SpeedInfo.make = function () {
             case 0: return "1 Apple, "; break;
             case 1: return "3 Apples, "; break;
             case 2: return "5 Apples, "; break;
-            case 3: return "Dice count, "; break;
+            case 3: return "10 Apples, "; break;
+            case 4: return "Dice count, "; break;
+            case 5: return "Bomb count, "; break;
             default: return "MoreMenu Apples, "; break;
         }
     }
