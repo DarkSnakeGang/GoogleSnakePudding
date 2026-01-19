@@ -4624,25 +4624,25 @@ window.BootstrapMenu.make = function () {
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
-    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
+    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" disabled>Custom Portal Pairs</label>
     </div>
-<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
+<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
     <option value="0">Apple</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
   <option value="1">Banana</option>
 </select><br>
 
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
     <option value="2">Pineapple</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
     <option value="3">Purple Grapes</option>
   </select><br>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
     <option value="4">Pumpkin</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
     <option value="5">Onion</option>
   </select>
   <br>
