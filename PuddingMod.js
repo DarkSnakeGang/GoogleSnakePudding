@@ -2488,7 +2488,7 @@ window.SettingsSaver.make = function () {
 
 
     window.saveSettings = function () {
-        window.pudding_settings.SelectedPairs = window.selected_fruit;
+        window.pudding_settings.SelectedPairs = [0, 1, 2, 3, 4, 5]; //window.selected_fruit;
         if (typeof pudding_settings !== 'undefined' && typeof pudding_settings.Skull !== 'undefined' &&
         typeof pudding_settings.SokoGoals !== 'undefined' &&
         typeof pudding_settings.InputDisplay !== 'undefined' &&
