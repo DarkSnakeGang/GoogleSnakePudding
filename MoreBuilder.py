@@ -20,6 +20,7 @@ mpm_combo = open("MorePuddingInit.js", encoding='utf-8')
 mm_file = open("MoreMenuMod.js", encoding='utf-8')
 pudding = open("PuddingMod.js", encoding='utf-8')
 visi_file = open("VisibilityMod.js", encoding='utf-8')
+pause_file = open("PauseGameMod.js", encoding='utf-8')
 
 
 mpm_file.write(pudding.read())
@@ -31,6 +32,7 @@ mm_file.close()
 mpm_combo.close()
 mpm_file.close()
 visi_file.close()
+pause_file.close()
 
 mpm_file = open("ChimeraMod.js", "w", encoding='utf-8')
 mpm_combo = open("Combo/ChimeraMod.js", encoding='utf-8')

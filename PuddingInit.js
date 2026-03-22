@@ -85,7 +85,8 @@ window.PuddingMod.runCodeBefore = function () {
     "SpeedInfo",
     "InputDisplay",
     "Timer",
-    "BootstrapMenu"
+    "BootstrapMenu",
+    "RenderDelayFix"
     //,"CustomPortalPairs"
   ];
   console.log("Enabling Pudding Mod");

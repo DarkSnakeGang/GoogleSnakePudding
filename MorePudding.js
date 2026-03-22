@@ -247,8 +247,8 @@ window.Theme.make = function () {
     },
     {
       name: 'Pacman',
-      light_tiles: '#010101',
-      dark_tiles: '#000000',
+      light_tiles: '#1D1D1D',
+      dark_tiles: '#161616',
       shadow: '#000000',
       border: '#0805c6',
       key_block_sign_color: '#000000',
@@ -528,8 +528,9 @@ window.DistinctVisual.make = function () {
 }
 
 window.DistinctVisual.alterCode = function (code) {
+
     // Attempt to get info on which mode it is
-    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
+    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{const [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
 
     spawn_func_code = code.match(spawn_func_regex)[0]
 
@@ -541,11 +542,11 @@ window.DistinctVisual.alterCode = function (code) {
     //console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)")
     ////console.log(code)
 
-    realism_draw = new RegExp(/switch\(void.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
     realism_switch = code.match(realism_draw)[0];
     //actual_canvas_regexp = new RegExp(/a.[a-zA-Z0-9_$]{1,8}.canvas,/);
     //actual_canvas = code.match(actual_canvas_regexp)[0]
-    realism_path = new RegExp(/switch\(void.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
     get_graphics = realism_switch.split(':')[1].split(')')[0];
@@ -566,13 +567,13 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     window.drawing_apple = true;
 
-    get_apple_stuff = new RegExp(/var.*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    get_apple_stuff = new RegExp(/const.*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     poison_default = code.match(get_apple_stuff)[0]
     b_graphics = poison_default.split('(')[2].split(')')[0]
 
     get_apple_code = `
     if(window.pudding_settings.Skull){
-        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[2].split('?')[0]} - 1 : b.type;
+        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[1].split('?')[0]} - 1 : b.type;
     }
     ${poison_default}
     `
@@ -616,9 +617,9 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
      `*/
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/null==\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[3]
+    real_grey_path = real_grey.split(')')[0].split('=')[1]
 
     new_grey_code = `
     if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
@@ -635,12 +636,12 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
         console.log(code)
     }
 
-    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new.*box\..*}/gm)
+    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new.*box\..*};/gm)
     sokondeez_code = code.match(sokondeez)[0]
 
     sokondeez_nuts = `
     window.SokoRef=this;
-    window.DefaultSokoGoal=${sokondeez_code.slice(0, -1)}
+    window.DefaultSokoGoal=${sokondeez_code.slice(0, -3)}
     window.DistinctSokoFinal=${sokondeez_code.split('=')[1].split('"')[0]} "${window.distinct_soko_goal.src}" ${sokondeez_code.split('"')[2]} "${window.distinct_soko_goal_px.src}" ${sokondeez_code.split('"')[4]}
     `
 
@@ -905,9 +906,11 @@ window.Counter.make = function () {
 window.Counter.alterCode = function (code) {
 
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    window.wallCoords = [];
 
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
+    window.wallCoords = [];
     window.timeKeeper.playing = false;
     window.BootstrapHide();
     stats.plays.session++;
@@ -915,7 +918,7 @@ window.Counter.alterCode = function (code) {
     window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     saveStatistics();
     stats.visible = true;
-    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 17) && stats.statShown == "walls"){
+    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 19) && stats.statShown == "walls"){
         stats.visible = false;
     }
     window.setCounter();
@@ -966,25 +969,53 @@ window.Counter.alterCode = function (code) {
 
 
 
-    stop_regex = new RegExp(/stop=function\(a\){/)
+    stop_regex = new RegExp(/stop\(a\){/)
     catchError(stop_regex, code)
-    save_stats_code = `stop=function(a){saveStatistics();`
+    save_stats_code = `stop\(a\){saveStatistics();`
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
-    wall_spawn_regex = new RegExp(/var [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
+    wall_spawn_regex = new RegExp(/const [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
     catchError(wall_spawn_regex, code)
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
 
-
     wall_counter_code = `${code.match(wall_spawn_regex)[0]}
-    if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
+    if(${wall_pos}){stats.walls.game++;
+    window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
+    updateCounterDisplay();}
     `
     if (window.NepDebug) {
         console.log("Wall thing: " + wall_pos)
         console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
+
+    window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
+        if(window.timeKeeper.getCurrentSetting("size") != 1)
+            return false;
+
+        // Initialize an array of 90 tiles, all initialized to '1' (empty)
+        let board = Array(90).fill('1');
+
+        // Set '2' (wall) for each coordinate in the list
+        coordinates.forEach(coord => {
+            let [x, y] = coord;
+            let index = y * 10 + x; // Calculate the index in the 1D array
+            board[index] = '2'; // Set '2' at the calculated index
+        });
+
+        // Join the array into a single string of 90 characters
+        return board.join('');
+    }
+
+    let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
+
+    death_wall_icon.addEventListener("click", function () {
+        pattern_string = window.coordinatesToBoardString(window.wallCoords)
+        if(pattern_string){
+            navigator.clipboard.writeText("pattern " + pattern_string);
+        }
+    });
 
     return code;
 }
@@ -1093,7 +1124,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 17; t++) {
+            for (t = 1; t <= 20; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -1139,7 +1170,7 @@ window.TimeKeeper.make = function () {
 
     //save highscore
     window.timeKeeper.saveScore = function (time, score, mode, count, speed, size) {
-        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or Dice, or MouseMode or Level Editor
             return;
         }
@@ -1174,7 +1205,7 @@ window.TimeKeeper.make = function () {
     //save 25, 50, 100 or 'ALL' score
     window.timeKeeper.savePB = function (time, score, mode, count, speed, size) {
 
-        if (count > 3 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
+        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             // More Menu, or MouseMode or Level Editor
             return;
         }
@@ -1306,14 +1337,14 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 17; mode++) {
-                    modeStr = "00000000000000000".split("");
+                for (mode = 0; mode < 20; mode++) {
+                    modeStr = "00000000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
                     modeStr = modeStr.join('');
 
-                    for (count = 0; count < 3; count++) {
+                    for (count = 0; count < 5; count++) {
                         for (speed = 0; speed < 3; speed++) {
                             for (size = 0; size < 3; size++) {
                                 for (let score of ["25", "50", "100", "ALL", "att"]) {
@@ -1363,7 +1394,6 @@ window.TimeKeeper.make = function () {
         var gamemode = "";
         for (t of modeStr) {
             if (t == 1) {
-
                 switch (counter) {
                     case 0: gamemode += "Wall, "; break;
                     case 1: gamemode += "Portal, "; break;
@@ -1381,7 +1411,10 @@ window.TimeKeeper.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Magnet, "; break;
+                    case 18: gamemode += "Gate, "; break;
+                    case 19: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -1407,7 +1440,9 @@ window.TimeKeeper.make = function () {
             case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
             case 1: dialog.appendChild(document.createTextNode("3 Apples, ")); break;
             case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
-            case 3: dialog.appendChild(document.createTextNode("Dice count, ")); break;
+            case 3: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
+            case 4: dialog.appendChild(document.createTextNode("Dice count, ")); break;
+            case 5: dialog.appendChild(document.createTextNode("Bomb count, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
         }
         switch (speed) {
@@ -1525,6 +1560,8 @@ window.TimeKeeper.make = function () {
         dialog.classList.add("custom-dialog");
 
         div.insertBefore(dialog, div.firstChild)
+
+
     };
 
     //Function to find the snake code, and apply changes.
@@ -1571,9 +1608,10 @@ window.TimeKeeper.alterCode = function (code) {
     // TimeKeeper stuff start
     //change stepfunction to run gotApple(), gotAll() and death()
 
-    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[\s\S]*?=function/)
+    // This is the full tick function
+    func_regex = new RegExp(/tick\(\){[^\\]{1,4000}light=Math.max[\s\S]*?=function/)
     window.catchError(func_regex, code)
-    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[\s\S]*?=function/)[0];
+    let func = code.match(/tick\(\){[^\\]{1,4000}light=Math.max[\s\S]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {
@@ -1585,7 +1623,7 @@ window.TimeKeeper.alterCode = function (code) {
     //modeFunc = modeFunc.substring(modeFunc.indexOf("(") + 1, modeFunc.lastIndexOf("("));
     //modeFunc = modeFunc.split('(')[0];
     //scoreFunc = func.match(/25\!\=\=this.[a-zA-Z0-9$]{1,4}/)[0]; // Need to figure this out
-    scoreFuncVar = func.match(/25\=\=\=\n?[a-zA-Z0-9$]{1,4}/)[0].split('=')[3]; // Assuming he wanted just the "this.score"
+    scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,4}\=\=\=\n?25/)[0].split('=')[0]; // Assuming he wanted just the "this.score"
     scoreFunc = func.match(`${window.escapeRegex(scoreFuncVar.replace('\n', ''))}=\n?this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1]
     ////console.log(scoreFunc)
     //scoreFunc = scoreFunc.substring(scoreFunc.indexOf("this."),scoreFunc.size);
@@ -1602,7 +1640,7 @@ window.TimeKeeper.alterCode = function (code) {
     //ownFuncIndex = func.indexOf(func.match(/!1}\);\([^%]{0,10}/)[0])+5; // No idea how this ever worked
     ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");"
     //func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex); // Cool but no, just going to insert before the if 25 50 100 instead
-    if25_regex = new RegExp(/if\(25===/)
+    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,4}\=\=\=\n?25/)
     ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
     func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
     ////console.log(func);
@@ -1680,12 +1718,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/LXFmtS7M/lime-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',70',
     });
-    new_fruit.push({ // Blackberries
-        "Normal": 'https://i.postimg.cc/hPTVGdNX/blackberries.png',
-        "Pixel": 'https://i.postimg.cc/RZTf7zS9/px-blackberries.png',
-        "Real": "https://i.postimg.cc/RVgCjj3c/blackberries-real.png",
-        "Poison_values": 'b,\'#000044\',\'#909090\',50',
-    });
     new_fruit.push({ // Green Grapes
         "Normal": 'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
         "Pixel": 'https://i.postimg.cc/J79bmqYw/px-green-grapes.png',
@@ -1711,8 +1743,8 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
     });
     new_fruit.push({ // Hotdog
-        "Normal": 'https://i.postimg.cc/BbQf4Vgs/hotdog.png',
-        "Pixel": 'https://i.postimg.cc/xTcnz1kL/px-hotdog.png',
+        "Normal": 'https://i.postimg.cc/bwYq44f1/hotdog.png',
+        "Pixel": 'https://i.postimg.cc/zXFJt86J/px-trophy-17.png',
         "Real": "https://i.postimg.cc/Y0RcM953/hotdog-real.png",
         "Poison_values": 'b,\'#9b441c\',\'#909090\',30',
     });
@@ -1720,18 +1752,6 @@ window.Fruit.make = function () {
         "Normal": 'https://i.postimg.cc/rwDXKnPj/pizza.png',
         "Pixel": 'https://i.postimg.cc/1tY1RKYq/pixil-frame-0-5.png',
         "Real": "https://i.postimg.cc/D0vyKmjv/pizza-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
-    new_fruit.push({ // Pacman Ghost
-        "Normal": 'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
-        "Pixel": 'https://i.postimg.cc/BvtK8fxb/px-pacman-ghost.png',
-        "Real": "https://i.postimg.cc/3Nc4x2Ch/ghost-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
-    new_fruit.push({ // Sonic Rings
-        "Normal": 'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
-        "Pixel": 'https://i.postimg.cc/BvzJqWhs/ring-1.png',
-        "Real": "https://i.postimg.cc/W3WrCR8H/ring-real.png",
         "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
     });
     new_fruit.push({ // Steak
@@ -1758,18 +1778,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/ncX0G22k/egg-real.png",
         "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
     });
-    new_fruit.push({ // Mango
-        "Normal": 'https://i.postimg.cc/R0NbYNSH/Mango.png',
-        "Pixel": 'https://i.postimg.cc/bNny7wv4/mango-px.png',
-        "Real": "https://i.postimg.cc/Hsb6V2tP/mango-real.png",
-        "Poison_values": 'b,\'#fc8824\',\'#909090\',50',
-    });
-    new_fruit.push({ // Melon
-        "Normal": 'https://i.postimg.cc/8knkL3WN/melon.png',
-        "Pixel": 'https://i.postimg.cc/Qt8NqZ0x/pixel-melon.png',
-        "Real": "https://i.postimg.cc/kG6h1PKn/melon-real.png",
-        "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
     new_fruit.push({ // Musa Banana
         "Normal": 'https://i.postimg.cc/3JsKcvnq/musa-banana.png',
         "Pixel": 'https://i.postimg.cc/bwSh0wPR/pixel-musa-banana.png',
@@ -1781,12 +1789,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/RZp3PRWz/pixel-pear.png',
         "Real": "https://i.postimg.cc/63dDtXTY/pear-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
-    new_fruit.push({ // Soccer Ball
-        "Normal": 'https://i.postimg.cc/C1yT8vjL/soccer-ball.png',
-        "Pixel": 'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
-        "Real": "https://i.postimg.cc/J7cnn0n8/soccer-real.png",
-        "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
     });
     new_fruit.push({ // Jacko
         "Normal": 'https://i.postimg.cc/rwMX5hbg/true-jacko.png',
@@ -1805,24 +1807,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/C5rrFjzV/red-pudding-px.png',
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
-    });
-    new_fruit.push({ // Dirt Block
-        "Normal": 'https://i.postimg.cc/9FwzBRY4/mc-dirt.png',
-        "Pixel": 'https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png',
-        "Real": "https://i.postimg.cc/Z5rR1Gg4/mc-dirt-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Bread
-        "Normal": 'https://i.postimg.cc/YSMVtPr1/bread.png',
-        "Pixel": 'https://i.postimg.cc/265KZBBy/bread-px.png',
-        "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Santa
-        "Normal": 'https://i.postimg.cc/kgV7FKDL/santa.png',
-        "Pixel": 'https://i.postimg.cc/SN1yMDQW/santa-px.png',
-        "Real": "https://i.postimg.cc/FsHrz2vr/santa-rtx.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
     new_fruit.push({ // Cabbage
         "Normal": 'https://i.postimg.cc/j59z8v1m/cabbage.png',
@@ -1874,17 +1858,17 @@ window.Fruit.alterCode = function (code) {
     // Code to alter snake code here
 
     // Regex for a function that sets the src for count (I think)
-    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){""!==[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
-    settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
+    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&/)
+    settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
-    settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
+    settings_src = code.match(settings_src_regex)[0].split('.')[2].split('!')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
     // ${settings_itself}
 
     get_graphics = new RegExp(/case "graphics":/);
     code = code.assertReplace(get_graphics, "$& window.graphics_selected=")
     get_fruit = new RegExp(/case "apple":/);
     code = code.assertReplace(get_fruit, "$& window.fruit_selected=")
-    fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}="/gm)[0].split('(')[1].split('=')[0]
+    fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=`/gm)[0].split('(')[1].split('=')[0]
     // Very poorly coded, get back here using this: "https://www.google.com/logos/fnbx/"+(1===
     /*
     // Full function that sets the current fruit icon
@@ -1913,19 +1897,33 @@ window.Fruit.alterCode = function (code) {
             case 2:
                 window.current_fruit_img = window.new_fruit[fruit_index].Real;
         }
+                
         ${fruit_image} = window.current_fruit_img;
+        document.querySelector('[jsname="Jesp7b"]').src = window.current_fruit_img;
     }
     `
+    
+    rude_insert = new RegExp(/trophy_\${b}\.png`}`\)}/gm);
+    code = code.assertReplace(rude_insert, "trophy_\${b}\.png`}`\); " + `${new_realism_code}` + " }");
 
-    rude_insert = new RegExp(/"\.png"\)\)}/gm)
-    code = code.assertReplace(rude_insert, `".png")); ${new_realism_code} }`);
+    //daily_ds_fruit = new RegExp(/"\.png"\)\);_\.[a-zA-Z0-9_$]{1,8}\.add\(c,"[a-zA-Z0-9_$]{1,8}"\)/gm);
+    //code = code.assertReplace(code.match(daily_ds_fruit)[0], code.match(daily_ds_fruit)[0].split(';')[0] + new_realism_code.replace(fruit_image, "c.src") + code.match(daily_ds_fruit)[0].split(';')[1]);
 
-    daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
+    // Old hotdog code
+    //daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
+    //rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
+    //code = code.assertReplace(rude_insert2,
+    //    `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
 
+    deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
+    code.match(deathscreen_fruit).forEach(element => {
+        console.log(element)
+        code.assertReplace(element, element + new_realism_code);
+    });
+    
+    image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
+    code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
 
-    rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
-    code = code.assertReplace(rude_insert2,
-        `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
     /*
     load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\),\n?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\?"snake_arcade\/pixel\/[a-zA-Z0-9_$]{1,8}\/px_apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png":"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png"\);/)
 
@@ -1954,7 +1952,7 @@ window.Fruit.alterCode = function (code) {
 */
 
     //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"/)
-    get_apple_make_func = new RegExp(/for\(a=0;22>a;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
+    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
     //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"`, "")
     func_name = code.match(get_apple_make_func)[0].split(' ')[1]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
@@ -1998,7 +1996,7 @@ window.Fruit.alterCode = function (code) {
     // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
     // The if statements are janky and get be condensed
     // This fixes errors in console but doesn't "change" anything in-game
-    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.path/);
+    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=`\${"https:\/\/www.google.com\/logos\/fnbx\/"}\${a\.path}`/);
     firstvar_name = code.match(shh_grabber)[0].split('.')[0];
     Hr_name = code.match(shh_grabber)[0].split('.')[1];
 
@@ -2380,10 +2378,10 @@ window.SnakeColor.alterCode = function (code) {
 
     // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
 
-    snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
+    snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}=?=?=?1?0?\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     catchError(snake_face_regex, code)
     snake_face_code = code.match(snake_face_regex)[0]
-    snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split('?')[0]}? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
+    snake_face_code = `window.isRainbow ? ${code.match(snake_face_regex)[0].split('?')[1].split('=')[0]}= window.isRainbow ? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].replace("===10","").split('?')[1].split('=')[1]}`
 
     //console.log(snake_face_code)
     code = code.assertReplace(snake_face_regex, snake_face_code)
@@ -2395,18 +2393,18 @@ window.SnakeColor.alterCode = function (code) {
     //code = code.assertReplace(/0===a\.settings\.Aa\|\|/, "")
     //code = code.assertReplace(/\["#4E7CF6","#17439F"\]/, `["#FFFFFF","#FFFFFF"]`)
 
-    snake_face2_reg = new RegExp(/\|\|10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
+    snake_face2_reg = new RegExp(/\|\|1?0?=?=?=?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=?=?=?=1?0?\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
     snakeface2code = '&&!window.randomColor&&!window.isRainbow)' + code.match(snake_face2_reg)[0].split(')')[1]
     code = code.assertReplace(snake_face2_reg, snakeface2code)
 
-    rainbow_bool_regex = new RegExp(/10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/g)
+    rainbow_bool_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}===10/g)
     catchError(rainbow_bool_regex, code)
 
     is_rainbow_matches = code.match(rainbow_bool_regex).length;
     for (let index = 0; index < is_rainbow_matches; index++) {
         const element = code.match(rainbow_bool_regex)[0];
-        snake_color_num = element.split('=')[3]
-        make_me_different = `10==` + element.split('=')[3]
+        snake_color_num = element.split('=')[0]
+        make_me_different = element.split('=')[0] + `==10`
         new_rainbow_bool = make_me_different + `||window.isRainbow`
         code = code.assertReplace(element, new_rainbow_bool)
 
@@ -2449,6 +2447,13 @@ window.SnakeColor.alterCode = function (code) {
 
     PopulateSnakeColorsDropdown()
 
+    // This fixes gate color issue, hardcoded is a poor choice but it works
+    // Better search: /a=_....\(a\)/ -> 3 dots should match some function name that sets gate color or something similar
+    code = code.assertReplace(/a=_.zJc\(a\)/,`
+        if (typeof a === 'undefined') {
+            a = "#4E7CF6";
+        }
+        a=_.zJc(a)`)
 
     //code = code.assertReplace(/this\.zd=qN\[0\]\[0\];/,`this.zd=qN[0][0];debugger;`)
 
@@ -2483,7 +2488,7 @@ window.SettingsSaver.make = function () {
 
 
     window.saveSettings = function () {
-        window.pudding_settings.SelectedPairs = window.selected_fruit;
+        window.pudding_settings.SelectedPairs = [0, 1, 2, 3, 4, 5]; //window.selected_fruit;
         if (typeof pudding_settings !== 'undefined' && typeof pudding_settings.Skull !== 'undefined' &&
         typeof pudding_settings.SokoGoals !== 'undefined' &&
         typeof pudding_settings.InputDisplay !== 'undefined' &&
@@ -2500,10 +2505,11 @@ window.SettingsSaver.make = function () {
 }
 
 window.SettingsSaver.alterCode = function (code) {
-    window.PopulateOptions();
-    window.PopulateDropdowns();
-    window.PopulateOptions();
-    window.PopulateDropdowns();
+    
+    //window.PopulateOptions();
+    //window.PopulateDropdowns();
+    //window.PopulateOptions();
+    //window.PopulateDropdowns();
 
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
@@ -2515,9 +2521,9 @@ window.SettingsSaver.alterCode = function (code) {
     code = code.assertReplace(reset_regex, settings_reset_code);
 
 
-    stop_regex = new RegExp(/stop=function\(a\){/)
+    stop_regex = new RegExp(/stop\(a\){/)
     catchError(stop_regex, code)
-    save_settings_code = `stop=function(a){saveSettings();`
+    save_settings_code = `stop\(a\){saveSettings();`
 
     code = code.assertReplace(stop_regex, save_settings_code);
     return code;
@@ -2528,66 +2534,142 @@ window.SpeedInfo.make = function () {
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
-    window.first_time_call =true;
+    window.first_time_call = true;
     window.requestsMade = 0;
+
+    // FastSnakeStats cache configuration
+    const FASTSNAKE_CACHE_BASE = "https://raw.githubusercontent.com/DarkSnakeGang/FastSnakeStats/main/time-travel-cache/daily";
+    const CACHE_STALE_THRESHOLD = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
+    let cacheData = null;
+    let lastCacheUpdate = 0;
 
     function sleepFor(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    window.makeAPIrequest = function (requestURL, callback) {
-        // Add id to solve query isssue
-        hasQuery = requestURL.includes("?")
-        url = requestURL
-        if (hasQuery) {
-            url += "&"
+    // New function to fetch from FastSnakeStats cache
+    async function fetchFromFastSnakeCache(date = null) {
+        try {
+            // If no date specified, use today's date
+            if (!date) {
+                const today = new Date();
+                date = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+            }
+
+            // Parse date to get year/month/day
+            const [year, month, day] = date.split('-');
+            const paddedMonth = month.padStart(2, '0');
+            const paddedDay = day.padStart(2, '0');
+
+            // Construct cache URL
+            const cacheUrl = `${FASTSNAKE_CACHE_BASE}/${year}/${paddedMonth}/${date}.json`;
+
+            if (window.NepDebug) {
+                console.log(`Fetching from FastSnake cache: ${cacheUrl}`);
+            }
+
+            const response = await fetch(cacheUrl);
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            cacheData = data;
+            lastCacheUpdate = Date.now();
+            window.requestsMade += 1;
+
+            if (window.NepDebug) {
+                console.log(`Successfully fetched cache data for ${date}`);
+            }
+
+            return data;
+        } catch (error) {
+            if (window.NepDebug) {
+                console.error(`Failed to fetch from FastSnake cache: ${error.message}`);
+            }
+            throw error;
         }
-        else {
-            url += "?"
-        }
-        url += "id=" + new Date().getTime()
-        if (window.NepDebug) {
-            //console.log(url);
-            //console.log("Getting runs..." + window.requestsMade);
+    }
+
+    // Check if cache is valid (not stale)
+    function isCacheValid() {
+        return cacheData && (Date.now() - lastCacheUpdate) < CACHE_STALE_THRESHOLD;
+    }
+
+    // Get the most recent available cache data
+    async function getLatestCacheData() {
+        if (isCacheValid()) {
+            return cacheData;
         }
 
-        let request = new XMLHttpRequest();
-        request.open("GET", url);
-        request.onload = function () {
-            if (request.status == 200) {
-                window.requestsMade += 1;
-                let response = JSON.parse(request.response);
-                //console.log(response);
-                if (callback && typeof callback === "function") {
-                    callback(response);
+        // Try to get today's data first
+        try {
+            return await fetchFromFastSnakeCache();
+        } catch (error) {
+            // If today's data isn't available, try yesterday
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            
+            try {
+                return await fetchFromFastSnakeCache(yesterdayStr);
+            } catch (error2) {
+                // If yesterday's data isn't available, try a few days back
+                for (let i = 2; i <= 7; i++) {
+                    const pastDate = new Date();
+                    pastDate.setDate(pastDate.getDate() - i);
+                    const pastDateStr = pastDate.toISOString().split('T')[0];
+                    
+                    try {
+                        return await fetchFromFastSnakeCache(pastDateStr);
+                    } catch (error3) {
+                        continue;
+                    }
                 }
-            }
-            else if (request.status == 404) {
-                console.error("You used the API wrong!");
-            }
-            else {
-                sleepFor(2000);
-                makeAPIrequest(requestURL);
+                throw new Error("No recent cache data available");
             }
         }
-        request.send();
+    }
+
+    // Legacy function for compatibility (now uses cache)
+    window.makeAPIrequest = function (requestURL, callback) {
+        // This is now a legacy function - we'll use the cache instead
+        if (window.NepDebug) {
+            console.log("Legacy API request called, using cache instead");
+        }
+        
+        // For compatibility, we'll still call the callback but with cached data
+        getLatestCacheData().then(data => {
+            if (callback && typeof callback === "function") {
+                callback(data);
+            }
+        }).catch(error => {
+            if (window.NepDebug) {
+                console.error("Cache fetch failed:", error);
+            }
+            // Call callback with empty data to maintain compatibility
+            if (callback && typeof callback === "function") {
+                callback({ data: { runs: [] } });
+            }
+        });
     }
 
 
 
+    // Legacy function for compatibility
     window.getGameDetails = function () {
-
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/variables", (x) => { window.SpeedrunVaraiblesJson = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/categories?embed=game", (x) => { window.SpeedrunCategoriesJson = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[0] + "/levels", (x) => { window.SpeedrunLevelsJson = x });
-
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/variables", (x) => { window.SpeedrunVaraiblesJsonCE = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/categories?embed=game", (x) => { window.SpeedrunCategoriesJsonCE = x });
-        makeAPIrequest("https://www.speedrun.com/api/v1/games/" + gameIDs[1] + "/levels", (x) => { window.SpeedrunLevelsJsonCE = x });
-
-        //makeAPIrequest("https://www.speedrun.com/api/v1/games/o1y9pyk6/records?top=1", printMe);
-
-
+        // This function is no longer needed as we're using cached data
+        // But we'll keep it for compatibility
+        if (window.NepDebug) {
+            console.log("getGameDetails called - using cached data instead");
+        }
+        
+        // Initialize cache data if not already done
+        getLatestCacheData().catch(error => {
+            if (window.NepDebug) {
+                console.error("Failed to initialize cache data:", error);
+            }
+        });
     }
 
     window.modeToTxt = {
@@ -2608,15 +2690,20 @@ window.SpeedInfo.make = function () {
         14: { name: "Light" },
         15: { name: "Shield" },
         16: { name: "Arrow" },
-        17: { name: "Peaceful" },
-        18: { name: "Blender" },
+        17: { name: "Hotdog" },
+        18: { name: "Magnet" },
+        19: { name: "Gate" },
+        20: { name: "Peaceful" },
+        21: { name: "Blender" },
     }
 
     window.countToTxt = {
         0: { name: "1 Apple" },
         1: { name: "3 Apples" },
         2: { name: "5 Apples" },
-        3: { name: "Dice" },
+        3: { name: "10 Apples" },
+        4: { name: "Dice" },
+        5: { name: "Bomb" },
     }
 
     window.sizeToTxt = {
@@ -2626,20 +2713,19 @@ window.SpeedInfo.make = function () {
     }
 
     window.speedToTxt = {
-        0: { name: "Standard" },
+        0: { name: "Normal" },
         1: { name: "Fast" },
         2: { name: "Slow" },
     }
 
     daily_button.addEventListener("click", function() {
-        SpeedInfoUpdate()
+        SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e))
         EmptyAll()
       });
 
-    window.getRecordSRC = function (level) {
+    window.getRecordSRC = async function (level) {
 
         if(window.daily_challenge){
-
             EmptyAll();
             return;
         }
@@ -2650,12 +2736,14 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        if (typeof window.SpeedrunVaraiblesJson == "undefined" ||
-            typeof window.SpeedrunCategoriesJson == "undefined" ||
-            typeof window.SpeedrunLevelsJson == "undefined" ||
-            typeof window.SpeedrunVaraiblesJsonCE == "undefined" ||
-            typeof window.SpeedrunCategoriesJsonCE == "undefined" ||
-            typeof window.SpeedrunLevelsJsonCE == "undefined") {
+        // Get cache data
+        let cacheData;
+        try {
+            cacheData = await getLatestCacheData();
+        } catch (error) {
+            if (window.NepDebug) {
+                console.error("Failed to get cache data:", error);
+            }
             EmptyAll();
             return;
         }
@@ -2678,8 +2766,11 @@ window.SpeedInfo.make = function () {
         LIGHT = 14
         SHIELD = 15
         ARROW = 16
-        PEACEFUL = 17
-        BLENDER = 18
+        HOTDOG = 17
+        MAGNET = 18
+        GATE = 19
+        PEACEFUL = 20
+        BLENDER = 21
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -2690,18 +2781,19 @@ window.SpeedInfo.make = function () {
         ONE_APPLE = 0;
         THREE_APPLES = 1;
         FIVE_APPLES = 2;
-        DICE = 3;
+        TEN_APPLES = 3;
+        DICE = 4;
+        BOMB = 5;
 
 
         let count = window.timeKeeper.getCurrentSetting("count");
         let speed = window.timeKeeper.getCurrentSetting("speed");
         let size = window.timeKeeper.getCurrentSetting("size");
         let mode = window.CurrentModeNum;
-        // Implement new method of getting mod that excludes blender
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
 
-        if (size > 2 || count > 3) {
+        if (size > 2 || count > 5) {
             EmptyAll();
             return;
         }
@@ -2714,126 +2806,200 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        gameID = speed == SLOW ? gameIDs[1] : gameIDs[0]; // Set gameID to CE if Slow
-
-        Highscore_ID = "";
-        variable_IDs = speed != SLOW ? window.SpeedrunVaraiblesJson : window.SpeedrunVaraiblesJsonCE;
-        category_IDs = speed != SLOW ? window.SpeedrunCategoriesJson : window.SpeedrunCategoriesJsonCE;
-        speed_var_ID = speed_value_ID = ""
-
-        // reset the stuff, blame moterstorm for CE having issues
-        multi_value_ID = ""
-        size_value_ID = ""
-        //debugger
-        for (let currentVar = 0; currentVar < variable_IDs["data"].length; currentVar++) {
-            if (multi_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Multi")) {
-                multi_var_ID = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.countToTxt[count].name) {
-                        multi_value_ID = currentValue;
-                        break;
-                    }
-                }
-            }
-
-            if (speed_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Speed")) {
-                speed_var_ID = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.speedToTxt[speed].name) {
-                        speed_value_ID = currentValue;
-                        break;
-                    }
-                }
-            }
-
-            if (size_value_ID == "" && variable_IDs["data"][currentVar].name.includes("Board")) {
-                size_var_ID = variable_IDs["data"][currentVar].id;
-                for (var currentValue in variable_IDs["data"][currentVar].values.values) {
-                    if (variable_IDs["data"][currentVar].values.values[currentValue].label == window.sizeToTxt[size].name) {
-                        size_value_ID = currentValue;
-                        break;
-                    }
-                }
-            }
+        // Build cache key based on FastSnakeStats format
+        const modeName = window.modeToTxt[mode].name;
+        const countName = window.countToTxt[count].name;
+        const speedName = window.speedToTxt[speed].name;
+        const sizeName = window.sizeToTxt[size].name;
+        
+        // Determine category name
+        let categoryName;
+        if (level === "H") {
+            categoryName = "High Score";
+        } else {
+            categoryName = level + " Apples";
         }
 
-        catch_multi = "var-" + multi_var_ID + "=" + multi_value_ID
-        catch_speed = "&var-" + speed_var_ID + "=" + speed_value_ID
-        catch_size = "&var-" + size_var_ID + "=" + size_value_ID
-
-        if (speed_var_ID = "") { // Slow stuff doesn't have speed value when it's high score
-            catch_speed = ""
-        }
-
-        if (level == "H") {
-
-            for (let index = 0; index < category_IDs["data"].length; index++) {
-                if (category_IDs["data"][index].name.includes(window.modeToTxt[mode].name)) {
-
-                    Highscore_ID = category_IDs["data"][index].id;
-                    break;
-                }
-            }
-
-            if (window.NepDebug) {
-                //console.log("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                //    "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size)
-            }
-
-            makeAPIrequest("https://www.speedrun.com/api/v1/leaderboards/" + gameID +
-                "/category/" + Highscore_ID + "?top=1&" + catch_multi + catch_speed + catch_size, HandleHighscore);
-
-            return;
-            //makeAPIrequest("https://www.speedrun.com/api/v1/categories/"+Highscore_ID+"/records?top=1&x=7kj63r42-0nwovxdl.mlnmj661-0nwomwdl.xqkkj49q-p854j77l.z19gp0jl", printMe);
-        }
-
-        level_IDs = speed != SLOW ? window.SpeedrunLevelsJson : window.SpeedrunLevelsJsonCE;
-
-        for (let index = 0; index < level_IDs["data"].length; index++) {
-            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
-                level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
-                level_ID = level_IDs["data"][index].id;
-                break;
-            }
-        }
-
-        for (let index = 0; index < category_IDs["data"].length; index++) {
-            if (category_IDs["data"][index].name.includes(level + " Apples")) {
-
-                category_ID = category_IDs["data"][index].id;
-                break;
-            }
-        }
-
-        src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
+        // Build the cache key in FastSnakeStats format
+        const cacheKey = `${countName}|${speedName}|${sizeName}|${modeName}|${categoryName}`;
 
         if (window.NepDebug) {
-            //console.log(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size)
+            console.log(`Looking for cache key: ${cacheKey}`);
         }
+
+        // Look up the record in cache data
+        if (!cacheData.records) {
+            if (window.NepDebug) {
+                console.error("Cache data does not have records property:", cacheData);
+            }
+            EmptyAll();
+            return;
+        }
+        
+        const recordData = cacheData.records[cacheKey];
+
+        if (window.NepDebug) {
+            console.log(`Record data for key ${cacheKey}:`, recordData);
+        }
+
+        if (!recordData) {
+            if (window.NepDebug) {
+                console.log(`No record found for key: ${cacheKey}`);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Check if record exists and has runs
+        if (!recordData.success || !recordData.runs || recordData.runs === "" || (Array.isArray(recordData.runs) && recordData.runs.length === 0)) {
+            if (window.NepDebug) {
+                console.log(`No successful runs found for key: ${cacheKey}`);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Check if runs is a string (empty data) or has actual run data
+        if (!recordData.runs || recordData.runs.length === 0) {
+            if (window.NepDebug) {
+                console.log(`No run data available for key: ${cacheKey}`);
+            }
+            // Handle based on level type with empty data
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Parse PowerShell object strings into JavaScript objects
+        let parsedRuns = [];
+        for (let i = 0; i < recordData.runs.length; i++) {
+            const runString = recordData.runs[i];
+            if (typeof runString === "string" && runString.startsWith("@{") && runString.endsWith("}")) {
+                // Parse PowerShell object string format: @{times=; date=2024-12-15; id=y2nqwrjy; weblink=...}
+                const parsedRun = {};
+                const content = runString.slice(2, -1); // Remove @{ and }
+                const pairs = content.split(';');
+                
+                for (const pair of pairs) {
+                    const [key, value] = pair.split('=');
+                    if (key && value !== undefined) {
+                        parsedRun[key.trim()] = value.trim();
+                    }
+                }
+                
+                // Convert times string to proper times object
+                if (parsedRun.times) {
+                    // Parse times like "PT26.595S" into { primary: "PT26.595S" }
+                    parsedRun.times = { primary: parsedRun.times };
+                }
+                
+                parsedRuns.push(parsedRun);
+            } else if (typeof runString === "object") {
+                // Already a proper object
+                parsedRuns.push(runString);
+            }
+        }
+
+        if (parsedRuns.length === 0) {
+            if (window.NepDebug) {
+                console.log(`No valid runs found after parsing for key: ${cacheKey}`);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Get the first (best) run from parsed runs
+        const bestRun = parsedRuns[0];
+
+        // Check if bestRun exists and has the expected structure
+        if (!bestRun || !bestRun.times || !bestRun.times.primary || !bestRun.weblink) {
+            if (window.NepDebug) {
+                console.log(`Invalid run data structure for key: ${cacheKey}`, bestRun);
+            }
+            // Handle based on level type
+            if (level === "H") {
+                HandleHighscore("Empty");
+            } else {
+                switch (level) {
+                    case "25": Handle25("Empty"); break;
+                    case "50": Handle50("Empty"); break;
+                    case "100": Handle100("Empty"); break;
+                    case "All": HandleAll("Empty"); break;
+                    default: break;
+                }
+            }
+            return;
+        }
+
+        // Create standardized run data structure
+        const runData = {
+            data: {
+                runs: [{
+                    run: {
+                        times: { primary: bestRun.times.primary },
+                        weblink: bestRun.weblink
+                    }
+                }]
+            }
+        };
+
+        // Handle based on level type using switch statement
         switch (level) {
-            case "25":
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle25)
-                break;
-            case "50":
-                if (size == 1 && mode == YINYANG) {
-                    Handle50("Empty")
-                    break;
-                }
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle50)
-                break;
-            case "100":
-                if (size != 1) {
-                    makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, Handle100)
-                    break;
-                }
-                Handle100("Empty");
-                break;
-            case "All":
-                makeAPIrequest(src_link_stuff + level_ID + "/" + category_ID + "?top=1&" + catch_multi + catch_size, HandleAll)
-                break;
+            case "H": HandleHighscore(runData); break;
+            case "25": Handle25(runData); break;
+            case "50": Handle50(runData); break;
+            case "100": Handle100(runData); break;
+            case "All": HandleAll(runData); break;
             default:
+                if (window.NepDebug) {
+                    console.warn(`No handler found for level: ${level}`);
+                }
                 break;
         }
+        
+
 
 
     }
@@ -2849,10 +3015,11 @@ window.SpeedInfo.make = function () {
         HandleHighscore(emp);
     }
 
-    window.getAllSrc = function () {
-        ["25", "50", "100", "All", "H"].forEach(element => {
-            getRecordSRC(element);
-        });
+    window.getAllSrc = async function () {
+        const levels = ["25", "50", "100", "All", "H"];
+        for (const element of levels) {
+            await getRecordSRC(element);
+        }
     }
 
     function Handle25(response) {
@@ -2981,8 +3148,12 @@ window.SpeedInfo.make = function () {
         return matches ? matches.length : 0;
     }
 
-    window.getGameDetails();
-    //window.getSomethingSRC();
+    // Initialize cache data on startup
+    getLatestCacheData().catch(error => {
+        if (window.NepDebug) {
+            console.error("Failed to initialize cache data:", error);
+        }
+    });
 
    // window.speedinfoVisible = false;
 
@@ -2992,7 +3163,7 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style.visibility = 'visible';
         window.pudding_settings.SpeedInfo = true;
 
-        window.SpeedInfoUpdate();
+        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     }
 
     window.SpeedInfoHide = function () {
@@ -3082,15 +3253,15 @@ window.SpeedInfo.make = function () {
     //Listeners to hide/show speedinfo box
     const backButton = 'p17HVe';
     document.querySelector("[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
-        window.SpeedInfoUpdate();
+        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     });
 
     const playButton = 'NSjDf';
     document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
-        window.SpeedInfoUpdate();
+        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     });
 
-    window.SpeedInfoUpdate = function () {
+    window.SpeedInfoUpdate = async function () {
         // Mainly for TimeKeeper, runs when "play" is clicked
         let count = window.timeKeeper.getCurrentSetting("count");
         let speed = window.timeKeeper.getCurrentSetting("speed");
@@ -3121,7 +3292,10 @@ window.SpeedInfo.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Magnet, "; break;
+                    case 18: gamemode += "Gate, "; break;
+                    case 19: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -3186,7 +3360,9 @@ window.SpeedInfo.make = function () {
             case 0: return "1 Apple, "; break;
             case 1: return "3 Apples, "; break;
             case 2: return "5 Apples, "; break;
-            case 3: return "Dice count, "; break;
+            case 3: return "10 Apples, "; break;
+            case 4: return "Dice count, "; break;
+            case 5: return "Bomb count, "; break;
             default: return "MoreMenu Apples, "; break;
         }
     }
@@ -3211,10 +3387,11 @@ window.SpeedInfo.make = function () {
 }
 
 window.SpeedInfo.alterCode = function (code) {
+    
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
-    speedinfo_reset = `;window.SpeedInfoUpdate();
-    if(window.first_time_call){window.getAllSrc();window.first_time_call=false;}
+    speedinfo_reset = `;window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
+    if(window.first_time_call){window.getAllSrc().catch(e=>console.error('getAllSrc error:',e));window.first_time_call=false;}
     ;$&`
 
 
@@ -3222,7 +3399,7 @@ window.SpeedInfo.alterCode = function (code) {
     code = code.assertReplace(reset_regex, speedinfo_reset);
 
     switch_regex = new RegExp(/switch\(b\){case "apple"/)
-    speedinfo_switch = `window.SpeedInfoUpdate();switch(b){case "apple"`
+    speedinfo_switch = `window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));switch(b){case "apple"`
     code = code.assertReplace(switch_regex, speedinfo_switch);
 
     window.CurrentModeNum = 0;
@@ -3547,6 +3724,9 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>
@@ -3554,7 +3734,10 @@ window.Timer = {
   <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_03.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
+
 </div>
 <br/>
 <div id="edit-speed">
@@ -3979,9 +4162,10 @@ window.Timer = {
     code = code.replace('"25"', 'Math.min(25, ...(window._splits.length === 0 ? [25] : window._splits)) || 25')
 
     const resetFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?\)\}\;/
+      /reset\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?\)\}\;/
     )[0]
 
+    /*
     const modeKey = resetFunction.match(
       /0===this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('0===this.settings.', '')
@@ -3994,11 +4178,12 @@ window.Timer = {
     const sizeKey = resetFunction.match(
       /1!==this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('1!==this.settings.', '')
+*/
 
     code = code.replace(resetFunction,
       resetFunction.replace(
-        'function(){',
-        `function(){this.xdddd=[];
+        'reset(){',
+        `reset(){this.xdddd=[];
 
           const _mode  = getSelected('#trophy')
           const _count = getSelected('#count')
@@ -4044,7 +4229,7 @@ window.Timer = {
 
 
     const timeFormatFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(0>=a\)return[^]*?3,"0"\)}/
+      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(a<=0\)return[^]*?3,"0"\)}/
     )[0]
 
 
@@ -4094,7 +4279,7 @@ window.Timer = {
 
 
     const splitStuff = code.match(
-      /if\(25===\n?[a-zA-Z0-9_$]{1,8}\|\|50===[a-zA-Z0-9_$]{1,8}\|\|100===[a-zA-Z0-9_$]{1,8}\)/
+      /if\(2?5?=?=?=?\n?[a-zA-Z0-9_$]{1,8}=?=?=?2?5?\|\|5?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?5?0?\|\|1?0?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?1?0?0?\)/
     )[0]
 
     code = code.replace(
@@ -4206,12 +4391,6 @@ window.Timer = {
       `
     )
 
-
-
-
-
-
-
     return code
   }
 }
@@ -4226,6 +4405,7 @@ window.BootstrapMenu.make = function () {
         settingsBox.style.display = 'block';
         settingsBox.style.visibility = 'visible';
         window.bootstrapVisible = true;
+
     }
 
     window.BootstrapHide = function () {
@@ -4235,6 +4415,7 @@ window.BootstrapMenu.make = function () {
             window.getAllSrc();
         }
         window.bootstrapVisible = false;
+
     }
 
     random_button_jsname = 'qycu7d' // Hardcoded because I'm lazy
@@ -4267,6 +4448,7 @@ window.BootstrapMenu.make = function () {
         }
     }
 
+
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -4274,7 +4456,6 @@ window.BootstrapMenu.make = function () {
         a.id = 'stat-icon';
         a.width = a.height = 25;
         a.style = 'position:relative;left:200px;top:70px;';
-
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
         divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
@@ -4296,31 +4477,91 @@ window.BootstrapMenu.make = function () {
         const settingsElement = document.querySelector('#input-counter-settings-container');
 
         //settingsElement.appendChild(c);
-        css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-        if (window.NepDebug) {
-            css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
-        }
+        // css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
+        // if (window.NepDebug) {
+        //     css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
+        // }
 
-        window.bootstrap_css = '';
+        // window.bootstrap_css = '';
+        // const xhr = new XMLHttpRequest();
+
+        // xhr.onreadystatechange = function () {
+        //     if (xhr.readyState === XMLHttpRequest.DONE) {
+        //         if (xhr.status === 200) {
+        //             const data = xhr.responseText;
+        //             // Use the fetched data as a string
+        //             //console.log(data); // Or do something else with the data
+        //             window.bootstrap_css = data;
+        //             document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
+                    
+        //         } else {
+        //             console.error('An error occurred while fetching Bootstrap: ', xhr.status);
+        //         }
+        //     }
+        // };
+
+        // xhr.open('GET', css_stripped, true);
+        // xhr.send();
+
+        const css_stripped = window.NepDebug 
+        ? "http://127.0.0.1:5500/bootstrap-stripped.css"
+        : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
+    
         const xhr = new XMLHttpRequest();
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    const data = xhr.responseText;
-                    // Use the fetched data as a string
-                    //console.log(data); // Or do something else with the data
-                    window.bootstrap_css = data;
-                    document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
-                } else {
-                    console.error('An error occurred while fetching Bootstrap: ', xhr.status);
+        
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                const cssText = xhr.responseText;
+                window.bootstrap_css = cssText;
+                
+                // Inject into existing style element (same as original)
+                const styleElement = document.getElementsByTagName('style')[0];
+                if (styleElement) {
+                    styleElement.innerHTML = styleElement.innerHTML + cssText;
                 }
+
+                let styleElnew = document.getElementById('custom-style');
+                if (!styleElnew) {
+                    styleElnew = document.createElement('style');
+                    styleElnew.id = 'custom-style';
+                    document.head.appendChild(styleElnew);
+                    styleElnew.innerHTML = cssText;
+                }
+
+            } else {
+                console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
             }
         };
 
+        const styleEl = document.getElementsByTagName('style')[0];
+
+        const observer = new MutationObserver((mutations) => {
+            console.log('Style tag changed:', mutations);
+            observer.disconnect();
+            const styleElement = document.getElementsByTagName('style')[0];
+            styleElement.innerHTML = styleElement.innerHTML + window.bootstrap_css;
+            observer.observe(styleEl, { childList: true, characterData: true, subtree: true });
+        });
+
+        // This is the original observer, disabled because adding a new style should fix it instead
+        //observer.observe(styleEl, {
+        //    childList: true,      // watch for added/removed nodes
+        //    characterData: true,  // watch for text changes
+        //    subtree: true         // watch inside the style tag
+        //});
+
+        
+        xhr.onerror = function() {
+            console.error('Network error while loading Bootstrap CSS');
+        };
+        
+        xhr.ontimeout = function() {
+            console.error('Timeout while loading Bootstrap CSS');
+        };
+        
+        xhr.timeout = 10000; // 10 second timeout
         xhr.open('GET', css_stripped, true);
         xhr.send();
-
 
         const settingsBox = document.createElement('div');
         settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
@@ -4383,28 +4624,33 @@ window.BootstrapMenu.make = function () {
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
-    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Custom Portal Pairs</label>
+    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" disabled>Custom Portal Pairs</label>
     </div>
-<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
+<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
     <option value="0">Apple</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
   <option value="1">Banana</option>
 </select><br>
 
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
     <option value="2">Pineapple</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
     <option value="3">Purple Grapes</option>
   </select><br>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
     <option value="4">Pumpkin</option>
   </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: inline-block; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
+  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
     <option value="5">Onion</option>
   </select>
   <br>
+</div>
+  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
+    </br>
+
+    </div>
 
 <select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
   <option value="0">Default Rainbow</option>
@@ -4471,6 +4717,31 @@ window.BootstrapMenu.make = function () {
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
         scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
 
+        keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
+
+        // Code for reset key
+        let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+        function setupKeybindPicker(buttonId, keybindType) {
+            const button = document.getElementById(buttonId);
+            if(!keybinds[keybindType]){
+                keybinds[keybindType] = "Shift";
+            }
+            button.textContent = `Reset Key: ${keybinds[keybindType]}`;
+
+            button.addEventListener("click", () => {
+                button.textContent = "Press any key...";
+                document.addEventListener("keydown", function handler(e) {
+                keybinds[keybindType] = e.key;
+                button.textContent = `Reset Key: ${e.key}`;
+                localStorage.setItem("keybinds", JSON.stringify(keybinds));
+                document.removeEventListener("keydown", handler);
+                });
+            });
+        }
+
+        // Apply to each bind
+        setupKeybindPicker("ResetKeybind", "resetKey");
+
         if (window.pudding_settings.ScrollBar) {
             // Disable it
             document.body.style.overflow = 'hidden';
@@ -4485,8 +4756,10 @@ window.BootstrapMenu.make = function () {
             EatThemeRandomizer2.style.display = 'none';
             EatThemeRandomizer.checked = false;
             window.pudding_settings.randomizeThemeApple = false;
+            EatThemeRandomizer.parentElement.style.display = 'none';
         } else
         {
+            EatThemeRandomizer.parentElement.style.display = 'block';
             console.log("Disabling SpeedInfo")
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
@@ -4636,316 +4909,34 @@ window.BootstrapMenu.alterCode = function (code) {
     }
     return code;
 }
-window.CustomPortalPairs = {};
+window.RenderDelayFix = {};
 
-window.CustomPortalPairs.make = function () {
-
-    // Code that runs before anything else here, loading variables, etc.
-    // Recommended to use "window." for things
-    //window.portal_pairs = false;
-    let first_time_portal = true;
-    window.toggle_portal_pairs = function toggle_portal_pairs() {
-          // this is so that if the input display starts on, it doesnt trigger it to be off, like what normally unchecking the box would do, since I'm using the same function.
-          if(first_time_portal){
-            first_time_portal=false;
-          }
-          else
-          {window.pudding_settings.PortalPairs = !window.pudding_settings.PortalPairs;}
-
-        for (var i = 1; i <= 6; i++) {
-            var selectElement = document.getElementById('fruitSelect' + i.toString());
-
-            selectElement.disabled = !window.pudding_settings.PortalPairs;
-        }
-        //console.log(window.pudding_settings.PortalPairs)
+window.RenderDelayFix.make = function () {
+  function keydownHandler(e){
+    console.log("something worked");
+    if(e.code === "KeyQ"){
+      window.pauseGame = !window.pauseGame;
+      if(window.pauseGame){
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.visibility = "visible";
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.opacity = 1;
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd > div").style.visibility = "hidden";
+      } else {
+        setTimeout(()=>{if(!window.pauseGame){document.querySelector("body > div.Czus3 > div > div.wjOYOd > div").style.visibility = "visible";}},500);
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.visibility = "hidden";
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.opacity = 0;
+      }
     }
-
-    window.sortFruit = function (arr) {
-        return arr.slice().sort((a, b) => a - b);
-    }
-
-    portal_pairs_checkbox = document.getElementById("PortalPairs");
-    portal_pairs_checkbox.checked = window.pudding_settings.PortalPairs;
-    portal_pairs_checkbox.addEventListener("change", toggle_portal_pairs);
-    toggle_portal_pairs();
-    // console.log("AAAAAAAAAAAAAAAAAAAA", window.pudding_settings.PortalPairs);
-
-    var fruitToText = {
-        0: { name: "Apple", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_00.png" },
-        1: { name: "Banana", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_01.png" },
-        2: { name: "Pineapple", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_02.png" },
-        3: { name: "Purple Grapes", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_03.png" },
-        4: { name: "Pumpkin", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_04.png" },
-        5: { name: "Onion", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_05.png" },
-        6: { name: "Eggplant", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_06.png" },
-        7: { name: "Strawberry", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_07.png" },
-        8: { name: "Cherry", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_08.png" },
-        9: { name: "Carrot", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_09.png" },
-        10: { name: "Mushroom", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_10.png" },
-        11: { name: "Broccoli", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_11.png" },
-        12: { name: "Watermelon", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_12.png" },
-        13: { name: "Green Pepper", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_13.png" },
-        14: { name: "Kiwi", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_14.png" },
-        15: { name: "Lemon", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_15.png" },
-        16: { name: "Orange", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_16.png" },
-        17: { name: "Peach", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_17.png" },
-        18: { name: "Peanut", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_18.png" },
-        19: { name: "Raspberries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_19.png" },
-        20: { name: "Tomato", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_20.png" },
-        21: { name: "Juniper Berries", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_21.png" },
-        22: { name: "Fruit Bowl", image: "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_22.png" },
-        23: { name: "Pudding", image: "https://i.postimg.cc/5y7gwwGY/pudding-cr.png" },
-        24: { name: "Blue Berries", image: "https://i.postimg.cc/8cmVPfGd/blueberries.png" },
-        25: { name: "Red Pepper", image: "https://i.postimg.cc/BQqHMbDc/redpepper.png" },
-        26: { name: "Lime", image: "https://i.postimg.cc/k5kWcyFB/lime.png" },
-        27: { name: "Black Berries", image: "https://i.postimg.cc/hPTVGdNX/blackberries.png" },
-        28: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
-        29: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
-        30: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
-        31: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
-        32: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
-        33: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
-        34: { name: "Pacman Ghost", image: "https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png" },
-        35: { name: "Sonic Ring", image: "https://i.postimg.cc/pX1xYGp9/sonic-ring.png" },
-        36: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
-        37: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
-        38: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
-        39: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
-        40: { name: "Mango", image: "https://i.postimg.cc/R0NbYNSH/Mango.png" },
-        41: { name: "Melon", image: "https://i.postimg.cc/8knkL3WN/melon.png" },
-        42: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
-        43: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
-        44: { name: "Soccer Ball", image: "https://i.postimg.cc/C1yT8vjL/soccer-ball.png" },
-        45: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
-        46: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
-        47: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
-        48: { name: "Dirt Block", image: "https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png" },
-        49: { name: "Bread", image: "https://i.postimg.cc/YSMVtPr1/bread.png" },
-        50: { name: "Santa", image: "https://i.postimg.cc/kgV7FKDL/santa.png" },
-        51: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
-        52: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
-
-    };
-
-
-    window.fruit_options = [];
-    //debugger
-    window.selected_fruit = window.pudding_settings.SelectedPairs;
-    window.onscreen_fruit = [];
-    window.offscreen_fruit = [];
-
-    // Code to alter snake code here
-    if (window.NepDebug) {
-        //console.log(document.querySelector('#apple').children)
-        console.log(document.querySelector('#apple').children.length);
-        //console.log(window.new_fruit)
-        //console.log(code)
-    }
-
-
-    window.PopulateOptions = function PopulateOptions() {
-        window.fruit_options = [];
-
-        for (let index = 0; index < document.querySelector('#apple').children.length; index++) {
-            if (index == 22) {
-                index++; // Skip fruit bowl
-            }
-            window.fruit_options.push(index);
-        }
-
-        for (var i = 1; i <= 6; i++) { // Remove selected fruit from new options
-            var otherSelectElement = document.getElementById('fruitSelect' + i);
-            var selectedFruitIndex = fruit_options.indexOf(parseInt(otherSelectElement.value));
-            if (selectedFruitIndex > -1) {
-                fruit_options.splice(selectedFruitIndex, 1);
-            }
-        }
-
-        window.fruit_options = Array.from(new Set(window.fruit_options));
-        window.fruit_options = window.sortFruit(window.fruit_options);
-    }
-
-
-
-    window.PopulateDropdowns = function PopulateDropdowns() {
-        // Populate dropdowns
-
-        for (var i = 1; i <= 6; i++) {
-            //debugger
-            var selectElement = document.getElementById('fruitSelect' + i);
-
-            var dropdown_fruit = selected_fruit[i - 1];
-            var option = document.createElement('option');
-            option.value = dropdown_fruit;
-            if (typeof (dropdown_fruit) === 'undefined') {
-                dropdown_fruit = i - 1;
-                option.value = dropdown_fruit;
-            }
-
-            option.textContent = fruitToText[dropdown_fruit].name;
-            option.setAttribute('data-image', fruitToText[dropdown_fruit].image);
-            selectElement.innerHTML = '';
-            selectElement.appendChild(option);
-
-            for (var j = 0; j < fruit_options.length; j++) {
-                if (fruit_options[j] != dropdown_fruit &&
-                    fruit_options.indexOf(parseInt(selected_fruit[0])) == -1
-                    && fruit_options.indexOf(parseInt(selected_fruit[1])) == -1
-                    && fruit_options.indexOf(parseInt(selected_fruit[2])) == -1
-                    && fruit_options.indexOf(parseInt(selected_fruit[3])) == -1
-                    && fruit_options.indexOf(parseInt(selected_fruit[4])) == -1
-                    && fruit_options.indexOf(parseInt(selected_fruit[5])) == -1
-                ) {
-                    var fruit = fruit_options[j];
-                    var option = document.createElement('option');
-                    option.value = fruit;
-                    option.textContent = fruitToText[fruit].name;
-                    option.setAttribute('data-image', fruitToText[fruit].image);
-                    selectElement.appendChild(option);
-                }
-            }
-        }
-    }
-
-
-
+  }
+  window.document.addEventListener('keydown', keydownHandler);
 }
 
-window.CustomPortalPairs.alterCode = function (code) {
-
-
-    // window.PopulateOptions();
-    // window.PopulateDropdowns();
-
-    // PopulateOptions();
-    // PopulateDropdowns();
-
-
-    // Function to handle the selection change
-    function handleSelection(index) {
-        //var selectElement = document.getElementById('fruitSelect' + index);
-        //var selectedOption = selectElement.value;
-        window.selected_fruit = [];
-
-        // Update Selected Fruit from all dropdowns
-        for (var i = 1; i <= 6; i++) {
-            var otherSelectElement = document.getElementById('fruitSelect' + i);
-            window.selected_fruit.push(otherSelectElement.value)
-        }
-
-        PopulateOptions();
-        PopulateDropdowns();
-    }
-
-
-    var selectElement = document.getElementById('fruitSelect1');
-    selectElement.addEventListener("click", function () {
-        window.fruitSelectID = 1
-    });
-    var selectElement = document.getElementById('fruitSelect2');
-    selectElement.addEventListener("click", function () {
-        window.fruitSelectID = 2
-    });
-    var selectElement = document.getElementById('fruitSelect3');
-    selectElement.addEventListener("click", function () {
-        window.fruitSelectID = 3
-    });
-    var selectElement = document.getElementById('fruitSelect4');
-    selectElement.addEventListener("click", function () {
-        window.fruitSelectID = 4
-    });
-    var selectElement = document.getElementById('fruitSelect5');
-    selectElement.addEventListener("click", function () {
-        window.fruitSelectID = 5
-    });
-    var selectElement = document.getElementById('fruitSelect6');
-    selectElement.addEventListener("click", function () {
-        window.fruitSelectID = 6
-    });
-
-    for (var i = 1; i <= 6; i++) {
-        var selectElement = document.getElementById('fruitSelect' + i);
-        selectElement.addEventListener("change", function () {
-            handleSelection(window.fruitSelectID)
-            if (window.NepDebug) {
-                console.log(window.selected_fruit)
-                console.log(window.fruit_options)
-            }
-        });
-    }
-
-    window.custom_pair_call_counter = 0; // Reset every new game
-
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
-
-    counter_reset_code = `window.custom_pair_call_counter = 0;
-    $&`
-
-    code = code.assertReplace(reset_regex, counter_reset_code);
-    portal_pairs_regex = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}\[[a-zA-Z0-9_$]{1,8}\]\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\)/)
-    catchError(portal_pairs_regex, code) // Third {1,8} here should be "type" - since this is where portal pair type is determined
-    apple_array = code.match(portal_pairs_regex)[0].split('.')[1].split('[')[0]
-    give_portal_type_func = code.match(portal_pairs_regex)[0].split('=')[1]
-    apple_type = code.match(portal_pairs_regex)[0].split('.')[2].split('=')[0]
-    apple_index = code.match(portal_pairs_regex)[0].split('[')[1].split(']')[0]
-    if (window.NepDebug) {
-
-        console.log("Apple array: " + apple_array)
-        console.log("portal type func: " + give_portal_type_func)
-        console.log("apple type: " + apple_type)
-    }
-
-    window.give_custom_pair = function () {
-        window.custom_pair_call_counter = window.custom_pair_call_counter + 1;
-        if (window.NepDebug) {
-            console.log("Giving fruit: " + selected_fruit[window.custom_pair_call_counter - 1].toString())
-        }
-        return selected_fruit[window.custom_pair_call_counter - 1]
-    }
-
-    portal_pairs_code = `
-    if(window.pudding_settings.PortalPairs){this.${apple_array}[${apple_index}].${apple_type} = window.give_custom_pair();
-    this.${apple_array}[${apple_index}+1].${apple_type} = this.${apple_array}[${apple_index}].${apple_type};}
-    else this.${apple_array}[${apple_index}].${apple_type} = ${give_portal_type_func}
-    `
-
-    code = code.assertReplace(portal_pairs_regex, portal_pairs_code);
-
-    // Code to alter snake code here
-    if (window.NepDebug) {
-        //console.log(document.querySelector('#apple').children)
-        console.log(document.querySelector('#apple').children.length);
-        //console.log(window.new_fruit)
-        //console.log(code)
-    }
-
-    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{/)
-    catchError(portal_dice_regex, code)
-    apple_dice_array = code.match(portal_dice_regex)[0].split('<')[1].split('.')[0];
-    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{[^]*type}/gm)
-    catchError(portal_dice_full_regex, code)
-    portal_pairs_dice_code = code.match(portal_dice_full_regex)[0]
-
-    portal_dice_pairs_code = `
-    {
-
-        if(window.pudding_settings.PortalPairs){
-            window.custom_pair_call_counter = 0;
-            for(var apple_index=0;apple_index<${apple_dice_array}.length;apple_index+=2){
-                ${apple_dice_array}[apple_index].${apple_type} = window.give_custom_pair();
-                ${apple_dice_array}[apple_index+1].${apple_type} = ${apple_dice_array}[apple_index].${apple_type};
-            }
-        }
-        else {
-
-    `
-
-    portal_pairs_dice_code = portal_pairs_dice_code.assertReplace('type}', 'type}}');
-    portal_pairs_dice_code = portal_pairs_dice_code.assertReplace('{', portal_dice_pairs_code);
-
-    code = code.assertReplace(portal_dice_full_regex, portal_pairs_dice_code);
-
-    return code;
+window.RenderDelayFix.alterCode = function (code) {
+  code = assertReplace(
+    code,
+    /\(this\.Aa\.direction!=="NONE"\|\|CUD\(this\.Aa\)\)/,
+    "((this.Aa.direction!==\"NONE\"||CUD(this.Aa))&&!window.pauseGame)"
+  );
+  return code;
 }
 window.PuddingMod = {};
 
@@ -5035,7 +5026,9 @@ window.PuddingMod.runCodeBefore = function () {
     "InputDisplay",
     "Timer",
     "BootstrapMenu",
-    "CustomPortalPairs"];
+    "RenderDelayFix"
+    //,"CustomPortalPairs"
+  ];
   console.log("Enabling Pudding Mod");
 
   libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
@@ -5055,6 +5048,22 @@ window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
     console.log(code)
   }
+
+  document.addEventListener('keydown', function(e){
+    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    let resetButton = document.getElementById('ResetKeybind');
+    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
+    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
+        if(e.key === keybinds["resetKey"]){
+            const keydownEvent = new KeyboardEvent('keydown', {
+                keyCode: 27
+            });
+            document.dispatchEvent(keydownEvent);
+            document.querySelector('[jsname="NSjDf"]').click();
+        }
+    }
+  });
+
 
   code = code.replaceAll(/\$\$/gm, `doubleD`)
   code = code.replaceAll(/\$\&/gm, `$ &`)
@@ -5088,6 +5097,7 @@ window.PuddingMod.runCodeAfter = function () {
   }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
+
 };
 
 window.moreMenu = {
@@ -5101,7 +5111,7 @@ window.moreMenu = {
       return img
     }
 
-
+  
     for(let src of [
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Micro.png?raw=true',
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Tiny.png?raw=true',
@@ -5112,7 +5122,7 @@ window.moreMenu = {
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Too%20Big.png?raw=true',
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Way%20Too%20Big.png?raw=true'
     ]) document.querySelector('#size').appendChild(uiImage(src))
-
+  
     for(let src of [
       'https://i.postimg.cc/bNYJfjyZ/Turtle-Bunny.png',
       'https://i.postimg.cc/GtdppWvS/Lightning.png',
@@ -5126,7 +5136,7 @@ window.moreMenu = {
       'https://i.postimg.cc/fL4LGtys/Eternal.png',
       'https://i.postimg.cc/LXzX29g1/Fire-Bunny.png'
     ]) document.querySelector('#speed').appendChild(uiImage(src))
-
+  
     for(let src of [
       'https://i.postimg.cc/cJx1Lt2W/13-cr.png',
       'https://i.postimg.cc/HWq26Bdv/25.png',
@@ -5138,34 +5148,34 @@ window.moreMenu = {
   },
   alterSnakeCode: code => {
     const resetFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\n?\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?pos\n?\)\n?}/
+      /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?pos\n?\)\n?}/
     )[0]
-
+  
     const selectedAppleCount = resetFunction.match(
-      /0\n?!==\n?this\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/
-    )[0].replace(/0\n?!==/, '').replace(/\n/g, '')
-
+      /this\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?!==\n?0/
+    )[0].replace(/!==\n?0/, '').replace(/\n/g, '')
+  
     const applePlacementStem = resetFunction.match(
       /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?push\n?\(\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?,/
     )[0]
     const appleArray = applePlacementStem.match(/this\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0]
-
+  
     const checkBadMode = code.match(
       /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?return [a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?2\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(a\n?,\n?8\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?9\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?10\n?\)\n?}/
     )[0].match(/[a-zA-Z0-9_$]{1,8}/)[0]
     const isModeSelected = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?,\n?b\n?\)\n?{\n?return a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.has\(b\):18\n?===\n?a[^]*?===\n?b\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?,\n?b\n?\)\n?{\n?return a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.has\(b\):[^]*?===\n?b\n?}/
     )[0].match(/[a-zA-Z0-9_$]{1,8}/)[0]
-
-
+  
+  
     code = code.assertReplace(resetFunction,
       resetFunction.assertReplace(
         'if(a)',
         `
-        if(${selectedAppleCount} > 3) {
+        if(${selectedAppleCount} > 5) {
 
           if(!${checkBadMode}(this.settings)) {
-            if(${selectedAppleCount} === 4) {
+            if(${selectedAppleCount} === 6) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} -1, +2))
               ${applePlacementStem} -3, +2))
@@ -5179,7 +5189,7 @@ window.moreMenu = {
               ${applePlacementStem} +1, -2))
               ${applePlacementStem} -1, -2))
               ${applePlacementStem} -3, -2))
-            } else if(${selectedAppleCount} === 5) {
+            } else if(${selectedAppleCount} === 7) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} +0, +2))
               ${applePlacementStem} -1, +2))
@@ -5205,7 +5215,7 @@ window.moreMenu = {
               ${applePlacementStem} -1, -2))
               ${applePlacementStem} -2, -2))
               ${applePlacementStem} -3, -2))
-            } else if(${selectedAppleCount} === 6) {
+            } else if(${selectedAppleCount} === 8) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} +0, +2))
               ${applePlacementStem} -1, +2))
@@ -5246,32 +5256,32 @@ window.moreMenu = {
               ${applePlacementStem} -1, +3))
               ${applePlacementStem} -2, +3))
               ${applePlacementStem} -3, +3))
-            } else if(${selectedAppleCount} === 7) {
+            } else if(${selectedAppleCount} === 9) {
               for(let dy = -4; dy <= 4; dy++)
                 for(let dx = -7; dx <= 2; dx++)
                   ${applePlacementStem} dx, dy))
-            } else if(${selectedAppleCount} === 8) {
+            } else if(${selectedAppleCount} === 10) {
               for(let i = 0; i < 200; i++)
                 ${applePlacementStem} -1, +0))
-            } else if(${selectedAppleCount} === 9) {
+            } else if(${selectedAppleCount} === 11) {
               for(let i = 0; i < 10000; i++)
                 ${applePlacementStem} -1, +0))
             } else
               ${applePlacementStem} +100000, +1))
-
+  
           } else {
 
-            if(${selectedAppleCount} < 9) {
+            if(${selectedAppleCount} < 11) {
               const count = (
-                ${selectedAppleCount} === 4
+                ${selectedAppleCount} === 6
                   ? 13
-                : ${selectedAppleCount} === 5
-                  ? 25
-                : ${selectedAppleCount} === 6
-                  ? 40
                 : ${selectedAppleCount} === 7
-                  ? 87
+                  ? 25
                 : ${selectedAppleCount} === 8
+                  ? 40
+                : ${selectedAppleCount} === 9
+                  ? 87
+                : ${selectedAppleCount} === 10
                   ? 200
                 : 0
               )
@@ -5288,36 +5298,36 @@ window.moreMenu = {
       ).assertReplace(
         'pos)}',
         `pos)
-          if(${isModeSelected}(this.settings, 2) && ${selectedAppleCount} > 4) {
+          if(${isModeSelected}(this.settings, 2) && ${selectedAppleCount} > 6) {
             for(let __i___ = 0; __i___ < ${appleArray}.length; __i___ += 2) {
-              ${appleArray}[__i___].type = ${appleArray}[__i___ + 1].type = Math.floor(Math.random() * 21)
+              ${appleArray}[__i___].type = ${appleArray}[__i___ + 1].type = Math.floor(Math.random() * 24)
             }
           }
-
+  
         }`
       )
     )
-
-
+  
+  
     const tileLengthSetLine = code.match(
-      /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\(\n?a\n?\.\n?isMobile\n?\?\n?175\n?:\n?135\n?\)\n?\*\n?b\n?;/
+      /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\(\n?d\n?\.\n?isMobile\n?\?\n?175\n?:\n?135\n?\)\n?\*\n?a\n?;/
     )[0]
     const selectedSpeed = code.match(
-      /switch\n?\(\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case(\n? \n?|\n)1\n?:\n?b\n?=\n?\.66/
+      /switch\n?\(\n?d\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case(\n? \n?|\n)1\n?:\n?a\n?=\n?\.66/
     )[0].match(
-      /a\n?\.\n?[a-zA-Z0-9_$]{1,8}/
-    )[0].replace('a', 'this.settings')
-
+      /d\n?\.\n?[a-zA-Z0-9_$]{1,8}/
+    )[0].replace('d', 'this.settings')
+  
     const tickFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?tick\n?=\n?function\n?\(\)\n?{\n?[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?keys\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}\n?}\n?}/
+      /tick\n?\(\n?\)\n?{\n?[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?keys\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}\n?}\n?}/
     )[0]
     const replacePoint = tickFunction.match(
       /\.5\n?:\n?1\.25\n?\);\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\+\+;/
     )[0]
-
+  
     window.bunnyTurtleSpeed = 1.33
     window.lightningSnailSpeed = 1.85
-
+  
     code = code.assertReplace(tickFunction,
       tickFunction.replaceAll(
         '&&', ' && '
@@ -5372,78 +5382,78 @@ window.moreMenu = {
               speedMultiplier = 1
               break
           }
-          ${tileLengthSetLine.replace(/\*\n?b/, '* speedMultiplier').replace('a.isMobile', 'this.settings.isMobile')}
+          ${tileLengthSetLine.replace(/\*\n?a/, '* speedMultiplier').replace('d.isMobile', 'this.settings.isMobile')}
         `
       )
     )
-
+  
     const resetFunction1 = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\n?\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
+      /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
     )[0]
-
+  
     code = code.assertReplace(resetFunction1,
       resetFunction1.assertReplace(
-        /{case 1:b=\.66[^}]*?1}/,
+        /{case 1:a=\.66[^}]*?1}/,
         `{
           case 1:
-            b = .66
+            a = .66
             break a
           case 2:
-            b = 1.33
+            a = 1.33                       
             break a
           case 3:
-            b = window.bunnyTurtleSpeed
+            a = window.bunnyTurtleSpeed    
             break a
           case 4:
-            b = .45
+            a = .45                        
             break a
           case 5:
-            b = 1.85
+            a = 1.85                       
             break a
           case 6:
-            b = window.lightningSnailSpeed
+            a = window.lightningSnailSpeed 
             break a
           case 7:
-            b = 18.5
+            a = 18.5                       
             break a
           case 8:
-            b = .35
+            a = .35                        
             break a
           case 9:
-            b = .25
+            a = .25                        
             break a
           case 10:
-            b = .15
+            a = .15                        
             break a
           case 11:
-            b = .05
+            a = .05                        
             break a
           case 12:
-            b = 26640
+            a = 26640                      
             break a
           case 13:
-            b = .00001
+            a = .00001                     
             break a
           default:
-            b = 1
+            a = 1                          
             break a
         }`
       )
     );
-
+  
     const speedIconFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?var b\n?=\n?1\n?===\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8};\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?clearRect\n?\(\n?0\n?,\n?0\n?,\n?[^]*?\n?0\n?\)\n?,\n?0\n?,\n?c\n?,\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?var b\n?=\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?===\n?1\n?;\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?clearRect\n?\(\n?0\n?,\n?0\n?,\n?[^]*?\n?0\n?\)\n?,\n?0\n?,\n?c\n?,\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}/
     )[0]
     const canvWidth = speedIconFunction.match(
-      /var c\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?width/
-    )[0].assertReplace(/var c\n?=/, '')
+      /const c\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?width/
+    )[0].assertReplace(/const c\n?=/, '')
     const canv = speedIconFunction.match(
       /a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?render/g
     )[1].assertReplace(/.\n?render/, '')
     const selectedSpeed1 = speedIconFunction.match(
-      /1\n?===\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/g
-    )[1].assertReplace(/1\n?===/, '')
-
+      /a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?===\n?1/g
+    )[1].assertReplace(/\n?===\n?1/, '')
+  
     code = code.assertReplace(speedIconFunction,
       speedIconFunction.assertReplace(
         '&&', '?'
@@ -5452,10 +5462,10 @@ window.moreMenu = {
         `)) : ${selectedSpeed1} !== 0 && (${canv}.context.drawImage(document.querySelector('#speed').children[${selectedSpeed1}], ${canvWidth} - 80, d.y - 80, 80, 80));`
       )
     )
-
-
+  
+  
     const sizeHandleFunction = code.match(
-      /_\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?\)\n?{\n?var(\n|\n? \n?)a\n?=\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\("JI3Aqc[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?\(\n?\)\n?{\n?var(\n|\n? \n?)a\n?=\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\("JI3Aqc[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}/
     )[0]
     const selectedSize = sizeHandleFunction.match(
       /switch\n?\(\n?this\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case 2\n?:/
@@ -5466,7 +5476,7 @@ window.moreMenu = {
     const sizeHolder = sizeHold.match(/[a-zA-Z0-9_$]\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0]
     const dim = sizeHold.match(/[a-zA-Z0-9_$]\n?\/\n?[a-zA-Z0-9_$]\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0].replace(/[a-zA-Z0-9_$]\n?\//, '')
     const e = sizeHandleFunction.match(/[a-zA-Z0-9_$]\n?=\n?512/)[0][0]
-
+  
     code = code.assertReplace(sizeHandleFunction,
       sizeHandleFunction
       .assertReplace(
@@ -5559,79 +5569,80 @@ window.moreMenu = {
         `
       )
     )
-
-
+    
+  
     const menuUpdateFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\)\n?{\n?if\n?\(\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\)\n?\)\n?[^]*?"thso6e"\n?\)\n?}\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?\(\n?\)\n?{\n?if\n?\(\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\)\n?\)\n?[^]*?"thso6e"\n?\)\n?}\n?}/
     )[0]
     const selectedAppleCount1 = `([...document.querySelector('#count').children].indexOf(document.querySelector('#count').getElementsByClassName('tuJOWd')[0]))`
-
-
+  
+  
     code = code.assertReplace(
       menuUpdateFunction,
       menuUpdateFunction.assertReplace(
         '}}',
         `}
           const appleCountDisplay = document.body.getElementsByClassName('UJhXPd wSwbef EWyEF')[0]
-
+  
           // [...appleCountDisplay.children].forEach((e, i) => i > 1 && (appleCountDisplay.removeChild(appleCountDisplay.children[i])))
           for(let i = 2; i < appleCountDisplay.children.length; i++) {
             appleCountDisplay.removeChild(appleCountDisplay.children[i])
           }
 
-          if(${selectedAppleCount1} > 2) {
+          if(${selectedAppleCount1} > 3) {
             const __src = document.querySelector('#count').children[${selectedAppleCount1}].src
             const __img = window.uiImage(__src)
             __img.style.position = 'relative'
             __img.style.left = '50px'
             appleCountDisplay.appendChild(__img)
           }
-        }
+        } 
         `
       )
     )
-
-
+  
+  
     const pixelIssueFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}=function\(a\){var b=a\.[a-zA-Z0-9_$]{1,8};if[^]*?9\)}}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?\)\n?{\n?var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?;\n?if[^]*?9\n?\)\n?}\n?}/
     )[0]
     const pixelIssueB = pixelIssueFunction.match(
-      /var b=a\.[a-zA-Z0-9_$]{1,8}/
-    )[0].replace('var b=', '')
+      /var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}/
+    )[0].replace(/var(\n| )b\n?=\n?/, '')
     const boardDimensions = pixelIssueFunction.match(
-      /b\.[a-zA-Z0-9_$]{1,8}\.height/
-    )[0].replace('b', pixelIssueB).replace('.height', '')
+      /b\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?height/
+    )[0].replace('b', pixelIssueB).replace(/\n?\.\n?height/, '')
     const boardThing = pixelIssueFunction.match(
-      /b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\[e\.y\]\[e\.x\]/
-    )[0].replace('[e.y][e.x]', '')
+      /b\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\[\n?d\n?\.\n?y\n?\]\n?\[\n?d\n?\.\n?x\n?\]/
+    )[0].replace(/\n?\[\n?d\n?\.\n?y\n?\]\n?\[\n?d\n?\.\n?x\n?\]/, '')
     code = code.assertReplaceAll(
-      `${boardThing}[e.y][e.x]=d`,
-      `e.y >= 0 && e.y < ${boardDimensions}.height && e.x >= 0 && e.x < ${boardDimensions}.width && (${boardThing}[e.y][e.x] = d)`
+      RegExp(`${boardThing}\\n?\\[\\n?c\\n?\\.\\n?y\\n?\\]\\n?\\[\\n?c\\n?\\.\\n?x\\n?\\]\\n?=\\n?e`, 'g'),
+      `c.y >= 0 && c.y < ${boardDimensions}.height && c.x >= 0 && c.x < ${boardDimensions}.width && (${boardThing}[c.y][c.x] = e)`
     )
-
-
+  
+  
     code = code.assertReplace(
-      /switch\(\n?Math\.floor\(4\*Math\.random\(\)\)\){default:case[^}]*?}/,
-      'g = Math.floor(10 * Math.random());'
+      /switch\n?\(\n?Math\n?\.\n?floor\n?\(\n?Math\n?\.\n?random\n?\(\n?\)\n?\*\n?6\n?\)\n?\)\n?{\n?default\n?:\n?case[^}]*?}/,
+      'h = Math.floor(12 * Math.random());'
     ).assertReplace(
-      /e=\.25>Math.random\(\)\?\.25>Math\.random\(\)\?2:1:0/,
-      'e = Math.floor(14 * Math.random())'
+      /f\n?=\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?2\n?:\n?1\n?:\n?0/,
+      'f = Math.floor(14 * Math.random())'
     ).assertReplace(
-      /f=\.25>Math.random\(\)\?\.25>Math\.random\(\)\?2:1:0/,
-      'f = Math.floor(11 * Math.random())'
+      /g\n?=\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?2\n?:\n?1\n?:\n?0/,
+      'g = Math.floor(11 * Math.random())'
     )
-
-
-
+  
+  
+  
     const appleTypeChosen = code.match(
-      /for\(a=a\.settings\.[a-zA-Z0-9_$]{1,8}/
-    )[0].match(/a\.settings\.[a-zA-Z0-9_$]{1,8}/)[0]
+      /for\n?\(\n?a\n?=\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/
+    )[0].match(/a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0]
+
     code = code.assertReplace(
-      RegExp(`for\\(a\\n?=\\n?${appleTypeChosen}\\n?;\\n?b\\.has\\n?\\(\\n?a\\n?\\)\\n?;\\n?\\)`),
-      `for(a = ${appleTypeChosen}, __i = 0; b.has(a) && __i < 23; __i++)`
+      RegExp(`for\\n?\\(\\n?a\\n?=\\n?${appleTypeChosen}\\n?;\\n?c\\.has\\n?\\(\\n?a\\n?\\)\\n?;\\n?\\)`),
+      `for(a = ${appleTypeChosen}, __i = 0; c.has(a) && __i < 24; __i++)`
     )
-
-
+  
+  
     return code
   },
   runCodeAfter: () => {

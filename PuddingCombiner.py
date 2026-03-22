@@ -13,7 +13,8 @@ lib_list = [
     "SpeedInfo",
     "InputDisplay",
     "Timer",
-    "BootstrapMenu"
+    "BootstrapMenu",
+    "RenderDelayFix"
     #,"CustomPortalPairs"
     ]
 for lib in lib_list:
