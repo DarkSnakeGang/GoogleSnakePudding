@@ -2,6 +2,9 @@ window.Theme = {};
 
 window.Theme.make = function () {
 
+  // style for all pudding sidebar overlays
+  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;';
+
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
   window.themes = [

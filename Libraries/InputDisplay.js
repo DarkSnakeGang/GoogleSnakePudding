@@ -2,16 +2,18 @@ window.InputDisplay = {};
 
 window.InputDisplay.make = function () {
 
+  let displayPosition = parseInt((window.puddingSidebarStyle.split(';').find(style => style.trim().startsWith('width')) ? window.puddingSidebarStyle.split(';').find(style => style.trim().startsWith('width')).split(':')[1].trim() : null),10);
+
   // Code that runs before anything else here, loading variables, etc.
   // Recommended to use "window." for things
   const e = document.createElement('div');
   e.id = 'input-display-container';
-  e.style = 'position:absolute;left:-447px;top:530px;z-index:10001;display:block;line-height:normal;';
+  e.style = `position:absolute;left:${(-553+displayPosition/2)}px;top:530px;z-index:10001;display:block;line-height:normal;`;
   window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
   f.id = 'input-display-container2';
-  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;';
+  f.style = `position:absolute;left:${(-553+displayPosition/2)}px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;`;
   window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');

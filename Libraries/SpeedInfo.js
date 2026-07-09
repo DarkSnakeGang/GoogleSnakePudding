@@ -598,7 +598,7 @@ window.SpeedInfo.make = function () {
             const wholeSeconds = Math.floor(seconds);
             convertedTime += wholeSeconds + 's';
 
-            const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
+            const milliseconds = String(Math.round((seconds - wholeSeconds) * 1000)).padStart(3, "0");
 
             if (milliseconds > 0) {
                 convertedTime += milliseconds + 'ms';
@@ -654,7 +654,7 @@ window.SpeedInfo.make = function () {
 
 
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:208px;height:584px;top:0px;';
+        speedinfoBox.style = window.puddingSidebarStyle;
         speedinfoBox.id = 'speedinfo-popup-pudding';
         speedinfoBox.style.visibility = 'hidden';
         window.speedinfoInput = speedinfoBox;
@@ -803,14 +803,16 @@ window.SpeedInfo.make = function () {
                     continue;
                 }
 
-                minutes = Math.floor(storage[name].time / 60000);
-                seconds = Math.floor((storage[name].time - minutes * 60000) / 1000);
-                mseconds = storage[name].time - minutes * 60000 - seconds * 1000;
-                if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
-                if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
-                while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
+                hours = Math.floor(storage[name].time / 3600000);
+                minutes = String(Math.floor(storage[name].time / 60000)).padStart(2, "0");
+                seconds = String(Math.floor((storage[name].time - minutes * 60000) / 1000)).padStart(2, "0");
+                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000).padStart(3, "0");
                 score_label = "ALL" === score ? "All" : score;
-                bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
+                if(hours==0){
+                    bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
+                }else{
+                    bold.innerHTML = score_label + " Apples: " + hours + "h" + minutes + "m" + seconds + "s" + mseconds + "ms";
+                }
 
             }
             else {

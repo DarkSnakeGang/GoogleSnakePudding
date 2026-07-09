@@ -354,6 +354,7 @@ window.TimeKeeper.make = function () {
 
     //generate and show the dialog
     window.timeKeeper.showDialog = function () {
+
         //make dialog
         window.timeKeeper.dialogActive = true;
         document.getElementById('time-keeper').innerHTML = 'Hide Details';
@@ -475,40 +476,63 @@ window.TimeKeeper.make = function () {
                 if (score == "att")
                     continue;
 
-                minutes = Math.floor(storage[name].time / 60000);
-                seconds = Math.floor((storage[name].time - minutes * 60000) / 1000);
-                mseconds = storage[name].time - minutes * 60000 - seconds * 1000;
-                if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
-                if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
-                while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
-                if (score != "H") {
-                    dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
+                hours = Math.floor(storage[name].time / 3600000);
+                minutes = String(Math.floor(storage[name].time / 60000)).padStart(2, "0");
+                seconds = String(Math.floor((storage[name].time - minutes * 60000) / 1000)).padStart(2, "0");
+                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                if(hours==0){
+                    if (score != "H") {
+                        dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    else {
+                        dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    if (storage[name].att != undefined && storage[name].sum != undefined) {
+                        let time = Math.floor(storage[name].sum / storage[name].att);
+                        minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+                        seconds = String(Math.floor((time - minutes * 60000) / 1000)).padStart(2, "0");
+                        mseconds = String(time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                    }
                     dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                }else{
+                    if (score != "H") {
+                        dialog.appendChild(document.createTextNode("Best Time: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    else {
+                        dialog.appendChild(document.createTextNode("Duration: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    if (storage[name].att != undefined && storage[name].sum != undefined) {
+                        let time = Math.floor(storage[name].sum / storage[name].att);
+                        minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+                        seconds = String(Math.floor((time - minutes * 60000) / 1000)).padStart(2, "0");
+                        mseconds = String(time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                    }
                     dialog.appendChild(document.createElement("br"));
                 }
-                else {
-                    dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
-                    dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                    dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
-                    dialog.appendChild(document.createElement("br"));
-                }
-                if (storage[name].att != undefined && storage[name].sum != undefined) {
-                    let time = Math.floor(storage[name].sum / storage[name].att);
-                    minutes = Math.floor(time / 60000);
-                    seconds = Math.floor((time - minutes * 60000) / 1000);
-                    mseconds = time - minutes * 60000 - seconds * 1000;
-                    if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
-                    if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
-                    while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
-                    dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                    dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
-                    dialog.appendChild(document.createElement("br"));
-                }
-                dialog.appendChild(document.createElement("br"));
             }
         }
 

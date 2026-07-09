@@ -68,6 +68,9 @@ window.Theme = {};
 
 window.Theme.make = function () {
 
+  // style for all pudding sidebar overlays
+  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;';
+
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
   window.themes = [
@@ -1375,6 +1378,7 @@ window.TimeKeeper.make = function () {
 
     //generate and show the dialog
     window.timeKeeper.showDialog = function () {
+
         //make dialog
         window.timeKeeper.dialogActive = true;
         document.getElementById('time-keeper').innerHTML = 'Hide Details';
@@ -1496,40 +1500,63 @@ window.TimeKeeper.make = function () {
                 if (score == "att")
                     continue;
 
-                minutes = Math.floor(storage[name].time / 60000);
-                seconds = Math.floor((storage[name].time - minutes * 60000) / 1000);
-                mseconds = storage[name].time - minutes * 60000 - seconds * 1000;
-                if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
-                if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
-                while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
-                if (score != "H") {
-                    dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
+                hours = Math.floor(storage[name].time / 3600000);
+                minutes = String(Math.floor(storage[name].time / 60000)).padStart(2, "0");
+                seconds = String(Math.floor((storage[name].time - minutes * 60000) / 1000)).padStart(2, "0");
+                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                if(hours==0){
+                    if (score != "H") {
+                        dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    else {
+                        dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    if (storage[name].att != undefined && storage[name].sum != undefined) {
+                        let time = Math.floor(storage[name].sum / storage[name].att);
+                        minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+                        seconds = String(Math.floor((time - minutes * 60000) / 1000)).padStart(2, "0");
+                        mseconds = String(time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                    }
                     dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                }else{
+                    if (score != "H") {
+                        dialog.appendChild(document.createTextNode("Best Time: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    else {
+                        dialog.appendChild(document.createTextNode("Duration: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
+                        dialog.appendChild(document.createElement("br"));
+                    }
+                    if (storage[name].att != undefined && storage[name].sum != undefined) {
+                        let time = Math.floor(storage[name].sum / storage[name].att);
+                        minutes = String(Math.floor(time / 60000)).padStart(2, "0");
+                        seconds = String(Math.floor((time - minutes * 60000) / 1000)).padStart(2, "0");
+                        mseconds = String(time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
+                        dialog.appendChild(document.createElement("br"));
+                        dialog.appendChild(document.createTextNode("Average: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
+                        dialog.appendChild(document.createElement("br"));
+                    }
                     dialog.appendChild(document.createElement("br"));
                 }
-                else {
-                    dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
-                    dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                    dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
-                    dialog.appendChild(document.createElement("br"));
-                }
-                if (storage[name].att != undefined && storage[name].sum != undefined) {
-                    let time = Math.floor(storage[name].sum / storage[name].att);
-                    minutes = Math.floor(time / 60000);
-                    seconds = Math.floor((time - minutes * 60000) / 1000);
-                    mseconds = time - minutes * 60000 - seconds * 1000;
-                    if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
-                    if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
-                    while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
-                    dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                    dialog.appendChild(document.createElement("br"));
-                    dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
-                    dialog.appendChild(document.createElement("br"));
-                }
-                dialog.appendChild(document.createElement("br"));
             }
         }
 
@@ -3128,7 +3155,7 @@ window.SpeedInfo.make = function () {
             const wholeSeconds = Math.floor(seconds);
             convertedTime += wholeSeconds + 's';
 
-            const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
+            const milliseconds = String(Math.round((seconds - wholeSeconds) * 1000)).padStart(3, "0");
 
             if (milliseconds > 0) {
                 convertedTime += milliseconds + 'ms';
@@ -3184,7 +3211,7 @@ window.SpeedInfo.make = function () {
 
 
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:208px;height:584px;top:0px;';
+        speedinfoBox.style = window.puddingSidebarStyle;
         speedinfoBox.id = 'speedinfo-popup-pudding';
         speedinfoBox.style.visibility = 'hidden';
         window.speedinfoInput = speedinfoBox;
@@ -3333,14 +3360,16 @@ window.SpeedInfo.make = function () {
                     continue;
                 }
 
-                minutes = Math.floor(storage[name].time / 60000);
-                seconds = Math.floor((storage[name].time - minutes * 60000) / 1000);
-                mseconds = storage[name].time - minutes * 60000 - seconds * 1000;
-                if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
-                if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
-                while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
+                hours = Math.floor(storage[name].time / 3600000);
+                minutes = String(Math.floor(storage[name].time / 60000)).padStart(2, "0");
+                seconds = String(Math.floor((storage[name].time - minutes * 60000) / 1000)).padStart(2, "0");
+                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000).padStart(3, "0");
                 score_label = "ALL" === score ? "All" : score;
-                bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
+                if(hours==0){
+                    bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
+                }else{
+                    bold.innerHTML = score_label + " Apples: " + hours + "h" + minutes + "m" + seconds + "s" + mseconds + "ms";
+                }
 
             }
             else {
@@ -3427,16 +3456,18 @@ window.InputDisplay = {};
 
 window.InputDisplay.make = function () {
 
+  let displayPosition = parseInt((window.puddingSidebarStyle.split(';').find(style => style.trim().startsWith('width')) ? window.puddingSidebarStyle.split(';').find(style => style.trim().startsWith('width')).split(':')[1].trim() : null),10);
+
   // Code that runs before anything else here, loading variables, etc.
   // Recommended to use "window." for things
   const e = document.createElement('div');
   e.id = 'input-display-container';
-  e.style = 'position:absolute;left:-447px;top:530px;z-index:10001;display:block;line-height:normal;';
+  e.style = `position:absolute;left:${(-553+displayPosition/2)}px;top:530px;z-index:10001;display:block;line-height:normal;`;
   window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
   f.id = 'input-display-container2';
-  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;';
+  f.style = `position:absolute;left:${(-553+displayPosition/2)}px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;`;
   window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
@@ -4564,7 +4595,8 @@ window.BootstrapMenu.make = function () {
         xhr.send();
 
         const settingsBox = document.createElement('div');
-        settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
+        settingsBox.style = window.puddingSidebarStyle;
+        settingsBox.style.display = 'none';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
 

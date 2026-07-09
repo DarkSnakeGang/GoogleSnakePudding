@@ -168,7 +168,8 @@ window.BootstrapMenu.make = function () {
         xhr.send();
 
         const settingsBox = document.createElement('div');
-        settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
+        settingsBox.style = window.puddingSidebarStyle;
+        settingsBox.style.display = 'none';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
 
