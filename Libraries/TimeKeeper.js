@@ -477,9 +477,9 @@ window.TimeKeeper.make = function () {
                     continue;
 
                 hours = Math.floor(storage[name].time / 3600000);
-                minutes = String(Math.floor(storage[name].time / 60000)).padStart(2, "0");
-                seconds = String(Math.floor((storage[name].time - minutes * 60000) / 1000)).padStart(2, "0");
-                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                minutes = String(Math.floor((storage[name].time-hours*3600000) / 60000)).padStart(2, "0");
+                seconds = String(Math.floor((storage[name].time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
+                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
                 if(hours==0){
                     if (score != "H") {
                         dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
@@ -497,9 +497,10 @@ window.TimeKeeper.make = function () {
                     }
                     if (storage[name].att != undefined && storage[name].sum != undefined) {
                         let time = Math.floor(storage[name].sum / storage[name].att);
-                        minutes = String(Math.floor(time / 60000)).padStart(2, "0");
-                        seconds = String(Math.floor((time - minutes * 60000) / 1000)).padStart(2, "0");
-                        mseconds = String(time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                        hours = Math.floor(storage[name].time / 3600000)
+                        minutes = String(Math.floor((time - hours * 3600000) / 60000)).padStart(2, "0");
+                        seconds = String(Math.floor((time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
+                        mseconds = String(time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
                         dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
                         dialog.appendChild(document.createElement("br"));
                         dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
@@ -523,9 +524,10 @@ window.TimeKeeper.make = function () {
                     }
                     if (storage[name].att != undefined && storage[name].sum != undefined) {
                         let time = Math.floor(storage[name].sum / storage[name].att);
-                        minutes = String(Math.floor(time / 60000)).padStart(2, "0");
-                        seconds = String(Math.floor((time - minutes * 60000) / 1000)).padStart(2, "0");
-                        mseconds = String(time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                        hours = Math.floor(storage[name].time / 3600000)
+                        minutes = String(Math.floor((time - hours * 3600000) / 60000)).padStart(2, "0");
+                        seconds = String(Math.floor((time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
+                        mseconds = String(time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
                         dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
                         dialog.appendChild(document.createElement("br"));
                         dialog.appendChild(document.createTextNode("Average: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));

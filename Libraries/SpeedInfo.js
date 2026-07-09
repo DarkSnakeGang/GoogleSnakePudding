@@ -804,9 +804,9 @@ window.SpeedInfo.make = function () {
                 }
 
                 hours = Math.floor(storage[name].time / 3600000);
-                minutes = String(Math.floor(storage[name].time / 60000)).padStart(2, "0");
-                seconds = String(Math.floor((storage[name].time - minutes * 60000) / 1000)).padStart(2, "0");
-                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000).padStart(3, "0");
+                minutes = String(Math.floor((storage[name].time / 60000)-hours*60)).padStart(2, "0");
+                seconds = String(Math.floor((storage[name].time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
+                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
                 score_label = "ALL" === score ? "All" : score;
                 if(hours==0){
                     bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
