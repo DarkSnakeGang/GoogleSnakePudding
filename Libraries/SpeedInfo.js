@@ -53,6 +53,7 @@ function findValueId(variables, variableName, valueLabel) {
  
 // this is a temporary fix for the fact that yarmi hasnt updated fastsnakestats to include bridge. this does not support highscore
 window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount, speed, mapSize, split) {
+    if(mode=="Skip Mode"){mode="Bridge Mode"};
   const { gameId, levels, categories } = await loadGameData();
  
   // Resolve the level (mode)
