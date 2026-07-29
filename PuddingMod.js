@@ -533,7 +533,7 @@ window.DistinctVisual.make = function () {
 window.DistinctVisual.alterCode = function (code) {
 
     // Attempt to get info on which mode it is
-    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{const [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
+    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{(?:let|const|var) [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
 
     spawn_func_code = code.match(spawn_func_regex)[0]
 
@@ -547,6 +547,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
     realism_switch = code.match(realism_draw)[0];
+    
     //actual_canvas_regexp = new RegExp(/a.[a-zA-Z0-9_$]{1,8}.canvas,/);
     //actual_canvas = code.match(actual_canvas_regexp)[0]
     realism_path = new RegExp(/function\(a,b\){switch.*}}/);
@@ -570,7 +571,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     window.drawing_apple = true;
 
-    get_apple_stuff = new RegExp(/const.*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    get_apple_stuff = new RegExp(/(?:let|const|var).*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     poison_default = code.match(get_apple_stuff)[0]
     b_graphics = poison_default.split('(')[2].split(')')[0]
 
@@ -975,10 +976,11 @@ window.Counter.alterCode = function (code) {
     stop_regex = new RegExp(/stop\(a\){/)
     catchError(stop_regex, code)
     save_stats_code = `stop\(a\){saveStatistics();`
+    
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
-    wall_spawn_regex = new RegExp(/const [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
+    wall_spawn_regex = new RegExp(/(?:let|const|var) [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
     catchError(wall_spawn_regex, code)
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
 
@@ -992,6 +994,7 @@ window.Counter.alterCode = function (code) {
         console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
+    
 
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
         if(window.timeKeeper.getCurrentSetting("size") != 1)
@@ -1019,6 +1022,7 @@ window.Counter.alterCode = function (code) {
             navigator.clipboard.writeText("pattern " + pattern_string);
         }
     });
+    
 
     return code;
 }
@@ -1398,28 +1402,56 @@ window.TimeKeeper.make = function () {
         var gamemode = "";
         for (t of modeStr) {
             if (t == 1) {
-                switch (counter) {
-                    case 0: gamemode += "Wall, "; break;
-                    case 1: gamemode += "Portal, "; break;
-                    case 2: gamemode += "Cheese, "; break;
-                    case 3: gamemode += "Borderless, "; break;
-                    case 4: gamemode += "Twin, "; break;
-                    case 5: gamemode += "Winged, "; break;
-                    case 6: gamemode += "YinYang, "; break;
-                    case 7: gamemode += "Key, "; break;
-                    case 8: gamemode += "Sokoban, "; break;
-                    case 9: gamemode += "Poison, "; break;
-                    case 10: gamemode += "Dimension, "; break;
-                    case 11: gamemode += "Minesweeper, "; break;
-                    case 12: gamemode += "Statue, "; break;
-                    case 13: gamemode += "Light, "; break;
-                    case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Magnet, "; break;
-                    case 18: gamemode += "Gate, "; break;
-                    case 19: gamemode += "Peaceful, "; break;
-                    default: gamemode += "Unknown, "; break;
+                if(window.isBridge){
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Bridge, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
+                }else{
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Skip, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
                 }
             }
             counter++;
@@ -2025,7 +2057,7 @@ window.Fruit.alterCode = function (code) {
     // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
     // The if statements are janky and get be condensed
     // This fixes errors in console but doesn't "change" anything in-game
-    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=`\${"https:\/\/www.google.com\/logos\/fnbx\/"}\${a\.path}`/);
+    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=`https:\/\/www.google.com\/logos\/fnbx\/\${a\.path}`/);
     firstvar_name = code.match(shh_grabber)[0].split('.')[0];
     Hr_name = code.match(shh_grabber)[0].split('.')[1];
 
@@ -2218,7 +2250,7 @@ window.SnakeColor.make = function () {
 }
 
 window.SnakeColor.alterCode = function (code) {
-
+try{
     // Code to alter snake code here
     snake_colors_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}[^]?=[^]?\[\["#4E7CF6","#17439F"\][^]*?\]\]/);
     yinyang_colors_regex = new RegExp(/\[5,4,7,7,1,2,0,3,9,8,0,14,15,15,11,\n?12,17,16\]/)
@@ -2478,11 +2510,15 @@ window.SnakeColor.alterCode = function (code) {
 
     // This fixes gate color issue, hardcoded is a poor choice but it works
     // Better search: /a=_....\(a\)/ -> 3 dots should match some function name that sets gate color or something similar
-    code = code.assertReplace(/a=_.zJc\(a\)/,`
+    code = code.assertReplace(/a=_.([a-zA-Z0-9_$]{1,8})\(a\);a=parseInt/,`
         if (typeof a === 'undefined') {
             a = "#4E7CF6";
         }
-        a=_.zJc(a)`)
+        a=_.$1(a);a=parseInt`);
+        console.log("spawn yay");
+}catch(error){
+    console.error("error in running counter: "+error);
+}
 
     //code = code.assertReplace(/this\.zd=qN\[0\]\[0\];/,`this.zd=qN[0][0];debugger;`)
 
@@ -2560,6 +2596,132 @@ window.SettingsSaver.alterCode = function (code) {
 window.SpeedInfo = {};
 
 window.SpeedInfo.make = function () {
+
+    // temporary function for bridge directly to src api since yarmi hasnt fixed fastsnakestats yet
+    (function() {
+    const API = "https://www.speedrun.com/api/v1";
+const GAME_ABBREVIATION = "snake_game";
+ 
+// Cache game/level/category lookups so repeated calls are cheap
+let _cache = null;
+ 
+async function getJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Request failed (${res.status}): ${url}`);
+  return res.json();
+}
+ 
+async function loadGameData() {
+  if (_cache) return _cache;
+ 
+  const gameRes = await getJSON(`${API}/games?abbreviation=${GAME_ABBREVIATION}`);
+  const gameId = gameRes.data[0].id;
+ 
+  const [levelsRes, categoriesRes] = await Promise.all([
+    getJSON(`${API}/games/${gameId}/levels`),
+    getJSON(`${API}/games/${gameId}/categories`),
+  ]);
+ 
+  _cache = { gameId, levels: levelsRes.data, categories: categoriesRes.data };
+  return _cache;
+}
+ 
+function normalizeSplit(split) {
+  const s = String(split).trim().toLowerCase();
+  if (s === "all") return "All Apples";
+  return `${s} Apples`;
+}
+ 
+function findValueId(variables, variableName, valueLabel) {
+  const variable = variables.find(
+    v => v.name.toLowerCase() === variableName.toLowerCase()
+  );
+  if (!variable) throw new Error(`Variable "${variableName}" not found for this level`);
+ 
+  const entry = Object.entries(variable.values.values).find(
+    ([, v]) => v.label.toLowerCase() === valueLabel.toLowerCase()
+  );
+  if (!entry) throw new Error(`Value "${valueLabel}" not found in "${variableName}"`);
+ 
+  return { varId: variable.id, valueId: entry[0] };
+}
+ 
+// this is a temporary fix for the fact that yarmi hasnt updated fastsnakestats to include bridge. this does not support highscore
+window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount, speed, mapSize, split) {
+  const { gameId, levels, categories } = await loadGameData();
+ 
+  // Resolve the level (mode)
+  const level = levels.find(l => l.name.toLowerCase() === mode.toLowerCase());
+  if (!level) throw new Error(`Mode "${mode}" not found`);
+ 
+  // Resolve the category (split)
+  const splitName = normalizeSplit(split);
+  const category = categories.find(
+    c => c.type === "per-level" && c.name.toLowerCase() === splitName.toLowerCase()
+  );
+  if (!category) throw new Error(`Split "${split}" not found`);
+ 
+  // Resolve the three variables that apply to this level
+  const varsRes = await getJSON(`${API}/levels/${level.id}/variables`);
+  const variables = varsRes.data;
+ 
+  const apples = findValueId(variables, "Multi Apple Amount", appleCount);
+  const spd    = findValueId(variables, "Speed", speed);
+  const size   = findValueId(variables, "Board Size", mapSize);
+ 
+  // Query the leaderboard for exactly this subcategory, top run only
+  const query = new URLSearchParams({
+    top: "1",
+    embed: "players",
+    [`var-${apples.varId}`]: apples.valueId,
+    [`var-${spd.varId}`]: spd.valueId,
+    [`var-${size.varId}`]: size.valueId,
+  });
+ 
+  const lbUrl = `${API}/leaderboards/${gameId}/level/${level.id}/${category.id}?${query}`;
+  const lb = await getJSON(lbUrl);
+ 
+  const wr = lb.data.runs[0];
+  if (!wr) {
+    return { found: false, mode, appleCount, speed, mapSize, split };
+  }
+ 
+  const player = lb.data.players.data[0];
+  const playerName = player.names ? player.names.international : player.name;
+ 
+  return {
+    found: true,
+    mode,
+    appleCount,
+    speed,
+    mapSize,
+    split,
+    time: wr.run.times.primary_t, // seconds, e.g. 26.551
+    player: playerName,
+    date: wr.run.date,
+    link: wr.run.weblink,
+  };
+}
+})();
+
+// This changes the format of the src data to roughly match the fast snake stats data so it works with the rest of the code
+function recordDataFormatingForSrcData(srcRecordData){
+    let hours = Math.floor(srcRecordData.time/3600)
+    if(hours>0){
+        hours+="H"
+    }else{hours=""}
+    let minutes = Math.floor(srcRecordData.time/60)
+    if(minutes>0){
+        minutes+="M"
+    }else{minutes=""}
+    let recordData = {"success":true,"runs":[{"times":{"primary":"PT"+hours+minutes+srcRecordData.time%60+"S"},"date":srcRecordData.date,"id":"yw71rk0z","weblink":srcRecordData.link,"players":{"data":[{"id":"8r7pv0gj","names":{"international":srcRecordData.player},"weblink":"https://www.speedrun.com/user/DAIH","name-style":{"style":"gradient","color-from":{"light":"#EF2081","dark":"#FF3091"},"color-to":{"light":"#EF2081","dark":"#FF3091"}}}]},"values":{"0nwovxdl":"mlnmj661","68k1g0yl":"192dxz4q","p854j77l":"z19gp0jl"}}],
+    "settings":[srcRecordData.appleCount,srcRecordData.speed,srcRecordData.mapSize,Object.keys(modeToTxt).find(key => modeToTxt[key].name == srcRecordData.mode.slice(0,-5)),srcRecordData.split]}
+    return recordData
+}
+
+window.newRecordData = 0;
+
+    window.isBridge = (Math.floor((Math.random()* 50) + 1) != 2)/*(Math.floor((Math.random()* 50) + 1) != 36)*/;
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
@@ -2701,29 +2863,58 @@ window.SpeedInfo.make = function () {
         });
     }
 
-    window.modeToTxt = {
-        0: { name: "Classic" },
-        1: { name: "Wall" },
-        2: { name: "Portal" },
-        3: { name: "Cheese" },
-        4: { name: "Borderless" },
-        5: { name: "Twin" },
-        6: { name: "Winged" },
-        7: { name: "Yin Yang" },
-        8: { name: "Key" },
-        9: { name: "Sokoban" },
-        10: { name: "Poison" },
-        11: { name: "Dimension" },
-        12: { name: "Minesweeper" },
-        13: { name: "Statue" },
-        14: { name: "Light" },
-        15: { name: "Shield" },
-        16: { name: "Arrow" },
-        17: { name: "Hotdog" },
-        18: { name: "Magnet" },
-        19: { name: "Gate" },
-        20: { name: "Peaceful" },
-        21: { name: "Blender" },
+    if(window.isBridge){
+        window.modeToTxt = {
+            0: { name: "Classic" },
+            1: { name: "Wall" },
+            2: { name: "Portal" },
+            3: { name: "Cheese" },
+            4: { name: "Borderless" },
+            5: { name: "Twin" },
+            6: { name: "Winged" },
+            7: { name: "Yin Yang" },
+            8: { name: "Key" },
+            9: { name: "Sokoban" },
+            10: { name: "Poison" },
+            11: { name: "Dimension" },
+            12: { name: "Minesweeper" },
+            13: { name: "Statue" },
+            14: { name: "Light" },
+            15: { name: "Shield" },
+            16: { name: "Arrow" },
+            17: { name: "Hotdog" },
+            18: { name: "Magnet" },
+            19: { name: "Gate" },
+            20: { name: "Bridge" },
+            21: { name: "Peaceful" },
+            22: { name: "Blender" },
+        }
+    }else{
+        window.modeToTxt = {
+            0: { name: "Classic" },
+            1: { name: "Wall" },
+            2: { name: "Portal" },
+            3: { name: "Cheese" },
+            4: { name: "Borderless" },
+            5: { name: "Twin" },
+            6: { name: "Winged" },
+            7: { name: "Yin Yang" },
+            8: { name: "Key" },
+            9: { name: "Sokoban" },
+            10: { name: "Poison" },
+            11: { name: "Dimension" },
+            12: { name: "Minesweeper" },
+            13: { name: "Statue" },
+            14: { name: "Light" },
+            15: { name: "Shield" },
+            16: { name: "Arrow" },
+            17: { name: "Hotdog" },
+            18: { name: "Magnet" },
+            19: { name: "Gate" },
+            20: { name: "Skip" },
+            21: { name: "Peaceful" },
+            22: { name: "Blender" },
+        }
     }
 
     window.countToTxt = {
@@ -2798,8 +2989,9 @@ window.SpeedInfo.make = function () {
         HOTDOG = 17
         MAGNET = 18
         GATE = 19
-        PEACEFUL = 20
-        BLENDER = 21
+        BRIDGE = 20
+        PEACEFUL = 21
+        BLENDER = 22
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -2820,7 +3012,7 @@ window.SpeedInfo.make = function () {
         let size = window.timeKeeper.getCurrentSetting("size");
         let mode = window.CurrentModeNum;
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
 
         if (size > 2 || count > 5) {
             EmptyAll();
@@ -2865,7 +3057,11 @@ window.SpeedInfo.make = function () {
             return;
         }
         
-        const recordData = cacheData.records[cacheKey];
+        let recordData = cacheData.records[cacheKey];
+
+        if(window.CurrentModeNum==20){
+            recordData=recordDataFormatingForSrcData(newRecordData);
+        }
 
         if (window.NepDebug) {
             console.log(`Record data for key ${cacheKey}:`, recordData);
@@ -3027,6 +3223,8 @@ window.SpeedInfo.make = function () {
                 }
                 break;
         }
+            
+
         
 
 
@@ -3047,6 +3245,10 @@ window.SpeedInfo.make = function () {
     window.getAllSrc = async function () {
         const levels = ["25", "50", "100", "All", "H"];
         for (const element of levels) {
+            if(window.CurrentModeNum==20){
+                let result = await getSnakeWorldRecord(window.modeToTxt[window.CurrentModeNum].name+" Mode", window.countToTxt[window.timeKeeper.getCurrentSetting("count")].name, window.speedToTxt[window.timeKeeper.getCurrentSetting("speed")].name, window.sizeToTxt[window.timeKeeper.getCurrentSetting("size")].name, element)
+                window.newRecordData=result;
+            }
             await getRecordSRC(element);
         }
     }
@@ -3304,28 +3506,56 @@ window.SpeedInfo.make = function () {
         for (t of modeStr) {
             if (t == 1) {
 
-                switch (counter) {
-                    case 0: gamemode += "Wall, "; break;
-                    case 1: gamemode += "Portal, "; break;
-                    case 2: gamemode += "Cheese, "; break;
-                    case 3: gamemode += "Borderless, "; break;
-                    case 4: gamemode += "Twin, "; break;
-                    case 5: gamemode += "Winged, "; break;
-                    case 6: gamemode += "YinYang, "; break;
-                    case 7: gamemode += "Key, "; break;
-                    case 8: gamemode += "Sokoban, "; break;
-                    case 9: gamemode += "Poison, "; break;
-                    case 10: gamemode += "Dimension, "; break;
-                    case 11: gamemode += "Minesweeper, "; break;
-                    case 12: gamemode += "Statue, "; break;
-                    case 13: gamemode += "Light, "; break;
-                    case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Magnet, "; break;
-                    case 18: gamemode += "Gate, "; break;
-                    case 19: gamemode += "Peaceful, "; break;
-                    default: gamemode += "Unknown, "; break;
+                if(window.isBridge){
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Bridge, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
+                }else{
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Skip, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
                 }
             }
             counter++;
@@ -4751,31 +4981,6 @@ window.BootstrapMenu.make = function () {
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
         scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
 
-        keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
-
-        // Code for reset key
-        let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
-        function setupKeybindPicker(buttonId, keybindType) {
-            const button = document.getElementById(buttonId);
-            if(!keybinds[keybindType]){
-                keybinds[keybindType] = "Shift";
-            }
-            button.textContent = `Reset Key: ${keybinds[keybindType]}`;
-
-            button.addEventListener("click", () => {
-                button.textContent = "Press any key...";
-                document.addEventListener("keydown", function handler(e) {
-                keybinds[keybindType] = e.key;
-                button.textContent = `Reset Key: ${e.key}`;
-                localStorage.setItem("keybinds", JSON.stringify(keybinds));
-                document.removeEventListener("keydown", handler);
-                });
-            });
-        }
-
-        // Apply to each bind
-        setupKeybindPicker("ResetKeybind", "resetKey");
-
         if (window.pudding_settings.ScrollBar) {
             // Disable it
             document.body.style.overflow = 'hidden';
@@ -4943,6 +5148,55 @@ window.BootstrapMenu.alterCode = function (code) {
     }
     return code;
 }
+window.ResetKey = {}
+
+window.ResetKey.make = function (){
+  keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
+
+  // Code for reset key
+  let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+  function setupKeybindPicker(buttonId, keybindType) {
+      const button = document.getElementById(buttonId);
+      if(!keybinds[keybindType]){
+          keybinds[keybindType] = "Shift";
+      }
+      button.textContent = `Reset Key: ${keybinds[keybindType]}`;
+
+      button.addEventListener("click", () => {
+          button.textContent = "Press any key...";
+          document.addEventListener("keydown", function handler(e) {
+          keybinds[keybindType] = e.key;
+          button.textContent = `Reset Key: ${e.key}`;
+          localStorage.setItem("keybinds", JSON.stringify(keybinds));
+          document.removeEventListener("keydown", handler);
+          });
+      });
+  }
+
+  // Apply to each bind
+  setupKeybindPicker("ResetKeybind", "resetKey");
+}
+
+window.ResetKey.alterCode = function(code){
+  document.addEventListener('keydown', function(e){
+    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    let resetButton = document.getElementById('ResetKeybind');
+    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
+    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
+        if(e.key === keybinds["resetKey"]){
+            const keydownEvent = new KeyboardEvent('keydown', {
+                keyCode: 27
+            });
+            document.dispatchEvent(keydownEvent);
+            document.querySelector('[jsname="NSjDf"]').click();
+        }
+    }
+  });
+  return code
+}
+
+// This library is to make the game, when lagging, not start until your game has fully visually rendered. This is to prevent moments where the first frame is skipped in src videos.
+
 window.RenderDelayFix = {};
 
 window.RenderDelayFix.make = function () {
@@ -4957,19 +5211,19 @@ window.RenderDelayFix.make = function () {
 window.RenderDelayFix.alterCode = function (code) {
   code = assertReplace(
     code,
-    /render\s*\(\s*a\s*,\s*b\s*\)\s*\{\s*this\.Db\.Uj\s*&&/,
-    "render(a,b){window.lastFrameTime=Date.now();if(window.resetTime!=window.oldResetTime){window.oldResetTime=window.resetTime;}this.Db.Uj&&"
+    /render\s*\(\s*a\s*,\s*b\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\s*&&/,
+    "render(a,b){window.lastFrameTime=Date.now();if(window.resetTime!=window.oldResetTime){window.oldResetTime=window.resetTime;}this.$1.$2&&"
   );
   // intercepts the game's reset function for when you click play
   code = assertReplace(
     code,
-    /reset\s*\(\s*\)\s*\{\s*this\.Db\.oa\.oa\s*=\s*0\s*;/,
-    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.Db.oa.oa=0;"
+    /reset\s*\(\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.oa\.oa\s*=\s*0\s*;/,
+    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.$1.oa.oa=0;"
   );
   code = assertReplace(
     code,
-    /J8\s*\(\s*a\s*\)\s*\{\s*if\s*\(\s*!this\.closed\s*\)\s*\{/,
-    "J8=window.stuffKeys=function(a){if(!this.closed){if(window.resetTime<window.lastFrameTime){"
+    /([a-zA-Z0-9_$]{1,8})\s*\(\s*a\s*\)\s*\{\s*if\s*\(\s*!this\.closed\s*\)\s*\{/,
+    "$1=window.stuffKeys=function(a){if(!this.closed){if(window.resetTime<window.lastFrameTime){"
   );
   code = assertReplace(
     code,
@@ -5066,8 +5320,9 @@ window.PuddingMod.runCodeBefore = function () {
     "InputDisplay",
     "Timer",
     "BootstrapMenu",
-    "RenderDelayFix"
-    //,"CustomPortalPairs"
+    "ResetKey",
+    "RenderDelayFix",
+    //"CustomPortalPairs",
   ];
   console.log("Enabling Pudding Mod");
 
@@ -5088,21 +5343,6 @@ window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
     console.log(code)
   }
-
-  document.addEventListener('keydown', function(e){
-    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
-    let resetButton = document.getElementById('ResetKeybind');
-    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
-    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
-        if(e.key === keybinds["resetKey"]){
-            const keydownEvent = new KeyboardEvent('keydown', {
-                keyCode: 27
-            });
-            document.dispatchEvent(keydownEvent);
-            document.querySelector('[jsname="NSjDf"]').click();
-        }
-    }
-  });
 
 
   code = code.replaceAll(/\$\$/gm, `doubleD`)
@@ -5133,7 +5373,8 @@ window.PuddingMod.runCodeAfter = function () {
   modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'Pudding Mod';
   if (window.loaded_code) {
-    modIndicator.textContent = 'Pudding Mod - Google Test Version';
+    // commented out cuz i dont want it to annoy people since its now the official version
+    //modIndicator.textContent = 'Pudding Mod - Google Test Version';
   }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);

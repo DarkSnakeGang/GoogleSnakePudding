@@ -6,8 +6,8 @@ window.PauseGameMod.alterSnakeCode = function(code) {
   //messes with the game frame by frame (update method)
   code = assertReplace(
     code,
-    /\(this\.Aa\.direction!=="NONE"\|\|CUD\(this\.Aa\)\)/,
-    "((this.Aa.direction!==\"NONE\"||CUD(this.Aa))&&!window.pauseGame)"
+    /\(this\.Aa\.direction!=="NONE"\|\|([A-Z]{3})\(this\.Aa\)\)/,
+    `((this.Aa.direction!=="NONE"||$1(this.Aa))&&!window.pauseGame)`
   );
   return code;
 }

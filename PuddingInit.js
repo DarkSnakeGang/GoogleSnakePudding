@@ -86,8 +86,9 @@ window.PuddingMod.runCodeBefore = function () {
     "InputDisplay",
     "Timer",
     "BootstrapMenu",
-    "RenderDelayFix"
-    //,"CustomPortalPairs"
+    "ResetKey",
+    "RenderDelayFix",
+    //"CustomPortalPairs",
   ];
   console.log("Enabling Pudding Mod");
 
@@ -108,21 +109,6 @@ window.PuddingMod.alterSnakeCode = function (code) {
   if (window.NepDebug) {
     console.log(code)
   }
-
-  document.addEventListener('keydown', function(e){
-    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
-    let resetButton = document.getElementById('ResetKeybind');
-    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
-    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
-        if(e.key === keybinds["resetKey"]){
-            const keydownEvent = new KeyboardEvent('keydown', {
-                keyCode: 27
-            });
-            document.dispatchEvent(keydownEvent);
-            document.querySelector('[jsname="NSjDf"]').click();
-        }
-    }
-  });
 
 
   code = code.replaceAll(/\$\$/gm, `doubleD`)
@@ -153,7 +139,8 @@ window.PuddingMod.runCodeAfter = function () {
   modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'Pudding Mod';
   if (window.loaded_code) {
-    modIndicator.textContent = 'Pudding Mod - Google Test Version';
+    // commented out cuz i dont want it to annoy people since its now the official version
+    //modIndicator.textContent = 'Pudding Mod - Google Test Version';
   }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
