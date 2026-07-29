@@ -374,28 +374,56 @@ window.TimeKeeper.make = function () {
         var gamemode = "";
         for (t of modeStr) {
             if (t == 1) {
-                switch (counter) {
-                    case 0: gamemode += "Wall, "; break;
-                    case 1: gamemode += "Portal, "; break;
-                    case 2: gamemode += "Cheese, "; break;
-                    case 3: gamemode += "Borderless, "; break;
-                    case 4: gamemode += "Twin, "; break;
-                    case 5: gamemode += "Winged, "; break;
-                    case 6: gamemode += "YinYang, "; break;
-                    case 7: gamemode += "Key, "; break;
-                    case 8: gamemode += "Sokoban, "; break;
-                    case 9: gamemode += "Poison, "; break;
-                    case 10: gamemode += "Dimension, "; break;
-                    case 11: gamemode += "Minesweeper, "; break;
-                    case 12: gamemode += "Statue, "; break;
-                    case 13: gamemode += "Light, "; break;
-                    case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Magnet, "; break;
-                    case 18: gamemode += "Gate, "; break;
-                    case 19: gamemode += "Peaceful, "; break;
-                    default: gamemode += "Unknown, "; break;
+                if(window.isBridge){
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Bridge, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
+                }else{
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Skip, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
                 }
             }
             counter++;

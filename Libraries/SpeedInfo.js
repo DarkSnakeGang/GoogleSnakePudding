@@ -2,6 +2,132 @@ window.SpeedInfo = {};
 
 window.SpeedInfo.make = function () {
 
+    // temporary function for bridge directly to src api since yarmi hasnt fixed fastsnakestats yet
+    (function() {
+    const API = "https://www.speedrun.com/api/v1";
+const GAME_ABBREVIATION = "snake_game";
+ 
+// Cache game/level/category lookups so repeated calls are cheap
+let _cache = null;
+ 
+async function getJSON(url) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Request failed (${res.status}): ${url}`);
+  return res.json();
+}
+ 
+async function loadGameData() {
+  if (_cache) return _cache;
+ 
+  const gameRes = await getJSON(`${API}/games?abbreviation=${GAME_ABBREVIATION}`);
+  const gameId = gameRes.data[0].id;
+ 
+  const [levelsRes, categoriesRes] = await Promise.all([
+    getJSON(`${API}/games/${gameId}/levels`),
+    getJSON(`${API}/games/${gameId}/categories`),
+  ]);
+ 
+  _cache = { gameId, levels: levelsRes.data, categories: categoriesRes.data };
+  return _cache;
+}
+ 
+function normalizeSplit(split) {
+  const s = String(split).trim().toLowerCase();
+  if (s === "all") return "All Apples";
+  return `${s} Apples`;
+}
+ 
+function findValueId(variables, variableName, valueLabel) {
+  const variable = variables.find(
+    v => v.name.toLowerCase() === variableName.toLowerCase()
+  );
+  if (!variable) throw new Error(`Variable "${variableName}" not found for this level`);
+ 
+  const entry = Object.entries(variable.values.values).find(
+    ([, v]) => v.label.toLowerCase() === valueLabel.toLowerCase()
+  );
+  if (!entry) throw new Error(`Value "${valueLabel}" not found in "${variableName}"`);
+ 
+  return { varId: variable.id, valueId: entry[0] };
+}
+ 
+// this is a temporary fix for the fact that yarmi hasnt updated fastsnakestats to include bridge. this does not support highscore
+window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount, speed, mapSize, split) {
+  const { gameId, levels, categories } = await loadGameData();
+ 
+  // Resolve the level (mode)
+  const level = levels.find(l => l.name.toLowerCase() === mode.toLowerCase());
+  if (!level) throw new Error(`Mode "${mode}" not found`);
+ 
+  // Resolve the category (split)
+  const splitName = normalizeSplit(split);
+  const category = categories.find(
+    c => c.type === "per-level" && c.name.toLowerCase() === splitName.toLowerCase()
+  );
+  if (!category) throw new Error(`Split "${split}" not found`);
+ 
+  // Resolve the three variables that apply to this level
+  const varsRes = await getJSON(`${API}/levels/${level.id}/variables`);
+  const variables = varsRes.data;
+ 
+  const apples = findValueId(variables, "Multi Apple Amount", appleCount);
+  const spd    = findValueId(variables, "Speed", speed);
+  const size   = findValueId(variables, "Board Size", mapSize);
+ 
+  // Query the leaderboard for exactly this subcategory, top run only
+  const query = new URLSearchParams({
+    top: "1",
+    embed: "players",
+    [`var-${apples.varId}`]: apples.valueId,
+    [`var-${spd.varId}`]: spd.valueId,
+    [`var-${size.varId}`]: size.valueId,
+  });
+ 
+  const lbUrl = `${API}/leaderboards/${gameId}/level/${level.id}/${category.id}?${query}`;
+  const lb = await getJSON(lbUrl);
+ 
+  const wr = lb.data.runs[0];
+  if (!wr) {
+    return { found: false, mode, appleCount, speed, mapSize, split };
+  }
+ 
+  const player = lb.data.players.data[0];
+  const playerName = player.names ? player.names.international : player.name;
+ 
+  return {
+    found: true,
+    mode,
+    appleCount,
+    speed,
+    mapSize,
+    split,
+    time: wr.run.times.primary_t, // seconds, e.g. 26.551
+    player: playerName,
+    date: wr.run.date,
+    link: wr.run.weblink,
+  };
+}
+})();
+
+// This changes the format of the src data to roughly match the fast snake stats data so it works with the rest of the code
+function recordDataFormatingForSrcData(srcRecordData){
+    let hours = Math.floor(srcRecordData.time/3600)
+    if(hours>0){
+        hours+="H"
+    }else{hours=""}
+    let minutes = Math.floor(srcRecordData.time/60)
+    if(minutes>0){
+        minutes+="M"
+    }else{minutes=""}
+    let recordData = {"success":true,"runs":[{"times":{"primary":"PT"+hours+minutes+srcRecordData.time%60+"S"},"date":srcRecordData.date,"id":"yw71rk0z","weblink":srcRecordData.link,"players":{"data":[{"id":"8r7pv0gj","names":{"international":srcRecordData.player},"weblink":"https://www.speedrun.com/user/DAIH","name-style":{"style":"gradient","color-from":{"light":"#EF2081","dark":"#FF3091"},"color-to":{"light":"#EF2081","dark":"#FF3091"}}}]},"values":{"0nwovxdl":"mlnmj661","68k1g0yl":"192dxz4q","p854j77l":"z19gp0jl"}}],
+    "settings":[srcRecordData.appleCount,srcRecordData.speed,srcRecordData.mapSize,Object.keys(modeToTxt).find(key => modeToTxt[key].name == srcRecordData.mode.slice(0,-5)),srcRecordData.split]}
+    return recordData
+}
+
+window.newRecordData = 0;
+
+    window.isBridge = (Math.floor((Math.random()* 50) + 1) != 2)/*(Math.floor((Math.random()* 50) + 1) != 36)*/;
+
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
     window.first_time_call = true;
@@ -142,29 +268,58 @@ window.SpeedInfo.make = function () {
         });
     }
 
-    window.modeToTxt = {
-        0: { name: "Classic" },
-        1: { name: "Wall" },
-        2: { name: "Portal" },
-        3: { name: "Cheese" },
-        4: { name: "Borderless" },
-        5: { name: "Twin" },
-        6: { name: "Winged" },
-        7: { name: "Yin Yang" },
-        8: { name: "Key" },
-        9: { name: "Sokoban" },
-        10: { name: "Poison" },
-        11: { name: "Dimension" },
-        12: { name: "Minesweeper" },
-        13: { name: "Statue" },
-        14: { name: "Light" },
-        15: { name: "Shield" },
-        16: { name: "Arrow" },
-        17: { name: "Hotdog" },
-        18: { name: "Magnet" },
-        19: { name: "Gate" },
-        20: { name: "Peaceful" },
-        21: { name: "Blender" },
+    if(window.isBridge){
+        window.modeToTxt = {
+            0: { name: "Classic" },
+            1: { name: "Wall" },
+            2: { name: "Portal" },
+            3: { name: "Cheese" },
+            4: { name: "Borderless" },
+            5: { name: "Twin" },
+            6: { name: "Winged" },
+            7: { name: "Yin Yang" },
+            8: { name: "Key" },
+            9: { name: "Sokoban" },
+            10: { name: "Poison" },
+            11: { name: "Dimension" },
+            12: { name: "Minesweeper" },
+            13: { name: "Statue" },
+            14: { name: "Light" },
+            15: { name: "Shield" },
+            16: { name: "Arrow" },
+            17: { name: "Hotdog" },
+            18: { name: "Magnet" },
+            19: { name: "Gate" },
+            20: { name: "Bridge" },
+            21: { name: "Peaceful" },
+            22: { name: "Blender" },
+        }
+    }else{
+        window.modeToTxt = {
+            0: { name: "Classic" },
+            1: { name: "Wall" },
+            2: { name: "Portal" },
+            3: { name: "Cheese" },
+            4: { name: "Borderless" },
+            5: { name: "Twin" },
+            6: { name: "Winged" },
+            7: { name: "Yin Yang" },
+            8: { name: "Key" },
+            9: { name: "Sokoban" },
+            10: { name: "Poison" },
+            11: { name: "Dimension" },
+            12: { name: "Minesweeper" },
+            13: { name: "Statue" },
+            14: { name: "Light" },
+            15: { name: "Shield" },
+            16: { name: "Arrow" },
+            17: { name: "Hotdog" },
+            18: { name: "Magnet" },
+            19: { name: "Gate" },
+            20: { name: "Skip" },
+            21: { name: "Peaceful" },
+            22: { name: "Blender" },
+        }
     }
 
     window.countToTxt = {
@@ -239,8 +394,9 @@ window.SpeedInfo.make = function () {
         HOTDOG = 17
         MAGNET = 18
         GATE = 19
-        PEACEFUL = 20
-        BLENDER = 21
+        BRIDGE = 20
+        PEACEFUL = 21
+        BLENDER = 22
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -261,7 +417,7 @@ window.SpeedInfo.make = function () {
         let size = window.timeKeeper.getCurrentSetting("size");
         let mode = window.CurrentModeNum;
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
 
         if (size > 2 || count > 5) {
             EmptyAll();
@@ -306,7 +462,11 @@ window.SpeedInfo.make = function () {
             return;
         }
         
-        const recordData = cacheData.records[cacheKey];
+        let recordData = cacheData.records[cacheKey];
+
+        if(window.CurrentModeNum==20){
+            recordData=recordDataFormatingForSrcData(newRecordData);
+        }
 
         if (window.NepDebug) {
             console.log(`Record data for key ${cacheKey}:`, recordData);
@@ -468,6 +628,8 @@ window.SpeedInfo.make = function () {
                 }
                 break;
         }
+            
+
         
 
 
@@ -488,6 +650,10 @@ window.SpeedInfo.make = function () {
     window.getAllSrc = async function () {
         const levels = ["25", "50", "100", "All", "H"];
         for (const element of levels) {
+            if(window.CurrentModeNum==20){
+                let result = await getSnakeWorldRecord(window.modeToTxt[window.CurrentModeNum].name+" Mode", window.countToTxt[window.timeKeeper.getCurrentSetting("count")].name, window.speedToTxt[window.timeKeeper.getCurrentSetting("speed")].name, window.sizeToTxt[window.timeKeeper.getCurrentSetting("size")].name, element)
+                window.newRecordData=result;
+            }
             await getRecordSRC(element);
         }
     }
@@ -745,28 +911,56 @@ window.SpeedInfo.make = function () {
         for (t of modeStr) {
             if (t == 1) {
 
-                switch (counter) {
-                    case 0: gamemode += "Wall, "; break;
-                    case 1: gamemode += "Portal, "; break;
-                    case 2: gamemode += "Cheese, "; break;
-                    case 3: gamemode += "Borderless, "; break;
-                    case 4: gamemode += "Twin, "; break;
-                    case 5: gamemode += "Winged, "; break;
-                    case 6: gamemode += "YinYang, "; break;
-                    case 7: gamemode += "Key, "; break;
-                    case 8: gamemode += "Sokoban, "; break;
-                    case 9: gamemode += "Poison, "; break;
-                    case 10: gamemode += "Dimension, "; break;
-                    case 11: gamemode += "Minesweeper, "; break;
-                    case 12: gamemode += "Statue, "; break;
-                    case 13: gamemode += "Light, "; break;
-                    case 14: gamemode += "Shield, "; break;
-                    case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Hotdog, "; break;
-                    case 17: gamemode += "Magnet, "; break;
-                    case 18: gamemode += "Gate, "; break;
-                    case 19: gamemode += "Peaceful, "; break;
-                    default: gamemode += "Unknown, "; break;
+                if(window.isBridge){
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Bridge, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
+                }else{
+                    switch (counter) {
+                        case 0: gamemode += "Wall, "; break;
+                        case 1: gamemode += "Portal, "; break;
+                        case 2: gamemode += "Cheese, "; break;
+                        case 3: gamemode += "Borderless, "; break;
+                        case 4: gamemode += "Twin, "; break;
+                        case 5: gamemode += "Winged, "; break;
+                        case 6: gamemode += "YinYang, "; break;
+                        case 7: gamemode += "Key, "; break;
+                        case 8: gamemode += "Sokoban, "; break;
+                        case 9: gamemode += "Poison, "; break;
+                        case 10: gamemode += "Dimension, "; break;
+                        case 11: gamemode += "Minesweeper, "; break;
+                        case 12: gamemode += "Statue, "; break;
+                        case 13: gamemode += "Light, "; break;
+                        case 14: gamemode += "Shield, "; break;
+                        case 15: gamemode += "Arrow, "; break;
+                        case 16: gamemode += "Hotdog, "; break;
+                        case 17: gamemode += "Magnet, "; break;
+                        case 18: gamemode += "Gate, "; break;
+                        case 19: gamemode += "Skip, "; break;
+                        case 20: gamemode += "Peaceful, "; break;
+                        default: gamemode += "Unknown, "; break;
+                    }
                 }
             }
             counter++;

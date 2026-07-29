@@ -322,31 +322,6 @@ window.BootstrapMenu.make = function () {
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
         scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
 
-        keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
-
-        // Code for reset key
-        let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
-        function setupKeybindPicker(buttonId, keybindType) {
-            const button = document.getElementById(buttonId);
-            if(!keybinds[keybindType]){
-                keybinds[keybindType] = "Shift";
-            }
-            button.textContent = `Reset Key: ${keybinds[keybindType]}`;
-
-            button.addEventListener("click", () => {
-                button.textContent = "Press any key...";
-                document.addEventListener("keydown", function handler(e) {
-                keybinds[keybindType] = e.key;
-                button.textContent = `Reset Key: ${e.key}`;
-                localStorage.setItem("keybinds", JSON.stringify(keybinds));
-                document.removeEventListener("keydown", handler);
-                });
-            });
-        }
-
-        // Apply to each bind
-        setupKeybindPicker("ResetKeybind", "resetKey");
-
         if (window.pudding_settings.ScrollBar) {
             // Disable it
             document.body.style.overflow = 'hidden';

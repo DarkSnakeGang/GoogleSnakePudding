@@ -8,7 +8,7 @@ window.SnakeColor.make = function () {
 }
 
 window.SnakeColor.alterCode = function (code) {
-
+try{
     // Code to alter snake code here
     snake_colors_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}[^]?=[^]?\[\["#4E7CF6","#17439F"\][^]*?\]\]/);
     yinyang_colors_regex = new RegExp(/\[5,4,7,7,1,2,0,3,9,8,0,14,15,15,11,\n?12,17,16\]/)
@@ -268,11 +268,15 @@ window.SnakeColor.alterCode = function (code) {
 
     // This fixes gate color issue, hardcoded is a poor choice but it works
     // Better search: /a=_....\(a\)/ -> 3 dots should match some function name that sets gate color or something similar
-    code = code.assertReplace(/a=_.zJc\(a\)/,`
+    code = code.assertReplace(/a=_.([a-zA-Z0-9_$]{1,8})\(a\);a=parseInt/,`
         if (typeof a === 'undefined') {
             a = "#4E7CF6";
         }
-        a=_.zJc(a)`)
+        a=_.$1(a);a=parseInt`);
+        console.log("spawn yay");
+}catch(error){
+    console.error("error in running counter: "+error);
+}
 
     //code = code.assertReplace(/this\.zd=qN\[0\]\[0\];/,`this.zd=qN[0][0];debugger;`)
 

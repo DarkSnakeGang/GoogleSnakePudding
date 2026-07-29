@@ -308,7 +308,7 @@ window.Fruit.alterCode = function (code) {
     // Basically, adds an if statement anywhere fruit image is search to compensate for pudding existing
     // The if statements are janky and get be condensed
     // This fixes errors in console but doesn't "change" anything in-game
-    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=`\${"https:\/\/www.google.com\/logos\/fnbx\/"}\${a\.path}`/);
+    shh_grabber = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=`https:\/\/www.google.com\/logos\/fnbx\/\${a\.path}`/);
     firstvar_name = code.match(shh_grabber)[0].split('.')[0];
     Hr_name = code.match(shh_grabber)[0].split('.')[1];
 
