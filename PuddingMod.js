@@ -2751,21 +2751,6 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
 }
 })();
 
-// This changes the format of the src data to roughly match the fast snake stats data so it works with the rest of the code
-function recordDataFormatingForSrcData(srcRecordData){
-    let hours = Math.floor(srcRecordData.time/3600)
-    if(hours>0){
-        hours+="H"
-    }else{hours=""}
-    let minutes = Math.floor(srcRecordData.time/60)
-    if(minutes>0){
-        minutes+="M"
-    }else{minutes=""}
-    let recordData = {"success":true,"runs":[{"times":{"primary":"PT"+hours+minutes+srcRecordData.time%60+"S"},"date":srcRecordData.date,"id":"yw71rk0z","weblink":srcRecordData.link,"players":{"data":[{"id":"8r7pv0gj","names":{"international":srcRecordData.player},"weblink":"https://www.speedrun.com/user/DAIH","name-style":{"style":"gradient","color-from":{"light":"#EF2081","dark":"#FF3091"},"color-to":{"light":"#EF2081","dark":"#FF3091"}}}]},"values":{"0nwovxdl":"mlnmj661","68k1g0yl":"192dxz4q","p854j77l":"z19gp0jl"}}],
-    "settings":[srcRecordData.appleCount,srcRecordData.speed,srcRecordData.mapSize,Object.keys(modeToTxt).find(key => modeToTxt[key].name == srcRecordData.mode.slice(0,-5)),srcRecordData.split]}
-    return recordData
-}
-
 window.newRecordData = 0;
 
     window.isBridge = (Math.floor((Math.random()* 50) + 1) != 2)/*(Math.floor((Math.random()* 50) + 1) != 36)*/;
