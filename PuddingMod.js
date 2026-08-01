@@ -1909,17 +1909,36 @@ window.Fruit.make = function () {
     }
 
     // Secret fruit, can't be selected by menu
-    new_fruit.push({ // Golden Apple
+    // Order matters: Apple, Cherry, Strawberry, Carrot, Watermelon (then Skull)
+    new_fruit.push({ // Golden Apple — 1 in 1m
         "Normal": 'https://i.postimg.cc/tJqR4tT6/gold-apple.png',
         "Pixel": 'https://i.postimg.cc/MGDg1gBQ/px-gold-apple.png',
         "Real": "https://i.postimg.cc/764WBzhL/golden-real.png",
         "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
     });
-    new_fruit.push({ // Golden Strawberry
+    new_fruit.push({ // Golden Cherry — 1 in 5m
+        "Normal": 'https://i.postimg.cc/sXDXkRP7/gold-cherry.png',
+        "Pixel": 'https://i.postimg.cc/3RJRsHjG/px-gold-cherry.png',
+        "Real": "https://i.postimg.cc/MTKTC80R/real-gold-cherry.png",
+        "Poison_values": 'b,\'#eaca23\',\'#909090\',20',
+    });
+    new_fruit.push({ // Golden Strawberry — 1 in 10m
         "Normal": 'https://i.postimg.cc/CxLDtZkB/golden-strawberry.png',
         "Pixel": 'https://i.postimg.cc/9Q8TjWYx/px-golden-strawberry.png',
         "Real": "https://i.postimg.cc/tCzW2dZG/real-golden-strawberry.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
+    });
+    new_fruit.push({ // Golden Carrot — 1 in 50m
+        "Normal": 'https://i.postimg.cc/g0Kjt0hv/gold-carrot.png',
+        "Pixel": 'https://i.postimg.cc/yNTxpNRP/gold-px-carrot.png',
+        "Real": "https://i.postimg.cc/s2JxH2Wm/gold-real-carrot.png",
+        "Poison_values": 'b,\'#fc8824\',\'#909090\',20',
+    });
+    new_fruit.push({ // Golden Watermelon — 1 in 100m
+        "Normal": 'https://i.postimg.cc/0NCjXNSc/gold-watermelon-1.png',
+        "Pixel": 'https://i.postimg.cc/25xy95Wx/gold-px-watermelon-1.png',
+        "Real": "https://i.postimg.cc/k5yGY5Sw/gold-real-watermelon-1.png",
+        "Poison_values": 'b,\'#93ef13\',\'#909090\',20',
     });
 
     // Only used for Distinct Poison Skulls
@@ -2063,7 +2082,7 @@ window.Fruit.alterCode = function (code) {
 
 
     add_gold = `
-  ${golden_index} = this.${fruit_array_name}.length - 2;
+  ${golden_index} = this.${fruit_array_name}.length - 6; // Golden Apple (first of 5 secrets; Skull is last)
   `
 
     add_fruit = add_fruit + add_gold;
@@ -2143,8 +2162,11 @@ window.Fruit.alterCode = function (code) {
     ////console.log(code)
     //debugger
 
-    gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance}
-    super_chance = `* 10000000) + 1) == 4263017)` // ${super_chance}
+    gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance} — Apple 1m
+    cherry_chance = `* 5000000) + 1) == 421017)` // ${cherry_chance} — Cherry 5m
+    super_chance = `* 10000000) + 1) == 4263018)` // ${super_chance} — Strawberry 10m
+    carrot_chance = `* 50000000) + 1) == 4263019)` // ${carrot_chance} — Carrot 50m
+    melon_chance = `* 100000000) + 1) == 4263217)` // ${melon_chance} — Watermelon 100m
     free_test = `* 10) + 1) == 6)` // ${free_test}
 
     apple_info_regex_improved = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\(a,b,c\){a\.[a-zA-Z0-9_$]{1,8}\[b\]\.[a-zA-Z0-9_$]{1,8}=c;/)
@@ -2153,12 +2175,16 @@ window.Fruit.alterCode = function (code) {
     apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
     ////console.log(apple_info_regex)
 
-    set_gold = `if(a.${get_ka}[b].type >= ${golden_index} - 1){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
-    if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} - 1;}
-    if(Math.floor((Math.random() ${super_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
+    // goldenIndex = Apple; +1 Cherry; +2 Strawberry; +3 Carrot; +4 Watermelon
+    // Rarer rolls checked later so they overwrite if both hit
+    set_gold = `if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
+    if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
+    if(Math.floor((Math.random() ${cherry_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 1;}
+    if(Math.floor((Math.random() ${super_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 2;}
+    if(Math.floor((Math.random() ${carrot_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 3;}
+    if(Math.floor((Math.random() ${melon_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 4;}
     $&`
-    //console.log("Adding 1 in a Million Golden Apple")
-    //console.log("Adding 1 in a 10 Million Special Secret")
+    //console.log("Adding secret golden fruits")
     code = code.assertReplace(apple_info_regex, set_gold)
 
     return code;
