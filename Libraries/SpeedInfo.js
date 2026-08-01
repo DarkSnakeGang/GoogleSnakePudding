@@ -110,9 +110,8 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
 }
 })();
 
-window.newRecordData = 0;
 
-    window.isBridge = (Math.floor((Math.random()* 50) + 1) != 2)/*(Math.floor((Math.random()* 50) + 1) != 36)*/;
+    window.isBridge = (Math.floor((Math.random()* 50) + 1) != 32);
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
@@ -254,58 +253,30 @@ window.newRecordData = 0;
         });
     }
 
-    if(window.isBridge){
-        window.modeToTxt = {
-            0: { name: "Classic" },
-            1: { name: "Wall" },
-            2: { name: "Portal" },
-            3: { name: "Cheese" },
-            4: { name: "Borderless" },
-            5: { name: "Twin" },
-            6: { name: "Winged" },
-            7: { name: "Yin Yang" },
-            8: { name: "Key" },
-            9: { name: "Sokoban" },
-            10: { name: "Poison" },
-            11: { name: "Dimension" },
-            12: { name: "Minesweeper" },
-            13: { name: "Statue" },
-            14: { name: "Light" },
-            15: { name: "Shield" },
-            16: { name: "Arrow" },
-            17: { name: "Hotdog" },
-            18: { name: "Magnet" },
-            19: { name: "Gate" },
-            20: { name: "Bridge" },
-            21: { name: "Peaceful" },
-            22: { name: "Blender" },
-        }
-    }else{
-        window.modeToTxt = {
-            0: { name: "Classic" },
-            1: { name: "Wall" },
-            2: { name: "Portal" },
-            3: { name: "Cheese" },
-            4: { name: "Borderless" },
-            5: { name: "Twin" },
-            6: { name: "Winged" },
-            7: { name: "Yin Yang" },
-            8: { name: "Key" },
-            9: { name: "Sokoban" },
-            10: { name: "Poison" },
-            11: { name: "Dimension" },
-            12: { name: "Minesweeper" },
-            13: { name: "Statue" },
-            14: { name: "Light" },
-            15: { name: "Shield" },
-            16: { name: "Arrow" },
-            17: { name: "Hotdog" },
-            18: { name: "Magnet" },
-            19: { name: "Gate" },
-            20: { name: "Skip" },
-            21: { name: "Peaceful" },
-            22: { name: "Blender" },
-        }
+    window.modeToTxt = {
+        0: { name: "Classic" },
+        1: { name: "Wall" },
+        2: { name: "Portal" },
+        3: { name: "Cheese" },
+        4: { name: "Borderless" },
+        5: { name: "Twin" },
+        6: { name: "Winged" },
+        7: { name: "Yin Yang" },
+        8: { name: "Key" },
+        9: { name: "Sokoban" },
+        10: { name: "Poison" },
+        11: { name: "Dimension" },
+        12: { name: "Minesweeper" },
+        13: { name: "Statue" },
+        14: { name: "Light" },
+        15: { name: "Shield" },
+        16: { name: "Arrow" },
+        17: { name: "Hotdog" },
+        18: { name: "Magnet" },
+        19: { name: "Gate" },
+        20: { name: "Bridge" },
+        21: { name: "Peaceful" },
+        22: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -632,10 +603,6 @@ window.newRecordData = 0;
     window.getAllSrc = async function () {
         const levels = ["25", "50", "100", "All", "H"];
         for (const element of levels) {
-            if(window.CurrentModeNum==20){
-                let result = await getSnakeWorldRecord(window.modeToTxt[window.CurrentModeNum].name+" Mode", window.countToTxt[window.timeKeeper.getCurrentSetting("count")].name, window.speedToTxt[window.timeKeeper.getCurrentSetting("speed")].name, window.sizeToTxt[window.timeKeeper.getCurrentSetting("size")].name, element)
-                window.newRecordData=result;
-            }
             await getRecordSRC(element);
         }
     }
