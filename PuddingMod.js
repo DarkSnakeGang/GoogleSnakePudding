@@ -1129,9 +1129,11 @@ window.TimeKeeper.make = function () {
         }
 
         let mode = window.timeKeeper.getCurrentSetting("trophy");
-        if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
+        let trophyCount = document.getElementById("trophy").children.length;
+        if (mode != trophyCount - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 20; t++) {
+            // Bits cover every trophy except Classic (0) and Blender (last)
+            for (t = 1; t < trophyCount - 1; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -1372,7 +1374,25 @@ window.TimeKeeper.make = function () {
         else {
             storage = JSON.parse(storage);
         }
-        if (storage["version"] != 2) {
+
+        // v2 (20-bit modeStr) -> v3 (21-bit): insert Bridge bit before Peaceful
+        if (storage["version"] == 2) {
+            const migrated = { version: 3 };
+            for (const key of Object.keys(storage)) {
+                if (key === "version") continue;
+                const parts = key.split("-");
+                if (parts.length >= 5 && /^[01]{20}$/.test(parts[1])) {
+                    const modeStr = parts[1];
+                    const newModeStr = modeStr.slice(0, 19) + "0" + modeStr.slice(19);
+                    migrated[parts[0] + "-" + newModeStr + "-" + parts.slice(2).join("-")] = storage[key];
+                } else {
+                    migrated[key] = storage[key];
+                }
+            }
+            storage = migrated;
+        }
+
+        if (storage["version"] != 3) {
             alert("Something went wrong with you localStorage!");
         }
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
@@ -3888,6 +3908,16 @@ window.Timer = {
     localStorage._snake_pb = localStorage._snake_pb ?? '{}'
     window._pb = JSON.parse(localStorage._snake_pb)
 
+    // Bridge inserted before Peaceful: old mode index 20 (Peaceful) -> 21
+    if (!localStorage._snake_pb_bridge_migrated) {
+      if (window._pb[20] && !window._pb[21]) {
+        window._pb[21] = window._pb[20];
+        delete window._pb[20];
+        localStorage._snake_pb = JSON.stringify(window._pb);
+      }
+      localStorage._snake_pb_bridge_migrated = '1';
+    }
+
 
     localStorage._snake_aheadg  = localStorage._snake_aheadg  ?? '#008010'
     localStorage._snake_aheadl  = localStorage._snake_aheadl  ?? '#53dd87'
@@ -3991,6 +4021,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v22/trophy_20.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>

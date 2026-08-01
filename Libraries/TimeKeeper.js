@@ -101,9 +101,11 @@ window.TimeKeeper.make = function () {
         }
 
         let mode = window.timeKeeper.getCurrentSetting("trophy");
-        if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
+        let trophyCount = document.getElementById("trophy").children.length;
+        if (mode != trophyCount - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 20; t++) {
+            // Bits cover every trophy except Classic (0) and Blender (last)
+            for (t = 1; t < trophyCount - 1; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -344,7 +346,25 @@ window.TimeKeeper.make = function () {
         else {
             storage = JSON.parse(storage);
         }
-        if (storage["version"] != 2) {
+
+        // v2 (20-bit modeStr) -> v3 (21-bit): insert Bridge bit before Peaceful
+        if (storage["version"] == 2) {
+            const migrated = { version: 3 };
+            for (const key of Object.keys(storage)) {
+                if (key === "version") continue;
+                const parts = key.split("-");
+                if (parts.length >= 5 && /^[01]{20}$/.test(parts[1])) {
+                    const modeStr = parts[1];
+                    const newModeStr = modeStr.slice(0, 19) + "0" + modeStr.slice(19);
+                    migrated[parts[0] + "-" + newModeStr + "-" + parts.slice(2).join("-")] = storage[key];
+                } else {
+                    migrated[key] = storage[key];
+                }
+            }
+            storage = migrated;
+        }
+
+        if (storage["version"] != 3) {
             alert("Something went wrong with you localStorage!");
         }
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));

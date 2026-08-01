@@ -68,6 +68,16 @@ window.Timer = {
     localStorage._snake_pb = localStorage._snake_pb ?? '{}'
     window._pb = JSON.parse(localStorage._snake_pb)
 
+    // Bridge inserted before Peaceful: old mode index 20 (Peaceful) -> 21
+    if (!localStorage._snake_pb_bridge_migrated) {
+      if (window._pb[20] && !window._pb[21]) {
+        window._pb[21] = window._pb[20];
+        delete window._pb[20];
+        localStorage._snake_pb = JSON.stringify(window._pb);
+      }
+      localStorage._snake_pb_bridge_migrated = '1';
+    }
+
 
     localStorage._snake_aheadg  = localStorage._snake_aheadg  ?? '#008010'
     localStorage._snake_aheadl  = localStorage._snake_aheadl  ?? '#53dd87'
@@ -171,6 +181,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v22/trophy_20.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>
