@@ -465,10 +465,6 @@ window.newRecordData = 0;
         
         let recordData = cacheData.records[cacheKey];
 
-        if(window.CurrentModeNum==20){
-            recordData=recordDataFormatingForSrcData(newRecordData);
-        }
-
         if (window.NepDebug) {
             console.log(`Record data for key ${cacheKey}:`, recordData);
         }
