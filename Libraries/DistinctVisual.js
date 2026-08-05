@@ -150,12 +150,15 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
         console.log(code)
     }
 
-    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new.*box\..*};/gm)
+    // Match only the box goal creation. v12 puts the sequence.png creation on the
+    // same line just before it, which a greedy match swallows — that truncated the
+    // rebuilt call and grabbed the sequence property instead of the box one.
+    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new [a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},"[^"]*box[^"]*",\d+,this\.[a-zA-Z0-9_$]{1,8},"[^"]*"\)/)
     sokondeez_code = code.match(sokondeez)[0]
 
     sokondeez_nuts = `
     window.SokoRef=this;
-    window.DefaultSokoGoal=${sokondeez_code.slice(0, -3)}
+    window.DefaultSokoGoal=${sokondeez_code};
     window.DistinctSokoFinal=${sokondeez_code.split('=')[1].split('"')[0]} "${window.distinct_soko_goal.src}" ${sokondeez_code.split('"')[2]} "${window.distinct_soko_goal_px.src}" ${sokondeez_code.split('"')[4]}
     `
 

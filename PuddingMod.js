@@ -640,12 +640,15 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
         console.log(code)
     }
 
-    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new.*box\..*};/gm)
+    // Match only the box goal creation. v12 puts the sequence.png creation on the
+    // same line just before it, which a greedy match swallows — that truncated the
+    // rebuilt call and grabbed the sequence property instead of the box one.
+    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new [a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},"[^"]*box[^"]*",\d+,this\.[a-zA-Z0-9_$]{1,8},"[^"]*"\)/)
     sokondeez_code = code.match(sokondeez)[0]
 
     sokondeez_nuts = `
     window.SokoRef=this;
-    window.DefaultSokoGoal=${sokondeez_code.slice(0, -3)}
+    window.DefaultSokoGoal=${sokondeez_code};
     window.DistinctSokoFinal=${sokondeez_code.split('=')[1].split('"')[0]} "${window.distinct_soko_goal.src}" ${sokondeez_code.split('"')[2]} "${window.distinct_soko_goal_px.src}" ${sokondeez_code.split('"')[4]}
     `
 
@@ -1179,8 +1182,8 @@ window.TimeKeeper.make = function () {
 
     //save highscore
     window.timeKeeper.saveScore = function (time, score, mode, count, speed, size) {
-        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
-            // More Menu, or Dice, or MouseMode or Level Editor
+        // count > 6 = beyond Tally (MoreMenu / custom); also skip MouseMode / Level Editor
+        if (count > 6 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             return;
         }
         if (typeof (window.timeKeeper.lastAppleDate) == "undefined") {
@@ -1213,9 +1216,8 @@ window.TimeKeeper.make = function () {
 
     //save 25, 50, 100 or 'ALL' score
     window.timeKeeper.savePB = function (time, score, mode, count, speed, size) {
-
-        if (count > 5 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
-            // More Menu, or MouseMode or Level Editor
+        // count > 6 = beyond Tally (MoreMenu / custom); also skip MouseMode / Level Editor
+        if (count > 6 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
             return;
         }
 
@@ -1496,9 +1498,10 @@ window.TimeKeeper.make = function () {
             case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
             case 1: dialog.appendChild(document.createTextNode("3 Apples, ")); break;
             case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
-            case 3: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
+            case 3: dialog.appendChild(document.createTextNode("10 Apples, ")); break;
             case 4: dialog.appendChild(document.createTextNode("Dice count, ")); break;
             case 5: dialog.appendChild(document.createTextNode("Bomb count, ")); break;
+            case 6: dialog.appendChild(document.createTextNode("Tally count, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
         }
         switch (speed) {
@@ -2051,19 +2054,19 @@ window.Fruit.alterCode = function (code) {
     load_code_condensed = load_code_condensed + ';';
 */
 
-    //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"/)
-    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
-    //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"`, "")
-    func_name = code.match(get_apple_make_func)[0].split(' ')[1]
+    // Derive fruit ctor + image-cache prop (v11: S6/oa, v12: c7/ka — this.oa is the fruit array on v12)
+    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
+    apple_make_match = code.match(get_apple_make_func)
+    func_name = apple_make_match[1]
+    image_cache_name = apple_make_match[2]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
-    poison_convert = code.match(ip_grabber2)[0].split('(')[0] // replace('\(b,c.base,c.target,c.threshold\)',"") // This function is what makes the poison grey in poison mode
+    poison_convert = code.match(ip_grabber2)[0].split('(')[0] // This function is what makes the poison grey in poison mode
     array_grabber = new RegExp(/c=[a-zA-Z0-9_$]{1,8}\[a\]/)
     array_name = code.match(array_grabber)[0].replace('c=', "").replace('[a]', "")
 
     add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
 
     fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
-    ////console.log(func_name.split('(')[0])
     golden_index = `window.goldenIndex`
 
     add_fruit = `$&;this.${fruit_array_name}.push(b); // Add dummy for randomizer
@@ -2074,7 +2077,7 @@ window.Fruit.alterCode = function (code) {
         current_fruit_real = window.new_fruit[index].Real;
         current_fruit_poison_values = window.new_fruit[index].Poison_values; // ${current_fruit_poison_values}
         add_fruit_template = `
-    b=new ${func_name.split('(')[0]}(this.${settings_itself},"${current_fruit}",1,this.oa,"${current_fruit_px}","${current_fruit_real}");
+    b=new ${func_name}(this.${settings_itself},"${current_fruit}",1,this.${image_cache_name},"${current_fruit_px}","${current_fruit_real}");
     ${poison_convert}(${current_fruit_poison_values});
     this.${fruit_array_name}.push(b);`
         add_fruit = add_fruit + add_fruit_template;
@@ -2162,21 +2165,19 @@ window.Fruit.alterCode = function (code) {
     ////console.log(code)
     //debugger
 
-    gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance} — Apple 1m
-    cherry_chance = `* 5000000) + 1) == 421017)` // ${cherry_chance} — Cherry 5m
-    super_chance = `* 10000000) + 1) == 4263018)` // ${super_chance} — Strawberry 10m
-    carrot_chance = `* 50000000) + 1) == 4263019)` // ${carrot_chance} — Carrot 50m
-    melon_chance = `* 100000000) + 1) == 4263217)` // ${melon_chance} — Watermelon 100m
-    free_test = `* 10) + 1) == 6)` // ${free_test}
+    // Secret fruit rarities (checked later → rarer overwrites if both hit)
+    gold_chance = `* 1000000) + 1) == 426017)` // Apple 1m
+    cherry_chance = `* 5000000) + 1) == 421017)` // Cherry 5m
+    super_chance = `* 10000000) + 1) == 4263018)` // Strawberry 10m
+    carrot_chance = `* 50000000) + 1) == 4263019)` // Carrot 50m
+    melon_chance = `* 100000000) + 1) == 4263217)` // Watermelon 100m
 
     apple_info_regex_improved = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\(a,b,c\){a\.[a-zA-Z0-9_$]{1,8}\[b\]\.[a-zA-Z0-9_$]{1,8}=c;/)
     get_ka = code.match(apple_info_regex_improved)[0].split('.')[1].split('[')[0]
     get_pos = code.match(apple_info_regex_improved)[0].split('.')[2].split('=')[0]
     apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
-    ////console.log(apple_info_regex)
 
     // goldenIndex = Apple; +1 Cherry; +2 Strawberry; +3 Carrot; +4 Watermelon
-    // Rarer rolls checked later so they overwrite if both hit
     set_gold = `if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
     if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
     if(Math.floor((Math.random() ${cherry_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 1;}
@@ -2927,6 +2928,7 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
         3: { name: "10 Apples" },
         4: { name: "Dice" },
         5: { name: "Bomb" },
+        6: { name: "Tally" },
     }
 
     window.sizeToTxt = {
@@ -3017,7 +3019,8 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
 
         const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
 
-        if (size > 2 || count > 5) {
+        // > 6 = beyond Tally (MoreMenu / custom counts)
+        if (size > 2 || count > 6) {
             EmptyAll();
             return;
         }
@@ -3619,6 +3622,7 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
             case 3: return "10 Apples, "; break;
             case 4: return "Dice count, "; break;
             case 5: return "Bomb count, "; break;
+            case 6: return "Tally count, "; break;
             default: return "MoreMenu Apples, "; break;
         }
     }
@@ -4006,7 +4010,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
-
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/count_06.png" />
 </div>
 <br/>
 <div id="edit-speed">
@@ -5200,8 +5204,9 @@ window.ResetKey.alterCode = function(code){
   });
   return code
 }
-
-// This library is to make the game, when lagging, not start until your game has fully visually rendered. This is to prevent moments where the first frame is skipped in src videos.
+// Hold the first game tick until the board has visually rendered once.
+// Four hooks: render() stamps lastFrameTime; reset() stamps resetTime and
+// drains a delayed key; the key handler queues early inputs until then.
 
 window.RenderDelayFix = {};
 
@@ -5220,11 +5225,11 @@ window.RenderDelayFix.alterCode = function (code) {
     /render\s*\(\s*a\s*,\s*b\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\s*&&/,
     "render(a,b){window.lastFrameTime=Date.now();if(window.resetTime!=window.oldResetTime){window.oldResetTime=window.resetTime;}this.$1.$2&&"
   );
-  // intercepts the game's reset function for when you click play
+  // Capture all three props — v11 uses Bb.oa.oa, v12 uses wb.ka.ka
   code = assertReplace(
     code,
-    /reset\s*\(\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.oa\.oa\s*=\s*0\s*;/,
-    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.$1.oa.oa=0;"
+    /reset\s*\(\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\s*=\s*0\s*;/,
+    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.$1.$2.$3=0;"
   );
   code = assertReplace(
     code,

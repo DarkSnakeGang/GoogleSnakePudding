@@ -1,5 +1,6 @@
-
-// This library is to make the game, when lagging, not start until your game has fully visually rendered. This is to prevent moments where the first frame is skipped in src videos.
+// Hold the first game tick until the board has visually rendered once.
+// Four hooks: render() stamps lastFrameTime; reset() stamps resetTime and
+// drains a delayed key; the key handler queues early inputs until then.
 
 window.RenderDelayFix = {};
 
@@ -18,11 +19,11 @@ window.RenderDelayFix.alterCode = function (code) {
     /render\s*\(\s*a\s*,\s*b\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\s*&&/,
     "render(a,b){window.lastFrameTime=Date.now();if(window.resetTime!=window.oldResetTime){window.oldResetTime=window.resetTime;}this.$1.$2&&"
   );
-  // intercepts the game's reset function for when you click play
+  // Capture all three props — v11 uses Bb.oa.oa, v12 uses wb.ka.ka
   code = assertReplace(
     code,
-    /reset\s*\(\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.oa\.oa\s*=\s*0\s*;/,
-    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.$1.oa.oa=0;"
+    /reset\s*\(\s*\)\s*\{\s*this\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\.([a-zA-Z0-9_$]{1,8})\s*=\s*0\s*;/,
+    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.$1.$2.$3=0;"
   );
   code = assertReplace(
     code,

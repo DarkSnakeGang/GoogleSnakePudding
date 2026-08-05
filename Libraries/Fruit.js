@@ -282,19 +282,19 @@ window.Fruit.alterCode = function (code) {
     load_code_condensed = load_code_condensed + ';';
 */
 
-    //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"/)
-    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
-    //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"`, "")
-    func_name = code.match(get_apple_make_func)[0].split(' ')[1]
+    // Derive fruit ctor + image-cache prop (v11: S6/oa, v12: c7/ka — this.oa is the fruit array on v12)
+    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
+    apple_make_match = code.match(get_apple_make_func)
+    func_name = apple_make_match[1]
+    image_cache_name = apple_make_match[2]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
-    poison_convert = code.match(ip_grabber2)[0].split('(')[0] // replace('\(b,c.base,c.target,c.threshold\)',"") // This function is what makes the poison grey in poison mode
+    poison_convert = code.match(ip_grabber2)[0].split('(')[0] // This function is what makes the poison grey in poison mode
     array_grabber = new RegExp(/c=[a-zA-Z0-9_$]{1,8}\[a\]/)
     array_name = code.match(array_grabber)[0].replace('c=', "").replace('[a]', "")
 
     add_fruit_array_last_func_regex = new RegExp(/.threshold\),this.[a-zA-Z0-9_$]{1,8}.push\([a-zA-Z0-9_$]{1,8}\)/);
 
     fruit_array_name = code.match(add_fruit_array_last_func_regex)[0].split('.')[2] // ${fruit_array_name}
-    ////console.log(func_name.split('(')[0])
     golden_index = `window.goldenIndex`
 
     add_fruit = `$&;this.${fruit_array_name}.push(b); // Add dummy for randomizer
@@ -305,7 +305,7 @@ window.Fruit.alterCode = function (code) {
         current_fruit_real = window.new_fruit[index].Real;
         current_fruit_poison_values = window.new_fruit[index].Poison_values; // ${current_fruit_poison_values}
         add_fruit_template = `
-    b=new ${func_name.split('(')[0]}(this.${settings_itself},"${current_fruit}",1,this.oa,"${current_fruit_px}","${current_fruit_real}");
+    b=new ${func_name}(this.${settings_itself},"${current_fruit}",1,this.${image_cache_name},"${current_fruit_px}","${current_fruit_real}");
     ${poison_convert}(${current_fruit_poison_values});
     this.${fruit_array_name}.push(b);`
         add_fruit = add_fruit + add_fruit_template;
@@ -393,21 +393,19 @@ window.Fruit.alterCode = function (code) {
     ////console.log(code)
     //debugger
 
-    gold_chance = `* 1000000) + 1) == 426017)` // ${gold_chance} — Apple 1m
-    cherry_chance = `* 5000000) + 1) == 421017)` // ${cherry_chance} — Cherry 5m
-    super_chance = `* 10000000) + 1) == 4263018)` // ${super_chance} — Strawberry 10m
-    carrot_chance = `* 50000000) + 1) == 4263019)` // ${carrot_chance} — Carrot 50m
-    melon_chance = `* 100000000) + 1) == 4263217)` // ${melon_chance} — Watermelon 100m
-    free_test = `* 10) + 1) == 6)` // ${free_test}
+    // Secret fruit rarities (checked later → rarer overwrites if both hit)
+    gold_chance = `* 1000000) + 1) == 426017)` // Apple 1m
+    cherry_chance = `* 5000000) + 1) == 421017)` // Cherry 5m
+    super_chance = `* 10000000) + 1) == 4263018)` // Strawberry 10m
+    carrot_chance = `* 50000000) + 1) == 4263019)` // Carrot 50m
+    melon_chance = `* 100000000) + 1) == 4263217)` // Watermelon 100m
 
     apple_info_regex_improved = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\(a,b,c\){a\.[a-zA-Z0-9_$]{1,8}\[b\]\.[a-zA-Z0-9_$]{1,8}=c;/)
     get_ka = code.match(apple_info_regex_improved)[0].split('.')[1].split('[')[0]
     get_pos = code.match(apple_info_regex_improved)[0].split('.')[2].split('=')[0]
     apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
-    ////console.log(apple_info_regex)
 
     // goldenIndex = Apple; +1 Cherry; +2 Strawberry; +3 Carrot; +4 Watermelon
-    // Rarer rolls checked later so they overwrite if both hit
     set_gold = `if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
     if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
     if(Math.floor((Math.random() ${cherry_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 1;}

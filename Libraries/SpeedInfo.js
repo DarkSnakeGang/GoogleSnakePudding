@@ -286,6 +286,7 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
         3: { name: "10 Apples" },
         4: { name: "Dice" },
         5: { name: "Bomb" },
+        6: { name: "Tally" },
     }
 
     window.sizeToTxt = {
@@ -376,7 +377,8 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
 
         const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
 
-        if (size > 2 || count > 5) {
+        // > 6 = beyond Tally (MoreMenu / custom counts)
+        if (size > 2 || count > 6) {
             EmptyAll();
             return;
         }
@@ -978,6 +980,7 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
             case 3: return "10 Apples, "; break;
             case 4: return "Dice count, "; break;
             case 5: return "Bomb count, "; break;
+            case 6: return "Tally count, "; break;
             default: return "MoreMenu Apples, "; break;
         }
     }
