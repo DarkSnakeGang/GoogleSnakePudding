@@ -2644,115 +2644,6 @@ window.SpeedInfo = {};
 
 window.SpeedInfo.make = function () {
 
-    // temporary function for bridge directly to src api since yarmi hasnt fixed fastsnakestats yet
-    (function() {
-    const API = "https://www.speedrun.com/api/v1";
-const GAME_ABBREVIATION = "snake_game";
- 
-// Cache game/level/category lookups so repeated calls are cheap
-let _cache = null;
- 
-async function getJSON(url) {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Request failed (${res.status}): ${url}`);
-  return res.json();
-}
- 
-async function loadGameData() {
-  if (_cache) return _cache;
- 
-  const gameRes = await getJSON(`${API}/games?abbreviation=${GAME_ABBREVIATION}`);
-  const gameId = gameRes.data[0].id;
- 
-  const [levelsRes, categoriesRes] = await Promise.all([
-    getJSON(`${API}/games/${gameId}/levels`),
-    getJSON(`${API}/games/${gameId}/categories`),
-  ]);
- 
-  _cache = { gameId, levels: levelsRes.data, categories: categoriesRes.data };
-  return _cache;
-}
- 
-function normalizeSplit(split) {
-  const s = String(split).trim().toLowerCase();
-  if (s === "all") return "All Apples";
-  return `${s} Apples`;
-}
- 
-function findValueId(variables, variableName, valueLabel) {
-  const variable = variables.find(
-    v => v.name.toLowerCase() === variableName.toLowerCase()
-  );
-  if (!variable) throw new Error(`Variable "${variableName}" not found for this level`);
- 
-  const entry = Object.entries(variable.values.values).find(
-    ([, v]) => v.label.toLowerCase() === valueLabel.toLowerCase()
-  );
-  if (!entry) throw new Error(`Value "${valueLabel}" not found in "${variableName}"`);
- 
-  return { varId: variable.id, valueId: entry[0] };
-}
- 
-// this is a temporary fix for the fact that yarmi hasnt updated fastsnakestats to include bridge. this does not support highscore
-window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount, speed, mapSize, split) {
-    if(mode=="Skip Mode"){mode="Bridge Mode"};
-  const { gameId, levels, categories } = await loadGameData();
- 
-  // Resolve the level (mode)
-  const level = levels.find(l => l.name.toLowerCase() === mode.toLowerCase());
-  if (!level) throw new Error(`Mode "${mode}" not found`);
- 
-  // Resolve the category (split)
-  const splitName = normalizeSplit(split);
-  const category = categories.find(
-    c => c.type === "per-level" && c.name.toLowerCase() === splitName.toLowerCase()
-  );
-  if (!category) throw new Error(`Split "${split}" not found`);
- 
-  // Resolve the three variables that apply to this level
-  const varsRes = await getJSON(`${API}/levels/${level.id}/variables`);
-  const variables = varsRes.data;
- 
-  const apples = findValueId(variables, "Multi Apple Amount", appleCount);
-  const spd    = findValueId(variables, "Speed", speed);
-  const size   = findValueId(variables, "Board Size", mapSize);
- 
-  // Query the leaderboard for exactly this subcategory, top run only
-  const query = new URLSearchParams({
-    top: "1",
-    embed: "players",
-    [`var-${apples.varId}`]: apples.valueId,
-    [`var-${spd.varId}`]: spd.valueId,
-    [`var-${size.varId}`]: size.valueId,
-  });
- 
-  const lbUrl = `${API}/leaderboards/${gameId}/level/${level.id}/${category.id}?${query}`;
-  const lb = await getJSON(lbUrl);
- 
-  const wr = lb.data.runs[0];
-  if (!wr) {
-    return { found: false, mode, appleCount, speed, mapSize, split };
-  }
- 
-  const player = lb.data.players.data[0];
-  const playerName = player.names ? player.names.international : player.name;
- 
-  return {
-    found: true,
-    mode,
-    appleCount,
-    speed,
-    mapSize,
-    split,
-    time: wr.run.times.primary_t, // seconds, e.g. 26.551
-    player: playerName,
-    date: wr.run.date,
-    link: wr.run.weblink,
-  };
-}
-})();
-
-
     window.isBridge = (Math.floor((Math.random()* 50) + 1) != 32);
 
     // First game must be CE, the other is the normal game
@@ -2760,137 +2651,161 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
     window.first_time_call = true;
     window.requestsMade = 0;
 
-    // FastSnakeStats cache configuration
-    const FASTSNAKE_CACHE_BASE = "https://raw.githubusercontent.com/DarkSnakeGang/FastSnakeStats/main/time-travel-cache/daily";
-    const CACHE_STALE_THRESHOLD = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
-    let cacheData = null;
-    let lastCacheUpdate = 0;
+    // FastSnakeStats runs-derived WR timelines (preferred over legacy daily/ snapshots)
+    const FASTSNAKE_BASE = "https://raw.githubusercontent.com/DarkSnakeGang/FastSnakeStats/refs/heads/main/time-travel-cache";
+    const RUNS_DATES_URL = `${FASTSNAKE_BASE}/metadata/available-dates-runs.json`;
+    const TIMELINES_URL = `${FASTSNAKE_BASE}/runs-derived/wr-timelines.json`;
+    const CACHE_STALE_THRESHOLD = 3 * 60 * 60 * 1000; // 3 hours
+
+    let timelinesData = null;
+    let runsDatesMeta = null;
+    let lastTimelinesUpdate = 0;
+    let timelinesPromise = null;
 
     function sleepFor(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    // New function to fetch from FastSnakeStats cache
-    async function fetchFromFastSnakeCache(date = null) {
-        try {
-            // If no date specified, use today's date
-            if (!date) {
-                const today = new Date();
-                date = today.toISOString().split('T')[0]; // YYYY-MM-DD format
+    async function getJSON(url) {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+        return res.json();
+    }
+
+    // Binary search: latest WR snapshot on or before `date` (same as FastSnakeStats GitHubCacheFetcher)
+    function wrAsOf(timeline, date) {
+        if (!timeline || !timeline.length) return [];
+        let lo = 0;
+        let hi = timeline.length - 1;
+        let best = -1;
+        while (lo <= hi) {
+            const mid = (lo + hi) >> 1;
+            if (timeline[mid].d <= date) {
+                best = mid;
+                lo = mid + 1;
+            } else {
+                hi = mid - 1;
             }
-
-            // Parse date to get year/month/day
-            const [year, month, day] = date.split('-');
-            const paddedMonth = month.padStart(2, '0');
-            const paddedDay = day.padStart(2, '0');
-
-            // Construct cache URL
-            const cacheUrl = `${FASTSNAKE_CACHE_BASE}/${year}/${paddedMonth}/${date}.json`;
-
-            if (window.NepDebug) {
-                console.log(`Fetching from FastSnake cache: ${cacheUrl}`);
-            }
-
-            const response = await fetch(cacheUrl);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-
-            const data = await response.json();
-            cacheData = data;
-            lastCacheUpdate = Date.now();
-            window.requestsMade += 1;
-
-            if (window.NepDebug) {
-                console.log(`Successfully fetched cache data for ${date}`);
-            }
-
-            return data;
-        } catch (error) {
-            if (window.NepDebug) {
-                console.error(`Failed to fetch from FastSnake cache: ${error.message}`);
-            }
-            throw error;
         }
+        return best >= 0 ? timeline[best].runs : [];
     }
 
-    // Check if cache is valid (not stale)
-    function isCacheValid() {
-        return cacheData && (Date.now() - lastCacheUpdate) < CACHE_STALE_THRESHOLD;
+    function expandCompactRun(r, date) {
+        const isGuest = r.g || String(r.p).indexOf("guest:") === 0;
+        return {
+            id: r.id,
+            date: date,
+            weblink: r.w,
+            times: { primary: r.t, primary_t: r.pt },
+            players: {
+                data: [
+                    isGuest
+                        ? {
+                            rel: "guest",
+                            name: r.n,
+                            "name-style": r.ns || {
+                                style: "solid",
+                                color: { dark: "#9e9e9e", light: "#9e9e9e" },
+                            },
+                        }
+                        : {
+                            rel: "user",
+                            id: r.p,
+                            names: { international: r.n },
+                            weblink: "https://www.speedrun.com/user/" + r.p,
+                            "name-style": r.ns || undefined,
+                        },
+                ],
+            },
+            values: {},
+        };
     }
 
-    // Get the most recent available cache data
+    async function loadRunsDerived() {
+        if (
+            timelinesData &&
+            runsDatesMeta &&
+            Date.now() - lastTimelinesUpdate < CACHE_STALE_THRESHOLD
+        ) {
+            const date = runsDatesMeta.availableDates[runsDatesMeta.availableDates.length - 1];
+            return { timelines: timelinesData, date };
+        }
+        if (timelinesPromise) return timelinesPromise;
+
+        timelinesPromise = (async () => {
+            if (window.NepDebug) {
+                console.log("Loading FastSnakeStats runs-derived timelines...");
+            }
+            const [dates, timelines] = await Promise.all([
+                getJSON(RUNS_DATES_URL),
+                getJSON(TIMELINES_URL),
+            ]);
+            if (!dates.availableDates || !dates.availableDates.length) {
+                throw new Error("No available dates in runs-derived metadata");
+            }
+            if (!timelines.boards) {
+                throw new Error("runs-derived timelines missing boards");
+            }
+            runsDatesMeta = dates;
+            timelinesData = timelines;
+            lastTimelinesUpdate = Date.now();
+            window.requestsMade += 2;
+            const date = dates.availableDates[dates.availableDates.length - 1];
+            if (window.NepDebug) {
+                console.log(`Runs-derived ready as of ${date} (${Object.keys(timelines.boards).length} boards)`);
+            }
+            return { timelines, date };
+        })().finally(() => {
+            timelinesPromise = null;
+        });
+
+        return timelinesPromise;
+    }
+
+    // Look up one category key as of the latest runs-derived date
+    async function getRecordForKey(cacheKey) {
+        const { timelines, date } = await loadRunsDerived();
+        const top = wrAsOf(timelines.boards[cacheKey], date);
+        return {
+            date,
+            success: top.length > 0,
+            runs: top.map((r) => expandCompactRun(r, date)),
+        };
+    }
+
+    // Preload timelines (startup / legacy hooks)
     async function getLatestCacheData() {
-        if (isCacheValid()) {
-            return cacheData;
-        }
-
-        // Try to get today's data first
-        try {
-            return await fetchFromFastSnakeCache();
-        } catch (error) {
-            // If today's data isn't available, try yesterday
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-            
-            try {
-                return await fetchFromFastSnakeCache(yesterdayStr);
-            } catch (error2) {
-                // If yesterday's data isn't available, try a few days back
-                for (let i = 2; i <= 7; i++) {
-                    const pastDate = new Date();
-                    pastDate.setDate(pastDate.getDate() - i);
-                    const pastDateStr = pastDate.toISOString().split('T')[0];
-                    
-                    try {
-                        return await fetchFromFastSnakeCache(pastDateStr);
-                    } catch (error3) {
-                        continue;
-                    }
-                }
-                throw new Error("No recent cache data available");
-            }
-        }
+        const { timelines, date } = await loadRunsDerived();
+        return { date, source: "runs-derived", boards: timelines.boards };
     }
 
-    // Legacy function for compatibility (now uses cache)
+    // Legacy function for compatibility (now uses runs-derived)
     window.makeAPIrequest = function (requestURL, callback) {
-        // This is now a legacy function - we'll use the cache instead
         if (window.NepDebug) {
-            console.log("Legacy API request called, using cache instead");
+            console.log("Legacy API request called, using runs-derived instead");
         }
-        
-        // For compatibility, we'll still call the callback but with cached data
         getLatestCacheData().then(data => {
             if (callback && typeof callback === "function") {
                 callback(data);
             }
         }).catch(error => {
             if (window.NepDebug) {
-                console.error("Cache fetch failed:", error);
+                console.error("Runs-derived fetch failed:", error);
             }
-            // Call callback with empty data to maintain compatibility
             if (callback && typeof callback === "function") {
                 callback({ data: { runs: [] } });
             }
         });
     }
 
-
-
     // Legacy function for compatibility
     window.getGameDetails = function () {
-        // This function is no longer needed as we're using cached data
-        // But we'll keep it for compatibility
         if (window.NepDebug) {
-            console.log("getGameDetails called - using cached data instead");
+            console.log("getGameDetails called - using runs-derived instead");
         }
-        
-        // Initialize cache data if not already done
         getLatestCacheData().catch(error => {
             if (window.NepDebug) {
-                console.error("Failed to initialize cache data:", error);
+                console.error("Failed to initialize runs-derived data:", error);
             }
         });
     }
@@ -2957,18 +2872,6 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
 
         if (!window.pudding_settings.SpeedInfo) {
             // For those that don't want to see speedrun info, to keep the game stable without api calls
-            EmptyAll();
-            return;
-        }
-
-        // Get cache data
-        let cacheData;
-        try {
-            cacheData = await getLatestCacheData();
-        } catch (error) {
-            if (window.NepDebug) {
-                console.error("Failed to get cache data:", error);
-            }
             EmptyAll();
             return;
         }
@@ -3051,49 +2954,28 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
         const cacheKey = `${countName}|${speedName}|${sizeName}|${modeName}|${categoryName}`;
 
         if (window.NepDebug) {
-            console.log(`Looking for cache key: ${cacheKey}`);
+            console.log(`Looking for runs-derived key: ${cacheKey}`);
         }
 
-        // Look up the record in cache data
-        if (!cacheData.records) {
+        let recordData;
+        try {
+            recordData = await getRecordForKey(cacheKey);
+        } catch (error) {
             if (window.NepDebug) {
-                console.error("Cache data does not have records property:", cacheData);
+                console.error("Failed to get runs-derived record:", error);
             }
             EmptyAll();
             return;
         }
-        
-        let recordData = cacheData.records[cacheKey];
 
         if (window.NepDebug) {
             console.log(`Record data for key ${cacheKey}:`, recordData);
         }
 
-        if (!recordData) {
-            if (window.NepDebug) {
-                console.log(`No record found for key: ${cacheKey}`);
-            }
-            // Handle based on level type
-            if (level === "H") {
-                HandleHighscore("Empty");
-            } else {
-                switch (level) {
-                    case "25": Handle25("Empty"); break;
-                    case "50": Handle50("Empty"); break;
-                    case "100": Handle100("Empty"); break;
-                    case "All": HandleAll("Empty"); break;
-                    default: break;
-                }
-            }
-            return;
-        }
-
-        // Check if record exists and has runs
-        if (!recordData.success || !recordData.runs || recordData.runs === "" || (Array.isArray(recordData.runs) && recordData.runs.length === 0)) {
+        if (!recordData || !recordData.success || !recordData.runs || recordData.runs.length === 0) {
             if (window.NepDebug) {
                 console.log(`No successful runs found for key: ${cacheKey}`);
             }
-            // Handle based on level type
             if (level === "H") {
                 HandleHighscore("Empty");
             } else {
@@ -3108,84 +2990,13 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
             return;
         }
 
-        // Check if runs is a string (empty data) or has actual run data
-        if (!recordData.runs || recordData.runs.length === 0) {
-            if (window.NepDebug) {
-                console.log(`No run data available for key: ${cacheKey}`);
-            }
-            // Handle based on level type with empty data
-            if (level === "H") {
-                HandleHighscore("Empty");
-            } else {
-                switch (level) {
-                    case "25": Handle25("Empty"); break;
-                    case "50": Handle50("Empty"); break;
-                    case "100": Handle100("Empty"); break;
-                    case "All": HandleAll("Empty"); break;
-                    default: break;
-                }
-            }
-            return;
-        }
+        // Runs are already expanded objects from runs-derived timelines
+        const bestRun = recordData.runs[0];
 
-        // Parse PowerShell object strings into JavaScript objects
-        let parsedRuns = [];
-        for (let i = 0; i < recordData.runs.length; i++) {
-            const runString = recordData.runs[i];
-            if (typeof runString === "string" && runString.startsWith("@{") && runString.endsWith("}")) {
-                // Parse PowerShell object string format: @{times=; date=2024-12-15; id=y2nqwrjy; weblink=...}
-                const parsedRun = {};
-                const content = runString.slice(2, -1); // Remove @{ and }
-                const pairs = content.split(';');
-                
-                for (const pair of pairs) {
-                    const [key, value] = pair.split('=');
-                    if (key && value !== undefined) {
-                        parsedRun[key.trim()] = value.trim();
-                    }
-                }
-                
-                // Convert times string to proper times object
-                if (parsedRun.times) {
-                    // Parse times like "PT26.595S" into { primary: "PT26.595S" }
-                    parsedRun.times = { primary: parsedRun.times };
-                }
-                
-                parsedRuns.push(parsedRun);
-            } else if (typeof runString === "object") {
-                // Already a proper object
-                parsedRuns.push(runString);
-            }
-        }
-
-        if (parsedRuns.length === 0) {
-            if (window.NepDebug) {
-                console.log(`No valid runs found after parsing for key: ${cacheKey}`);
-            }
-            // Handle based on level type
-            if (level === "H") {
-                HandleHighscore("Empty");
-            } else {
-                switch (level) {
-                    case "25": Handle25("Empty"); break;
-                    case "50": Handle50("Empty"); break;
-                    case "100": Handle100("Empty"); break;
-                    case "All": HandleAll("Empty"); break;
-                    default: break;
-                }
-            }
-            return;
-        }
-
-        // Get the first (best) run from parsed runs
-        const bestRun = parsedRuns[0];
-
-        // Check if bestRun exists and has the expected structure
         if (!bestRun || !bestRun.times || !bestRun.times.primary || !bestRun.weblink) {
             if (window.NepDebug) {
                 console.log(`Invalid run data structure for key: ${cacheKey}`, bestRun);
             }
-            // Handle based on level type
             if (level === "H") {
                 HandleHighscore("Empty");
             } else {
@@ -3200,7 +3011,6 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
             return;
         }
 
-        // Create standardized run data structure
         const runData = {
             data: {
                 runs: [{
@@ -3212,7 +3022,6 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
             }
         };
 
-        // Handle based on level type using switch statement
         switch (level) {
             case "H": HandleHighscore(runData); break;
             case "25": Handle25(runData); break;
@@ -3225,11 +3034,6 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
                 }
                 break;
         }
-            
-
-        
-
-
 
     }
 
@@ -3377,10 +3181,10 @@ window.getSnakeWorldRecord = async function getSnakeWorldRecord(mode, appleCount
         return matches ? matches.length : 0;
     }
 
-    // Initialize cache data on startup
+    // Prefetch runs-derived timelines on startup
     getLatestCacheData().catch(error => {
         if (window.NepDebug) {
-            console.error("Failed to initialize cache data:", error);
+            console.error("Failed to initialize runs-derived data:", error);
         }
     });
 
