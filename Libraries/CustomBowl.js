@@ -131,17 +131,18 @@ window.CustomBowl.make = function () {
 
     /**
      * Roll a fruit from the custom bowl pool.
-     * Portal mode only: allowed = selected − types showing on screen.
-     * If allowed is empty (e.g. 5 selected on 5a after clearing the eaten pair),
-     * fall back to the full pool so the eaten type can reappear.
-     * Non-portal: plain random from the selected pool (duplicates allowed).
+     * Unique (pool − showing) when portal OR AlwaysUniqueFruit is on.
+     * Portal always uses unique logic; the checkbox enables it for other modes.
+     * If allowed is empty, fall back to full pool (re-roll eaten type when board is full).
      */
     window.pickCustomPortalType = function (appleManager, isPortal) {
         syncCountOverride(appleManager && appleManager.settings);
         try {
             const pool = ensurePoolMeetsMinimum();
             if (!pool.length) return 0;
-            if (!isPortal) {
+            const useUnique = !!isPortal ||
+                !!(window.pudding_settings && window.pudding_settings.AlwaysUniqueFruit);
+            if (!useUnique) {
                 return pool[Math.floor(Math.random() * pool.length)];
             }
             const showing = typesOnBoard(appleManager);
@@ -284,6 +285,8 @@ window.CustomBowl.make = function () {
     function syncPanelEnabledState() {
         const toggle = document.getElementById("fruit-bowl-enable");
         if (toggle) toggle.checked = !!window.pudding_settings.PortalPairs;
+        const uniqueToggle = document.getElementById("fruit-bowl-always-unique");
+        if (uniqueToggle) uniqueToggle.checked = !!window.pudding_settings.AlwaysUniqueFruit;
         const grid = document.getElementById("fruit-bowl-grid");
         if (grid) {
             grid.style.opacity = window.pudding_settings.PortalPairs ? "1" : "0.45";
@@ -351,9 +354,15 @@ window.CustomBowl.make = function () {
             panel.style.cssText = PANEL_STYLE;
             panel.innerHTML = `
                 <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:14px;font-size:18px;font-weight:bold;letter-spacing:0.2px;">Fruit Bowl Settings</div>
-                <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 12px;width:100%;">
-                    <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable" style="margin:0;float:none;position:static;">
-                    <label class="form-check-label" for="fruit-bowl-enable" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:1.2;">Enable custom fruit bowl</label>
+                <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:0 auto 12px;width:100%;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable" style="margin:0;float:none;position:static;">
+                        <label class="form-check-label" for="fruit-bowl-enable" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:1.2;">Enable custom fruit bowl</label>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-always-unique" style="margin:0;float:none;position:static;">
+                        <label class="form-check-label" for="fruit-bowl-always-unique" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:1.2;">Always Unique Fruit</label>
+                    </div>
                 </div>
                 <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:13px;margin:0 0 12px 0;text-align:center;"></div>
                 <div id="fruit-bowl-grid" style="padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;"></div>
@@ -368,6 +377,11 @@ window.CustomBowl.make = function () {
                 if (typeof window.saveSettings === "function") window.saveSettings();
                 syncPanelEnabledState();
                 renderFruitGrid();
+            });
+            document.getElementById("fruit-bowl-always-unique").addEventListener("change", function () {
+                window.pudding_settings.AlwaysUniqueFruit = !!this.checked;
+                if (typeof window.saveSettings === "function") window.saveSettings();
+                syncPanelEnabledState();
             });
             document.getElementById("fruit-bowl-close").addEventListener("click", function () {
                 window.PortalPairsPanelHide();

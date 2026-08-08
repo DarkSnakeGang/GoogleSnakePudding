@@ -51,6 +51,7 @@ window.SettingsSaver.make = function () {
                 TopBar: true,
                 SpeedInfo: false,
                 PortalPairs: false,
+                AlwaysUniqueFruit: false,
                 SelectedPairs: defaultPoolForCount(0),
                 SelectedPairsByCount: {},
                 DisableRandom: false,
@@ -64,6 +65,9 @@ window.SettingsSaver.make = function () {
             pudding_settings = JSON.parse(pudding_settings);
             if (typeof pudding_settings.PortalPairs !== 'boolean') {
                 pudding_settings.PortalPairs = false;
+            }
+            if (typeof pudding_settings.AlwaysUniqueFruit !== 'boolean') {
+                pudding_settings.AlwaysUniqueFruit = false;
             }
             if (typeof pudding_settings.ScrollBar !== 'boolean') {
                 pudding_settings.ScrollBar = false;
