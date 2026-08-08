@@ -15,6 +15,9 @@ window.BootstrapMenu.make = function () {
     window.BootstrapHide = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
         settingsBox.style.visibility = 'hidden';
+        if (typeof window.PortalPairsPanelHide === "function") {
+            window.PortalPairsPanelHide();
+        }
         if (window.bootstrapVisible && typeof window.getAllSrc != "undefined") {
             window.getAllSrc();
         }
@@ -68,57 +71,22 @@ window.BootstrapMenu.make = function () {
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
         document.getElementsByClassName('sEOCsb')[0].appendChild(divList);
 
-        /*const c = new Image();
-        c.src = 'https://i.postimg.cc/02xshYj1/index.png';
-        c.width = c.height = 16;
-        c.style = 'cursor:pointer;position:relative;left:-10px;top:30px;';
-        c.id = 'input-counter-settings';
-*/
         const d = document.createElement('div');
         d.id = 'input-counter-settings-container';
         d.style = 'position:absolute;left:465px;top:45px;z-index:10002;';
         document.getElementsByClassName('sEOCsb')[0].appendChild(d);
-        const settingsElement = document.querySelector('#input-counter-settings-container');
 
-        //settingsElement.appendChild(c);
-        // css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-        // if (window.NepDebug) {
-        //     css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
-        // }
+        const css_stripped = window.NepDebug
+            ? "http://127.0.0.1:5500/bootstrap-stripped.css"
+            : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
 
-        // window.bootstrap_css = '';
-        // const xhr = new XMLHttpRequest();
-
-        // xhr.onreadystatechange = function () {
-        //     if (xhr.readyState === XMLHttpRequest.DONE) {
-        //         if (xhr.status === 200) {
-        //             const data = xhr.responseText;
-        //             // Use the fetched data as a string
-        //             //console.log(data); // Or do something else with the data
-        //             window.bootstrap_css = data;
-        //             document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
-                    
-        //         } else {
-        //             console.error('An error occurred while fetching Bootstrap: ', xhr.status);
-        //         }
-        //     }
-        // };
-
-        // xhr.open('GET', css_stripped, true);
-        // xhr.send();
-
-        const css_stripped = window.NepDebug 
-        ? "http://127.0.0.1:5500/bootstrap-stripped.css"
-        : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-    
         const xhr = new XMLHttpRequest();
-        
-        xhr.onload = function() {
+
+        xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
                 const cssText = xhr.responseText;
                 window.bootstrap_css = cssText;
-                
-                // Inject into existing style element (same as original)
+
                 const styleElement = document.getElementsByTagName('style')[0];
                 if (styleElement) {
                     styleElement.innerHTML = styleElement.innerHTML + cssText;
@@ -131,39 +99,20 @@ window.BootstrapMenu.make = function () {
                     document.head.appendChild(styleElnew);
                     styleElnew.innerHTML = cssText;
                 }
-
             } else {
                 console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
             }
         };
 
-        const styleEl = document.getElementsByTagName('style')[0];
-
-        const observer = new MutationObserver((mutations) => {
-            console.log('Style tag changed:', mutations);
-            observer.disconnect();
-            const styleElement = document.getElementsByTagName('style')[0];
-            styleElement.innerHTML = styleElement.innerHTML + window.bootstrap_css;
-            observer.observe(styleEl, { childList: true, characterData: true, subtree: true });
-        });
-
-        // This is the original observer, disabled because adding a new style should fix it instead
-        //observer.observe(styleEl, {
-        //    childList: true,      // watch for added/removed nodes
-        //    characterData: true,  // watch for text changes
-        //    subtree: true         // watch inside the style tag
-        //});
-
-        
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             console.error('Network error while loading Bootstrap CSS');
         };
-        
-        xhr.ontimeout = function() {
+
+        xhr.ontimeout = function () {
             console.error('Timeout while loading Bootstrap CSS');
         };
-        
-        xhr.timeout = 10000; // 10 second timeout
+
+        xhr.timeout = 10000;
         xhr.open('GET', css_stripped, true);
         xhr.send();
 
@@ -227,34 +176,8 @@ window.BootstrapMenu.make = function () {
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
     <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="EatThemeRandomizer2">"Dragon Fruit"</label>
     </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
-    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" disabled>Custom Portal Pairs</label>
-    </div>
-<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
-    <option value="0">Apple</option>
-  </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
-  <option value="1">Banana</option>
-</select><br>
-
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
-    <option value="2">Pineapple</option>
-  </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
-    <option value="3">Purple Grapes</option>
-  </select><br>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
-    <option value="4">Pumpkin</option>
-  </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
-    <option value="5">Onion</option>
-  </select>
-  <br>
-</div>
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
-    </br>
-
+  <button type="button" class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="CustomBowlFruits" onclick="window.TogglePortalPairsPanel&&window.TogglePortalPairsPanel()">Custom Bowl Fruits</button><br>
     </div>
 
 <select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
@@ -392,17 +315,10 @@ window.BootstrapMenu.make = function () {
             hideCount: { stat: 'hide', duration: 'count' },
         }
 
-        //preselect based on saved settings
-        //document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
-
         document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
-
-        //Listeners to hide/show settings box when clickng the cog, or the X - not anymore! Only back button.
-        //document.querySelector('#input-counter-settings').addEventListener('click', showSettingsBox);
 
         const settingsCloseElements = document.getElementById('settings-close');
         settingsCloseElements.addEventListener('click', window.BootstrapHide);
-        //settingsCloseElements[1].addEventListener('click', hideSettingsBox);
 
         document.getElementById('stat-chooser').onchange = function () {
             stats.statShown = valuesToSettings[this.value].stat;
@@ -413,18 +329,6 @@ window.BootstrapMenu.make = function () {
 
         document.getElementById('edit-stat').addEventListener('click', promptToEditStatCount);
         document.getElementById('reset-stats').addEventListener('click', promptToResetStats);
-        //document.getElementById('toggle-counter').addEventListener('click', toggleCounter);
-
-        tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
-        //document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
-        //    window.timeKeeper.toggleDialog();
-        //});
-        TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
-        //document.querySelector("div[jsname^=\"" + TimerID + "\"]").addEventListener("click", (e) => {
-        //    window.timeKeeper.toggleDialog();
-        //});
-
-        //debugger
     }
 
     window.BootstrapSetup();

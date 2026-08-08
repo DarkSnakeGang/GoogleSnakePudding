@@ -4640,9 +4640,9 @@ window.BootstrapMenu.alterCode = function (code) {
     }
     return code;
 }
-window.CustomPortalPairs = {};
+window.CustomBowl = {};
 
-window.CustomPortalPairs.make = function () {
+window.CustomBowl.make = function () {
 
     // Code that runs before anything else here, loading variables, etc.
     // Recommended to use "window." for things
@@ -4815,7 +4815,7 @@ window.CustomPortalPairs.make = function () {
 
 }
 
-window.CustomPortalPairs.alterCode = function (code) {
+window.CustomBowl.alterCode = function (code) {
 
 
     // window.PopulateOptions();
@@ -5039,7 +5039,7 @@ window.PuddingMod.runCodeBefore = function () {
     "InputDisplay",
     "Timer",
     "BootstrapMenu",
-    "CustomPortalPairs"];
+    "CustomBowl"];
   console.log("Enabling Pudding Mod");
 
   libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";

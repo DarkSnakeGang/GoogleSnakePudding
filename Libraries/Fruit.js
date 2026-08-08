@@ -200,19 +200,6 @@ window.Fruit.alterCode = function (code) {
     get_fruit = new RegExp(/case "apple":/);
     code = code.assertReplace(get_fruit, "$& window.fruit_selected=")
     fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=`/gm)[0].split('(')[1].split('=')[0]
-    // Very poorly coded, get back here using this: "https://www.google.com/logos/fnbx/"+(1===
-    /*
-    // Full function that sets the current fruit icon
-    realism_load_image = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\).*;if/);
-    realism_image_code = code.match(realism_load_image)[0];
-    realism_image_code = realism_image_code.split(')')[0] + '){' + realism_image_code.split(')')[1] + ')};if'
-    //selected_fruit_num = realism_image_code.split('{')[1].split('=')[1].split(';')[0];
-    selected_fruit_num = realism_image_code.split('(')[2].split(',')[0];
-    //graphics_selected_code = realism_image_code.split('{')[1].split('(')[2].split(')')[0];
-    graphics_selected_code = realism_image_code.split(',')[1];
-
-    fruit_image = realism_image_code.split('{')[1].split('=')[0]
-    */
 
     new_realism_code = `
     if(window.fruit_selected >= ${last_fruit_num + 1}){
@@ -237,50 +224,13 @@ window.Fruit.alterCode = function (code) {
     rude_insert = new RegExp(/trophy_\${b}\.png`}`\)}/gm);
     code = code.assertReplace(rude_insert, "trophy_\${b}\.png`}`\); " + `${new_realism_code}` + " }");
 
-    //daily_ds_fruit = new RegExp(/"\.png"\)\);_\.[a-zA-Z0-9_$]{1,8}\.add\(c,"[a-zA-Z0-9_$]{1,8}"\)/gm);
-    //code = code.assertReplace(code.match(daily_ds_fruit)[0], code.match(daily_ds_fruit)[0].split(';')[0] + new_realism_code.replace(fruit_image, "c.src") + code.match(daily_ds_fruit)[0].split(';')[1]);
-
-    // Old hotdog code
-    //daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
-    //rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
-    //code = code.assertReplace(rude_insert2,
-    //    `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
-
     deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
     code.match(deathscreen_fruit).forEach(element => {
-        console.log(element)
         code.assertReplace(element, element + new_realism_code);
     });
     
     image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
     code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
-
-    /*
-    load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\),\n?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\?"snake_arcade\/pixel\/[a-zA-Z0-9_$]{1,8}\/px_apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png":"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png"\);/)
-
-    // Get all required variables around src for endscreen
-    settings_regex = new RegExp(`,\n?[a-zA-Z0-9_$]{1,8}\.${settings_itself}\.[a-zA-Z0-9_$]{1,8}`)
-    //debugger
-    settings_var = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[0].split(',')[1]
-    settings_src = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[2]
-    select_fruit_numvar = code.match(load_image_func)[0].match(new RegExp(/\+.\+/))[0].split('+')[1]
-    pixel_setting_regex = new RegExp(`case "graphics":[a-zA-Z0-9_$]{1,8}.${settings_itself}.[a-zA-Z0-9_$]{1,8}`);
-    pixel_setting = code.match(pixel_setting_regex)[0].split('.')[2]
-    // Gets the element that changed, "apple" means fruit here, in endscreen - Unused code here, but may be useful in the future.
-    get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
-
-    load_code_condensed = ``;
-
-    for (let index = 0; index < window.new_fruit.length; index++) {
-        current_fruit = window.new_fruit[index].Normal;
-        current_fruit_px = window.new_fruit[index].Pixel;
-        load_fruit_template = `
-    ,\(${select_fruit_numvar}==${last_fruit_num + 1 + index} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${current_fruit}" : {}\)
-    ,\(${select_fruit_numvar}==${last_fruit_num + 1 + index} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${current_fruit_px}" : {}\)`
-        load_code_condensed = load_code_condensed + load_fruit_template;
-    }
-    load_code_condensed = load_code_condensed + ';';
-*/
 
     // Derive fruit ctor + image-cache prop (v11: S6/oa, v12: c7/ka — this.oa is the fruit array on v12)
     get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
@@ -333,65 +283,7 @@ window.Fruit.alterCode = function (code) {
 
     new_shh_line = "if(" + firstvar_name + ".path.includes(\"postimg\"))" + firstvar_name + "." + Hr_name + ".src=" + firstvar_name + ".path;else $&";
 
-/*
-    Pr_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-    Pr_a = code.match(Pr_regex)[0].split('.')[0]
-    Pr_ka = code.match(Pr_regex)[0].split('.')[1].split('&')[0]
-    Pr_pa = code.match(Pr_regex)[0].split('.')[6] // Where relative path is stored
-
-    load_pixelated_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},"load",\n?function\(\){[a-zA-Z0-9_$]{1,8}\(a\)}\)\)}/gm)
-
-    pixelated_switch = `switch(${Pr_a}.${Pr_pa}){ `;
-
-    for (let index = 0; index < window.new_fruit.length; index++) {
-        current_fruit = window.new_fruit[index].Normal;
-        current_fruit_px = window.new_fruit[index].Pixel;
-        pixelated_case_template = `
-    case '${current_fruit_px}': ${Pr_a}.${Pr_ka}.src = '${current_fruit_px}'; break;`;
-        pixelated_switch = pixelated_switch + pixelated_case_template;
-    }
-
-
-    pixelated_switch = pixelated_switch + `
-  default: ${Pr_a}.${Pr_ka}.src = "https://www.google.com/logos/fnbx/" + ${Pr_a}.${Pr_pa}; break;
-}`;
-
-    new_pixelated_func = `
-  if (${Pr_a}.${Pr_ka})
-  {
-    ${pixelated_switch}
-    ${code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]}(${Pr_a}.${Pr_ka}, "load",
-    function() {
-        ${code.match(load_pixelated_regex)[0].split('{')[1].split('(')[0]}(${Pr_a})
-    });
-  }
-}
-  `
-
-    only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-
-    //console.log("Adding pixelated images")
-    code = code.assertReplace(load_pixelated_regex, new_pixelated_func);
-*/
- // THIS ENTIRE CHUNK IS MISSING, WHAT DOES IT DO? it used to fix deathscreen, but it works without it so no need.
-    // Fixes a image calls
-    //console.log("Adding images")
     code = code.assertReplace(shh_grabber, new_shh_line);
-
-    // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
-    //get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
-    //get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-    //get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-    //get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-
-    // Endscreen related image loading for new fruit - pudding. Keep this last
-    // Since it effect load_image_func in a way that would break the other code that relies on it !!
-    //console.log("Adding new fruit to endscreen")
-    ////console.log(load_image_func)
-    ////console.log(code)
-    //code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';', load_code_condensed));
-    ////console.log(code)
-    //debugger
 
     // Secret fruit rarities (checked later → rarer overwrites if both hit)
     gold_chance = `* 1000000) + 1) == 426017)` // Apple 1m
@@ -413,7 +305,6 @@ window.Fruit.alterCode = function (code) {
     if(Math.floor((Math.random() ${carrot_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 3;}
     if(Math.floor((Math.random() ${melon_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 4;}
     $&`
-    //console.log("Adding secret golden fruits")
     code = code.assertReplace(apple_info_regex, set_gold)
 
     return code;

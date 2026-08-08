@@ -441,6 +441,8 @@ window.Theme.alterCode = function (code) {
 
     document.getElementById('settings-popup-pudding').style.background = real_top_bar;
     document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');
+    if (portalPanel) portalPanel.style.background = real_top_bar;
 
     window.real_topbar_color = real_top_bar;
     window.button_color = buttons_color;
@@ -516,7 +518,6 @@ window.DistinctVisual.make = function () {
 
     // window.skull_toggle = false;
     // window.soko_toggle = true;
-    //document.getElementsByClassName('TO4uAe wSwbef')[1].addEventListener('click', toggle_skull_func, false);
 
     window.distinct_soko_goal = new Image();
     window.distinct_soko_goal.src = 'https://i.postimg.cc/x11nt4Pb/box-distinct-soko-goals.png';
@@ -532,46 +533,20 @@ window.DistinctVisual.make = function () {
 
 window.DistinctVisual.alterCode = function (code) {
 
-    // Attempt to get info on which mode it is
-    spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{(?:let|const|var) [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
-
-    spawn_func_code = code.match(spawn_func_regex)[0]
-
-    is_portal = spawn_func_code.split('(')[1] + "(" + spawn_func_code.split(')')[0].split('(')[2] + ")"
-    is_soko = is_portal.replace('2', '9').replace("this", "a");
-
-    // The elegent piece of code that replace the grey pudding with the skull icon
-    //console.log("Making soko goals more distinct")
-    //console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)")
-    ////console.log(code)
-
     realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
+    catchError(realism_draw, code);
     realism_switch = code.match(realism_draw)[0];
-    
-    //actual_canvas_regexp = new RegExp(/a.[a-zA-Z0-9_$]{1,8}.canvas,/);
-    //actual_canvas = code.match(actual_canvas_regexp)[0]
+
     realism_path = new RegExp(/function\(a,b\){switch.*}}/);
+    catchError(realism_path, code);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
     get_graphics = realism_switch.split(':')[1].split(')')[0];
-nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes("box")){
-    switch (${get_graphics}) {
-        default:
-        case 0:
-            a.oa.xy = window.distinct_soko_goal;
-            break;
-        case 1:
-            a.Ba.xy = window.distinct_soko_goal_px;
-            break;
-        case 2:
-            a.Ea.xy = window.distinct_soko_goal;
-            break;
-    }
-}`
 
     window.drawing_apple = true;
 
     get_apple_stuff = new RegExp(/(?:let|const|var).*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    catchError(get_apple_stuff, code);
     poison_default = code.match(get_apple_stuff)[0]
     b_graphics = poison_default.split('(')[2].split(')')[0]
 
@@ -582,46 +557,10 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     ${poison_default}
     `
 
-    /*get_apple_code = `
-    if(window.pudding_settings.Skull){
-        switch (window.graphics_selected) {
-            default:
-            case 0:
-                final_skull = window.skull;
-                break;
-            case 1:
-                final_skull = window.px_skull;
-                break;
-            case 2:
-                final_skull = window.real_skull;
-                break;
-            case 3:
-                switch (${b_graphics}) {
-                    default:
-                    case 0:
-                        final_skull = window.skull;
-                        break;
-                    case 1:
-                        final_skull = window.px_skull;
-                        break;
-                    case 2:
-                        final_skull = window.real_skull;
-                        break;
-                }
-                break;
-        }
-        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[2].split('?')[0]} - 1 : b.type;
-        //${poison_default.split('?')[0]} ? ${poison_default.split('?')[1]} ? final_skull : ${poison_default.split(':')[2]}
-        ${poison_default}
-
-    }
-    else {
-        ${poison_default}
-    }
-     `*/
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
     disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    catchError(disable_real_grey, code);
     real_grey = code.match(disable_real_grey)[0]
     real_grey_path = real_grey.split(')')[0].split('=')[1]
 
@@ -634,16 +573,13 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     }
     `
 
-    code = code.assertReplace(disable_real_grey,new_grey_code)
-
-    if (window.NepDebug) {
-        console.log(code)
-    }
+    code = code.assertReplace(disable_real_grey, new_grey_code)
 
     // Match only the box goal creation. v12 puts the sequence.png creation on the
     // same line just before it, which a greedy match swallows — that truncated the
     // rebuilt call and grabbed the sequence property instead of the box one.
     sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new [a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},"[^"]*box[^"]*",\d+,this\.[a-zA-Z0-9_$]{1,8},"[^"]*"\)/)
+    catchError(sokondeez, code);
     sokondeez_code = code.match(sokondeez)[0]
 
     sokondeez_nuts = `
@@ -654,17 +590,6 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     code = code.assertReplace(sokondeez, sokondeez_nuts)
 
-    //keep_running = new RegExp(/;if\([a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{1,8},9\)\)/)
-/*
-    code = code.assertReplace(keep_running, `;
-    if (window.pudding_settings.SokoGoals) {
-        window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DistinctSokoFinal;
-    }
-    else {
-        window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DefaultSokoGoal;
-    }
-    ${code.match(keep_running)[0]}`)
-*/
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     set_on_reset = `;
@@ -676,84 +601,6 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
     }
     $&`
     code = code.assertReplace(reset_regex, set_on_reset)
-
-    //code = code.assertReplace(/this.Ja.canvas,/, `window.distinct_soko_goal,`)
-
-/*
-
-Generally speaking, there is a "shadow" apple that is just the skull icon
-And the code recognizes poison apples and changes their "type" (fruit) to that skull
-
-*/
-
-    //disappear_skull = new RegExp(/this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z],0,\n?0,\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}/)
-    //dis_skull = code.match(disappear_skull)[0]
-    //code = code.assertReplace(disappear_skull, `false && ` + dis_skull)
-
-/*
-    pudding_draw = `
-
-    if(window.drawing_apple && (a.${last_path}.path.includes("apple") || a.${last_path}.path.includes("postimg")) ){
-        //a.oa.xy = window.skull;
-        //debugger
-
-        if(window.pudding_settings.Skull){
-            switch (${get_graphics}) {
-                default:
-                case 0:
-                    a.oa.xy = window.skull;
-                    break;
-                case 1:
-                    a.Ba.xy = window.px_skull;
-                    break;
-                case 2:
-                    a.Ea.xy = window.real_skull;
-                    break;
-            }
-        }
-        else if(a.${last_path}.path.includes("ghost")){
-            switch (${get_graphics}) {
-                default:
-                case 0:
-                    a.oa.xy = window.ghost_skull;
-                    break;
-                case 1:
-                    a.Ba.xy = window.px_ghost_skull;
-                    break;
-                case 2:
-                    a.Ea.xy = window.ghost_skull;
-                    break;
-            }
-        }
-    }
-
-    `
-*/
-    //actual_canvas = code.match(test_regexp)[0]
-
-    // Still need to take into account realism style.
-
-    //code = code.assertReplace(realism_draw, pudding_draw + `;` + realism_switch)
-
-
-    /*
-
-    draw_skull_func = new RegExp(/return [a-zA-Z0-9_$]{1,8}\(a.[a-zA-Z0-9_$]{1,8}\)\&\&a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.canvas\:a\.[a-zA-Z0-9_$]{1,8}\.canvas},[a-zA-Z0-9_$]{1,8}=function\(\)/gm)
-    new_draw_skull = code.match(draw_skull_func)[0].split("}")[0]
-    get_pixel = new_draw_skull.split(' ')[1].split('&')[0]
-    pudding_skull_xd = `
-if(!a.path.includes("key")){
-if(window.pudding_settings.SokoGoals && a.path.includes("box")){if(${get_pixel}){return window.distinct_soko_goal_px;}return window.distinct_soko_goal;}
-if(window.pudding_settings.Skull && !a.path.includes("box")){if(${get_pixel}){return window.px_skull;}return window.skull;}
-if(a.path.includes("ghost")){if(${get_pixel}){return window.px_ghost_skull;}return window.ghost_skull;}
-}
-${code.match(draw_skull_func)[0].split("}")[0]};}
-${code.match(draw_skull_func)[0].split("}")[1]}`
-
-    code = code.assertReplace(draw_skull_func, pudding_skull_xd)
-
-    */
-
 
     return code;
 }
@@ -1972,19 +1819,6 @@ window.Fruit.alterCode = function (code) {
     get_fruit = new RegExp(/case "apple":/);
     code = code.assertReplace(get_fruit, "$& window.fruit_selected=")
     fruit_image = code.match(/\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=`/gm)[0].split('(')[1].split('=')[0]
-    // Very poorly coded, get back here using this: "https://www.google.com/logos/fnbx/"+(1===
-    /*
-    // Full function that sets the current fruit icon
-    realism_load_image = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\).*;if/);
-    realism_image_code = code.match(realism_load_image)[0];
-    realism_image_code = realism_image_code.split(')')[0] + '){' + realism_image_code.split(')')[1] + ')};if'
-    //selected_fruit_num = realism_image_code.split('{')[1].split('=')[1].split(';')[0];
-    selected_fruit_num = realism_image_code.split('(')[2].split(',')[0];
-    //graphics_selected_code = realism_image_code.split('{')[1].split('(')[2].split(')')[0];
-    graphics_selected_code = realism_image_code.split(',')[1];
-
-    fruit_image = realism_image_code.split('{')[1].split('=')[0]
-    */
 
     new_realism_code = `
     if(window.fruit_selected >= ${last_fruit_num + 1}){
@@ -2009,50 +1843,13 @@ window.Fruit.alterCode = function (code) {
     rude_insert = new RegExp(/trophy_\${b}\.png`}`\)}/gm);
     code = code.assertReplace(rude_insert, "trophy_\${b}\.png`}`\); " + `${new_realism_code}` + " }");
 
-    //daily_ds_fruit = new RegExp(/"\.png"\)\);_\.[a-zA-Z0-9_$]{1,8}\.add\(c,"[a-zA-Z0-9_$]{1,8}"\)/gm);
-    //code = code.assertReplace(code.match(daily_ds_fruit)[0], code.match(daily_ds_fruit)[0].split(';')[0] + new_realism_code.replace(fruit_image, "c.src") + code.match(daily_ds_fruit)[0].split(';')[1]);
-
-    // Old hotdog code
-    //daily_fruit_deathscreen = code.match(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src/)[0]
-    //rude_insert2 = code.match(/0,[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)}/)[0]
-    //code = code.assertReplace(rude_insert2,
-    //    `${rude_insert2.split('}')[0]} ${new_realism_code.replace(fruit_image, daily_fruit_deathscreen)} }`);
-
     deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
     code.match(deathscreen_fruit).forEach(element => {
-        console.log(element)
         code.assertReplace(element, element + new_realism_code);
     });
     
     image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
     code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
-
-    /*
-    load_image_func = new RegExp(/if\("apple"===[a-zA-Z0-9_$]{1,8}\|\|"graphics"===[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\),\n?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}="https:\/\/www\.google\.com\/logos\/fnbx\/"\+\(1===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\?"snake_arcade\/pixel\/[a-zA-Z0-9_$]{1,8}\/px_apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png":"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_"\+[a-zA-Z0-9_$]{1,8}\+"\.png"\);/)
-
-    // Get all required variables around src for endscreen
-    settings_regex = new RegExp(`,\n?[a-zA-Z0-9_$]{1,8}\.${settings_itself}\.[a-zA-Z0-9_$]{1,8}`)
-    //debugger
-    settings_var = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[0].split(',')[1]
-    settings_src = code.match(load_image_func)[0].match(settings_regex)[0].split('.')[2]
-    select_fruit_numvar = code.match(load_image_func)[0].match(new RegExp(/\+.\+/))[0].split('+')[1]
-    pixel_setting_regex = new RegExp(`case "graphics":[a-zA-Z0-9_$]{1,8}.${settings_itself}.[a-zA-Z0-9_$]{1,8}`);
-    pixel_setting = code.match(pixel_setting_regex)[0].split('.')[2]
-    // Gets the element that changed, "apple" means fruit here, in endscreen - Unused code here, but may be useful in the future.
-    get_changed_var = code.match(load_image_func)[0].split('=')[3].split('|')[0]
-
-    load_code_condensed = ``;
-
-    for (let index = 0; index < window.new_fruit.length; index++) {
-        current_fruit = window.new_fruit[index].Normal;
-        current_fruit_px = window.new_fruit[index].Pixel;
-        load_fruit_template = `
-    ,\(${select_fruit_numvar}==${last_fruit_num + 1 + index} && ${settings_var}.${settings_itself}.${pixel_setting} === 0 ? ${settings_var}.${settings_itself}.${settings_src}="${current_fruit}" : {}\)
-    ,\(${select_fruit_numvar}==${last_fruit_num + 1 + index} && ${settings_var}.${settings_itself}.${pixel_setting} === 1 ? ${settings_var}.${settings_itself}.${settings_src}="${current_fruit_px}" : {}\)`
-        load_code_condensed = load_code_condensed + load_fruit_template;
-    }
-    load_code_condensed = load_code_condensed + ';';
-*/
 
     // Derive fruit ctor + image-cache prop (v11: S6/oa, v12: c7/ka — this.oa is the fruit array on v12)
     get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
@@ -2105,65 +1902,7 @@ window.Fruit.alterCode = function (code) {
 
     new_shh_line = "if(" + firstvar_name + ".path.includes(\"postimg\"))" + firstvar_name + "." + Hr_name + ".src=" + firstvar_name + ".path;else $&";
 
-/*
-    Pr_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-    Pr_a = code.match(Pr_regex)[0].split('.')[0]
-    Pr_ka = code.match(Pr_regex)[0].split('.')[1].split('&')[0]
-    Pr_pa = code.match(Pr_regex)[0].split('.')[6] // Where relative path is stored
-
-    load_pixelated_regex = new RegExp(/[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\&\&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},"load",\n?function\(\){[a-zA-Z0-9_$]{1,8}\(a\)}\)\)}/gm)
-
-    pixelated_switch = `switch(${Pr_a}.${Pr_pa}){ `;
-
-    for (let index = 0; index < window.new_fruit.length; index++) {
-        current_fruit = window.new_fruit[index].Normal;
-        current_fruit_px = window.new_fruit[index].Pixel;
-        pixelated_case_template = `
-    case '${current_fruit_px}': ${Pr_a}.${Pr_ka}.src = '${current_fruit_px}'; break;`;
-        pixelated_switch = pixelated_switch + pixelated_case_template;
-    }
-
-
-    pixelated_switch = pixelated_switch + `
-  default: ${Pr_a}.${Pr_ka}.src = "https://www.google.com/logos/fnbx/" + ${Pr_a}.${Pr_pa}; break;
-}`;
-
-    new_pixelated_func = `
-  if (${Pr_a}.${Pr_ka})
-  {
-    ${pixelated_switch}
-    ${code.match(load_pixelated_regex)[0].split(',')[1].split('(')[0]}(${Pr_a}.${Pr_ka}, "load",
-    function() {
-        ${code.match(load_pixelated_regex)[0].split('{')[1].split('(')[0]}(${Pr_a})
-    });
-  }
-}
-  `
-
-    only_link_regex = new RegExp(/\"https:\/\/www\.google\.com\/logos\/fnbx\/\"\+[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-
-    //console.log("Adding pixelated images")
-    code = code.assertReplace(load_pixelated_regex, new_pixelated_func);
-*/
- // THIS ENTIRE CHUNK IS MISSING, WHAT DOES IT DO? it used to fix deathscreen, but it works without it so no need.
-    // Fixes a image calls
-    //console.log("Adding images")
     code = code.assertReplace(shh_grabber, new_shh_line);
-
-    // Gets the settings value that hold the src for count and apple, also the var it's held in is the same for both.
-    //get_count_val1 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[0].split(':')[1]
-    //get_count_val2 = code.match(/case "count":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-    //get_apple_val2 = code.match(/case "apple":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-    //get_speed_val2 = code.match(/case "speed":[a-zA-Z0-9_$]{1,4}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,4}/)[0].split('.')[2]
-
-    // Endscreen related image loading for new fruit - pudding. Keep this last
-    // Since it effect load_image_func in a way that would break the other code that relies on it !!
-    //console.log("Adding new fruit to endscreen")
-    ////console.log(load_image_func)
-    ////console.log(code)
-    //code = code.assertReplace(load_image_func, code.match(load_image_func)[0].replaceAll(';', load_code_condensed));
-    ////console.log(code)
-    //debugger
 
     // Secret fruit rarities (checked later → rarer overwrites if both hit)
     gold_chance = `* 1000000) + 1) == 426017)` // Apple 1m
@@ -2185,7 +1924,6 @@ window.Fruit.alterCode = function (code) {
     if(Math.floor((Math.random() ${carrot_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 3;}
     if(Math.floor((Math.random() ${melon_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 4;}
     $&`
-    //console.log("Adding secret golden fruits")
     code = code.assertReplace(apple_info_regex, set_gold)
 
     return code;
@@ -2574,6 +2312,46 @@ try{
 window.SettingsSaver = {};
 
 window.SettingsSaver.make = function () {
+    const COUNT_KEYS = ["0", "1", "2", "3", "4", "5", "6"];
+    const COUNT_MINIMA = { 0: 1, 1: 3, 2: 5, 3: 10, 4: 6, 5: 24, 6: 5 };
+
+    function defaultPoolForCount(count) {
+        const min = COUNT_MINIMA[count] || 1;
+        const pool = [];
+        for (let i = 0; pool.length < min; i++) {
+            if (i === 24) continue; // skip fruit bowl
+            pool.push(i);
+        }
+        return pool;
+    }
+
+    function migrateSelectedPairsByCount(settings) {
+        if (settings.SelectedPairsByCount && typeof settings.SelectedPairsByCount === "object") {
+            for (const key of COUNT_KEYS) {
+                if (!Array.isArray(settings.SelectedPairsByCount[key])) {
+                    settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
+                }
+            }
+            return settings;
+        }
+
+        const legacy = Array.isArray(settings.SelectedPairs) ? settings.SelectedPairs.map(Number) : null;
+        settings.SelectedPairsByCount = {};
+        for (const key of COUNT_KEYS) {
+            const count = Number(key);
+            const min = COUNT_MINIMA[count];
+            // Seed each count with only its own minimum slice of the old shared list
+            const seed = legacy ? legacy.slice(0, min) : defaultPoolForCount(count);
+            const pool = Array.from(new Set(seed.map(Number).filter((n) => !isNaN(n) && n !== 24)));
+            for (let i = 0; pool.length < min; i++) {
+                if (i === 24) continue;
+                if (!pool.includes(i)) pool.push(i);
+            }
+            settings.SelectedPairsByCount[key] = pool;
+        }
+        return settings;
+    }
+
     window.loadSettings = function () {
         let pudding_settings = localStorage.getItem('PuddingSettings');
         if (pudding_settings === null) {
@@ -2584,45 +2362,49 @@ window.SettingsSaver.make = function () {
                 TopBar: true,
                 SpeedInfo: false,
                 PortalPairs: false,
-                SelectedPairs: [0, 1, 2, 3, 4, 5],
+                SelectedPairs: defaultPoolForCount(0),
+                SelectedPairsByCount: {},
                 DisableRandom: false,
-                randomizeThemeApple: false
+                randomizeThemeApple: false,
+                ScrollBar: false
             };
-
+            for (const key of COUNT_KEYS) {
+                pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
             }
-         else {
+        } else {
             pudding_settings = JSON.parse(pudding_settings);
+            if (typeof pudding_settings.PortalPairs !== 'boolean') {
+                pudding_settings.PortalPairs = false;
+            }
+            if (typeof pudding_settings.ScrollBar !== 'boolean') {
+                pudding_settings.ScrollBar = false;
+            }
+            pudding_settings = migrateSelectedPairsByCount(pudding_settings);
+            pudding_settings.SelectedPairs = pudding_settings.SelectedPairsByCount["0"];
         }
 
         return pudding_settings;
     }
     window.pudding_settings = window.loadSettings();
 
-
     window.saveSettings = function () {
-        window.pudding_settings.SelectedPairs = [0, 1, 2, 3, 4, 5]; //window.selected_fruit;
-        if (typeof pudding_settings !== 'undefined' && typeof pudding_settings.Skull !== 'undefined' &&
-        typeof pudding_settings.SokoGoals !== 'undefined' &&
-        typeof pudding_settings.InputDisplay !== 'undefined' &&
-        typeof pudding_settings.TopBar !== 'undefined' &&
-        typeof pudding_settings.SpeedInfo !== 'undefined' &&
-        typeof pudding_settings.PortalPairs !== 'undefined' &&
-        typeof pudding_settings.DisableRandom !== 'undefined' &&
-        typeof pudding_settings.randomizeThemeApple !== 'undefined'
+        const s = window.pudding_settings;
+        if (typeof s !== 'undefined' &&
+            typeof s.Skull !== 'undefined' &&
+            typeof s.SokoGoals !== 'undefined' &&
+            typeof s.InputDisplay !== 'undefined' &&
+            typeof s.TopBar !== 'undefined' &&
+            typeof s.SpeedInfo !== 'undefined' &&
+            typeof s.PortalPairs !== 'undefined' &&
+            typeof s.DisableRandom !== 'undefined' &&
+            typeof s.randomizeThemeApple !== 'undefined'
         ) {
-            localStorage.setItem('PuddingSettings', JSON.stringify(pudding_settings));
+            localStorage.setItem('PuddingSettings', JSON.stringify(s));
         }
     }
-
 }
 
 window.SettingsSaver.alterCode = function (code) {
-    
-    //window.PopulateOptions();
-    //window.PopulateDropdowns();
-    //window.PopulateOptions();
-    //window.PopulateDropdowns();
-
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
 
     settings_reset_code = `
@@ -2631,7 +2413,6 @@ window.SettingsSaver.alterCode = function (code) {
 
     catchError(reset_regex, code)
     code = code.assertReplace(reset_regex, settings_reset_code);
-
 
     stop_regex = new RegExp(/stop\(a\){/)
     catchError(stop_regex, code)
@@ -3344,7 +3125,7 @@ window.SpeedInfo.make = function () {
                         case 6: gamemode += "YinYang, "; break;
                         case 7: gamemode += "Key, "; break;
                         case 8: gamemode += "Sokoban, "; break;
-                        case 9: gamemode += "Poison, "; break;
+                        case 9: gamemode += "Skull, "; break;
                         case 10: gamemode += "Dimension, "; break;
                         case 11: gamemode += "Minesweeper, "; break;
                         case 12: gamemode += "Statue, "; break;
@@ -4488,6 +4269,9 @@ window.BootstrapMenu.make = function () {
     window.BootstrapHide = function () {
         const settingsBox = document.getElementById('settings-popup-pudding');
         settingsBox.style.visibility = 'hidden';
+        if (typeof window.PortalPairsPanelHide === "function") {
+            window.PortalPairsPanelHide();
+        }
         if (window.bootstrapVisible && typeof window.getAllSrc != "undefined") {
             window.getAllSrc();
         }
@@ -4541,57 +4325,22 @@ window.BootstrapMenu.make = function () {
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
         document.getElementsByClassName('sEOCsb')[0].appendChild(divList);
 
-        /*const c = new Image();
-        c.src = 'https://i.postimg.cc/02xshYj1/index.png';
-        c.width = c.height = 16;
-        c.style = 'cursor:pointer;position:relative;left:-10px;top:30px;';
-        c.id = 'input-counter-settings';
-*/
         const d = document.createElement('div');
         d.id = 'input-counter-settings-container';
         d.style = 'position:absolute;left:465px;top:45px;z-index:10002;';
         document.getElementsByClassName('sEOCsb')[0].appendChild(d);
-        const settingsElement = document.querySelector('#input-counter-settings-container');
 
-        //settingsElement.appendChild(c);
-        // css_stripped = 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-        // if (window.NepDebug) {
-        //     css_stripped = "http://127.0.0.1:5500/bootstrap-stripped.css"
-        // }
+        const css_stripped = window.NepDebug
+            ? "http://127.0.0.1:5500/bootstrap-stripped.css"
+            : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
 
-        // window.bootstrap_css = '';
-        // const xhr = new XMLHttpRequest();
-
-        // xhr.onreadystatechange = function () {
-        //     if (xhr.readyState === XMLHttpRequest.DONE) {
-        //         if (xhr.status === 200) {
-        //             const data = xhr.responseText;
-        //             // Use the fetched data as a string
-        //             //console.log(data); // Or do something else with the data
-        //             window.bootstrap_css = data;
-        //             document.getElementsByTagName('style')[0].innerHTML = document.getElementsByTagName('style')[0].innerHTML + window.bootstrap_css;
-                    
-        //         } else {
-        //             console.error('An error occurred while fetching Bootstrap: ', xhr.status);
-        //         }
-        //     }
-        // };
-
-        // xhr.open('GET', css_stripped, true);
-        // xhr.send();
-
-        const css_stripped = window.NepDebug 
-        ? "http://127.0.0.1:5500/bootstrap-stripped.css"
-        : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-    
         const xhr = new XMLHttpRequest();
-        
-        xhr.onload = function() {
+
+        xhr.onload = function () {
             if (xhr.status >= 200 && xhr.status < 300) {
                 const cssText = xhr.responseText;
                 window.bootstrap_css = cssText;
-                
-                // Inject into existing style element (same as original)
+
                 const styleElement = document.getElementsByTagName('style')[0];
                 if (styleElement) {
                     styleElement.innerHTML = styleElement.innerHTML + cssText;
@@ -4604,39 +4353,20 @@ window.BootstrapMenu.make = function () {
                     document.head.appendChild(styleElnew);
                     styleElnew.innerHTML = cssText;
                 }
-
             } else {
                 console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
             }
         };
 
-        const styleEl = document.getElementsByTagName('style')[0];
-
-        const observer = new MutationObserver((mutations) => {
-            console.log('Style tag changed:', mutations);
-            observer.disconnect();
-            const styleElement = document.getElementsByTagName('style')[0];
-            styleElement.innerHTML = styleElement.innerHTML + window.bootstrap_css;
-            observer.observe(styleEl, { childList: true, characterData: true, subtree: true });
-        });
-
-        // This is the original observer, disabled because adding a new style should fix it instead
-        //observer.observe(styleEl, {
-        //    childList: true,      // watch for added/removed nodes
-        //    characterData: true,  // watch for text changes
-        //    subtree: true         // watch inside the style tag
-        //});
-
-        
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             console.error('Network error while loading Bootstrap CSS');
         };
-        
-        xhr.ontimeout = function() {
+
+        xhr.ontimeout = function () {
             console.error('Timeout while loading Bootstrap CSS');
         };
-        
-        xhr.timeout = 10000; // 10 second timeout
+
+        xhr.timeout = 10000;
         xhr.open('GET', css_stripped, true);
         xhr.send();
 
@@ -4700,34 +4430,8 @@ window.BootstrapMenu.make = function () {
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
     <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="EatThemeRandomizer2">"Dragon Fruit"</label>
     </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="PortalPairs">
-    <label class="form-check-label" for="PortalPairs" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" disabled>Custom Portal Pairs</label>
-    </div>
-<select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect1" class="form-control flex-row">
-    <option value="0">Apple</option>
-  </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect2" class="form-control flex-row">
-  <option value="1">Banana</option>
-</select><br>
-
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect3" class="form-control flex-row">
-    <option value="2">Pineapple</option>
-  </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect4" class="form-control flex-row">
-    <option value="3">Purple Grapes</option>
-  </select><br>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect5" class="form-control flex-row">
-    <option value="4">Pumpkin</option>
-  </select>
-  <select style="width:95px;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display: none; align-items: center; text-align: center;" id="fruitSelect6" class="form-control flex-row">
-    <option value="5">Onion</option>
-  </select>
-  <br>
-</div>
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
-    </br>
-
+  <button type="button" class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="CustomBowlFruits" onclick="window.TogglePortalPairsPanel&&window.TogglePortalPairsPanel()">Custom Bowl Fruits</button><br>
     </div>
 
 <select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
@@ -4865,17 +4569,10 @@ window.BootstrapMenu.make = function () {
             hideCount: { stat: 'hide', duration: 'count' },
         }
 
-        //preselect based on saved settings
-        //document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
-
         document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
-
-        //Listeners to hide/show settings box when clickng the cog, or the X - not anymore! Only back button.
-        //document.querySelector('#input-counter-settings').addEventListener('click', showSettingsBox);
 
         const settingsCloseElements = document.getElementById('settings-close');
         settingsCloseElements.addEventListener('click', window.BootstrapHide);
-        //settingsCloseElements[1].addEventListener('click', hideSettingsBox);
 
         document.getElementById('stat-chooser').onchange = function () {
             stats.statShown = valuesToSettings[this.value].stat;
@@ -4886,18 +4583,6 @@ window.BootstrapMenu.make = function () {
 
         document.getElementById('edit-stat').addEventListener('click', promptToEditStatCount);
         document.getElementById('reset-stats').addEventListener('click', promptToResetStats);
-        //document.getElementById('toggle-counter').addEventListener('click', toggleCounter);
-
-        tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
-        //document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
-        //    window.timeKeeper.toggleDialog();
-        //});
-        TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
-        //document.querySelector("div[jsname^=\"" + TimerID + "\"]").addEventListener("click", (e) => {
-        //    window.timeKeeper.toggleDialog();
-        //});
-
-        //debugger
     }
 
     window.BootstrapSetup();
@@ -5047,6 +4732,369 @@ window.RenderDelayFix.alterCode = function (code) {
   );
   return code;
 }
+window.CustomBowl = {};
+
+window.CustomBowl.make = function () {
+    const FRUIT_BOWL_INDEX = 24;
+    const COUNT_MINIMA = {
+        0: 1,  // 1a
+        1: 3,  // 3a
+        2: 5,  // 5a
+        3: 10, // 10a
+        4: 6,  // dice
+        5: 24, // bomb
+        6: 5   // tally
+    };
+    const BOWL_SPRITE = "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_22.png";
+
+    window.custom_pair_call_counter = 0;
+
+    function getCountIndex() {
+        if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
+            const c = window.timeKeeper.getCurrentSetting("count");
+            if (typeof c === "number" && !isNaN(c)) return c;
+        }
+        if (typeof window.count_var !== "undefined") {
+            const c = Number(window.count_var);
+            if (!isNaN(c)) return c;
+        }
+        return 0;
+    }
+
+    window.getPortalPairMinimum = function () {
+        const count = getCountIndex();
+        return COUNT_MINIMA.hasOwnProperty(count) ? COUNT_MINIMA[count] : 1;
+    };
+
+    function countKey(count) {
+        return String(count);
+    }
+
+    function defaultPoolForCount(count) {
+        const min = COUNT_MINIMA.hasOwnProperty(count) ? COUNT_MINIMA[count] : 1;
+        return normalizePool([], min);
+    }
+
+    function normalizePool(pool, min) {
+        let next = Array.isArray(pool) ? pool.map(Number).filter((n) => !isNaN(n) && n !== FRUIT_BOWL_INDEX) : [];
+        next = Array.from(new Set(next));
+        if (next.length < min) {
+            for (let i = 0; i < 64 && next.length < min; i++) {
+                if (i === FRUIT_BOWL_INDEX) continue;
+                if (!next.includes(i)) next.push(i);
+            }
+        }
+        return next;
+    }
+
+    function ensurePairsByCountStore() {
+        if (!window.pudding_settings.SelectedPairsByCount || typeof window.pudding_settings.SelectedPairsByCount !== "object") {
+            window.pudding_settings.SelectedPairsByCount = {};
+        }
+        for (const c of Object.keys(COUNT_MINIMA)) {
+            const key = countKey(c);
+            if (!Array.isArray(window.pudding_settings.SelectedPairsByCount[key])) {
+                window.pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(c));
+            }
+        }
+    }
+
+    function getPoolForCurrentCount() {
+        ensurePairsByCountStore();
+        const count = getCountIndex();
+        const key = countKey(count);
+        const min = window.getPortalPairMinimum();
+        const pool = normalizePool(window.pudding_settings.SelectedPairsByCount[key], min);
+        window.pudding_settings.SelectedPairsByCount[key] = pool;
+        window.pudding_settings.SelectedPairs = pool;
+        return pool;
+    }
+
+    function setPoolForCurrentCount(pool) {
+        ensurePairsByCountStore();
+        const count = getCountIndex();
+        const key = countKey(count);
+        const min = window.getPortalPairMinimum();
+        const next = normalizePool(pool, min);
+        window.pudding_settings.SelectedPairsByCount[key] = next;
+        window.pudding_settings.SelectedPairs = next;
+        return next;
+    }
+
+    function ensurePoolMeetsMinimum() {
+        return getPoolForCurrentCount();
+    }
+
+    window.pickCustomPortalType = function (appleManager) {
+        const pool = ensurePoolMeetsMinimum();
+        if (!pool.length) return 0;
+
+        const appleArray = appleManager && appleManager[window.__portalAppleArrayName];
+        const used = new Set();
+        if (appleArray && appleArray.length) {
+            for (let i = 0; i < appleArray.length; i++) {
+                if (appleArray[i] && typeof appleArray[i].type !== "undefined") {
+                    used.add(appleArray[i].type);
+                }
+            }
+        }
+
+        const available = pool.filter((t) => !used.has(t));
+        const source = available.length > 0 ? available : pool;
+        return source[Math.floor(Math.random() * source.length)];
+    };
+
+    window.give_custom_pair = function () {
+        const pool = ensurePoolMeetsMinimum();
+        if (!pool.length) return 0;
+        const idx = window.custom_pair_call_counter % pool.length;
+        window.custom_pair_call_counter += 1;
+        return pool[idx];
+    };
+
+    function getFruitSrc(index) {
+        const apple = document.querySelector("#apple");
+        if (apple && apple.children[index] && apple.children[index].src) {
+            return apple.children[index].src;
+        }
+        if (index < FRUIT_BOWL_INDEX) {
+            const ver = index >= 22 ? "v18" : "v17";
+            const num = String(index).padStart(2, "0");
+            return `https://www.google.com/logos/fnbx/snake_arcade/${ver}/apple_${num}.png`;
+        }
+        return BOWL_SPRITE;
+    }
+
+    function buildFruitOptions() {
+        const apple = document.querySelector("#apple");
+        const options = [];
+        if (!apple) return options;
+        for (let i = 0; i < apple.children.length; i++) {
+            if (i === FRUIT_BOWL_INDEX) continue;
+            options.push(i);
+        }
+        return options;
+    }
+
+    function updateStatusLabel() {
+        const el = document.getElementById("fruit-bowl-status");
+        if (!el) return;
+        const pool = getPoolForCurrentCount();
+        const min = window.getPortalPairMinimum();
+        el.textContent = `Selected ${pool.length} / min ${min}`;
+    }
+
+    function renderFruitGrid() {
+        const grid = document.getElementById("fruit-bowl-grid");
+        if (!grid) return;
+        const pool = new Set(ensurePoolMeetsMinimum());
+        const options = buildFruitOptions();
+        const min = window.getPortalPairMinimum();
+        grid.innerHTML = "";
+
+        const rowSize = 4;
+        for (let i = 0; i < options.length; i += rowSize) {
+            const row = document.createElement("div");
+            row.style = "display:flex;flex-wrap:nowrap;gap:4px;margin-bottom:4px;justify-content:center;";
+            options.slice(i, i + rowSize).forEach((fruitIndex) => {
+                const selected = pool.has(fruitIndex);
+                const cell = document.createElement("div");
+                cell.className = "blender_icon" + (selected ? " blender_icon_on" : "");
+                cell.style = "width:44px;height:44px;padding-bottom:0;flex:0 0 44px;display:flex;align-items:center;justify-content:center;";
+                cell.dataset.fruit = String(fruitIndex);
+                cell.title = `Fruit ${fruitIndex}`;
+
+                const img = document.createElement("img");
+                img.className = "blender_icon_img" + (selected ? " blender_icon_img_selected" : "");
+                img.src = getFruitSrc(fruitIndex);
+                img.draggable = false;
+                img.style = "width:36px;height:36px;max-width:100%;";
+                cell.appendChild(img);
+
+                cell.addEventListener("click", function () {
+                    if (!window.pudding_settings.PortalPairs) return;
+                    const current = getPoolForCurrentCount().slice();
+                    const idx = current.indexOf(fruitIndex);
+                    if (idx >= 0) {
+                        if (current.length <= min) return;
+                        current.splice(idx, 1);
+                    } else {
+                        current.push(fruitIndex);
+                    }
+                    setPoolForCurrentCount(current.sort((a, b) => a - b));
+                    if (typeof window.saveSettings === "function") window.saveSettings();
+                    renderFruitGrid();
+                    updateStatusLabel();
+                });
+
+                row.appendChild(cell);
+            });
+            grid.appendChild(row);
+        }
+        updateStatusLabel();
+    }
+
+    function syncPanelEnabledState() {
+        const toggle = document.getElementById("fruit-bowl-enable");
+        if (toggle) toggle.checked = !!window.pudding_settings.PortalPairs;
+        const grid = document.getElementById("fruit-bowl-grid");
+        if (grid) {
+            grid.style.opacity = window.pudding_settings.PortalPairs ? "1" : "0.45";
+            grid.style.pointerEvents = window.pudding_settings.PortalPairs ? "auto" : "none";
+        }
+    }
+
+    // Cover Pudding Mod Settings when open.
+    const PANEL_STYLE =
+        "position:absolute;left:0;top:0;right:0;bottom:0;z-index:10004;background-color:#4a752c;padding:10px;" +
+        "display:none;border-radius:3px;width:100%;height:100%;max-height:100%;overflow:auto;" +
+        "visibility:hidden;box-sizing:border-box;";
+
+    function getPanelHost() {
+        return document.getElementById("settings-popup-pudding") ||
+            document.getElementsByClassName("sEOCsb")[0];
+    }
+
+    function ensureUi() {
+        const host = getPanelHost();
+        if (!host) return;
+
+        // Remove abandoned header/fruit-row trigger icons from earlier builds
+        document.querySelectorAll("#fruit-bowl-settings-icon").forEach((el) => el.remove());
+
+        const legacy = document.getElementById("portal-pairs-popup-pudding");
+        if (legacy) legacy.remove();
+
+        let panel = document.getElementById("fruit-bowl-popup-pudding");
+        if (!panel) {
+            panel = document.createElement("div");
+            panel.id = "fruit-bowl-popup-pudding";
+            panel.style.cssText = PANEL_STYLE;
+            panel.innerHTML = `
+                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:8px;font-size:15px;">Fruit Bowl Settings</div>
+                <div class="form-check form-check-inline" style="margin-bottom:8px;">
+                    <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable">
+                    <label class="form-check-label" for="fruit-bowl-enable" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Enable custom fruit bowl</label>
+                </div>
+                <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:13px;margin:4px 0 10px 0;text-align:center;"></div>
+                <div id="fruit-bowl-grid"></div>
+                <button type="button" class="btn" style="margin-top:10px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:100%;" id="fruit-bowl-close">Close</button>
+            `;
+            host.appendChild(panel);
+
+            document.getElementById("fruit-bowl-enable").addEventListener("change", function () {
+                window.pudding_settings.PortalPairs = !!this.checked;
+                ensurePoolMeetsMinimum();
+                if (typeof window.saveSettings === "function") window.saveSettings();
+                syncPanelEnabledState();
+                renderFruitGrid();
+            });
+            document.getElementById("fruit-bowl-close").addEventListener("click", function () {
+                window.PortalPairsPanelHide();
+            });
+        } else {
+            if (panel.parentElement !== host) host.appendChild(panel);
+            panel.style.cssText = PANEL_STYLE + (window.portalPairsPanelVisible
+                ? "display:block;visibility:visible;"
+                : "display:none;visibility:hidden;");
+        }
+
+        syncPanelEnabledState();
+        renderFruitGrid();
+    }
+
+    window.PortalPairsPanelShow = function () {
+        ensureUi();
+        try { ensurePoolMeetsMinimum(); } catch (e) { /* settings may still be loading */ }
+        syncPanelEnabledState();
+        renderFruitGrid();
+        const panel = document.getElementById("fruit-bowl-popup-pudding");
+        if (panel) {
+            panel.style.display = "block";
+            panel.style.visibility = "visible";
+        }
+        window.portalPairsPanelVisible = true;
+    };
+
+    window.PortalPairsPanelHide = function () {
+        const panel = document.getElementById("fruit-bowl-popup-pudding");
+        if (panel) {
+            panel.style.display = "none";
+            panel.style.visibility = "hidden";
+        }
+        window.portalPairsPanelVisible = false;
+    };
+
+    window.TogglePortalPairsPanel = function () {
+        if (window.portalPairsPanelVisible) window.PortalPairsPanelHide();
+        else window.PortalPairsPanelShow();
+    };
+
+    window.CustomBowlSyncUi = function () {
+        if (!window.portalPairsPanelVisible) return;
+        ensurePoolMeetsMinimum();
+        syncPanelEnabledState();
+        renderFruitGrid();
+    };
+
+    setTimeout(function () {
+        try { ensurePoolMeetsMinimum(); } catch (e) { /* ignore */ }
+        ensureUi();
+        window.PortalPairsPanelHide();
+    }, 0);
+};
+
+window.CustomBowl.alterCode = function (code) {
+    const reset_regex = new RegExp(/;this\.reset\(\)\}\}/);
+    catchError(reset_regex, code);
+    code = code.assertReplace(reset_regex, `window.custom_pair_call_counter=0;$&`);
+
+    code = code.assertReplace(
+        /case "apple":/,
+        `case "apple":setTimeout(function(){window.CustomBowlSyncUi&&window.CustomBowlSyncUi()},0);`
+    );
+    code = code.assertReplace(
+        /case "count":/,
+        `case "count":setTimeout(function(){window.CustomBowlSyncUi&&window.CustomBowlSyncUi()},0);`
+    );
+
+    const aaf_regex = /([a-zA-Z0-9_$]{1,8})=function\(a\)\{if\(a\.settings\.([a-zA-Z0-9_$]{1,8})===24\)\{/;
+    catchError(aaf_regex, code);
+    const aaf_match = code.match(aaf_regex);
+    const aaf_name = aaf_match[1];
+    const fruit_setting = aaf_match[2];
+
+    const baf_regex = /([a-zA-Z0-9_$]{1,8})=function\(a\)\{if\(([a-zA-Z0-9_$]{1,8})\(a\.settings,2\)\)\{var b=\s*Math\.floor\(48\/a\.([a-zA-Z0-9_$]{1,8})\.length\);/;
+    catchError(baf_regex, code);
+    const baf_match = code.match(baf_regex);
+    const apple_array = baf_match[3];
+    window.__portalAppleArrayName = apple_array;
+
+    code = code.assertReplace(
+        aaf_regex,
+        `${aaf_name}=function(a){if(window.pudding_settings&&window.pudding_settings.PortalPairs&&window.fruit_selected===24&&a.settings.${fruit_setting}===24){return window.pickCustomPortalType(a);}if(a.settings.${fruit_setting}===24){`
+    );
+
+    const refill_regex = new RegExp(
+        `if\\(([a-zA-Z0-9_$]{1,8})\\(a\\.settings,2\\)&&b\\.length>0\\)for\\(b\\[0\\]\\.type=${aaf_name}\\(a\\.([a-zA-Z0-9_$]{1,8})\\),b\\[1\\]\\.type=b\\[0\\]\\.type,a=2;a<b\\.length;a\\+=2\\)b\\[a\\]\\.type=\\(b\\[a-2\\]\\.type\\+1\\)%24,b\\[a\\+1\\]\\.type=b\\[a\\]\\.type`
+    );
+    catchError(refill_regex, code);
+    const refill_match = code.match(refill_regex);
+    const mode_check = refill_match[1];
+    const apple_mgr_prop = refill_match[2];
+
+    const refill_replacement =
+        `if(${mode_check}(a.settings,2)&&b.length>0){` +
+        `if(window.pudding_settings&&window.pudding_settings.PortalPairs&&window.fruit_selected===24){` +
+        `window.custom_pair_call_counter=0;` +
+        `for(let __pi=0;__pi<b.length;__pi+=2){b[__pi].type=${aaf_name}(a.${apple_mgr_prop});b[__pi+1].type=b[__pi].type;}` +
+        `}else for(b[0].type=${aaf_name}(a.${apple_mgr_prop}),b[1].type=b[0].type,a=2;a<b.length;a+=2)b[a].type=(b[a-2].type+1)%24,b[a+1].type=b[a].type` +
+        `}`;
+
+    code = code.assertReplace(refill_regex, refill_replacement);
+
+    return code;
+};
 window.PuddingMod = {};
 
 ////////////////////////////////////////////////////////////////////
@@ -5137,7 +5185,7 @@ window.PuddingMod.runCodeBefore = function () {
     "BootstrapMenu",
     "ResetKey",
     "RenderDelayFix",
-    //"CustomPortalPairs",
+    "CustomBowl",
   ];
   console.log("Enabling Pudding Mod");
 

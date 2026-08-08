@@ -375,6 +375,8 @@ window.Theme.alterCode = function (code) {
 
     document.getElementById('settings-popup-pudding').style.background = real_top_bar;
     document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');
+    if (portalPanel) portalPanel.style.background = real_top_bar;
 
     window.real_topbar_color = real_top_bar;
     window.button_color = buttons_color;

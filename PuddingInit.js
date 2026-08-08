@@ -88,7 +88,7 @@ window.PuddingMod.runCodeBefore = function () {
     "BootstrapMenu",
     "ResetKey",
     "RenderDelayFix",
-    //"CustomPortalPairs",
+    "CustomBowl",
   ];
   console.log("Enabling Pudding Mod");
 

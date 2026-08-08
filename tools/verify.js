@@ -32,6 +32,7 @@ const LIBS = [
   "BootstrapMenu",
   "ResetKey",
   "RenderDelayFix",
+  "CustomBowl",
 ];
 
 const version = process.argv[2] || "current";
