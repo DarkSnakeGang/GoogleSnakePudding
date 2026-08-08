@@ -14,8 +14,13 @@ window.CustomBowl.make = function () {
     const BOWL_SPRITE = "https://www.google.com/logos/fnbx/snake_arcade/v17/apple_22.png";
 
     window.custom_pair_call_counter = 0;
+    window.__portalAppleArrayName = window.__portalAppleArrayName || "ka";
+    window.__customBowlCountOverride = null;
 
     function getCountIndex() {
+        if (typeof window.__customBowlCountOverride === "number" && !isNaN(window.__customBowlCountOverride)) {
+            return window.__customBowlCountOverride;
+        }
         if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
             const c = window.timeKeeper.getCurrentSetting("count");
             if (typeof c === "number" && !isNaN(c)) return c;
@@ -65,11 +70,11 @@ window.CustomBowl.make = function () {
         }
     }
 
-    function getPoolForCurrentCount() {
+    function getPoolForCurrentCount(minOverride) {
         ensurePairsByCountStore();
         const count = getCountIndex();
         const key = countKey(count);
-        const min = window.getPortalPairMinimum();
+        const min = Math.max(window.getPortalPairMinimum(), minOverride || 0);
         const pool = normalizePool(window.pudding_settings.SelectedPairsByCount[key], min);
         window.pudding_settings.SelectedPairsByCount[key] = pool;
         window.pudding_settings.SelectedPairs = pool;
@@ -91,32 +96,108 @@ window.CustomBowl.make = function () {
         return getPoolForCurrentCount();
     }
 
-    window.pickCustomPortalType = function (appleManager) {
-        const pool = ensurePoolMeetsMinimum();
-        if (!pool.length) return 0;
+    function getAppleList(appleManager) {
+        if (!appleManager) return null;
+        const key = window.__portalAppleArrayName || "ka";
+        if (Array.isArray(appleManager[key])) return appleManager[key];
+        if (Array.isArray(appleManager.ka)) return appleManager.ka;
+        return null;
+    }
 
-        const appleArray = appleManager && appleManager[window.__portalAppleArrayName];
-        const used = new Set();
-        if (appleArray && appleArray.length) {
-            for (let i = 0; i < appleArray.length; i++) {
-                if (appleArray[i] && typeof appleArray[i].type !== "undefined") {
-                    used.add(appleArray[i].type);
-                }
-            }
+    // Types currently visible on the board (type < 0 = slot being reassigned, not showing).
+    function typesOnBoard(appleManager) {
+        const showing = new Set();
+        const apples = getAppleList(appleManager);
+        if (!apples) return showing;
+        for (const apple of apples) {
+            if (!apple) continue;
+            const t = Number(apple.type);
+            if (!isNaN(t) && t >= 0) showing.add(t);
         }
+        return showing;
+    }
 
-        const available = pool.filter((t) => !used.has(t));
-        const source = available.length > 0 ? available : pool;
-        return source[Math.floor(Math.random() * source.length)];
+    function isCustomBowlActive(settings) {
+        if (!(window.pudding_settings && window.pudding_settings.PortalPairs && settings)) return false;
+        const prop = window.__fruitBowlSettingProp || "Ka";
+        return Number(settings[prop]) === 24;
+    }
+
+    function syncCountOverride(settings) {
+        if (settings && typeof settings.ka === "number" && !isNaN(settings.ka)) {
+            window.__customBowlCountOverride = settings.ka;
+        }
+    }
+
+    /**
+     * Roll a fruit from the custom bowl pool.
+     * Portal mode only: allowed = selected − types showing on screen.
+     * If allowed is empty (e.g. 5 selected on 5a after clearing the eaten pair),
+     * fall back to the full pool so the eaten type can reappear.
+     * Non-portal: plain random from the selected pool (duplicates allowed).
+     */
+    window.pickCustomPortalType = function (appleManager, isPortal) {
+        syncCountOverride(appleManager && appleManager.settings);
+        try {
+            const pool = ensurePoolMeetsMinimum();
+            if (!pool.length) return 0;
+            if (!isPortal) {
+                return pool[Math.floor(Math.random() * pool.length)];
+            }
+            const showing = typesOnBoard(appleManager);
+            const available = pool.filter((t) => !showing.has(t));
+            const source = available.length > 0 ? available : pool;
+            return source[Math.floor(Math.random() * source.length)];
+        } finally {
+            window.__customBowlCountOverride = null;
+        }
+    };
+
+    // Portal-only full board assign: clear slots, then roll with showing-list rules.
+    window.assignCustomPortalPairTypes = function (appleManager) {
+        if (!appleManager || !isCustomBowlActive(appleManager.settings)) return false;
+        const apples = getAppleList(appleManager);
+        if (!apples || apples.length < 2) return false;
+
+        for (let i = 0; i < apples.length; i++) apples[i].type = -1;
+
+        for (let i = 0; i < apples.length; i += 2) {
+            const t = window.pickCustomPortalType(appleManager, true);
+            apples[i].type = t;
+            if (apples[i + 1]) apples[i + 1].type = t;
+        }
+        return true;
+    };
+
+    // Portal-only safety: if two pairs share a type, re-roll with showing-list rules.
+    window.enforceUniquePortalFruitTypes = function (appleManager) {
+        if (!appleManager || !isCustomBowlActive(appleManager.settings)) return;
+        const apples = getAppleList(appleManager);
+        if (!apples || apples.length < 2) return;
+
+        const seen = new Set();
+        for (let i = 0; i < apples.length; i += 2) {
+            const a0 = apples[i];
+            const a1 = apples[i + 1];
+            let t = Number(a0 && a0.type);
+            if (isNaN(t) || t < 0 || seen.has(t)) {
+                if (a0) a0.type = -1;
+                if (a1) a1.type = -1;
+                t = window.pickCustomPortalType(appleManager, true);
+                if (a0) a0.type = t;
+                if (a1) a1.type = t;
+            } else if (a1 && Number(a1.type) !== t) {
+                a1.type = t;
+            }
+            seen.add(t);
+        }
     };
 
     window.give_custom_pair = function () {
-        const pool = ensurePoolMeetsMinimum();
-        if (!pool.length) return 0;
-        const idx = window.custom_pair_call_counter % pool.length;
-        window.custom_pair_call_counter += 1;
-        return pool[idx];
+        return window.pickCustomPortalType(null, true);
     };
+    window.startCustomBowlDeal = function () { /* no-op */ };
+    window.endCustomBowlDeal = function () { /* no-op */ };
 
     function getFruitSrc(index) {
         const apple = document.querySelector("#apple");
@@ -158,15 +239,15 @@ window.CustomBowl.make = function () {
         const min = window.getPortalPairMinimum();
         grid.innerHTML = "";
 
-        const rowSize = 4;
+        const rowSize = 6;
         for (let i = 0; i < options.length; i += rowSize) {
             const row = document.createElement("div");
-            row.style = "display:flex;flex-wrap:nowrap;gap:4px;margin-bottom:4px;justify-content:center;";
+            row.style = "display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:8px;justify-content:center;";
             options.slice(i, i + rowSize).forEach((fruitIndex) => {
                 const selected = pool.has(fruitIndex);
                 const cell = document.createElement("div");
                 cell.className = "blender_icon" + (selected ? " blender_icon_on" : "");
-                cell.style = "width:44px;height:44px;padding-bottom:0;flex:0 0 44px;display:flex;align-items:center;justify-content:center;";
+                cell.style = "width:52px;height:52px;padding-bottom:0;flex:0 0 52px;display:flex;align-items:center;justify-content:center;cursor:pointer;";
                 cell.dataset.fruit = String(fruitIndex);
                 cell.title = `Fruit ${fruitIndex}`;
 
@@ -174,7 +255,7 @@ window.CustomBowl.make = function () {
                 img.className = "blender_icon_img" + (selected ? " blender_icon_img_selected" : "");
                 img.src = getFruitSrc(fruitIndex);
                 img.draggable = false;
-                img.style = "width:36px;height:36px;max-width:100%;";
+                img.style = "width:44px;height:44px;max-width:100%;";
                 cell.appendChild(img);
 
                 cell.addEventListener("click", function () {
@@ -210,26 +291,58 @@ window.CustomBowl.make = function () {
         }
     }
 
-    // Cover Pudding Mod Settings when open.
+    // Theme background is applied separately via applyPanelTheme (Theme.js sets real_topbar_color).
     const PANEL_STYLE =
-        "position:absolute;left:0;top:0;right:0;bottom:0;z-index:10004;background-color:#4a752c;padding:10px;" +
-        "display:none;border-radius:3px;width:100%;height:100%;max-height:100%;overflow:auto;" +
-        "visibility:hidden;box-sizing:border-box;";
+        "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100000;" +
+        "padding:18px 20px 16px;display:none;border-radius:8px;" +
+        "width:min(480px,92vw);min-width:280px;height:auto;min-height:320px;max-height:min(720px,88vh);" +
+        "overflow-x:hidden;overflow-y:auto;visibility:hidden;box-sizing:border-box;" +
+        "box-shadow:0 12px 36px rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.18);";
+
+    const BACKDROP_STYLE =
+        "position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:99999;" +
+        "background:rgba(0,0,0,0.45);display:none;visibility:hidden;";
+
+    function applyPanelTheme(panel) {
+        if (!panel) return;
+        const color = window.real_topbar_color || "#4a752c";
+        panel.style.background = color;
+        panel.style.backgroundColor = color;
+    }
 
     function getPanelHost() {
-        return document.getElementById("settings-popup-pudding") ||
-            document.getElementsByClassName("sEOCsb")[0];
+        return document.body;
     }
 
     function ensureUi() {
         const host = getPanelHost();
         if (!host) return;
 
-        // Remove abandoned header/fruit-row trigger icons from earlier builds
         document.querySelectorAll("#fruit-bowl-settings-icon").forEach((el) => el.remove());
+
+        // If an old tiny in-game panel exists, rebuild it.
+        const existing = document.getElementById("fruit-bowl-popup-pudding");
+        if (existing && existing.parentElement !== host) {
+            existing.remove();
+            const oldBd = document.getElementById("fruit-bowl-backdrop-pudding");
+            if (oldBd) oldBd.remove();
+        }
 
         const legacy = document.getElementById("portal-pairs-popup-pudding");
         if (legacy) legacy.remove();
+
+        let backdrop = document.getElementById("fruit-bowl-backdrop-pudding");
+        if (!backdrop) {
+            backdrop = document.createElement("div");
+            backdrop.id = "fruit-bowl-backdrop-pudding";
+            backdrop.style.cssText = BACKDROP_STYLE;
+            backdrop.addEventListener("click", function () {
+                window.PortalPairsPanelHide();
+            });
+            host.appendChild(backdrop);
+        } else if (backdrop.parentElement !== host) {
+            host.appendChild(backdrop);
+        }
 
         let panel = document.getElementById("fruit-bowl-popup-pudding");
         if (!panel) {
@@ -237,16 +350,17 @@ window.CustomBowl.make = function () {
             panel.id = "fruit-bowl-popup-pudding";
             panel.style.cssText = PANEL_STYLE;
             panel.innerHTML = `
-                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:8px;font-size:15px;">Fruit Bowl Settings</div>
-                <div class="form-check form-check-inline" style="margin-bottom:8px;">
-                    <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable">
-                    <label class="form-check-label" for="fruit-bowl-enable" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Enable custom fruit bowl</label>
+                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:14px;font-size:18px;font-weight:bold;letter-spacing:0.2px;">Fruit Bowl Settings</div>
+                <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin:0 auto 12px;width:100%;">
+                    <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable" style="margin:0;float:none;position:static;">
+                    <label class="form-check-label" for="fruit-bowl-enable" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:1.2;">Enable custom fruit bowl</label>
                 </div>
-                <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:13px;margin:4px 0 10px 0;text-align:center;"></div>
-                <div id="fruit-bowl-grid"></div>
-                <button type="button" class="btn" style="margin-top:10px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:100%;" id="fruit-bowl-close">Close</button>
+                <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:13px;margin:0 0 12px 0;text-align:center;"></div>
+                <div id="fruit-bowl-grid" style="padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;"></div>
+                <button type="button" class="btn" style="margin-top:8px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:100%;padding:8px 12px;font-size:14px;" id="fruit-bowl-close">Close</button>
             `;
             host.appendChild(panel);
+            applyPanelTheme(panel);
 
             document.getElementById("fruit-bowl-enable").addEventListener("change", function () {
                 window.pudding_settings.PortalPairs = !!this.checked;
@@ -260,7 +374,12 @@ window.CustomBowl.make = function () {
             });
         } else {
             if (panel.parentElement !== host) host.appendChild(panel);
-            panel.style.cssText = PANEL_STYLE + (window.portalPairsPanelVisible
+            const shown = !!window.portalPairsPanelVisible;
+            panel.style.cssText = PANEL_STYLE + (shown
+                ? "display:block;visibility:visible;"
+                : "display:none;visibility:hidden;");
+            applyPanelTheme(panel);
+            backdrop.style.cssText = BACKDROP_STYLE + (shown
                 ? "display:block;visibility:visible;"
                 : "display:none;visibility:hidden;");
         }
@@ -275,18 +394,29 @@ window.CustomBowl.make = function () {
         syncPanelEnabledState();
         renderFruitGrid();
         const panel = document.getElementById("fruit-bowl-popup-pudding");
+        const backdrop = document.getElementById("fruit-bowl-backdrop-pudding");
         if (panel) {
             panel.style.display = "block";
             panel.style.visibility = "visible";
+            applyPanelTheme(panel);
+        }
+        if (backdrop) {
+            backdrop.style.display = "block";
+            backdrop.style.visibility = "visible";
         }
         window.portalPairsPanelVisible = true;
     };
 
     window.PortalPairsPanelHide = function () {
         const panel = document.getElementById("fruit-bowl-popup-pudding");
+        const backdrop = document.getElementById("fruit-bowl-backdrop-pudding");
         if (panel) {
             panel.style.display = "none";
             panel.style.visibility = "hidden";
+        }
+        if (backdrop) {
+            backdrop.style.display = "none";
+            backdrop.style.visibility = "hidden";
         }
         window.portalPairsPanelVisible = false;
     };
@@ -333,12 +463,37 @@ window.CustomBowl.alterCode = function (code) {
     const baf_regex = /([a-zA-Z0-9_$]{1,8})=function\(a\)\{if\(([a-zA-Z0-9_$]{1,8})\(a\.settings,2\)\)\{var b=\s*Math\.floor\(48\/a\.([a-zA-Z0-9_$]{1,8})\.length\);/;
     catchError(baf_regex, code);
     const baf_match = code.match(baf_regex);
+    const baf_name = baf_match[1];
+    const portal_check = baf_match[2];
     const apple_array = baf_match[3];
     window.__portalAppleArrayName = apple_array;
+    window.__fruitBowlSettingProp = fruit_setting;
 
+    // Portal init: clear + roll from (pool − showing) pair by pair.
+    code = code.assertReplace(
+        baf_regex,
+        `${baf_name}=function(a){` +
+        `if(${portal_check}(a.settings,2)&&window.assignCustomPortalPairTypes&&window.assignCustomPortalPairTypes(a))return;` +
+        `if(${portal_check}(a.settings,2)){var b=Math.floor(48/a.${apple_array}.length);`
+    );
+
+    // Custom bowl pick: portal → showing-list uniqueness; other modes → random from pool.
     code = code.assertReplace(
         aaf_regex,
-        `${aaf_name}=function(a){if(window.pudding_settings&&window.pudding_settings.PortalPairs&&window.fruit_selected===24&&a.settings.${fruit_setting}===24){return window.pickCustomPortalType(a);}if(a.settings.${fruit_setting}===24){`
+        `${aaf_name}=function(a){` +
+        `if(window.pudding_settings&&window.pudding_settings.PortalPairs&&a.settings.${fruit_setting}===24){` +
+        `return window.pickCustomPortalType(a,${portal_check}(a.settings,2));}` +
+        `if(a.settings.${fruit_setting}===24){`
+    );
+
+    // Before in-place portal retype, drop the eaten pair from "showing" (type=-1).
+    const inplace_regex = new RegExp(
+        `Ni&&\\(this\\.wa\\.ka\\[vd\\]\\.type=${aaf_name}\\(this\\.wa\\),this\\.wa\\.ka\\[Ok\\]\\.type=this\\.wa\\.ka\\[vd\\]\\.type\\)`
+    );
+    catchError(inplace_regex, code);
+    code = code.assertReplace(
+        inplace_regex,
+        `Ni&&(this.wa.ka[vd].type=-1,this.wa.ka[Ok].type=-1,this.wa.ka[vd].type=${aaf_name}(this.wa),this.wa.ka[Ok].type=this.wa.ka[vd].type)`
     );
 
     const refill_regex = new RegExp(
@@ -351,13 +506,26 @@ window.CustomBowl.alterCode = function (code) {
 
     const refill_replacement =
         `if(${mode_check}(a.settings,2)&&b.length>0){` +
-        `if(window.pudding_settings&&window.pudding_settings.PortalPairs&&window.fruit_selected===24){` +
-        `window.custom_pair_call_counter=0;` +
-        `for(let __pi=0;__pi<b.length;__pi+=2){b[__pi].type=${aaf_name}(a.${apple_mgr_prop});b[__pi+1].type=b[__pi].type;}` +
-        `}else for(b[0].type=${aaf_name}(a.${apple_mgr_prop}),b[1].type=b[0].type,a=2;a<b.length;a+=2)b[a].type=(b[a-2].type+1)%24,b[a+1].type=b[a].type` +
+        `if(window.pudding_settings&&window.pudding_settings.PortalPairs&&a.settings.${fruit_setting}===24&&window.assignCustomPortalPairTypes){` +
+        `window.assignCustomPortalPairTypes(a.${apple_mgr_prop});` +
+        `}else for(b[0].type=${aaf_name}(a.${apple_mgr_prop}),b[1].type=b[0].type,a=2;a<b.length;a+=2)b[a].type=(b[a-2].type+1)%24,b[a+1].type=b[a].type;` +
+        `window.enforceUniquePortalFruitTypes&&window.enforceUniquePortalFruitTypes(a.${apple_mgr_prop})` +
         `}`;
 
     code = code.assertReplace(refill_regex, refill_replacement);
+
+    // Enforce after baF without breaking if/else (comma expression).
+    code = code.assertReplace(
+        new RegExp(`${baf_name}\\(this\\)`),
+        `(${baf_name}(this),window.enforceUniquePortalFruitTypes&&window.enforceUniquePortalFruitTypes(this))`
+    );
+    const bafArgRegex = new RegExp(`${baf_name}\\(a\\.([a-zA-Z0-9_$]{1,8})\\)`);
+    catchError(bafArgRegex, code);
+    const bafArgProp = code.match(bafArgRegex)[1];
+    code = code.assertReplace(
+        bafArgRegex,
+        `(${baf_name}(a.${bafArgProp}),window.enforceUniquePortalFruitTypes&&window.enforceUniquePortalFruitTypes(a.${bafArgProp}))`
+    );
 
     return code;
 };
