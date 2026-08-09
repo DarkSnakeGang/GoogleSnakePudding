@@ -405,7 +405,7 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.showDialog = function () {
         window.timeKeeper.dialogActive = true;
         const btn = document.getElementById("time-keeper");
-        if (btn) btn.innerHTML = "Hide Details";
+        if (btn) btn.innerHTML = "Hide";
 
         const dialog = document.createElement("div");
         dialog.setAttribute("open", "");
@@ -536,7 +536,7 @@ window.TimeKeeper.make = function () {
         if (child && child.parentElement) child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
         const btn = document.getElementById("time-keeper");
-        if (btn) btn.innerHTML = "Show Details";
+        if (btn) btn.innerHTML = "Details";
     };
 
     window.timeKeeper.toggleDialog = function () {

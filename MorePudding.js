@@ -1502,7 +1502,7 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.showDialog = function () {
         window.timeKeeper.dialogActive = true;
         const btn = document.getElementById("time-keeper");
-        if (btn) btn.innerHTML = "Hide Details";
+        if (btn) btn.innerHTML = "Hide";
 
         const dialog = document.createElement("div");
         dialog.setAttribute("open", "");
@@ -1633,7 +1633,7 @@ window.TimeKeeper.make = function () {
         if (child && child.parentElement) child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
         const btn = document.getElementById("time-keeper");
-        if (btn) btn.innerHTML = "Show Details";
+        if (btn) btn.innerHTML = "Details";
     };
 
     window.timeKeeper.toggleDialog = function () {
@@ -2549,7 +2549,7 @@ window.SpeedInfo.make = function () {
         "H": "High_Score.json",
     };
 
-    // Match FastSnakeStats tally-boards.js (source of truth for HS columns)
+    // Match FastSnakeStats tally-boards.js (typical dedicated HS modes)
     const TYPICAL_HIGHSCORE_MODES = {
         1: "Wall",
         2: "Portal",
@@ -2562,18 +2562,6 @@ window.SpeedInfo.make = function () {
         17: "Hotdog",
         19: "Gate",
         20: "Bridge",
-    };
-    const TALLY_CE_HIGHSCORE_MODES = {
-        0: "Classic",
-        3: "Cheese",
-        4: "Borderless",
-        5: "Twin",
-        6: "Winged",
-        7: "Yin Yang",
-        11: "Dimension",
-        14: "Light",
-        16: "Arrow",
-        18: "Magnet",
     };
 
     // Dedicated main-game High Score categories (Cheese HS was removed from SRC).
@@ -2694,18 +2682,20 @@ window.SpeedInfo.make = function () {
         return true;
     }
 
-    // FSS shouldShowHighScoreColumn: typical HS modes always; CE Tally-HS modes only on Tally.
-    // Peaceful/Blender never (no FSS HS boards).
+    // FSS HS boards: typical HS modes on any count; on Tally every mode except Peaceful/Blender
     function canShowSrcHighscore(mode, count) {
         if (mode === 21 || mode === 22) return false; // Peaceful, Blender
         if (TYPICAL_HIGHSCORE_MODES[mode]) return true;
-        if (count === TALLY_COUNT && TALLY_CE_HIGHSCORE_MODES[mode]) return true;
+        if (count === TALLY_COUNT) return true;
         return false;
     }
 
-    // Submit link only when SRC has a real board for this mode/count
+    // Submit link only when SRC has a real board (HS category or CE Tally-HS mode)
     function canSubmitHighscore(mode, count) {
-        return canShowSrcHighscore(mode, count);
+        if (mode === 21 || mode === 22) return false;
+        if (SRC_HS_CATEGORY_BY_MODE[mode]) return true;
+        if (count === TALLY_COUNT && CE_TALLY_MODE_BY_MODE[mode]) return true;
+        return false;
     }
 
     function srcVarPair(varId, valueId) {
@@ -2754,10 +2744,66 @@ window.SpeedInfo.make = function () {
         return `https://www.speedrun.com/${SRC_GAME}/runs/new?x=${x}`;
     }
 
-    function pbSubmitLink(text, score, mode, count, speed, size) {
+    function pbValueHtml(text, score, mode, count, speed, size, gold) {
+        const color = gold ? "#FFD700" : "#ADD8E6";
         const url = buildSrcSubmitUrl(score, mode, count, speed, size);
-        if (!url) return text;
-        return `<a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="${url}">${text}</a>`;
+        if (url) {
+            return `<a target="_blank" style="text-decoration: none;color:${color} !important;" href="${url}">${text}</a>`;
+        }
+        if (gold) return `<span style="color:${color} !important">${text}</span>`;
+        return text;
+    }
+
+    // SRC encodes apple count in the duration seconds field (0.187 → 187, 1.234 → 1234)
+    function wrHighscoreFromRun(run) {
+        if (!run || !run.times) return null;
+        if (typeof run.times.primary_t === "number" && isFinite(run.times.primary_t)) {
+            return Math.round(run.times.primary_t * 1000 + 1e-6);
+        }
+        const primary = String(run.times.primary || "");
+        const m = primary.match(/PT(?:\d+H)?(?:\d+M)?(\d+(?:\.\d+)?)S/i);
+        if (m) return Math.round(parseFloat(m[1]) * 1000 + 1e-6);
+        return null;
+    }
+
+    function fssModeName(mode, modeKey) {
+        if (modeKey && window.ModeRegistry && typeof window.ModeRegistry.labelModeKey === "function") {
+            const label = window.ModeRegistry.labelModeKey(modeKey);
+            if (label && label.indexOf(",") < 0) return label;
+        }
+        return window.modeToTxt[mode] && window.modeToTxt[mode].name;
+    }
+
+    // Timed: lower ms wins. Highscore: higher apples wins (only when HS board applies). Unheld → gold.
+    async function shouldGoldPb(score, mode, count, speed, size, pb, modeKey) {
+        if (score === "H" && !canShowSrcHighscore(mode, count)) return false;
+
+        const modeName = fssModeName(mode, modeKey);
+        const countName = window.countToTxt[count] && window.countToTxt[count].name;
+        const speedName = window.speedToTxt[speed] && window.speedToTxt[speed].name;
+        const sizeName = window.sizeToTxt[size] && window.sizeToTxt[size].name;
+        if (!modeName || !countName || !speedName || !sizeName) return false;
+
+        const categoryName =
+            score === "H" ? "High Score" : (score === "ALL" ? "All" : score) + " Apples";
+        const cacheKey = `${countName}|${speedName}|${sizeName}|${modeName}|${categoryName}`;
+
+        try {
+            const record = await getRecordForKey(cacheKey);
+            if (!record.success || !record.runs || !record.runs.length) return true; // unheld
+            const wr = record.runs[0];
+            if (score === "H") {
+                const wrHigh = wrHighscoreFromRun(wr);
+                if (wrHigh == null || pb.high == null) return false;
+                return Number(pb.high) > wrHigh;
+            }
+            if (pb.time == null || !wr.times || typeof wr.times.primary_t !== "number") return false;
+            const wrMs = Math.round(wr.times.primary_t * 1000 + 1e-6);
+            return Number(pb.time) < wrMs;
+        } catch (e) {
+            if (window.NepDebug) console.error("shouldGoldPb failed:", e);
+            return false;
+        }
     }
 
     function sleepFor(ms) {
@@ -3279,21 +3325,48 @@ window.SpeedInfo.make = function () {
         HandleAll(emp);
         HandleHighscore(emp);
         EmptyTracking();
-        updateTrackingSectionVisibility();
+        updateSrcAndTrackingVisibility();
+    }
+
+    function isBlenderMode() {
+        if (window.CurrentModeNum === 22) return true;
+        try {
+            if (window.timeKeeper && typeof window.timeKeeper.getCurrentMode === "function") {
+                return window.timeKeeper.getCurrentMode() === "blender";
+            }
+        } catch (e) { /* ignore */ }
+        return false;
+    }
+
+    function updateSrcAndTrackingVisibility() {
+        const srcSection = document.getElementById("src-section");
+        const trackSection = document.getElementById("tracking-section");
+        const label = document.getElementById("tracking-label");
+        const hideSrc = isBlenderMode() || !!window.daily_challenge;
+
+        if (srcSection) {
+            srcSection.style.display = hideSrc ? "none" : "block";
+        }
+        if (!trackSection) return;
+
+        if (hideSrc) {
+            trackSection.style.display = "none";
+            EmptyTracking();
+            return;
+        }
+
+        const name = getTrackedPlayerName();
+        if (name) {
+            trackSection.style.display = "block";
+            if (label) label.textContent = `Tracking: ${name}`;
+        } else {
+            trackSection.style.display = "none";
+            EmptyTracking();
+        }
     }
 
     function updateTrackingSectionVisibility() {
-        const section = document.getElementById("tracking-section");
-        const label = document.getElementById("tracking-label");
-        if (!section) return;
-        const name = getTrackedPlayerName();
-        if (name) {
-            section.style.display = "block";
-            if (label) label.textContent = `Tracking: ${name}`;
-        } else {
-            section.style.display = "none";
-            EmptyTracking();
-        }
+        updateSrcAndTrackingVisibility();
     }
 
     window.refreshTrackedPlayerUi = function () {
@@ -3399,7 +3472,11 @@ window.SpeedInfo.make = function () {
     };
 
     window.getAllSrc = async function () {
-        updateTrackingSectionVisibility();
+        if (isBlenderMode() || window.daily_challenge) {
+            EmptyAll();
+            return;
+        }
+        updateSrcAndTrackingVisibility();
         const levels = ["25", "50", "100", "All", "H"];
         for (const element of levels) {
             await getRecordSRC(element);
@@ -3413,6 +3490,12 @@ window.SpeedInfo.make = function () {
         }
         if (typeof window.fillTrackedPlayerSuggestions === "function") {
             window.fillTrackedPlayerSuggestions();
+        }
+        // Refresh personal PB gold colors now that FSS WRs are ready
+        if (typeof window.SpeedInfoUpdate === "function") {
+            window.SpeedInfoUpdate().catch(function (e) {
+                console.error("SpeedInfoUpdate error:", e);
+            });
         }
     }
 
@@ -3612,7 +3695,10 @@ window.SpeedInfo.make = function () {
         window.speedinfoInput = speedinfoBox;
         speedinfoBox.innerHTML = `
 
-        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Speed Info</span>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 3px;">
+        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;">Speed Info</span>
+        <button class="btn" style="margin:0;padding:2px 8px;font-size:12px;line-height:1.2;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Details</button>
+        </div>
         <label id="mode-selected" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="mode-selected2" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="25" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
@@ -3621,11 +3707,8 @@ window.SpeedInfo.make = function () {
         <label id="ALL" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="H" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="att" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <span style="display:flex; justify-content: center; align-items: center; text-align: center;">
-        <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;justify-content: center; align-items: center; text-align: center;" id="time-keeper" jsname="time-keeper">Show Details</button>
-        </span>
-        <br>
 
+        <div id="src-section">
         <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">SRC World Records</span>
         <label id="25src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="50src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
@@ -3639,6 +3722,7 @@ window.SpeedInfo.make = function () {
         <label id="100track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Alltrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Htrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        </div>
         </div>
         <br>
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
@@ -3726,8 +3810,11 @@ window.SpeedInfo.make = function () {
                 const el = document.getElementById(score);
                 if (el) el.innerHTML = "";
             }
+            updateSrcAndTrackingVisibility();
             return;
         }
+
+        updateSrcAndTrackingVisibility();
 
         mode_label.innerHTML =
             gamemode +
@@ -3760,12 +3847,15 @@ window.SpeedInfo.make = function () {
 
             if (score == "H") {
                 if (typeof storage[name] != "undefined" && storage[name].high != null) {
-                    const highText = String(storage[name].high);
+                    const highText = String(storage[name].high) + " Apples";
+                    // Gold only when an SRC highscore board applies (HS mode any count, or Tally CE modes)
+                    const hsApplies = canShowSrcHighscore(mode, count);
+                    const gold =
+                        hsApplies &&
+                        (await shouldGoldPb("H", mode, count, speed, size, storage[name], modeKey));
                     bold.innerHTML =
                         "Highscore: " +
-                        (canSubmitHighscore(mode, count)
-                            ? pbSubmitLink(highText, "H", mode, count, speed, size)
-                            : highText);
+                        pbValueHtml(highText, "H", mode, count, speed, size, gold);
                 } else {
                     bold.innerHTML = "Highscore: None";
                 }
@@ -3774,10 +3864,19 @@ window.SpeedInfo.make = function () {
 
             const label = score === "ALL" ? "All Apples" : score + " Apples";
             if (typeof storage[name] != "undefined" && storage[name].time != null) {
+                const gold = await shouldGoldPb(
+                    score,
+                    mode,
+                    count,
+                    speed,
+                    size,
+                    storage[name],
+                    modeKey
+                );
                 bold.innerHTML =
                     label +
                     ": " +
-                    pbSubmitLink(fmt(storage[name].time), score, mode, count, speed, size);
+                    pbValueHtml(fmt(storage[name].time), score, mode, count, speed, size, gold);
             } else {
                 bold.innerHTML = label + ": None";
             }
@@ -3834,7 +3933,8 @@ window.SpeedInfo.alterCode = function (code) {
 
     window.CurrentModeNum = 0;
     mode_regex = new RegExp(/case "trophy"\:/)
-    mode_get_code = `case "trophy":window.CurrentModeNum = `
+    // Set mode first, then refresh SRC (microtask so CurrentModeNum is assigned)
+    mode_get_code = `case "trophy":queueMicrotask(function(){window.getAllSrc().catch(function(e){console.error('getAllSrc error:',e);});});window.CurrentModeNum = `
     code = code.assertReplace(mode_regex, mode_get_code);
 
     /*
@@ -5093,7 +5193,6 @@ window.BootstrapMenu.make = function () {
 
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat</button>
   <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset stats</button><br>
-  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Show TimeKeeper</button>
   <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
     <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
