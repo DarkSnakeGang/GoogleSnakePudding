@@ -69,7 +69,7 @@ window.Theme = {};
 window.Theme.make = function () {
 
   // style for all pudding sidebar overlays
-  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;';
+  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
 
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
@@ -802,6 +802,8 @@ window.Counter.alterCode = function (code) {
 
 
     document.addEventListener('keydown', (event)=> {
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
         if(!event.repeat)
         {
             if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
@@ -2364,6 +2366,8 @@ window.SettingsSaver.make = function () {
                 InputDisplay: false,
                 TopBar: true,
                 SpeedInfo: false,
+                ShowWrHolders: true,
+                TrackedPlayerName: "",
                 PortalPairs: false,
                 AlwaysUniqueFruit: false,
                 SelectedPairs: defaultPoolForCount(0),
@@ -2385,6 +2389,12 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.ScrollBar !== 'boolean') {
                 pudding_settings.ScrollBar = false;
+            }
+            if (typeof pudding_settings.ShowWrHolders !== 'boolean') {
+                pudding_settings.ShowWrHolders = true;
+            }
+            if (typeof pudding_settings.TrackedPlayerName !== 'string') {
+                pudding_settings.TrackedPlayerName = "";
             }
             pudding_settings = migrateSelectedPairsByCount(pudding_settings);
             pudding_settings.SelectedPairs = pudding_settings.SelectedPairsByCount["0"];
@@ -2449,6 +2459,17 @@ window.SpeedInfo.make = function () {
     let runsDatesMeta = null;
     let lastTimelinesUpdate = 0;
     let timelinesPromise = null;
+
+    // Full-board runs cache for tracked-player lookups (not live SRC)
+    const runsBoardCache = Object.create(null); // key -> { data, fetchedAt }
+    const runsBoardPromises = Object.create(null);
+    const LEVEL_TO_RUNS_FILE = {
+        "25": "25_Apples.json",
+        "50": "50_Apples.json",
+        "100": "100_Apples.json",
+        "All": "All_Apples.json",
+        "H": "High_Score.json",
+    };
 
     function sleepFor(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -2548,6 +2569,99 @@ window.SpeedInfo.make = function () {
         });
 
         return timelinesPromise;
+    }
+
+    function modeFolderName(modeName) {
+        return String(modeName || "").replace(/ /g, "_");
+    }
+
+    function getTrackedPlayerName() {
+        return (window.pudding_settings && window.pudding_settings.TrackedPlayerName || "").trim();
+    }
+
+    function shouldShowWrHolders() {
+        return !!(window.pudding_settings && window.pudding_settings.ShowWrHolders) && !getTrackedPlayerName();
+    }
+
+    function playerNameFromExpandedRun(run) {
+        if (!run || !run.players || !run.players.data || !run.players.data[0]) return "";
+        const p = run.players.data[0];
+        if (p.rel === "guest") return p.name || "";
+        return (p.names && p.names.international) || p.name || "";
+    }
+
+    function wrLink(href, text) {
+        return `<a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="${href}">${text}</a>`;
+    }
+
+    function formatWrRow(label, timeText, weblink, playerName) {
+        let html = `${label}: ${wrLink(weblink, timeText)}`;
+        if (shouldShowWrHolders() && playerName) {
+            html += `<br>${wrLink(weblink, `by ${playerName}`)}`;
+        }
+        return html;
+    }
+
+    function formatTrackRow(label, timeText, weblink) {
+        if (!weblink) return `${label}: ${timeText}`;
+        return `${label}: ${wrLink(weblink, timeText)}`;
+    }
+
+    function formatTimeTSeconds(timeT) {
+        if (typeof timeT !== "number" || !isFinite(timeT)) return "None";
+        const totalMs = Math.round(timeT * 1000);
+        const hours = Math.floor(totalMs / 3600000);
+        const minutes = Math.floor((totalMs % 3600000) / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const milliseconds = totalMs % 1000;
+        let convertedTime = "";
+        if (hours > 0) convertedTime += hours + "h";
+        if (minutes > 0 || hours > 0) convertedTime += minutes + "m";
+        convertedTime += seconds + "s";
+        if (hours === 0 && milliseconds > 0) {
+            convertedTime += String(milliseconds).padStart(3, "0") + "ms";
+        }
+        if (hours > 0) {
+            convertedTime = convertedTime.split("s")[0] + "s";
+        }
+        return convertedTime;
+    }
+
+    async function loadRunsBoard(modeName, level) {
+        const file = LEVEL_TO_RUNS_FILE[level];
+        if (!file) throw new Error("Unknown level for runs board: " + level);
+        const folder = modeFolderName(modeName);
+        const cacheKey = `${folder}/${file}`;
+        const cached = runsBoardCache[cacheKey];
+        if (cached && Date.now() - cached.fetchedAt < CACHE_STALE_THRESHOLD) {
+            return cached.data;
+        }
+        if (runsBoardPromises[cacheKey]) return runsBoardPromises[cacheKey];
+
+        const url = `${FASTSNAKE_BASE}/runs/${folder}/${file}`;
+        runsBoardPromises[cacheKey] = (async () => {
+            const data = await getJSON(url);
+            window.requestsMade += 1;
+            runsBoardCache[cacheKey] = { data, fetchedAt: Date.now() };
+            return data;
+        })().finally(() => {
+            delete runsBoardPromises[cacheKey];
+        });
+        return runsBoardPromises[cacheKey];
+    }
+
+    function findBestTrackedRun(boardData, playerName, categoryKey) {
+        if (!boardData || !boardData.runs) return null;
+        const target = playerName.toLowerCase();
+        let best = null;
+        for (const run of Object.values(boardData.runs)) {
+            if (!run || !run.playerName) continue;
+            if (String(run.playerName).toLowerCase() !== target) continue;
+            if (run.category !== categoryKey) continue;
+            if (typeof run.timeT !== "number") continue;
+            if (!best || run.timeT < best.timeT) best = run;
+        }
+        return best;
     }
 
     // Look up one category key as of the latest runs-derived date
@@ -2805,7 +2919,8 @@ window.SpeedInfo.make = function () {
                     run: {
                         times: { primary: bestRun.times.primary },
                         weblink: bestRun.weblink
-                    }
+                    },
+                    playerName: playerNameFromExpandedRun(bestRun)
                 }]
             }
         };
@@ -2827,6 +2942,13 @@ window.SpeedInfo.make = function () {
 
     //window.getRecordSRC("H");
 
+    function EmptyTracking() {
+        for (const id of ["25track", "50track", "100track", "Alltrack", "Htrack"]) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = "";
+        }
+    }
+
     function EmptyAll() {
         emp = "Empty"
         Handle25(emp);
@@ -2834,12 +2956,137 @@ window.SpeedInfo.make = function () {
         Handle100(emp);
         HandleAll(emp);
         HandleHighscore(emp);
+        EmptyTracking();
+        updateTrackingSectionVisibility();
     }
 
+    function updateTrackingSectionVisibility() {
+        const section = document.getElementById("tracking-section");
+        const label = document.getElementById("tracking-label");
+        if (!section) return;
+        const name = getTrackedPlayerName();
+        if (name) {
+            section.style.display = "block";
+            if (label) label.textContent = `Tracking: ${name}`;
+        } else {
+            section.style.display = "none";
+            EmptyTracking();
+        }
+    }
+
+    window.refreshTrackedPlayerUi = function () {
+        updateTrackingSectionVisibility();
+    };
+
+    window.fillTrackedPlayerSuggestions = function () {
+        const list = document.getElementById("tracked-player-suggestions");
+        if (!list) return;
+        list.innerHTML = "";
+        if (!timelinesData || !timelinesData.boards || !runsDatesMeta) return;
+        const date = runsDatesMeta.availableDates[runsDatesMeta.availableDates.length - 1];
+        const names = new Set();
+        for (const timeline of Object.values(timelinesData.boards)) {
+            const top = wrAsOf(timeline, date);
+            for (const r of top) {
+                if (r && r.n) names.add(r.n);
+            }
+        }
+        for (const name of [...names].sort((a, b) => a.localeCompare(b))) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            list.appendChild(opt);
+        }
+    };
+
+    window.getTrackedRecord = async function (level) {
+        const trackIds = {
+            "25": "25track",
+            "50": "50track",
+            "100": "100track",
+            "All": "Alltrack",
+            "H": "Htrack",
+        };
+        const elId = trackIds[level];
+        const el = elId ? document.getElementById(elId) : null;
+        const labels = {
+            "25": "25 Apples",
+            "50": "50 Apples",
+            "100": "100 Apples",
+            "All": "All Apples",
+            "H": "Highscore",
+        };
+
+        if (!el) return;
+
+        const playerName = getTrackedPlayerName();
+        if (!playerName || !window.pudding_settings.SpeedInfo || window.daily_challenge) {
+            el.innerHTML = "";
+            return;
+        }
+
+        let count = window.timeKeeper.getCurrentSetting("count");
+        let speed = window.timeKeeper.getCurrentSetting("speed");
+        let size = window.timeKeeper.getCurrentSetting("size");
+        let mode = window.CurrentModeNum;
+
+        const WALL = 1, PORTAL = 2, CHEESE = 3, KEY = 8, SOKO = 9, POISON = 10;
+        const MINESWEEPER = 12, STATUE = 13, SHIELD = 15, HOTDOG = 17, GATE = 19, BRIDGE = 20, BLENDER = 22;
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
+        if (size > 2 || count > 6 || mode == BLENDER) {
+            el.innerHTML = "";
+            return;
+        }
+        if (!highscore_modes.includes(mode) && level == "H") {
+            el.innerHTML = "";
+            return;
+        }
+
+        const modeName = window.modeToTxt[mode].name;
+        const countName = window.countToTxt[count].name;
+        const speedName = window.speedToTxt[speed].name;
+        const sizeName = window.sizeToTxt[size].name;
+        const categoryName = level === "H" ? "High Score" : level + " Apples";
+        const categoryKey = `${countName}|${speedName}|${sizeName}|${modeName}|${categoryName}`;
+
+        try {
+            const board = await loadRunsBoard(modeName, level);
+            const best = findBestTrackedRun(board, playerName, categoryKey);
+            if (!best) {
+                el.innerHTML = `${labels[level]}: None`;
+                return;
+            }
+            if (level === "H") {
+                const primary = best.time || ("PT" + best.timeT + "S");
+                const highscore = parseInt(String(primary).split(".")[1]).toString();
+                const text = (isNaN(parseInt(highscore, 10)) ? String(Math.round(best.timeT * 1000)) : highscore) + " Apples";
+                el.innerHTML = formatTrackRow(labels[level], text, best.weblink);
+            } else {
+                const text = best.time ? convertTime(best.time) : formatTimeTSeconds(best.timeT);
+                el.innerHTML = formatTrackRow(labels[level], text, best.weblink);
+            }
+        } catch (error) {
+            if (window.NepDebug) {
+                console.error("Tracked run lookup failed:", error);
+            }
+            el.innerHTML = `${labels[level]}: None`;
+        }
+    };
+
     window.getAllSrc = async function () {
+        updateTrackingSectionVisibility();
         const levels = ["25", "50", "100", "All", "H"];
         for (const element of levels) {
             await getRecordSRC(element);
+        }
+        if (getTrackedPlayerName()) {
+            for (const element of levels) {
+                await window.getTrackedRecord(element);
+            }
+        } else {
+            EmptyTracking();
+        }
+        if (typeof window.fillTrackedPlayerSuggestions === "function") {
+            window.fillTrackedPlayerSuggestions();
         }
     }
 
@@ -2855,10 +3102,14 @@ window.SpeedInfo.make = function () {
         }
 
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('25src').innerHTML = formatWrRow(
+            "25 Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
 
-        document.getElementById('25src').innerHTML = `25 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
-
-        //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
             //console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
         }
@@ -2874,8 +3125,13 @@ window.SpeedInfo.make = function () {
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
-
-        document.getElementById('50src').innerHTML = `50 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('50src').innerHTML = formatWrRow(
+            "50 Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
     }
     function Handle100(response) {
         if (response == "Empty") {
@@ -2888,8 +3144,13 @@ window.SpeedInfo.make = function () {
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
-
-        document.getElementById('100src').innerHTML = `100 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('100src').innerHTML = formatWrRow(
+            "100 Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
     }
     function HandleAll(response) {
         if (response == "Empty") {
@@ -2902,8 +3163,13 @@ window.SpeedInfo.make = function () {
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
-
-        document.getElementById('Allsrc').innerHTML = `All Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('Allsrc').innerHTML = formatWrRow(
+            "All Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
     }
 
     function HandleHighscore(response) {
@@ -2920,9 +3186,14 @@ window.SpeedInfo.make = function () {
 
         highscore = parseInt(response["data"]["runs"][0]["run"]["times"]["primary"].toString().split('.')[1]).toString();
         world_record = highscore + " Apples";
+        const playerName = response["data"]["runs"][0].playerName || "";
 
-        document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
-        //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
+        document.getElementById('Hsrc').innerHTML = formatWrRow(
+            "Highscore",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
         if (window.NepDebug) {
             //console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
         }
@@ -2970,7 +3241,11 @@ window.SpeedInfo.make = function () {
     }
 
     // Prefetch runs-derived timelines on startup
-    getLatestCacheData().catch(error => {
+    getLatestCacheData().then(() => {
+        if (typeof window.fillTrackedPlayerSuggestions === "function") {
+            window.fillTrackedPlayerSuggestions();
+        }
+    }).catch(error => {
         if (window.NepDebug) {
             console.error("Failed to initialize runs-derived data:", error);
         }
@@ -3031,12 +3306,21 @@ window.SpeedInfo.make = function () {
         <label id="100src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Allsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Hsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <div id="tracking-section" style="display:none;">
+        <span id="tracking-label" style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Tracking</span>
+        <label id="25track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="50track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="100track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="Alltrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="Htrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        </div>
         <br>
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
 
   `;
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
+        updateTrackingSectionVisibility();
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
         speedinfoCloseElements.addEventListener('click', window.SpeedInfoHide);
@@ -3367,6 +3651,8 @@ window.InputDisplay.alterCode = function (code) {
 
   // Code to alter snake code here
   document.addEventListener('keydown', (event)=> {
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
 
     if (event.key === 'ArrowRight' || (event.code === 'KeyD')){
 
@@ -3389,6 +3675,9 @@ window.InputDisplay.alterCode = function (code) {
   });
 
   document.addEventListener('keyup', (event)=> {
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
+
     if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
 
       window.LightInputOff("right-button-id");
@@ -3533,161 +3822,268 @@ window.Timer = {
       } else {
         const theme = window.themes[getSelected('#theme', 'DqMRee tuJOWd') || getSelected('#theme', 'tuJOWd')]
 
+        const btnColor = window.button_color || '#1155CC'
         editBox = document.createElement('div')
         editBox.id = 'edit-box'
         editBox.style = `
           background-color: ${theme.real_top_bar ?? '#aaaaff'};
           border-radius: 0.5vw;
           position: absolute;
-          height: 93vh;
+          height: auto;
+          max-height: 94vh;
           z-index: 1000000;
-          top: 30px;
+          top: 20px;
           left: 50%;
           backdrop-filter: blur(5px);
           text-align: center;
-          padding: 4px;
+          padding: 6px 14px 10px;
           transform: translate(-50%, 0);
           box-shadow: 0px 0px 8px rgba(0,0,0,0.4);
           border: 1px solid ${theme.topbar_color ?? '#4444dd'};
-          font-size: 2.5vh;
+          font-size: 2vh;
           color: #ffffff;
-          width: 50vw;
+          width: 58vw;
+          max-width: 640px;
           font-family: Roboto,Arial,sans-serif;
-          overflow-y: auto;
+          overflow: hidden;
+          box-sizing: border-box;
         `
+        const sectionTitle = 'margin:4px 0 2px;font-size:2.1vh;font-weight:600;letter-spacing:0.02em;opacity:0.95;'
+        const iconRow = 'display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:0.3vh;margin:0 auto 1px;'
+        const iconStyle = 'cursor: pointer; border: 0.45vh ridge #00000000; border-radius: 1vh; width: 3.2vh; height: 3.2vh;'
+        const iconSel = 'cursor: pointer; border: 0.45vh ridge #af4490ff; border-radius: 1vh; width: 3.2vh; height: 3.2vh;'
+        const halfCol = 'flex:1;min-width:0;'
         editBox.innerHTML = `
         <span id="close-box" style="
         position: absolute;
-        top: 10px;
-        right: 15px;
+        top: 8px;
+        right: 12px;
         cursor: pointer;
         color: #ffffff;
         font-size: 0.9em;
       ">&#x2715</span>
-</br>
-<label class="form-check-label" style="font-size: 3.5vh">
+<label class="form-check-label" style="font-size: 2.8vh; display:block; margin-top:2px; margin-bottom:2px;">
         Custom Timer/Splits Settings
-      </label> </br>
-</br>
+      </label>
 
-<div id="edit-mode">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_02.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_03.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_04.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_05.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_06.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_07.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_08.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_09.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_10.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_11.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_12.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v22/trophy_20.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
-</div>
-<br/>
-<div id="edit-count">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/count_06.png" />
-</div>
-<br/>
-<div id="edit-speed">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_02.png" />
-</div>
-<br/>
-<div id="edit-size">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png" />
-</div>
-<br/>
-
-<div id="edit-cat">
-  <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/d1R1Y648/25.png" />
-  <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/7hmZC6vh/50.png" />
-  <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/qqk7MK5W/100.png" />
-  <img class="sel" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/52j6Cw2V/all.png" />
-</div>
-
-<br/>
-<div id="edit-times" style="left:0px;">
-  <div>
-      <label class="form-check-label" for="edit-25"> 25</label>
-      <input class="text-input" size="9" name="edit-25" id="edit-25" type="text" style="font-family:Consolas;" />
+<div style="${sectionTitle}">SpeedInfo</div>
+<div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap;text-align:left;">
+  <div style="display:flex;align-items:center;gap:6px;padding-top:4px;">
+    <input class="form-check-input" type="checkbox" role="switch" id="ShowWrHolders" style="width:1.3em;height:1.3em;margin:0;">
+    <label class="form-check-label" for="ShowWrHolders" style="margin:0;white-space:nowrap;">Show WR holders</label>
   </div>
-  <div>
-      <label class="form-check-label" for="edit-50"> 50</label>
-      <input class="text-input" size="9" name="edit-50" id="edit-50" type="text" style="font-family:Consolas;" />
-  </div>
-  <div>
-      <label class="form-check-label" for="edit-100">100</label>
-      <input class="text-input" size="9" name="edit-100" id="edit-100" type="text" style="font-family:Consolas;" />
-  </div>
-  <div>
-      <label class="form-check-label" for="edit-ALL">ALL</label>
-      <input class="text-input" size="9" name="edit-ALL" id="edit-ALL" type="text" style="font-family:Consolas;" />
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+    <label for="TrackedPlayerInput" class="form-check-label" style="margin:0;white-space:nowrap;">Track player</label>
+    <input type="text" class="form-control" id="TrackedPlayerInput" list="tracked-player-suggestions" placeholder="SRC username" autocomplete="off" style="width:140px;display:inline-block;background-color:${btnColor};color:white;font-family:Roboto,Arial,sans-serif;border:1px solid rgba(255,255,255,0.25);border-radius:4px;outline:none;text-align:center;caret-color:white;padding:2px 6px;">
+    <datalist id="tracked-player-suggestions"></datalist>
+    <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerSet">Set</button>
+    <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerClear">Clear</button>
   </div>
 </div>
 
+<div style="${sectionTitle}">Mode</div>
+<div id="edit-mode" style="${iconRow}">
+  <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_02.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_03.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_04.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_05.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_06.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_07.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_08.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_09.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_10.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_11.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_12.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v22/trophy_20.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
+</div>
+
+<div style="${sectionTitle}">Count</div>
+<div id="edit-count" style="${iconRow}">
+  <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v19/count_06.png" />
+</div>
+
+<div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;">
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Speed</div>
+    <div id="edit-speed" style="${iconRow}">
+      <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_01.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_02.png" />
+    </div>
+  </div>
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Size</div>
+    <div id="edit-size" style="${iconRow}">
+      <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_00.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_01.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png" />
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;">
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Category</div>
+    <div id="edit-cat" style="${iconRow}">
+      <img class="uns" style="background-color: #ffffff55; ${iconStyle}" src="https://i.postimg.cc/d1R1Y648/25.png" />
+      <img class="uns" style="background-color: #ffffff55; ${iconStyle}" src="https://i.postimg.cc/7hmZC6vh/50.png" />
+      <img class="uns" style="background-color: #ffffff55; ${iconStyle}" src="https://i.postimg.cc/qqk7MK5W/100.png" />
+      <img class="sel" style="background-color: #ffffff55; ${iconSel}" src="https://i.postimg.cc/52j6Cw2V/all.png" />
+    </div>
+  </div>
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Personal bests</div>
+    <div id="edit-times" style="left:0px;display:inline-grid;grid-template-columns:auto auto;gap:3px 8px;justify-content:center;text-align:left;">
+      <div>
+          <label class="form-check-label" for="edit-25"> 25</label>
+          <input class="text-input" size="9" name="edit-25" id="edit-25" type="text" style="font-family:Consolas;" />
+      </div>
+      <div>
+          <label class="form-check-label" for="edit-50"> 50</label>
+          <input class="text-input" size="9" name="edit-50" id="edit-50" type="text" style="font-family:Consolas;" />
+      </div>
+      <div>
+          <label class="form-check-label" for="edit-100">100</label>
+          <input class="text-input" size="9" name="edit-100" id="edit-100" type="text" style="font-family:Consolas;" />
+      </div>
+      <div>
+          <label class="form-check-label" for="edit-ALL">ALL</label>
+          <input class="text-input" size="9" name="edit-ALL" id="edit-ALL" type="text" style="font-family:Consolas;" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="${sectionTitle}">Custom splits</div>
 <div id="edit-customsplit" style="border-top:0px solid black">
 
 </div>
 
-<div id="edit-split">
+<div id="edit-split" style="margin-top:2px;">
   <label class="form-check-label" for="edit-splitscore">New Split</label>
   <input class="text-input" size="6" name="edit-splitscore" id="edit-splitscore" type="number" placeholder="Score" />
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-addsplit">Add</button>
+  <button class="btn" style="margin:3px;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;" id="edit-addsplit">Add</button>
 </div>
-<div id="edit-customsplit" style="border-top:0px solid black">
-</br>
-<label class="form-check-label" style="flex:center;">Timer Format</label>
-<select class="form-control" id="edit-format" style="flex:center;">
-    <option value="0">0:00:00:000</option>
-    <option value="1">  00:00:000</option>
-    <option value="2">   0:00:000</option>
-    <option value="3">     00:000</option>
-    <option value="4">      0:000</option>
-    <option value="5">0:00:00.000</option>
-    <option value="6">  00:00.000</option>
-    <option value="7">   0:00.000</option>
-    <option value="8">     00.000</option>
-    <option value="9">      0.000</option>
-  </select>
-<br/>
-<input class="form-check-input" style="width: 1.5em; height: 1.5em;" type="checkbox" checked="true" name="edit-delta" id="edit-delta" />
-<label class="form-check-label" for="edit-delta">Show Delta</label>
-<br/>
-<br/>
-<label class="form-check-label" for="edit-aheadg">Ahead (gaining time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-aheadg" id="edit-aheadg" type="color" />
-<label class="form-check-label" for="edit-aheadl">Ahead (losing time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-aheadl" id="edit-aheadl" type="color" />
-<br/>
-<label class="form-check-label" for="edit-behindg">Behind (gaining time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-behindg" id="edit-behindg" type="color" />
-<label class="form-check-label" for="edit-behindl">Behind (losing time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-behindl" id="edit-behindl" type="color" />
+
+<div id="edit-display" style="margin-top:2px;">
+<div style="${sectionTitle}">Display</div>
+<div style="display:flex;gap:24px;justify-content:center;align-items:center;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <label class="form-check-label" for="edit-format" style="margin:0;">Timer Format</label>
+    <select class="form-control" id="edit-format" style="display:inline-block;width:auto;margin:0;background-color:${btnColor};color:white;border:1px solid rgba(255,255,255,0.25);">
+      <option value="0">0:00:00:000</option>
+      <option value="1">  00:00:000</option>
+      <option value="2">   0:00:000</option>
+      <option value="3">     00:000</option>
+      <option value="4">      0:000</option>
+      <option value="5">0:00:00.000</option>
+      <option value="6">  00:00.000</option>
+      <option value="7">   0:00.000</option>
+      <option value="8">     00.000</option>
+      <option value="9">      0.000</option>
+    </select>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <input class="form-check-input" style="width: 1.5em; height: 1.5em; margin:0;" type="checkbox" checked="true" name="edit-delta" id="edit-delta" />
+    <label class="form-check-label" for="edit-delta" style="margin:0;">Show Delta</label>
+  </div>
+</div>
+<div style="${sectionTitle}">Delta colors</div>
+<div style="display:inline-grid;grid-template-columns:auto auto;gap:4px 18px;justify-content:center;text-align:left;align-items:center;">
+  <div><label class="form-check-label" for="edit-aheadg">Ahead (gaining)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-aheadg" id="edit-aheadg" type="color" /></div>
+  <div><label class="form-check-label" for="edit-aheadl">Ahead (losing)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-aheadl" id="edit-aheadl" type="color" /></div>
+  <div><label class="form-check-label" for="edit-behindg">Behind (gaining)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-behindg" id="edit-behindg" type="color" /></div>
+  <div><label class="form-check-label" for="edit-behindl">Behind (losing)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-behindl" id="edit-behindl" type="color" /></div>
+</div>
 
 </div>
         `
         document.body.appendChild(editBox)
         document.getElementById('close-box').addEventListener('click', function() { document.getElementById('edit-box').remove() })
+
+        const wrholders_checkbox = document.getElementById('ShowWrHolders')
+        const tracked_input = document.getElementById('TrackedPlayerInput')
+        const trackedSetBtn = document.getElementById('TrackedPlayerSet')
+        const trackedClearBtn = document.getElementById('TrackedPlayerClear')
+
+        function syncSpeedInfoExclusiveUi() {
+          const tracking = !!(window.pudding_settings.TrackedPlayerName || '').trim()
+          if (tracking) {
+            wrholders_checkbox.checked = false
+            wrholders_checkbox.disabled = true
+            wrholders_checkbox.title = 'Clear tracked player to show WR holders'
+          } else {
+            wrholders_checkbox.disabled = false
+            wrholders_checkbox.title = ''
+            wrholders_checkbox.checked = !!window.pudding_settings.ShowWrHolders
+          }
+          tracked_input.value = window.pudding_settings.TrackedPlayerName || ''
+        }
+
+        function refreshSrcAfterSpeedInfoChange() {
+          if (typeof window.refreshTrackedPlayerUi === 'function') {
+            window.refreshTrackedPlayerUi()
+          }
+          if (typeof window.getAllSrc === 'function') {
+            window.getAllSrc().catch(e => console.error('getAllSrc error:', e))
+          }
+        }
+
+        syncSpeedInfoExclusiveUi()
+        if (typeof window.fillTrackedPlayerSuggestions === 'function') {
+          window.fillTrackedPlayerSuggestions()
+        }
+
+        wrholders_checkbox.addEventListener('change', function () {
+          if (wrholders_checkbox.disabled) return
+          if (wrholders_checkbox.checked) {
+            window.pudding_settings.TrackedPlayerName = ''
+            tracked_input.value = ''
+          }
+          window.pudding_settings.ShowWrHolders = !!wrholders_checkbox.checked
+          if (typeof window.saveSettings === 'function') window.saveSettings()
+          syncSpeedInfoExclusiveUi()
+          refreshSrcAfterSpeedInfoChange()
+        })
+
+        trackedSetBtn.addEventListener('click', function () {
+          const name = (tracked_input.value || '').trim()
+          window.pudding_settings.TrackedPlayerName = name
+          if (name) {
+            window.pudding_settings.ShowWrHolders = false
+          }
+          if (typeof window.saveSettings === 'function') window.saveSettings()
+          syncSpeedInfoExclusiveUi()
+          refreshSrcAfterSpeedInfoChange()
+        })
+
+        trackedClearBtn.addEventListener('click', function () {
+          tracked_input.value = ''
+          window.pudding_settings.TrackedPlayerName = ''
+          if (typeof window.saveSettings === 'function') window.saveSettings()
+          syncSpeedInfoExclusiveUi()
+          refreshSrcAfterSpeedInfoChange()
+        })
 
         const toggleDelta = document.getElementById('edit-delta')
         toggleDelta.checked = +_showDelta
@@ -4424,7 +4820,6 @@ window.BootstrapMenu.make = function () {
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
     <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show SpeedInfo</label>
     </div>
-    <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
@@ -4433,6 +4828,7 @@ window.BootstrapMenu.make = function () {
     <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
     <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
     </div>
+    <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
     <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="EatThemeRandomizer2">"Dragon Fruit"</label>
@@ -4730,7 +5126,7 @@ window.RenderDelayFix.alterCode = function (code) {
   code = assertReplace(
     code,
     /([a-zA-Z0-9_$]{1,8})\s*\(\s*a\s*\)\s*\{\s*if\s*\(\s*!this\.closed\s*\)\s*\{/,
-    "$1=window.stuffKeys=function(a){if(!this.closed){if(window.resetTime<window.lastFrameTime){"
+    "$1=window.stuffKeys=function(a){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;if(!this.closed){if(window.resetTime<window.lastFrameTime){"
   );
   code = assertReplace(
     code,
@@ -5094,20 +5490,20 @@ window.CustomBowl.make = function () {
             panel.id = "fruit-bowl-popup-pudding";
             panel.style.cssText = PANEL_STYLE;
             panel.innerHTML = `
-                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:14px;font-size:18px;font-weight:bold;letter-spacing:0.2px;">Fruit Bowl Settings</div>
+                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:14px;font-size:22px;font-weight:bold;letter-spacing:0.2px;">Fruit Bowl Settings</div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:0 auto 12px;width:100%;">
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable" style="margin:0;float:none;position:static;">
-                        <label class="form-check-label" for="fruit-bowl-enable" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:1.2;">Enable custom fruit bowl</label>
+                        <label class="form-check-label" for="fruit-bowl-enable" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.2;">Enable custom fruit bowl</label>
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-always-unique" style="margin:0;float:none;position:static;">
-                        <label class="form-check-label" for="fruit-bowl-always-unique" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:14px;line-height:1.2;">Always Unique Fruit</label>
+                        <label class="form-check-label" for="fruit-bowl-always-unique" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.2;">Always Unique Fruit</label>
                     </div>
                 </div>
-                <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:13px;margin:0 0 12px 0;text-align:center;"></div>
+                <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:15px;margin:0 0 12px 0;text-align:center;"></div>
                 <div id="fruit-bowl-grid" style="padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;"></div>
-                <button type="button" class="btn" style="margin-top:8px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:100%;padding:8px 12px;font-size:14px;" id="fruit-bowl-close">Close</button>
+                <button type="button" class="btn" style="margin:8px auto 0;display:block;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:auto;min-width:72px;padding:4px 14px;font-size:12px;line-height:1.2;" id="fruit-bowl-close">Close</button>
             `;
             host.appendChild(panel);
             applyPanelTheme(panel);

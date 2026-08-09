@@ -50,6 +50,8 @@ window.SettingsSaver.make = function () {
                 InputDisplay: false,
                 TopBar: true,
                 SpeedInfo: false,
+                ShowWrHolders: true,
+                TrackedPlayerName: "",
                 PortalPairs: false,
                 AlwaysUniqueFruit: false,
                 SelectedPairs: defaultPoolForCount(0),
@@ -71,6 +73,12 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.ScrollBar !== 'boolean') {
                 pudding_settings.ScrollBar = false;
+            }
+            if (typeof pudding_settings.ShowWrHolders !== 'boolean') {
+                pudding_settings.ShowWrHolders = true;
+            }
+            if (typeof pudding_settings.TrackedPlayerName !== 'string') {
+                pudding_settings.TrackedPlayerName = "";
             }
             pudding_settings = migrateSelectedPairsByCount(pudding_settings);
             pudding_settings.SelectedPairs = pudding_settings.SelectedPairsByCount["0"];

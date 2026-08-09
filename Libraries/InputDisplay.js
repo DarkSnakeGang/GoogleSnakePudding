@@ -90,6 +90,8 @@ window.InputDisplay.alterCode = function (code) {
 
   // Code to alter snake code here
   document.addEventListener('keydown', (event)=> {
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
 
     if (event.key === 'ArrowRight' || (event.code === 'KeyD')){
 
@@ -112,6 +114,9 @@ window.InputDisplay.alterCode = function (code) {
   });
 
   document.addEventListener('keyup', (event)=> {
+    const ae = document.activeElement;
+    if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
+
     if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
 
       window.LightInputOff("right-button-id");

@@ -193,6 +193,8 @@ window.Counter.alterCode = function (code) {
 
 
     document.addEventListener('keydown', (event)=> {
+        const ae = document.activeElement;
+        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
         if(!event.repeat)
         {
             if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){

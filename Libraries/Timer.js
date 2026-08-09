@@ -123,161 +123,268 @@ window.Timer = {
       } else {
         const theme = window.themes[getSelected('#theme', 'DqMRee tuJOWd') || getSelected('#theme', 'tuJOWd')]
 
+        const btnColor = window.button_color || '#1155CC'
         editBox = document.createElement('div')
         editBox.id = 'edit-box'
         editBox.style = `
           background-color: ${theme.real_top_bar ?? '#aaaaff'};
           border-radius: 0.5vw;
           position: absolute;
-          height: 93vh;
+          height: auto;
+          max-height: 94vh;
           z-index: 1000000;
-          top: 30px;
+          top: 20px;
           left: 50%;
           backdrop-filter: blur(5px);
           text-align: center;
-          padding: 4px;
+          padding: 6px 14px 10px;
           transform: translate(-50%, 0);
           box-shadow: 0px 0px 8px rgba(0,0,0,0.4);
           border: 1px solid ${theme.topbar_color ?? '#4444dd'};
-          font-size: 2.5vh;
+          font-size: 2vh;
           color: #ffffff;
-          width: 50vw;
+          width: 58vw;
+          max-width: 640px;
           font-family: Roboto,Arial,sans-serif;
-          overflow-y: auto;
+          overflow: hidden;
+          box-sizing: border-box;
         `
+        const sectionTitle = 'margin:4px 0 2px;font-size:2.1vh;font-weight:600;letter-spacing:0.02em;opacity:0.95;'
+        const iconRow = 'display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:0.3vh;margin:0 auto 1px;'
+        const iconStyle = 'cursor: pointer; border: 0.45vh ridge #00000000; border-radius: 1vh; width: 3.2vh; height: 3.2vh;'
+        const iconSel = 'cursor: pointer; border: 0.45vh ridge #af4490ff; border-radius: 1vh; width: 3.2vh; height: 3.2vh;'
+        const halfCol = 'flex:1;min-width:0;'
         editBox.innerHTML = `
         <span id="close-box" style="
         position: absolute;
-        top: 10px;
-        right: 15px;
+        top: 8px;
+        right: 12px;
         cursor: pointer;
         color: #ffffff;
         font-size: 0.9em;
       ">&#x2715</span>
-</br>
-<label class="form-check-label" style="font-size: 3.5vh">
+<label class="form-check-label" style="font-size: 2.8vh; display:block; margin-top:2px; margin-bottom:2px;">
         Custom Timer/Splits Settings
-      </label> </br>
-</br>
+      </label>
 
-<div id="edit-mode">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_02.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_03.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_04.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_05.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_06.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_07.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_08.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_09.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_10.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_11.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_12.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v22/trophy_20.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
-</div>
-<br/>
-<div id="edit-count">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/count_06.png" />
-</div>
-<br/>
-<div id="edit-speed">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_02.png" />
-</div>
-<br/>
-<div id="edit-size">
-  <img class="sel" style="cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_00.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_01.png" />
-  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png" />
-</div>
-<br/>
-
-<div id="edit-cat">
-  <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/d1R1Y648/25.png" />
-  <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/7hmZC6vh/50.png" />
-  <img class="uns" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/qqk7MK5W/100.png" />
-  <img class="sel" style="background-color: #ffffff55; cursor: pointer; border: 0.5vh ridge #af4490ff; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://i.postimg.cc/52j6Cw2V/all.png" />
-</div>
-
-<br/>
-<div id="edit-times" style="left:0px;">
-  <div>
-      <label class="form-check-label" for="edit-25"> 25</label>
-      <input class="text-input" size="9" name="edit-25" id="edit-25" type="text" style="font-family:Consolas;" />
+<div style="${sectionTitle}">SpeedInfo</div>
+<div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap;text-align:left;">
+  <div style="display:flex;align-items:center;gap:6px;padding-top:4px;">
+    <input class="form-check-input" type="checkbox" role="switch" id="ShowWrHolders" style="width:1.3em;height:1.3em;margin:0;">
+    <label class="form-check-label" for="ShowWrHolders" style="margin:0;white-space:nowrap;">Show WR holders</label>
   </div>
-  <div>
-      <label class="form-check-label" for="edit-50"> 50</label>
-      <input class="text-input" size="9" name="edit-50" id="edit-50" type="text" style="font-family:Consolas;" />
-  </div>
-  <div>
-      <label class="form-check-label" for="edit-100">100</label>
-      <input class="text-input" size="9" name="edit-100" id="edit-100" type="text" style="font-family:Consolas;" />
-  </div>
-  <div>
-      <label class="form-check-label" for="edit-ALL">ALL</label>
-      <input class="text-input" size="9" name="edit-ALL" id="edit-ALL" type="text" style="font-family:Consolas;" />
+  <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+    <label for="TrackedPlayerInput" class="form-check-label" style="margin:0;white-space:nowrap;">Track player</label>
+    <input type="text" class="form-control" id="TrackedPlayerInput" list="tracked-player-suggestions" placeholder="SRC username" autocomplete="off" style="width:140px;display:inline-block;background-color:${btnColor};color:white;font-family:Roboto,Arial,sans-serif;border:1px solid rgba(255,255,255,0.25);border-radius:4px;outline:none;text-align:center;caret-color:white;padding:2px 6px;">
+    <datalist id="tracked-player-suggestions"></datalist>
+    <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerSet">Set</button>
+    <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerClear">Clear</button>
   </div>
 </div>
 
+<div style="${sectionTitle}">Mode</div>
+<div id="edit-mode" style="${iconRow}">
+  <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_00.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_02.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_03.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_04.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_05.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_06.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_07.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_08.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_09.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_10.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_11.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_12.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_13.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v20/trophy_18.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v21/trophy_19.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v22/trophy_20.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
+</div>
+
+<div style="${sectionTitle}">Count</div>
+<div id="edit-count" style="${iconRow}">
+  <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_00.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_01.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v17/count_02.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_03.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_04.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v18/count_05.png" />
+  <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v19/count_06.png" />
+</div>
+
+<div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;">
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Speed</div>
+    <div id="edit-speed" style="${iconRow}">
+      <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_01.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v3/speed_02.png" />
+    </div>
+  </div>
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Size</div>
+    <div id="edit-size" style="${iconRow}">
+      <img class="sel" style="${iconSel}" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_00.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_01.png" />
+      <img class="uns" style="${iconStyle}" src="https://www.google.com/logos/fnbx/snake_arcade/v4/size_02.png" />
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:12px;justify-content:center;align-items:flex-start;flex-wrap:wrap;">
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Category</div>
+    <div id="edit-cat" style="${iconRow}">
+      <img class="uns" style="background-color: #ffffff55; ${iconStyle}" src="https://i.postimg.cc/d1R1Y648/25.png" />
+      <img class="uns" style="background-color: #ffffff55; ${iconStyle}" src="https://i.postimg.cc/7hmZC6vh/50.png" />
+      <img class="uns" style="background-color: #ffffff55; ${iconStyle}" src="https://i.postimg.cc/qqk7MK5W/100.png" />
+      <img class="sel" style="background-color: #ffffff55; ${iconSel}" src="https://i.postimg.cc/52j6Cw2V/all.png" />
+    </div>
+  </div>
+  <div style="${halfCol}">
+    <div style="${sectionTitle}">Personal bests</div>
+    <div id="edit-times" style="left:0px;display:inline-grid;grid-template-columns:auto auto;gap:3px 8px;justify-content:center;text-align:left;">
+      <div>
+          <label class="form-check-label" for="edit-25"> 25</label>
+          <input class="text-input" size="9" name="edit-25" id="edit-25" type="text" style="font-family:Consolas;" />
+      </div>
+      <div>
+          <label class="form-check-label" for="edit-50"> 50</label>
+          <input class="text-input" size="9" name="edit-50" id="edit-50" type="text" style="font-family:Consolas;" />
+      </div>
+      <div>
+          <label class="form-check-label" for="edit-100">100</label>
+          <input class="text-input" size="9" name="edit-100" id="edit-100" type="text" style="font-family:Consolas;" />
+      </div>
+      <div>
+          <label class="form-check-label" for="edit-ALL">ALL</label>
+          <input class="text-input" size="9" name="edit-ALL" id="edit-ALL" type="text" style="font-family:Consolas;" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="${sectionTitle}">Custom splits</div>
 <div id="edit-customsplit" style="border-top:0px solid black">
 
 </div>
 
-<div id="edit-split">
+<div id="edit-split" style="margin-top:2px;">
   <label class="form-check-label" for="edit-splitscore">New Split</label>
   <input class="text-input" size="6" name="edit-splitscore" id="edit-splitscore" type="number" placeholder="Score" />
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-addsplit">Add</button>
+  <button class="btn" style="margin:3px;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;" id="edit-addsplit">Add</button>
 </div>
-<div id="edit-customsplit" style="border-top:0px solid black">
-</br>
-<label class="form-check-label" style="flex:center;">Timer Format</label>
-<select class="form-control" id="edit-format" style="flex:center;">
-    <option value="0">0:00:00:000</option>
-    <option value="1">  00:00:000</option>
-    <option value="2">   0:00:000</option>
-    <option value="3">     00:000</option>
-    <option value="4">      0:000</option>
-    <option value="5">0:00:00.000</option>
-    <option value="6">  00:00.000</option>
-    <option value="7">   0:00.000</option>
-    <option value="8">     00.000</option>
-    <option value="9">      0.000</option>
-  </select>
-<br/>
-<input class="form-check-input" style="width: 1.5em; height: 1.5em;" type="checkbox" checked="true" name="edit-delta" id="edit-delta" />
-<label class="form-check-label" for="edit-delta">Show Delta</label>
-<br/>
-<br/>
-<label class="form-check-label" for="edit-aheadg">Ahead (gaining time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-aheadg" id="edit-aheadg" type="color" />
-<label class="form-check-label" for="edit-aheadl">Ahead (losing time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-aheadl" id="edit-aheadl" type="color" />
-<br/>
-<label class="form-check-label" for="edit-behindg">Behind (gaining time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-behindg" id="edit-behindg" type="color" />
-<label class="form-check-label" for="edit-behindl">Behind (losing time)</label>
-<input class="text-input" style="margin: 0; padding: 0; border: 0; width: 6vh; height: 3vh;" name="edit-behindl" id="edit-behindl" type="color" />
+
+<div id="edit-display" style="margin-top:2px;">
+<div style="${sectionTitle}">Display</div>
+<div style="display:flex;gap:24px;justify-content:center;align-items:center;flex-wrap:wrap;">
+  <div style="display:flex;align-items:center;gap:8px;">
+    <label class="form-check-label" for="edit-format" style="margin:0;">Timer Format</label>
+    <select class="form-control" id="edit-format" style="display:inline-block;width:auto;margin:0;background-color:${btnColor};color:white;border:1px solid rgba(255,255,255,0.25);">
+      <option value="0">0:00:00:000</option>
+      <option value="1">  00:00:000</option>
+      <option value="2">   0:00:000</option>
+      <option value="3">     00:000</option>
+      <option value="4">      0:000</option>
+      <option value="5">0:00:00.000</option>
+      <option value="6">  00:00.000</option>
+      <option value="7">   0:00.000</option>
+      <option value="8">     00.000</option>
+      <option value="9">      0.000</option>
+    </select>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <input class="form-check-input" style="width: 1.5em; height: 1.5em; margin:0;" type="checkbox" checked="true" name="edit-delta" id="edit-delta" />
+    <label class="form-check-label" for="edit-delta" style="margin:0;">Show Delta</label>
+  </div>
+</div>
+<div style="${sectionTitle}">Delta colors</div>
+<div style="display:inline-grid;grid-template-columns:auto auto;gap:4px 18px;justify-content:center;text-align:left;align-items:center;">
+  <div><label class="form-check-label" for="edit-aheadg">Ahead (gaining)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-aheadg" id="edit-aheadg" type="color" /></div>
+  <div><label class="form-check-label" for="edit-aheadl">Ahead (losing)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-aheadl" id="edit-aheadl" type="color" /></div>
+  <div><label class="form-check-label" for="edit-behindg">Behind (gaining)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-behindg" id="edit-behindg" type="color" /></div>
+  <div><label class="form-check-label" for="edit-behindl">Behind (losing)</label>
+  <input class="text-input" style="margin: 0 0 0 6px; padding: 0; border: 0; width: 5vh; height: 2.6vh; vertical-align:middle;" name="edit-behindl" id="edit-behindl" type="color" /></div>
+</div>
 
 </div>
         `
         document.body.appendChild(editBox)
         document.getElementById('close-box').addEventListener('click', function() { document.getElementById('edit-box').remove() })
+
+        const wrholders_checkbox = document.getElementById('ShowWrHolders')
+        const tracked_input = document.getElementById('TrackedPlayerInput')
+        const trackedSetBtn = document.getElementById('TrackedPlayerSet')
+        const trackedClearBtn = document.getElementById('TrackedPlayerClear')
+
+        function syncSpeedInfoExclusiveUi() {
+          const tracking = !!(window.pudding_settings.TrackedPlayerName || '').trim()
+          if (tracking) {
+            wrholders_checkbox.checked = false
+            wrholders_checkbox.disabled = true
+            wrholders_checkbox.title = 'Clear tracked player to show WR holders'
+          } else {
+            wrholders_checkbox.disabled = false
+            wrholders_checkbox.title = ''
+            wrholders_checkbox.checked = !!window.pudding_settings.ShowWrHolders
+          }
+          tracked_input.value = window.pudding_settings.TrackedPlayerName || ''
+        }
+
+        function refreshSrcAfterSpeedInfoChange() {
+          if (typeof window.refreshTrackedPlayerUi === 'function') {
+            window.refreshTrackedPlayerUi()
+          }
+          if (typeof window.getAllSrc === 'function') {
+            window.getAllSrc().catch(e => console.error('getAllSrc error:', e))
+          }
+        }
+
+        syncSpeedInfoExclusiveUi()
+        if (typeof window.fillTrackedPlayerSuggestions === 'function') {
+          window.fillTrackedPlayerSuggestions()
+        }
+
+        wrholders_checkbox.addEventListener('change', function () {
+          if (wrholders_checkbox.disabled) return
+          if (wrholders_checkbox.checked) {
+            window.pudding_settings.TrackedPlayerName = ''
+            tracked_input.value = ''
+          }
+          window.pudding_settings.ShowWrHolders = !!wrholders_checkbox.checked
+          if (typeof window.saveSettings === 'function') window.saveSettings()
+          syncSpeedInfoExclusiveUi()
+          refreshSrcAfterSpeedInfoChange()
+        })
+
+        trackedSetBtn.addEventListener('click', function () {
+          const name = (tracked_input.value || '').trim()
+          window.pudding_settings.TrackedPlayerName = name
+          if (name) {
+            window.pudding_settings.ShowWrHolders = false
+          }
+          if (typeof window.saveSettings === 'function') window.saveSettings()
+          syncSpeedInfoExclusiveUi()
+          refreshSrcAfterSpeedInfoChange()
+        })
+
+        trackedClearBtn.addEventListener('click', function () {
+          tracked_input.value = ''
+          window.pudding_settings.TrackedPlayerName = ''
+          if (typeof window.saveSettings === 'function') window.saveSettings()
+          syncSpeedInfoExclusiveUi()
+          refreshSrcAfterSpeedInfoChange()
+        })
 
         const toggleDelta = document.getElementById('edit-delta')
         toggleDelta.checked = +_showDelta

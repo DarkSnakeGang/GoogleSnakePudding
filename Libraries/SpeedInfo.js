@@ -20,6 +20,17 @@ window.SpeedInfo.make = function () {
     let lastTimelinesUpdate = 0;
     let timelinesPromise = null;
 
+    // Full-board runs cache for tracked-player lookups (not live SRC)
+    const runsBoardCache = Object.create(null); // key -> { data, fetchedAt }
+    const runsBoardPromises = Object.create(null);
+    const LEVEL_TO_RUNS_FILE = {
+        "25": "25_Apples.json",
+        "50": "50_Apples.json",
+        "100": "100_Apples.json",
+        "All": "All_Apples.json",
+        "H": "High_Score.json",
+    };
+
     function sleepFor(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -118,6 +129,99 @@ window.SpeedInfo.make = function () {
         });
 
         return timelinesPromise;
+    }
+
+    function modeFolderName(modeName) {
+        return String(modeName || "").replace(/ /g, "_");
+    }
+
+    function getTrackedPlayerName() {
+        return (window.pudding_settings && window.pudding_settings.TrackedPlayerName || "").trim();
+    }
+
+    function shouldShowWrHolders() {
+        return !!(window.pudding_settings && window.pudding_settings.ShowWrHolders) && !getTrackedPlayerName();
+    }
+
+    function playerNameFromExpandedRun(run) {
+        if (!run || !run.players || !run.players.data || !run.players.data[0]) return "";
+        const p = run.players.data[0];
+        if (p.rel === "guest") return p.name || "";
+        return (p.names && p.names.international) || p.name || "";
+    }
+
+    function wrLink(href, text) {
+        return `<a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="${href}">${text}</a>`;
+    }
+
+    function formatWrRow(label, timeText, weblink, playerName) {
+        let html = `${label}: ${wrLink(weblink, timeText)}`;
+        if (shouldShowWrHolders() && playerName) {
+            html += `<br>${wrLink(weblink, `by ${playerName}`)}`;
+        }
+        return html;
+    }
+
+    function formatTrackRow(label, timeText, weblink) {
+        if (!weblink) return `${label}: ${timeText}`;
+        return `${label}: ${wrLink(weblink, timeText)}`;
+    }
+
+    function formatTimeTSeconds(timeT) {
+        if (typeof timeT !== "number" || !isFinite(timeT)) return "None";
+        const totalMs = Math.round(timeT * 1000);
+        const hours = Math.floor(totalMs / 3600000);
+        const minutes = Math.floor((totalMs % 3600000) / 60000);
+        const seconds = Math.floor((totalMs % 60000) / 1000);
+        const milliseconds = totalMs % 1000;
+        let convertedTime = "";
+        if (hours > 0) convertedTime += hours + "h";
+        if (minutes > 0 || hours > 0) convertedTime += minutes + "m";
+        convertedTime += seconds + "s";
+        if (hours === 0 && milliseconds > 0) {
+            convertedTime += String(milliseconds).padStart(3, "0") + "ms";
+        }
+        if (hours > 0) {
+            convertedTime = convertedTime.split("s")[0] + "s";
+        }
+        return convertedTime;
+    }
+
+    async function loadRunsBoard(modeName, level) {
+        const file = LEVEL_TO_RUNS_FILE[level];
+        if (!file) throw new Error("Unknown level for runs board: " + level);
+        const folder = modeFolderName(modeName);
+        const cacheKey = `${folder}/${file}`;
+        const cached = runsBoardCache[cacheKey];
+        if (cached && Date.now() - cached.fetchedAt < CACHE_STALE_THRESHOLD) {
+            return cached.data;
+        }
+        if (runsBoardPromises[cacheKey]) return runsBoardPromises[cacheKey];
+
+        const url = `${FASTSNAKE_BASE}/runs/${folder}/${file}`;
+        runsBoardPromises[cacheKey] = (async () => {
+            const data = await getJSON(url);
+            window.requestsMade += 1;
+            runsBoardCache[cacheKey] = { data, fetchedAt: Date.now() };
+            return data;
+        })().finally(() => {
+            delete runsBoardPromises[cacheKey];
+        });
+        return runsBoardPromises[cacheKey];
+    }
+
+    function findBestTrackedRun(boardData, playerName, categoryKey) {
+        if (!boardData || !boardData.runs) return null;
+        const target = playerName.toLowerCase();
+        let best = null;
+        for (const run of Object.values(boardData.runs)) {
+            if (!run || !run.playerName) continue;
+            if (String(run.playerName).toLowerCase() !== target) continue;
+            if (run.category !== categoryKey) continue;
+            if (typeof run.timeT !== "number") continue;
+            if (!best || run.timeT < best.timeT) best = run;
+        }
+        return best;
     }
 
     // Look up one category key as of the latest runs-derived date
@@ -375,7 +479,8 @@ window.SpeedInfo.make = function () {
                     run: {
                         times: { primary: bestRun.times.primary },
                         weblink: bestRun.weblink
-                    }
+                    },
+                    playerName: playerNameFromExpandedRun(bestRun)
                 }]
             }
         };
@@ -397,6 +502,13 @@ window.SpeedInfo.make = function () {
 
     //window.getRecordSRC("H");
 
+    function EmptyTracking() {
+        for (const id of ["25track", "50track", "100track", "Alltrack", "Htrack"]) {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = "";
+        }
+    }
+
     function EmptyAll() {
         emp = "Empty"
         Handle25(emp);
@@ -404,12 +516,137 @@ window.SpeedInfo.make = function () {
         Handle100(emp);
         HandleAll(emp);
         HandleHighscore(emp);
+        EmptyTracking();
+        updateTrackingSectionVisibility();
     }
 
+    function updateTrackingSectionVisibility() {
+        const section = document.getElementById("tracking-section");
+        const label = document.getElementById("tracking-label");
+        if (!section) return;
+        const name = getTrackedPlayerName();
+        if (name) {
+            section.style.display = "block";
+            if (label) label.textContent = `Tracking: ${name}`;
+        } else {
+            section.style.display = "none";
+            EmptyTracking();
+        }
+    }
+
+    window.refreshTrackedPlayerUi = function () {
+        updateTrackingSectionVisibility();
+    };
+
+    window.fillTrackedPlayerSuggestions = function () {
+        const list = document.getElementById("tracked-player-suggestions");
+        if (!list) return;
+        list.innerHTML = "";
+        if (!timelinesData || !timelinesData.boards || !runsDatesMeta) return;
+        const date = runsDatesMeta.availableDates[runsDatesMeta.availableDates.length - 1];
+        const names = new Set();
+        for (const timeline of Object.values(timelinesData.boards)) {
+            const top = wrAsOf(timeline, date);
+            for (const r of top) {
+                if (r && r.n) names.add(r.n);
+            }
+        }
+        for (const name of [...names].sort((a, b) => a.localeCompare(b))) {
+            const opt = document.createElement("option");
+            opt.value = name;
+            list.appendChild(opt);
+        }
+    };
+
+    window.getTrackedRecord = async function (level) {
+        const trackIds = {
+            "25": "25track",
+            "50": "50track",
+            "100": "100track",
+            "All": "Alltrack",
+            "H": "Htrack",
+        };
+        const elId = trackIds[level];
+        const el = elId ? document.getElementById(elId) : null;
+        const labels = {
+            "25": "25 Apples",
+            "50": "50 Apples",
+            "100": "100 Apples",
+            "All": "All Apples",
+            "H": "Highscore",
+        };
+
+        if (!el) return;
+
+        const playerName = getTrackedPlayerName();
+        if (!playerName || !window.pudding_settings.SpeedInfo || window.daily_challenge) {
+            el.innerHTML = "";
+            return;
+        }
+
+        let count = window.timeKeeper.getCurrentSetting("count");
+        let speed = window.timeKeeper.getCurrentSetting("speed");
+        let size = window.timeKeeper.getCurrentSetting("size");
+        let mode = window.CurrentModeNum;
+
+        const WALL = 1, PORTAL = 2, CHEESE = 3, KEY = 8, SOKO = 9, POISON = 10;
+        const MINESWEEPER = 12, STATUE = 13, SHIELD = 15, HOTDOG = 17, GATE = 19, BRIDGE = 20, BLENDER = 22;
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
+        if (size > 2 || count > 6 || mode == BLENDER) {
+            el.innerHTML = "";
+            return;
+        }
+        if (!highscore_modes.includes(mode) && level == "H") {
+            el.innerHTML = "";
+            return;
+        }
+
+        const modeName = window.modeToTxt[mode].name;
+        const countName = window.countToTxt[count].name;
+        const speedName = window.speedToTxt[speed].name;
+        const sizeName = window.sizeToTxt[size].name;
+        const categoryName = level === "H" ? "High Score" : level + " Apples";
+        const categoryKey = `${countName}|${speedName}|${sizeName}|${modeName}|${categoryName}`;
+
+        try {
+            const board = await loadRunsBoard(modeName, level);
+            const best = findBestTrackedRun(board, playerName, categoryKey);
+            if (!best) {
+                el.innerHTML = `${labels[level]}: None`;
+                return;
+            }
+            if (level === "H") {
+                const primary = best.time || ("PT" + best.timeT + "S");
+                const highscore = parseInt(String(primary).split(".")[1]).toString();
+                const text = (isNaN(parseInt(highscore, 10)) ? String(Math.round(best.timeT * 1000)) : highscore) + " Apples";
+                el.innerHTML = formatTrackRow(labels[level], text, best.weblink);
+            } else {
+                const text = best.time ? convertTime(best.time) : formatTimeTSeconds(best.timeT);
+                el.innerHTML = formatTrackRow(labels[level], text, best.weblink);
+            }
+        } catch (error) {
+            if (window.NepDebug) {
+                console.error("Tracked run lookup failed:", error);
+            }
+            el.innerHTML = `${labels[level]}: None`;
+        }
+    };
+
     window.getAllSrc = async function () {
+        updateTrackingSectionVisibility();
         const levels = ["25", "50", "100", "All", "H"];
         for (const element of levels) {
             await getRecordSRC(element);
+        }
+        if (getTrackedPlayerName()) {
+            for (const element of levels) {
+                await window.getTrackedRecord(element);
+            }
+        } else {
+            EmptyTracking();
+        }
+        if (typeof window.fillTrackedPlayerSuggestions === "function") {
+            window.fillTrackedPlayerSuggestions();
         }
     }
 
@@ -425,10 +662,14 @@ window.SpeedInfo.make = function () {
         }
 
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('25src').innerHTML = formatWrRow(
+            "25 Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
 
-        document.getElementById('25src').innerHTML = `25 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
-
-        //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
         if (window.NepDebug) {
             //console.log("Found 25 apples " + world_record + " " + response["data"]["runs"][0]["run"].weblink)
         }
@@ -444,8 +685,13 @@ window.SpeedInfo.make = function () {
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
-
-        document.getElementById('50src').innerHTML = `50 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('50src').innerHTML = formatWrRow(
+            "50 Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
     }
     function Handle100(response) {
         if (response == "Empty") {
@@ -458,8 +704,13 @@ window.SpeedInfo.make = function () {
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
-
-        document.getElementById('100src').innerHTML = `100 Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('100src').innerHTML = formatWrRow(
+            "100 Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
     }
     function HandleAll(response) {
         if (response == "Empty") {
@@ -472,8 +723,13 @@ window.SpeedInfo.make = function () {
             return;
         }
         world_record = convertTime(response["data"]["runs"][0]["run"]["times"]["primary"]);
-
-        document.getElementById('Allsrc').innerHTML = `All Apples: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
+        const playerName = response["data"]["runs"][0].playerName || "";
+        document.getElementById('Allsrc').innerHTML = formatWrRow(
+            "All Apples",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
     }
 
     function HandleHighscore(response) {
@@ -490,9 +746,14 @@ window.SpeedInfo.make = function () {
 
         highscore = parseInt(response["data"]["runs"][0]["run"]["times"]["primary"].toString().split('.')[1]).toString();
         world_record = highscore + " Apples";
+        const playerName = response["data"]["runs"][0].playerName || "";
 
-        document.getElementById('Hsrc').innerHTML = `Highscore: <a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="` + response["data"]["runs"][0]["run"].weblink + `">` + world_record + `</a>`
-        //document.getElementById('Hsrc').href = response["data"]["runs"][0]["run"].weblink
+        document.getElementById('Hsrc').innerHTML = formatWrRow(
+            "Highscore",
+            world_record,
+            response["data"]["runs"][0]["run"].weblink,
+            playerName
+        );
         if (window.NepDebug) {
             //console.log("Found highscore " + highscore + " " + response["data"]["runs"][0]["run"].weblink)
         }
@@ -540,7 +801,11 @@ window.SpeedInfo.make = function () {
     }
 
     // Prefetch runs-derived timelines on startup
-    getLatestCacheData().catch(error => {
+    getLatestCacheData().then(() => {
+        if (typeof window.fillTrackedPlayerSuggestions === "function") {
+            window.fillTrackedPlayerSuggestions();
+        }
+    }).catch(error => {
         if (window.NepDebug) {
             console.error("Failed to initialize runs-derived data:", error);
         }
@@ -601,12 +866,21 @@ window.SpeedInfo.make = function () {
         <label id="100src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Allsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
         <label id="Hsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <div id="tracking-section" style="display:none;">
+        <span id="tracking-label" style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Tracking</span>
+        <label id="25track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="50track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="100track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="Alltrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="Htrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        </div>
         <br>
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
 
   `;
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
+        updateTrackingSectionVisibility();
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
         speedinfoCloseElements.addEventListener('click', window.SpeedInfoHide);
