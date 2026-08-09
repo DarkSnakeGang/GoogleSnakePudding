@@ -41,6 +41,26 @@ window.TimeKeeper.make = function () {
         };
     };
 
+    // Prefer the mode/settings frozen at run start so score events after a
+    // trophy switch (reset/death) cannot write PBs into the newly selected mode.
+    window.timeKeeper.getSaveContext = function () {
+        if (
+            (window.timeKeeper.runStarted || window.timeKeeper.playing) &&
+            typeof window.timeKeeper.mode === "string" &&
+            typeof window.timeKeeper.count === "number" &&
+            typeof window.timeKeeper.speed === "number" &&
+            typeof window.timeKeeper.size === "number"
+        ) {
+            return {
+                modeKey: window.timeKeeper.mode,
+                count: window.timeKeeper.count,
+                speed: window.timeKeeper.speed,
+                size: window.timeKeeper.size,
+            };
+        }
+        return window.timeKeeper.resolveRunContext();
+    };
+
     window.timeKeeper.buildKey = function (prefix, ctx) {
         const c = ctx || window.timeKeeper.resolveRunContext();
         return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
@@ -148,7 +168,7 @@ window.TimeKeeper.make = function () {
     // Mid-run: write Highscore PB when the current apple count beats the stored best
     // (does not touch sum — death still accumulates run totals for average).
     window.timeKeeper.updateHighscoreLive = function (time, score) {
-        const ctx = window.timeKeeper.resolveRunContext();
+        const ctx = window.timeKeeper.getSaveContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
         if (typeof score !== "number" || isNaN(score)) return;
 
@@ -190,7 +210,7 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.saveScore = function (time, score) {
-        const ctx = window.timeKeeper.resolveRunContext();
+        const ctx = window.timeKeeper.getSaveContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
 
         if (typeof window.timeKeeper.lastAppleDate == "undefined") {
@@ -227,7 +247,7 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.savePB = function (time, score) {
-        const ctx = window.timeKeeper.resolveRunContext();
+        const ctx = window.timeKeeper.getSaveContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
 
         time = Math.floor(time);
