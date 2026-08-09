@@ -1,353 +1,368 @@
 window.TimeKeeper = {};
 
 window.TimeKeeper.make = function () {
-
     /*
-    storage:
-    att-modeStr-count-speed-size : number of attempts of this mode
-    25-modeStr-count-speed-size: {time: time of 25 score, date: date of 25 score, att: number of attempts that reached 25 score, sum: total time of all attempts that reached 25 score}
-    50, 100 and ALL idem.
-    H-modeStr-count-speed-size: {high: highscore of this mode, time: time of the highscore run, date: date of the highscore run, sum: total score of all attempts}
-*/
+    storage v4:
+    att-modeKey-count-speed-size : number of started attempts
+    25|50|100|ALL-modeKey-count-speed-size: {time, date, att, sum}
+    H-modeKey-count-speed-size: {high, time, date, sum}
+    modeKey = classic | wall | ... | peaceful | wall+portal (blender)
+    */
     window.timeKeeper = {};
     window.timeKeeper.debug = false;
-    //called on every apple
+    window.timeKeeper.playing = false;
+    window.timeKeeper.runStarted = false;
+    window.timeKeeper.dialogActive = false;
+
+    window.timeKeeper.refreshSpeedInfo = function () {
+        if (typeof window.SpeedInfoUpdate === "function") {
+            window.SpeedInfoUpdate().catch(function (e) {
+                console.error("SpeedInfoUpdate error:", e);
+            });
+        }
+    };
+
+    window.timeKeeper.shouldTrack = function (ctx) {
+        if (window.daily_challenge) return false;
+        if (typeof window.aimTrainer !== "undefined" || typeof window.megaWholeSnakeObject !== "undefined") {
+            return false;
+        }
+        const c = ctx || window.timeKeeper.resolveRunContext();
+        if (c.count > 6 || c.speed > 2 || c.size > 2) return false;
+        return true;
+    };
+
+    window.timeKeeper.resolveRunContext = function () {
+        return {
+            modeKey: window.ModeRegistry.getCurrentModeKey(),
+            count: window.timeKeeper.getCurrentSetting("count"),
+            speed: window.timeKeeper.getCurrentSetting("speed"),
+            size: window.timeKeeper.getCurrentSetting("size"),
+        };
+    };
+
+    window.timeKeeper.buildKey = function (prefix, ctx) {
+        const c = ctx || window.timeKeeper.resolveRunContext();
+        return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
+    };
+
+    window.timeKeeper.getStorage = function () {
+        return JSON.parse(localStorage.getItem("snake_timeKeeper") || '{"version":4}');
+    };
+
+    window.timeKeeper.setStorage = function (storage) {
+        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
+    };
+
+    // Compat: callers expecting mode "string" now get stable modeKey
+    window.timeKeeper.getCurrentMode = function () {
+        return window.ModeRegistry.getCurrentModeKey();
+    };
+
+    window.timeKeeper.ensurePlaying = function () {
+        if (!window.timeKeeper.runStarted) {
+            window.timeKeeper.start();
+        } else {
+            window.timeKeeper.playing = true;
+        }
+    };
+
     window.timeKeeper.gotApple = function (time, score) {
         stats.apples.session++;
         stats.apples.lifetime++;
         updateCounterDisplay();
-        if (window.pudding_settings.randomizeThemeApple) {
+        if (window.pudding_settings && window.pudding_settings.randomizeThemeApple) {
             window.setTheme(window.getRandomThemeName());
         }
-        if(window.daily_challenge) {
-            return;
-        }
-        if (window.timeKeeper.debug) {
-            //console.log("got Apple %s, %s", time, score);
-        }
-        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
-            return;
-        }
+        if (!window.timeKeeper.shouldTrack()) return;
+
+        window.timeKeeper.ensurePlaying();
         window.timeKeeper.lastAppleDate = new Date();
         window.timeKeeper.lastAppleTime = time;
-        //save time
+
         if (score == 25 || score == 50 || score == 100) {
-            if (window.timeKeeper.debug) {
-                //console.log("Saving PB for %s Ticks, %s Apples", time, score);
-            }
-            window.timeKeeper.savePB(time, score, window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+            window.timeKeeper.savePB(time, score);
         }
-    }
+    };
 
-    //called when you get all apples
     window.timeKeeper.gotAll = function (time, score) {
-        if(window.daily_challenge) {
-            return;
-        }
-        if (window.timeKeeper.debug) {
-            //console.log("got All %s, %s", time, score);
-        }
-        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
-            return;
-        }
-        window.timeKeeper.savePB(time, "ALL", window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
-    }
+        if (!window.timeKeeper.shouldTrack()) return;
+        window.timeKeeper.ensurePlaying();
+        window.timeKeeper.savePB(time, "ALL");
+    };
 
-    //called when you're dead, every time.
     window.timeKeeper.death = function (time, score) {
-        if (window.timeKeeper.debug) {
-            //console.log("death %s, %s", time, score);
-        }
-        if (localStorage.getItem('snakeChosenMod') != "PuddingMod"){
+        if (!window.timeKeeper.shouldTrack()) {
+            window.timeKeeper.playing = false;
             return;
         }
-        if (window.timeKeeper.playing) {
-            window.timeKeeper.playing = false;
-            window.timeKeeper.saveScore(time, score, window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+        if (window.timeKeeper.playing || window.timeKeeper.runStarted) {
+            window.timeKeeper.saveScore(time, score);
         }
-    }
+        window.timeKeeper.playing = false;
+    };
 
-    //called when you start gamed d
     window.timeKeeper.start = function () {
-        if (window.timeKeeper.debug) {
-            //console.log("start");
-        }
         window.timeKeeper.playing = true;
-        //save current settings
-        window.timeKeeper.mode = window.timeKeeper.getCurrentMode();
-        window.timeKeeper.count = window.timeKeeper.getCurrentSetting("count");
-        window.timeKeeper.speed = window.timeKeeper.getCurrentSetting("speed");
-        window.timeKeeper.size = window.timeKeeper.getCurrentSetting("size");
-    }
+        window.timeKeeper.runStarted = true;
+        const ctx = window.timeKeeper.resolveRunContext();
+        window.timeKeeper.mode = ctx.modeKey;
+        window.timeKeeper.count = ctx.count;
+        window.timeKeeper.speed = ctx.speed;
+        window.timeKeeper.size = ctx.size;
+    };
 
-    window.timeKeeper.getCurrentMode = function () {
-        element = "";
-        for (i of document.querySelectorAll('img')) {
-            if (i.src.includes('random.png')) {
-                element = i;
-            }
-        }
-        counter = -1;
-        modeStr = "";
-        for (child of element.parentElement.parentElement.parentElement.children) {
-            counter++;
-            if (counter == 0) { continue; };
-            if (child.firstElementChild.classList.length > 1 && child.firstElementChild.children.length > 0) {
-                modeStr += "1";
-            }
-            else {
-                modeStr += "0";
-            }
-        }
-
-        let mode = window.timeKeeper.getCurrentSetting("trophy");
-        let trophyCount = document.getElementById("trophy").children.length;
-        if (mode != trophyCount - 1) {	//not on blender mode
-            modeStr = "";
-            // Bits cover every trophy except Classic (0) and Blender (last)
-            for (t = 1; t < trophyCount - 1; t++) {
-                if (t == mode) {
-                    modeStr += "1";
-                }
-                else {
-                    modeStr += "0";
-                }
-            }
-        }
-        return modeStr
-    }
-
-    //get the current setting, name = 'count', 'speed', 'size' or 'trophy'
+    // get the current setting, name = 'count', 'speed', 'size' or 'trophy'
     window.timeKeeper.getCurrentSetting = function (name) {
         let getSelectedIndex = function (name) {
             let elementList = document.getElementById(name);
+            if (!elementList) return 0;
             let number = 0;
             let classNames = [];
             let notUnique = "";
-            for (element of elementList.children) {
+            for (const element of elementList.children) {
                 if (classNames.indexOf(element.className) == -1) {
                     classNames.push(element.className);
-                }
-                else {
+                } else {
                     notUnique = element.className;
                     break;
                 }
             }
-            for (element of elementList.children) {
+            for (const element of elementList.children) {
                 if (element.className != notUnique) {
                     return number;
                 }
                 number++;
             }
             return 0;
-        }
+        };
 
-        if(name != 'trophy'){
-            return eval(window[name + '_var'])
+        if (name != "trophy") {
+            return eval(window[name + "_var"]);
         }
-
         return getSelectedIndex(name);
-    }
+    };
 
-    //save highscore
-    window.timeKeeper.saveScore = function (time, score, mode, count, speed, size) {
-        // count > 6 = beyond Tally (MoreMenu / custom); also skip MouseMode / Level Editor
-        if (count > 6 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
-            return;
-        }
-        if (typeof (window.timeKeeper.lastAppleDate) == "undefined") {
+    window.timeKeeper.saveScore = function (time, score) {
+        const ctx = window.timeKeeper.resolveRunContext();
+        if (!window.timeKeeper.shouldTrack(ctx)) return;
+
+        if (typeof window.timeKeeper.lastAppleDate == "undefined") {
             window.timeKeeper.lastAppleDate = new Date();
         }
-        if (typeof (window.timeKeeper.lastAppleTime) == "undefined") {
+        if (typeof window.timeKeeper.lastAppleTime == "undefined") {
             window.timeKeeper.lastAppleTime = time;
         }
 
         time = Math.floor(time);
-        let storage = localStorage.getItem("snake_timeKeeper");
-        storage = JSON.parse(storage);
-        let name = "H" + "-" + mode + "-" + count + "-" + speed + "-" + size;
-        //if undefined, save new high
-        if (typeof (storage[name]) == "undefined") {
-            storage[name] = { "high": score, "time": window.timeKeeper.lastAppleTime, "date": window.timeKeeper.lastAppleDate, "sum": score };
-        }
-        else {
-            //increase sum
+        const storage = window.timeKeeper.getStorage();
+        const name = window.timeKeeper.buildKey("H", ctx);
+        if (typeof storage[name] == "undefined") {
+            storage[name] = {
+                high: score,
+                time: window.timeKeeper.lastAppleTime,
+                date: window.timeKeeper.lastAppleDate,
+                sum: score,
+            };
+        } else {
             storage[name].sum += score;
-            if (score > storage[name].high || (score == storage[name].high && time < storage[name].time)) {
-                //save new pb
+            if (
+                score > storage[name].high ||
+                (score == storage[name].high && time < storage[name].time)
+            ) {
                 storage[name].high = score;
                 storage[name].time = window.timeKeeper.lastAppleTime;
                 storage[name].date = window.timeKeeper.lastAppleDate;
             }
         }
-        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
+        window.timeKeeper.setStorage(storage);
+        window.timeKeeper.refreshSpeedInfo();
+    };
 
-    //save 25, 50, 100 or 'ALL' score
-    window.timeKeeper.savePB = function (time, score, mode, count, speed, size) {
-        // count > 6 = beyond Tally (MoreMenu / custom); also skip MouseMode / Level Editor
-        if (count > 6 || speed > 2 || size > 2 || typeof window.aimTrainer !== 'undefined' || typeof window.megaWholeSnakeObject !== 'undefined') {
-            return;
-        }
+    window.timeKeeper.savePB = function (time, score) {
+        const ctx = window.timeKeeper.resolveRunContext();
+        if (!window.timeKeeper.shouldTrack(ctx)) return;
 
         time = Math.floor(time);
-        let storage = localStorage.getItem("snake_timeKeeper");
-        storage = JSON.parse(storage);
-        let name = score.toString() + "-" + mode + "-" + count + "-" + speed + "-" + size;
+        const storage = window.timeKeeper.getStorage();
+        const name = window.timeKeeper.buildKey(String(score), ctx);
 
-        //if undefined, save new pb
-        if (typeof (storage[name]) == "undefined") {
-            storage[name] = { "time": time, "date": new Date(), "att": 1, "sum": time };
-        }
-        else {
-            //increase attempt
-            if (typeof (storage[name].att) == "undefined") { storage[name].att = 0 };
+        if (typeof storage[name] == "undefined") {
+            storage[name] = { time: time, date: new Date(), att: 1, sum: time };
+        } else {
+            if (typeof storage[name].att == "undefined") storage[name].att = 0;
             storage[name].att += 1;
-            //increase sum
-            if (typeof (storage[name].sum) == "undefined") { storage[name].sum = 0 };
+            if (typeof storage[name].sum == "undefined") storage[name].sum = 0;
             storage[name].sum += time;
-            if (time < storage[name].time) {		//only pb when lower time then stored
-                storage[name] = { "time": time, "date": new Date(), "att": storage[name].att, "sum": storage[name].sum };
+            if (time < storage[name].time) {
+                storage[name] = {
+                    time: time,
+                    date: new Date(),
+                    att: storage[name].att,
+                    sum: storage[name].sum,
+                };
             }
         }
+        window.timeKeeper.setStorage(storage);
+        window.timeKeeper.refreshSpeedInfo();
+    };
 
-        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
-
-    //function to add attempt to localStorage
-    window.timeKeeper.addAttempt = function (mode, count, speed, size) {
-        let storage = localStorage.getItem("snake_timeKeeper");
-        storage = JSON.parse(storage);
-        let name = "att" + "-" + mode + "-" + count + "-" + speed + "-" + size;
-        if (typeof (storage[name]) == "undefined") {
-            storage[name] = 1;
+    // Only count if a run had actually started (not play→esc→play)
+    window.timeKeeper.addAttempt = function () {
+        if (!window.timeKeeper.runStarted) {
+            window.timeKeeper.playing = false;
+            return;
         }
-        else {
+        const ctx = {
+            modeKey: window.timeKeeper.mode || window.ModeRegistry.getCurrentModeKey(),
+            count:
+                typeof window.timeKeeper.count === "number"
+                    ? window.timeKeeper.count
+                    : window.timeKeeper.getCurrentSetting("count"),
+            speed:
+                typeof window.timeKeeper.speed === "number"
+                    ? window.timeKeeper.speed
+                    : window.timeKeeper.getCurrentSetting("speed"),
+            size:
+                typeof window.timeKeeper.size === "number"
+                    ? window.timeKeeper.size
+                    : window.timeKeeper.getCurrentSetting("size"),
+        };
+        if (!window.timeKeeper.shouldTrack(ctx)) {
+            window.timeKeeper.runStarted = false;
+            window.timeKeeper.playing = false;
+            return;
+        }
+
+        const storage = window.timeKeeper.getStorage();
+        const name = window.timeKeeper.buildKey("att", ctx);
+        if (typeof storage[name] == "undefined") {
+            storage[name] = 1;
+        } else {
             storage[name] += 1;
         }
-        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
+        window.timeKeeper.setStorage(storage);
+        window.timeKeeper.runStarted = false;
+        window.timeKeeper.playing = false;
+        window.timeKeeper.refreshSpeedInfo();
+    };
 
     window.timeKeeper.setAttempts = function (attempts) {
-        if (isNaN(attempts)) {
-            //console.log(attempts.toString() + " is not a number!");
-            return;
-        }
-        let storage = localStorage.getItem("snake_timeKeeper");
-        storage = JSON.parse(storage);
-        mode = window.timeKeeper.getCurrentMode()
-        count = window.timeKeeper.getCurrentSetting("count");
-        speed = window.timeKeeper.getCurrentSetting("speed");
-        size = window.timeKeeper.getCurrentSetting("size");
-        let name = "att" + "-" + mode + "-" + count + "-" + speed + "-" + size;
-        storage[name] = {};
+        if (isNaN(attempts)) return;
+        const storage = window.timeKeeper.getStorage();
+        const name = window.timeKeeper.buildKey("att");
         storage[name] = attempts;
-        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
+        window.timeKeeper.setStorage(storage);
+        window.timeKeeper.refreshSpeedInfo();
+    };
 
     window.timeKeeper.setPB = function (time, score, attempts, average) {
-        if (isNaN(time)) {
-            //console.log(time.toString() + " is not a number!");
-            return;
-        }
-        if (score != 25 && score != 50 && score != 100 && score != "ALL") {
-            //console.log(score + " has to be 25, 50, 100 or \"ALL\"!");
-            return;
-        }
-        if (isNaN(attempts)) {
-            //console.log(attempts.toString() + " is not a number!");
-            return;
-        }
-        if (isNaN(average)) {
-            //console.log(average.toString() + " is not a number!");
-            return;
-        }
-        let storage = localStorage.getItem("snake_timeKeeper");
-        storage = JSON.parse(storage);
-        mode = window.timeKeeper.getCurrentMode()
-        count = window.timeKeeper.getCurrentSetting("count");
-        speed = window.timeKeeper.getCurrentSetting("speed");
-        size = window.timeKeeper.getCurrentSetting("size");
-        let name = score.toString() + "-" + mode + "-" + count + "-" + speed + "-" + size;
-        storage[name] = {};
-        storage[name].time = time;
-        storage[name].date = new Date();
-        storage[name].att = attempts;
-        storage[name].sum = Math.round(average * attempts);
-        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
+        if (isNaN(time)) return;
+        if (score != 25 && score != 50 && score != 100 && score != "ALL") return;
+        if (isNaN(attempts)) return;
+        if (isNaN(average)) return;
+        const storage = window.timeKeeper.getStorage();
+        const name = window.timeKeeper.buildKey(String(score));
+        storage[name] = {
+            time: time,
+            date: new Date(),
+            att: attempts,
+            sum: Math.round(average * attempts),
+        };
+        window.timeKeeper.setStorage(storage);
+        window.timeKeeper.refreshSpeedInfo();
+    };
 
     window.timeKeeper.setScore = function (highscore, time, average) {
-        if (isNaN(highscore)) {
-            //console.log(highscore.toString() + " is not a number!");
-            return;
-        }
-        if (isNaN(time)) {
-            //console.log(time.toString() + " is not a number!");
-            return;
-        }
-        if (isNaN(average)) {
-            //console.log(average.toString() + " is not a number!");
-            return;
-        }
-        let storage = localStorage.getItem("snake_timeKeeper");
-        storage = JSON.parse(storage);
-        mode = window.timeKeeper.getCurrentMode()
-        count = window.timeKeeper.getCurrentSetting("count");
-        speed = window.timeKeeper.getCurrentSetting("speed");
-        size = window.timeKeeper.getCurrentSetting("size");
-        let name = "H" + "-" + mode + "-" + count + "-" + speed + "-" + size;
-        storage[name] = {};
-        storage[name].high = highscore;
-        storage[name].time = time;
-        storage[name].date = new Date();
-        storage[name].sum = average * storage["att" + "-" + mode + "-" + count + "-" + speed + "-" + size];
-        localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
+        if (isNaN(highscore)) return;
+        if (isNaN(time)) return;
+        if (isNaN(average)) return;
+        const storage = window.timeKeeper.getStorage();
+        const ctx = window.timeKeeper.resolveRunContext();
+        const name = window.timeKeeper.buildKey("H", ctx);
+        const attKey = window.timeKeeper.buildKey("att", ctx);
+        const att = typeof storage[attKey] === "number" ? storage[attKey] : 0;
+        storage[name] = {
+            high: highscore,
+            time: time,
+            date: new Date(),
+            sum: average * att,
+        };
+        window.timeKeeper.setStorage(storage);
+        window.timeKeeper.refreshSpeedInfo();
+    };
 
-    //generate storage if it doesn't exist, or import from old file format.
+    window.timeKeeper.formatDuration = function (ms) {
+        ms = Math.floor(ms);
+        const hours = Math.floor(ms / 3600000);
+        const minutes = String(Math.floor((ms - hours * 3600000) / 60000)).padStart(2, "0");
+        const seconds = String(
+            Math.floor((ms - minutes * 60000 - hours * 3600000) / 1000)
+        ).padStart(2, "0");
+        const mseconds = String(
+            ms - minutes * 60000 - seconds * 1000 - hours * 3600000
+        ).padStart(3, "0");
+        if (hours == 0) return minutes + ":" + seconds + ":" + mseconds;
+        return hours + ":" + minutes + ":" + seconds + ":" + mseconds;
+    };
+
+    // ms → SRC-like 1m2s345ms (shared with SpeedInfo personal rows)
+    window.timeKeeper.formatTimeSrcStyle = function (ms) {
+        ms = Math.floor(Number(ms) || 0);
+        const hours = Math.floor(ms / 3600000);
+        const minutes = Math.floor((ms % 3600000) / 60000);
+        const seconds = Math.floor((ms % 60000) / 1000);
+        const milliseconds = ms % 1000;
+        let out = "";
+        if (hours > 0) out += hours + "h";
+        if (minutes > 0 || hours > 0) out += minutes + "m";
+        out += seconds + "s";
+        if (hours === 0) out += String(milliseconds).padStart(3, "0") + "ms";
+        if (hours > 0) out = out.split("s")[0] + "s";
+        return out;
+    };
+
     window.timeKeeper.makeStorage = function () {
         let storage = localStorage.getItem("snake_timeKeeper");
         if (storage == null) {
-            storage = {};
-            storage["version"] = 2;
-
-            //try to read version 1 to new storage type
-            old_pbs = localStorage.getItem("snake_pbs");
+            storage = { version: 2 };
+            const old_pbs = localStorage.getItem("snake_pbs");
             if (old_pbs != null) {
-                old_pbs = JSON.parse(old_pbs);
-                //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 20; mode++) {
-                    modeStr = "00000000000000000000".split("");
-                    if (mode != 0) {
-                        modeStr[mode - 1] = '1';
-                    }
-                    modeStr = modeStr.join('');
-
-                    for (count = 0; count < 5; count++) {
-                        for (speed = 0; speed < 3; speed++) {
-                            for (size = 0; size < 3; size++) {
-                                for (let score of ["25", "50", "100", "ALL", "att"]) {
-                                    let name = score + "-" + mode + "-" + count + "-" + speed + "-" + size;
-                                    if (typeof (old_pbs[name]) != "undefined") {
-                                        //console.log(name, old_pbs[name]);
-                                        newName = score + "-" + modeStr + "-" + count + "-" + speed + "-" + size;
-                                        storage[newName] = old_pbs[name];
+                const old = JSON.parse(old_pbs);
+                for (let mode = 0; mode < 20; mode++) {
+                    let modeStr = "00000000000000000000".split("");
+                    if (mode != 0) modeStr[mode - 1] = "1";
+                    modeStr = modeStr.join("");
+                    for (let count = 0; count < 5; count++) {
+                        for (let speed = 0; speed < 3; speed++) {
+                            for (let size = 0; size < 3; size++) {
+                                for (const score of ["25", "50", "100", "ALL", "att", "H"]) {
+                                    const name =
+                                        score + "-" + mode + "-" + count + "-" + speed + "-" + size;
+                                    if (typeof old[name] != "undefined") {
+                                        storage[
+                                            score +
+                                                "-" +
+                                                modeStr +
+                                                "-" +
+                                                count +
+                                                "-" +
+                                                speed +
+                                                "-" +
+                                                size
+                                        ] = old[name];
                                     }
-
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        else {
+        } else {
             storage = JSON.parse(storage);
         }
 
-        // v2 (20-bit modeStr) -> v3 (21-bit): insert Bridge bit before Peaceful
-        if (storage["version"] == 2) {
+        if (storage.version == 2) {
             const migrated = { version: 3 };
             for (const key of Object.keys(storage)) {
                 if (key === "version") continue;
@@ -355,7 +370,8 @@ window.TimeKeeper.make = function () {
                 if (parts.length >= 5 && /^[01]{20}$/.test(parts[1])) {
                     const modeStr = parts[1];
                     const newModeStr = modeStr.slice(0, 19) + "0" + modeStr.slice(19);
-                    migrated[parts[0] + "-" + newModeStr + "-" + parts.slice(2).join("-")] = storage[key];
+                    migrated[parts[0] + "-" + newModeStr + "-" + parts.slice(2).join("-")] =
+                        storage[key];
                 } else {
                     migrated[key] = storage[key];
                 }
@@ -363,107 +379,50 @@ window.TimeKeeper.make = function () {
             storage = migrated;
         }
 
-        if (storage["version"] != 3) {
-            alert("Something went wrong with you localStorage!");
+        if (storage.version == 3) {
+            const migrated = { version: 4 };
+            for (const key of Object.keys(storage)) {
+                if (key === "version") continue;
+                const parts = key.split("-");
+                if (parts.length >= 5 && /^[01]{21}$/.test(parts[1])) {
+                    const modeKey = window.ModeRegistry.bitstringV3ToModeKey(parts[1]);
+                    migrated[parts[0] + "-" + modeKey + "-" + parts.slice(2).join("-")] =
+                        storage[key];
+                } else {
+                    migrated[key] = storage[key];
+                }
+            }
+            storage = migrated;
+        }
+
+        if (storage.version != 4) {
+            console.error("TimeKeeper storage version unexpected:", storage.version);
+            storage.version = 4;
         }
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
-    }
+    };
 
-    window.timeKeeper.dialogActive = false;
-
-    //generate and show the dialog
     window.timeKeeper.showDialog = function () {
-
-        //make dialog
         window.timeKeeper.dialogActive = true;
-        document.getElementById('time-keeper').innerHTML = 'Hide Details';
+        const btn = document.getElementById("time-keeper");
+        if (btn) btn.innerHTML = "Hide Details";
 
-        //dialog = document.createElement("dialog");
-        dialog = document.createElement("div");
-
+        const dialog = document.createElement("div");
         dialog.setAttribute("open", "");
         dialog.setAttribute("id", "timeKeeperDialog");
 
-        let count = window.timeKeeper.getCurrentSetting("count");
-        let speed = window.timeKeeper.getCurrentSetting("speed");
-        let size = window.timeKeeper.getCurrentSetting("size");
-        let modeStr = window.timeKeeper.getCurrentMode("size");
-        //change modeStr to gamemode
-        counter = 0
-        var gamemode = "";
-        for (t of modeStr) {
-            if (t == 1) {
-                if(window.isBridge){
-                    switch (counter) {
-                        case 0: gamemode += "Wall, "; break;
-                        case 1: gamemode += "Portal, "; break;
-                        case 2: gamemode += "Cheese, "; break;
-                        case 3: gamemode += "Borderless, "; break;
-                        case 4: gamemode += "Twin, "; break;
-                        case 5: gamemode += "Winged, "; break;
-                        case 6: gamemode += "YinYang, "; break;
-                        case 7: gamemode += "Key, "; break;
-                        case 8: gamemode += "Sokoban, "; break;
-                        case 9: gamemode += "Poison, "; break;
-                        case 10: gamemode += "Dimension, "; break;
-                        case 11: gamemode += "Minesweeper, "; break;
-                        case 12: gamemode += "Statue, "; break;
-                        case 13: gamemode += "Light, "; break;
-                        case 14: gamemode += "Shield, "; break;
-                        case 15: gamemode += "Arrow, "; break;
-                        case 16: gamemode += "Hotdog, "; break;
-                        case 17: gamemode += "Magnet, "; break;
-                        case 18: gamemode += "Gate, "; break;
-                        case 19: gamemode += "Bridge, "; break;
-                        case 20: gamemode += "Peaceful, "; break;
-                        default: gamemode += "Unknown, "; break;
-                    }
-                }else{
-                    switch (counter) {
-                        case 0: gamemode += "Wall, "; break;
-                        case 1: gamemode += "Portal, "; break;
-                        case 2: gamemode += "Cheese, "; break;
-                        case 3: gamemode += "Borderless, "; break;
-                        case 4: gamemode += "Twin, "; break;
-                        case 5: gamemode += "Winged, "; break;
-                        case 6: gamemode += "YinYang, "; break;
-                        case 7: gamemode += "Key, "; break;
-                        case 8: gamemode += "Sokoban, "; break;
-                        case 9: gamemode += "Poison, "; break;
-                        case 10: gamemode += "Dimension, "; break;
-                        case 11: gamemode += "Minesweeper, "; break;
-                        case 12: gamemode += "Statue, "; break;
-                        case 13: gamemode += "Light, "; break;
-                        case 14: gamemode += "Shield, "; break;
-                        case 15: gamemode += "Arrow, "; break;
-                        case 16: gamemode += "Hotdog, "; break;
-                        case 17: gamemode += "Magnet, "; break;
-                        case 18: gamemode += "Gate, "; break;
-                        case 19: gamemode += "Skip, "; break;
-                        case 20: gamemode += "Peaceful, "; break;
-                        default: gamemode += "Unknown, "; break;
-                    }
-                }
-            }
-            counter++;
-        }
-        if (gamemode == "") {
-            gamemode = "Classic, ";
-        }
-        gamemode = gamemode.substring(0, gamemode.lastIndexOf(","));
+        const ctx = window.timeKeeper.resolveRunContext();
+        const gamemode = window.ModeRegistry.labelModeKey(ctx.modeKey);
 
-        //add level information
-        bold = document.createElement('u');
-        textnode = document.createTextNode("Speed Info Details");
-        bold.style = 'color:white;font-family:Roboto,Arial;'
-        //textnode.style = 'color:white;font-family:Arial;'
-        bold.appendChild(textnode);
-        //buttonClose.style = 'color:white;background:black'; font-family:roboto;
+        const bold = document.createElement("u");
+        bold.appendChild(document.createTextNode("TimeKeeper Details"));
+        bold.style = "color:white;font-family:Roboto,Arial;";
         dialog.appendChild(bold);
         dialog.appendChild(document.createElement("br"));
         dialog.appendChild(document.createTextNode("Mode: " + gamemode));
         dialog.appendChild(document.createElement("br"));
-        switch (count) {
+
+        switch (ctx.count) {
             case 0: dialog.appendChild(document.createTextNode("1 Apple, ")); break;
             case 1: dialog.appendChild(document.createTextNode("3 Apples, ")); break;
             case 2: dialog.appendChild(document.createTextNode("5 Apples, ")); break;
@@ -473,269 +432,175 @@ window.TimeKeeper.make = function () {
             case 6: dialog.appendChild(document.createTextNode("Tally count, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu Apples, ")); break;
         }
-        switch (speed) {
+        switch (ctx.speed) {
             case 0: dialog.appendChild(document.createTextNode("Normal speed, ")); break;
             case 1: dialog.appendChild(document.createTextNode("Fast speed, ")); break;
             case 2: dialog.appendChild(document.createTextNode("Slow speed, ")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu speed, ")); break;
-
         }
-        switch (size) {
+        switch (ctx.size) {
             case 0: dialog.appendChild(document.createTextNode("Normal size")); break;
             case 1: dialog.appendChild(document.createTextNode("Small size")); break;
             case 2: dialog.appendChild(document.createTextNode("Large size")); break;
             default: dialog.appendChild(document.createTextNode("MoreMenu size")); break;
         }
-        //dialog.style = 'border-radius: 10px;'
 
-        //add stats
         dialog.appendChild(document.createElement("br"));
         dialog.appendChild(document.createElement("br"));
-        storage = JSON.parse(localStorage["snake_timeKeeper"]);
+        const storage = window.timeKeeper.getStorage();
         let totalAttempts = 0;
 
-        for (let score of ["att", "25", "50", "100", "ALL", "H"]) {
-            let name = score + "-" + modeStr + "-" + count + "-" + speed + "-" + size;
-            if (typeof (storage[name]) != "undefined") {
+        for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
+            const name = window.timeKeeper.buildKey(score, ctx);
+            if (typeof storage[name] == "undefined") continue;
 
-                bold = document.createElement('span');
-                switch (score) {
-                    case "25": bold.appendChild(document.createTextNode("25 Apples:")); break;
-                    case "50": bold.appendChild(document.createTextNode("50 Apples:")); break;
-                    case "100": bold.appendChild(document.createTextNode("100 Apples:")); break;
-                    case "ALL": bold.appendChild(document.createTextNode("All Apples:")); break;
-                    case "att": bold.appendChild(document.createTextNode("Total Attempts: ")); break;
-                    case "H": bold.appendChild(document.createTextNode("Highscore: ")); break;
-                    default: break;
-                }
-                dialog.appendChild(bold);
-
-                if (score == "att") {
-                    totalAttempts = storage[name];
-                    dialog.appendChild(document.createTextNode(totalAttempts));
-                    dialog.appendChild(document.createElement("br"));
-                }
-                else if (score == "H") {
-                    dialog.appendChild(document.createTextNode(storage[name].high));
-                }
-
-                dialog.appendChild(document.createElement("br"));
-
-                if (score == "att")
-                    continue;
-
-                hours = Math.floor(storage[name].time / 3600000);
-                minutes = String(Math.floor((storage[name].time-hours*3600000) / 60000)).padStart(2, "0");
-                seconds = String(Math.floor((storage[name].time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                if(hours==0){
-                    if (score != "H") {
-                        dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    else {
-                        dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    if (storage[name].att != undefined && storage[name].sum != undefined) {
-                        let time = Math.floor(storage[name].sum / storage[name].att);
-                        hours = Math.floor(storage[name].time / 3600000)
-                        minutes = String(Math.floor((time - hours * 3600000) / 60000)).padStart(2, "0");
-                        seconds = String(Math.floor((time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                        mseconds = String(time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    dialog.appendChild(document.createElement("br"));
-                }else{
-                    if (score != "H") {
-                        dialog.appendChild(document.createTextNode("Best Time: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    else {
-                        dialog.appendChild(document.createTextNode("Duration: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    if (storage[name].att != undefined && storage[name].sum != undefined) {
-                        let time = Math.floor(storage[name].sum / storage[name].att);
-                        hours = Math.floor(storage[name].time / 3600000)
-                        minutes = String(Math.floor((time - hours * 3600000) / 60000)).padStart(2, "0");
-                        seconds = String(Math.floor((time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                        mseconds = String(time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    dialog.appendChild(document.createElement("br"));
-                }
+            const label = document.createElement("span");
+            switch (score) {
+                case "25": label.appendChild(document.createTextNode("25 Apples:")); break;
+                case "50": label.appendChild(document.createTextNode("50 Apples:")); break;
+                case "100": label.appendChild(document.createTextNode("100 Apples:")); break;
+                case "ALL": label.appendChild(document.createTextNode("All Apples:")); break;
+                case "att": label.appendChild(document.createTextNode("Total Attempts: ")); break;
+                case "H": label.appendChild(document.createTextNode("Highscore: ")); break;
+                default: break;
             }
+            dialog.appendChild(label);
+
+            if (score == "att") {
+                totalAttempts = storage[name];
+                dialog.appendChild(document.createTextNode(totalAttempts));
+                dialog.appendChild(document.createElement("br"));
+                dialog.appendChild(document.createElement("br"));
+                continue;
+            }
+
+            if (score == "H") {
+                dialog.appendChild(document.createTextNode(storage[name].high));
+            }
+            dialog.appendChild(document.createElement("br"));
+
+            const bestLabel = score == "H" ? "Duration: " : "Best Time: ";
+            dialog.appendChild(
+                document.createTextNode(bestLabel + window.timeKeeper.formatDuration(storage[name].time))
+            );
+            dialog.appendChild(document.createElement("br"));
+            dialog.appendChild(
+                document.createTextNode("Achieved on: " + new Date(storage[name].date).toString())
+            );
+            dialog.appendChild(document.createElement("br"));
+
+            if (score == "H" && totalAttempts > 0) {
+                dialog.appendChild(
+                    document.createTextNode(
+                        "Average score: " +
+                            (Math.round((100 * storage[name].sum) / totalAttempts) / 100).toString()
+                    )
+                );
+                dialog.appendChild(document.createElement("br"));
+            }
+
+            if (storage[name].att != undefined && storage[name].sum != undefined && storage[name].att > 0) {
+                const avg = Math.floor(storage[name].sum / storage[name].att);
+                dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
+                dialog.appendChild(document.createElement("br"));
+                dialog.appendChild(
+                    document.createTextNode("Average: " + window.timeKeeper.formatDuration(avg))
+                );
+                dialog.appendChild(document.createElement("br"));
+            }
+            dialog.appendChild(document.createElement("br"));
         }
 
-        //buttonClose
-        //dialog.appendChild(document.createElement("br"));
-        buttonClose = document.createElement("button");
+        const buttonClose = document.createElement("button");
         buttonClose.appendChild(document.createTextNode("Close"));
-        buttonClose.addEventListener("click", (e) => {
+        buttonClose.addEventListener("click", function () {
             window.timeKeeper.toggleDialog();
         });
-
-        buttonClose.style = 'color:white;background-color:' + window.button_color+';';
-        buttonClose.className = 'btn';
+        buttonClose.style = "color:white;background-color:" + window.button_color + ";";
+        buttonClose.className = "btn";
         dialog.appendChild(buttonClose);
 
-        //buttonExport
-        buttonExport = document.createElement("button");
-        buttonExport.appendChild(document.createTextNode("Export"));
-        buttonExport.addEventListener("click", function () {
-            download("timeKeeper - " + new Date().toString() + ".txt", "To import: open snake -> open console -> paste the following:\nlocalStorage[\"snake_timeKeeper\"]='" + localStorage["snake_timeKeeper"] + "'");
-        });
-        //dialog.appendChild(buttonExport); // Disabled export button, I don't want this.
-
-        //add dialog
-        div = document.querySelector("body");
-        dialog.setAttribute("style", "outline: none;border-radius: 10px;z-index:10100;background:"+window.real_topbar_color+";color:white;font-family:Roboto,Arial;");
-        dialog.style.outline = "none";
+        dialog.setAttribute(
+            "style",
+            "outline: none;border-radius: 10px;z-index:10100;background:" +
+                window.real_topbar_color +
+                ";color:white;font-family:Roboto,Arial;"
+        );
         dialog.classList.add("custom-dialog");
-
-        div.insertBefore(dialog, div.firstChild)
-
-
+        const body = document.querySelector("body");
+        body.insertBefore(dialog, body.firstChild);
     };
 
-    //Function to find the snake code, and apply changes.
-    window.timeKeeper.setup = function () {
-        //just make storage, this used to also alter snake code
-        window.timeKeeper.makeStorage();
-        return;
-    }
-
-    //console.log("Enabling TimeKeeper")
-    window.timeKeeper.setup();
-
     window.timeKeeper.hideDialog = function () {
-        //remove dialog when click on ok
-        child = document.getElementById("timeKeeperDialog");
-        child.parentElement.removeChild(child);
+        const child = document.getElementById("timeKeeperDialog");
+        if (child && child.parentElement) child.parentElement.removeChild(child);
         window.timeKeeper.dialogActive = false;
-        document.getElementById('time-keeper').innerHTML = 'Show Details';
-
-    }
+        const btn = document.getElementById("time-keeper");
+        if (btn) btn.innerHTML = "Show Details";
+    };
 
     window.timeKeeper.toggleDialog = function () {
-        if (window.timeKeeper.dialogActive) {
-            window.timeKeeper.hideDialog();
-        }
-        else {
-            window.timeKeeper.showDialog();
-        }
-    }
+        if (window.timeKeeper.dialogActive) window.timeKeeper.hideDialog();
+        else window.timeKeeper.showDialog();
+    };
 
-    /*
-    tempID = "time-keeper"; // Inspect element on Timer and take jsname from it
-    document.querySelector("button[jsname^=\"" + tempID + "\"]").addEventListener("click", (e) => {
-        window.timeKeeper.toggleDialog();
-    });
-    TimerID = "yddQF"; // Inspect element on Timer and take jsname from it
-    document.querySelector("div[jsname^=\"" + TimerID + "\"]").addEventListener("click", (e) => {
-        window.timeKeeper.toggleDialog();
-    });
-    */
-}
+    window.timeKeeper.setup = function () {
+        window.timeKeeper.makeStorage();
+        if (window.ModeRegistry && typeof window.ModeRegistry.has === "function") {
+            window.isBridge = window.ModeRegistry.has("bridge");
+        }
+    };
+
+    window.timeKeeper.setup();
+};
 
 window.TimeKeeper.alterCode = function (code) {
-    // TimeKeeper stuff start
-    //change stepfunction to run gotApple(), gotAll() and death()
-
-    // This is the full tick function
-    func_regex = new RegExp(/tick\(\){[^\\]{1,4000}light=Math.max[\s\S]*?=function/)
-    window.catchError(func_regex, code)
+    func_regex = new RegExp(/tick\(\){[^\\]{1,4000}light=Math.max[\s\S]*?=function/);
+    window.catchError(func_regex, code);
     let func = code.match(/tick\(\){[^\\]{1,4000}light=Math.max[\s\S]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
-    if (window.NepDebug) {
-        console.log(func);
-    }
-    //let modeFunc = func.match(/1}\);[^%]{0,10}/)[0];
-    //let modeFunc = func.match(/[a-zA-Z0-9$]{1,4}\([a-zA-Z0-9$]{1,4}.[a-zA-Z0-9$]{1,8},11\)&&/)[0];
 
-    //modeFunc = modeFunc.substring(modeFunc.indexOf("(") + 1, modeFunc.lastIndexOf("("));
-    //modeFunc = modeFunc.split('(')[0];
-    //scoreFunc = func.match(/25\!\=\=this.[a-zA-Z0-9$]{1,4}/)[0]; // Need to figure this out
-    scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,4}\=\=\=\n?25/)[0].split('=')[0]; // Assuming he wanted just the "this.score"
-    scoreFunc = func.match(`${window.escapeRegex(scoreFuncVar.replace('\n', ''))}=\n?this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1]
-    ////console.log(scoreFunc)
-    //scoreFunc = scoreFunc.substring(scoreFunc.indexOf("this."),scoreFunc.size);
-    //timeFunc = func.match(/this.[a-zA-Z0-9$]{1,6}\*this.[a-zA-Z0-9$]{1,6}/)[0];
-    // Now has weird vars that obfuscate, it's "this.ticks" * "this.{1,4}"
+    scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,4}\=\=\=\n?25/)[0].split("=")[0];
+    scoreFunc = func.match(
+        `${window.escapeRegex(scoreFuncVar.replace("\n", ""))}=\n?this.[a-zA-Z0-9$]{1,6}`
+    )[0].split("=")[1];
     timeFunc = func.match(/\([a-zA-Z0-9$]{1,6}\*[a-zA-Z0-9$]{1,6}\)/)[0];
-    ticksVar = timeFunc.split('(')[1].split("*")[0];
-    tickLengthVar = timeFunc.split("*")[1].split(')')[0];
-    realTicks = func.match(`${escapeRegex(ticksVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
-    realTickLength = func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1];
-    realTimeFunc = `${realTicks}*${realTickLength}`;
-    timeFunc = realTimeFunc;
-    ////console.log(timeFunc)
-    //ownFuncIndex = func.indexOf(func.match(/!1}\);\([^%]{0,10}/)[0])+5; // No idea how this ever worked
-    ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");"
-    //func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex); // Cool but no, just going to insert before the if 25 50 100 instead
-    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,4}\=\=\=\n?25/)
+    ticksVar = timeFunc.split("(")[1].split("*")[0];
+    tickLengthVar = timeFunc.split("*")[1].split(")")[0];
+    realTicks = func.match(`${escapeRegex(ticksVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split("=")[1];
+    realTickLength = func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split(
+        "="
+    )[1];
+    timeFunc = `${realTicks}*${realTickLength}`;
+
+    ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");";
+    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,4}\=\=\=\n?25/);
     ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
     func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
-    ////console.log(func);
 
-
-
-    //change all apples to run gotAll()
-    func = func.slice(0, func.indexOf("WIN.play()") + 11) + "window.timeKeeper.gotAll(Math.floor(" + timeFunc + ")," + scoreFunc + ")," + func.slice(func.indexOf("WIN.play()") + 11);
+    func =
+        func.slice(0, func.indexOf("WIN.play()") + 11) +
+        "window.timeKeeper.gotAll(Math.floor(" +
+        timeFunc +
+        ")," +
+        scoreFunc +
+        ")," +
+        func.slice(func.indexOf("WIN.play()") + 11);
 
     death = func.match(/if\(this.[a-zA-Z0-9$]{1,4}\|\|this.[a-zA-Z0-9$]{1,4}\)/)[0];
     death = death.slice(death.indexOf("(") + 1, death.indexOf("|"));
-    func = func.slice(0, func.indexOf("{") + 1) + "if(" + death + "){window.timeKeeper.death(Math.floor(" + timeFunc + ")," + scoreFunc + ");}" + func.slice(func.indexOf("{") + 1)
-    //eval(func)
+    func =
+        func.slice(0, func.indexOf("{") + 1) +
+        "if(" +
+        death +
+        "){window.timeKeeper.death(Math.floor(" +
+        timeFunc +
+        ")," +
+        scoreFunc +
+        ");}" +
+        func.slice(func.indexOf("{") + 1);
 
     code = code.assertReplace(func_regex, func + StartOfNext);
-
-    ////console.log(code)
-
-    //change start function to run gameStart() - The "start" here fails, but this section is required for the code to work -- not anymore, fixed it earlier.
-
-    //func_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}=function\(a,b\){if\(!\(a.[a-zA-Z0-9$]{1,4}[^\\]*?=function/)
-    //func = code.match(/[a-zA-Z0-9_$]{1,6}=function\(a,b\){if\(!\(a.[a-zA-Z0-9$]{1,4}[^\\]*?=function/)[0];
-    //StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
-    //func = func.substring(0, func.lastIndexOf(";"));
-    //step = timeFunc.substring(0, timeFunc.indexOf("*"));
-    //step = "a" + step.slice(step.indexOf("."));
-
-    //func = func.slice(0, func.indexOf("{") + 1) + "if(" + step + "==0){window.timeKeeper.start();}" + func.slice(func.indexOf("{") + 1);
-    //eval(func)
-    //code = code.assertReplace(func_regex, func + StartOfNext);
-
-    //add eventhandler to click on time
-    //let id = code.match(/function\(a\){if\(\!a.[a-zA-Z0-9]{1,4}&&[^"]*?"[^"]*?"/)[0];
-    //id = id.substring(id.indexOf("\"")+1, id.lastIndexOf("\""));
-    //let id = code.match(/"[^"]{1,9}"[^"]{1,200}"00:00:000/)[0]; // Whatever this crap gives is the wrong thing sadly
-    //window.TimerID = id.substring(1, id.indexOf("\"",2));
-    //document.querySelector("div[jsname^=\""+id+"\"]").addEventListener("click",(e)=>{
-    //	window.timeKeeper.showDialog();
-    //});
-
-    // TimeKeeper stuff end
-    ////console.log(code)
-    // Counter stuff
     return code;
-}
+};

@@ -5,6 +5,7 @@ lib_list = [
     "Theme",
     "DistinctVisual",
     "Counter",
+    "ModeRegistry",
     "TimeKeeper",
     "Fruit",
     "TopBar",

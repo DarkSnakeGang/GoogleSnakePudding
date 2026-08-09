@@ -2,7 +2,7 @@ window.SpeedInfo = {};
 
 window.SpeedInfo.make = function () {
 
-    window.isBridge = (Math.floor((Math.random()* 50) + 1) != 32);
+    window.isBridge = true; // refreshed from ModeRegistry when trophies exist
 
     // First game must be CE, the other is the normal game
     const gameIDs = ["o1y9pyk6", "9dow0go1"];
@@ -13,15 +13,14 @@ window.SpeedInfo.make = function () {
     const FASTSNAKE_BASE = "https://raw.githubusercontent.com/DarkSnakeGang/FastSnakeStats/refs/heads/main/time-travel-cache";
     const RUNS_DATES_URL = `${FASTSNAKE_BASE}/metadata/available-dates-runs.json`;
     const TIMELINES_URL = `${FASTSNAKE_BASE}/runs-derived/wr-timelines.json`;
-    const CACHE_STALE_THRESHOLD = 3 * 60 * 60 * 1000; // 3 hours
 
     let timelinesData = null;
     let runsDatesMeta = null;
-    let lastTimelinesUpdate = 0;
     let timelinesPromise = null;
+    let fssVersion = null; // available-dates-runs.json lastUpdated — only reuse memory if this matches
 
-    // Full-board runs cache for tracked-player lookups (not live SRC)
-    const runsBoardCache = Object.create(null); // key -> { data, fetchedAt }
+    // In-memory runs boards for the current FSS publish only
+    const runsBoardCache = Object.create(null); // key -> { data, version }
     const runsBoardPromises = Object.create(null);
     const LEVEL_TO_RUNS_FILE = {
         "25": "25_Apples.json",
@@ -31,13 +30,231 @@ window.SpeedInfo.make = function () {
         "H": "High_Score.json",
     };
 
+    // Match FastSnakeStats tally-boards.js (source of truth for HS columns)
+    const TYPICAL_HIGHSCORE_MODES = {
+        1: "Wall",
+        2: "Portal",
+        8: "Key",
+        9: "Sokoban",
+        10: "Poison",
+        12: "Minesweeper",
+        13: "Statue",
+        15: "Shield",
+        17: "Hotdog",
+        19: "Gate",
+        20: "Bridge",
+    };
+    const TALLY_CE_HIGHSCORE_MODES = {
+        0: "Classic",
+        3: "Cheese",
+        4: "Borderless",
+        5: "Twin",
+        6: "Winged",
+        7: "Yin Yang",
+        11: "Dimension",
+        14: "Light",
+        16: "Arrow",
+        18: "Magnet",
+    };
+
+    // Dedicated main-game High Score categories (Cheese HS was removed from SRC).
+    // Non-HS modes submit Tally highscores on Category Extensions instead.
+    const TALLY_COUNT = 6;
+    const SRC_GAME = "snake_game";
+    const SRC_GAME_CE = "snake_game_ce";
+
+    const SRC_LEVEL_BY_MODE = {
+        0: "5d7e0vvw", // Classic
+        1: "xd13o769", // Wall
+        2: "rw6e78gd", // Portal
+        3: "rdnq00qd", // Cheese
+        4: "nwl2ll0d", // Borderless
+        5: "n93mv5nd", // Twin
+        6: "z9856279", // Winged
+        7: "n93lkxz9", // Yin Yang
+        8: "z985kzr9", // Key
+        9: "rdn4ej79", // Sokoban
+        10: "ldyrq3r9", // Poison
+        11: "ldy64pz9", // Dimension
+        12: "kwjr0erd", // Minesweeper
+        13: "rdqv8kg9", // Statue
+        14: "rdqkpgmd", // Light
+        15: "xd47pv2d", // Shield
+        16: "rdnjgm69", // Arrow
+        17: "dqzzvn1d", // Hotdog
+        18: "dno527nw", // Magnet
+        19: "wkkjnjxw", // Gate
+        20: "9x1zey3d", // Bridge
+        21: "y9mrvj1w", // Peaceful
+    };
+
+    const SRC_IL_CATEGORY = {
+        "25": "mke9xe9d",
+        "50": "5dw410gk",
+        "100": "wk6nwme2",
+        "ALL": "n2yov4ed",
+        "All": "n2yov4ed",
+    };
+
+    const SRC_HS_CATEGORY_BY_MODE = {
+        1: "7kj63r42", // Wall
+        2: "n2y9g8ed", // Portal
+        8: "q25ewmv2", // Key
+        9: "xd11gn8d", // Sokoban
+        10: "wdmr0lek", // Poison
+        12: "ndxr78rd", // Minesweeper
+        13: "8249v5nd", // Statue
+        15: "02q686jk", // Shield
+        17: "mkemx192", // Hotdog
+        19: "zd31z3n2", // Gate
+        20: "mke3e76d", // Bridge
+    };
+
+    // CE "Tally Highscore (non-highscore modes)" mode values (FSS tally-boards.js)
+    const CE_TALLY_MODE_BY_MODE = {
+        0: "lr3d7n2l", // Classic
+        3: "1dknd7jl", // Cheese
+        4: "q8k3z7kq", // Borderless
+        5: "qyzm4e71", // Twin
+        6: "ln8736dl", // Winged
+        7: "10vy7e5l", // Yin Yang
+        11: "qj7odygq", // Dimension
+        14: "q65w7k7l", // Light
+        16: "lmoenj41", // Arrow
+        18: "1w4j8w5q", // Magnet
+    };
+
+    const SRC_COUNT_VAR = "0nwovxdl";
+    const SRC_COUNT_VAL = {
+        0: "mlnmj661", // 1 Apple
+        1: "5q88w7rq", // 3 Apples
+        2: "4qyoge3l", // 5 Apples
+        3: "qvvpkp7q", // 10 Apples
+        4: "qoxx6dxq", // Dice
+        5: "1pyp3vg1", // Bomb
+        6: "qznw4k2q", // Tally
+    };
+    const SRC_SIZE_VAR = "p854j77l";
+    const SRC_SIZE_VAL = {
+        0: "z19gp0jl", // Standard
+        1: "81pw5rel", // Small
+        2: "p12e0gv1", // Large
+    };
+    const SRC_IL_SPEED_VAR = "68k1g0yl";
+    const SRC_IL_SPEED_VAL = {
+        0: "192dxz4q", // Normal
+        1: "12v4922q", // Fast
+        2: "1py6exn1", // Slow
+    };
+    const SRC_HS_SPEED_VAR = "0nwomwdl";
+    const SRC_HS_SPEED_VAL = {
+        0: "xqkkj49q", // Normal
+        1: "gq7ej4n1", // Fast
+        2: "192d23kq", // Slow
+    };
+
+    const CE_TALLY_HS_CATEGORY = "rkl4elqd";
+    const CE_SPEED_VAR = "gnx3m4gn";
+    const CE_SPEED_VAL = {
+        0: "lmo2pr01", // Normal
+        1: "1w479v6q", // Fast
+        2: "qoxj984q", // Slow
+    };
+    const CE_SIZE_VAR = "ql6mkzw8";
+    const CE_SIZE_VAL = {
+        0: "q75ogky1", // Standard
+        1: "1gn6gyml", // Small
+        2: "qznw4kmq", // Large
+    };
+    const CE_MODE_VAR = "onvxz158";
+
+    // Match SRC/FastSnakeStats boards: no 100 on Small; Yin Yang has no 50 on Small
+    function shouldShowCategory(level, size, mode) {
+        if (level === "100" && size === 1) return false;
+        if (level === "50" && mode === 7 && size === 1) return false; // Yin Yang: no 50 on Small
+        return true;
+    }
+
+    // FSS shouldShowHighScoreColumn: typical HS modes always; CE Tally-HS modes only on Tally.
+    // Peaceful/Blender never (no FSS HS boards).
+    function canShowSrcHighscore(mode, count) {
+        if (mode === 21 || mode === 22) return false; // Peaceful, Blender
+        if (TYPICAL_HIGHSCORE_MODES[mode]) return true;
+        if (count === TALLY_COUNT && TALLY_CE_HIGHSCORE_MODES[mode]) return true;
+        return false;
+    }
+
+    // Submit link only when SRC has a real board for this mode/count
+    function canSubmitHighscore(mode, count) {
+        return canShowSrcHighscore(mode, count);
+    }
+
+    function srcVarPair(varId, valueId) {
+        return varId + "." + valueId;
+    }
+
+    // Always include defaults (1 Apple / Normal / Standard) so the form matches in-game settings
+    function buildSrcSubmitUrl(score, mode, count, speed, size) {
+        if (size > 2 || count > 6 || speed > 2) return null;
+
+        if (score === "H") {
+            const hsCat = SRC_HS_CATEGORY_BY_MODE[mode];
+            if (hsCat) {
+                const x = [
+                    hsCat,
+                    srcVarPair(SRC_COUNT_VAR, SRC_COUNT_VAL[count]),
+                    srcVarPair(SRC_HS_SPEED_VAR, SRC_HS_SPEED_VAL[speed]),
+                    srcVarPair(SRC_SIZE_VAR, SRC_SIZE_VAL[size]),
+                ].join("-");
+                return `https://www.speedrun.com/${SRC_GAME}/runs/new?x=${x}`;
+            }
+            const ceMode = CE_TALLY_MODE_BY_MODE[mode];
+            if (count === TALLY_COUNT && ceMode) {
+                const x = [
+                    CE_TALLY_HS_CATEGORY,
+                    srcVarPair(CE_SPEED_VAR, CE_SPEED_VAL[speed]),
+                    srcVarPair(CE_SIZE_VAR, CE_SIZE_VAL[size]),
+                    srcVarPair(CE_MODE_VAR, ceMode),
+                ].join("-");
+                return `https://www.speedrun.com/${SRC_GAME_CE}/runs/new?x=${x}`;
+            }
+            return null;
+        }
+
+        const levelId = SRC_LEVEL_BY_MODE[mode];
+        const catId = SRC_IL_CATEGORY[score];
+        if (!levelId || !catId) return null;
+
+        const x = [
+            "l_" + levelId,
+            catId,
+            srcVarPair(SRC_COUNT_VAR, SRC_COUNT_VAL[count]),
+            srcVarPair(SRC_IL_SPEED_VAR, SRC_IL_SPEED_VAL[speed]),
+            srcVarPair(SRC_SIZE_VAR, SRC_SIZE_VAL[size]),
+        ].join("-");
+        return `https://www.speedrun.com/${SRC_GAME}/runs/new?x=${x}`;
+    }
+
+    function pbSubmitLink(text, score, mode, count, speed, size) {
+        const url = buildSrcSubmitUrl(score, mode, count, speed, size);
+        if (!url) return text;
+        return `<a target="_blank" style="text-decoration: none;color:#ADD8E6 !important;" href="${url}">${text}</a>`;
+    }
+
     function sleepFor(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    async function getJSON(url) {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
+    function withCacheBust(url, bust) {
+        if (!bust) return url;
+        return url + (url.indexOf("?") >= 0 ? "&" : "?") + "v=" + encodeURIComponent(bust);
+    }
+
+    async function getJSON(url, options) {
+        const opts = options || {};
+        const fetchUrl = withCacheBust(url, opts.bust);
+        const res = await fetch(fetchUrl, opts.cache === false ? { cache: "no-store" } : undefined);
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${fetchUrl}`);
         return res.json();
     }
 
@@ -91,37 +308,54 @@ window.SpeedInfo.make = function () {
     }
 
     async function loadRunsDerived() {
-        if (
-            timelinesData &&
-            runsDatesMeta &&
-            Date.now() - lastTimelinesUpdate < CACHE_STALE_THRESHOLD
-        ) {
-            const date = runsDatesMeta.availableDates[runsDatesMeta.availableDates.length - 1];
+        // Always check FSS metadata — whatever they published is what we use
+        let datesMeta;
+        try {
+            datesMeta = await getJSON(RUNS_DATES_URL, { cache: false });
+            window.requestsMade += 1;
+        } catch (e) {
+            if (timelinesData && runsDatesMeta) {
+                const date = runsDatesMeta.availableDates[runsDatesMeta.availableDates.length - 1];
+                return { timelines: timelinesData, date };
+            }
+            throw e;
+        }
+
+        if (!datesMeta.availableDates || !datesMeta.availableDates.length) {
+            throw new Error("No available dates in runs-derived metadata");
+        }
+
+        const version = datesMeta.lastUpdated || datesMeta.availableDates[datesMeta.availableDates.length - 1];
+
+        // Same FSS publish already in memory — reuse it (no time-based expiry)
+        if (timelinesData && fssVersion === version) {
+            runsDatesMeta = datesMeta;
+            const date = datesMeta.availableDates[datesMeta.availableDates.length - 1];
             return { timelines: timelinesData, date };
         }
+
         if (timelinesPromise) return timelinesPromise;
 
+        const datesMetaForLoad = datesMeta;
+        const versionForLoad = version;
         timelinesPromise = (async () => {
             if (window.NepDebug) {
-                console.log("Loading FastSnakeStats runs-derived timelines...");
+                console.log("Loading FastSnakeStats runs-derived timelines...", versionForLoad);
             }
-            const [dates, timelines] = await Promise.all([
-                getJSON(RUNS_DATES_URL),
-                getJSON(TIMELINES_URL),
-            ]);
-            if (!dates.availableDates || !dates.availableDates.length) {
-                throw new Error("No available dates in runs-derived metadata");
-            }
+            const timelines = await getJSON(TIMELINES_URL, { bust: versionForLoad });
             if (!timelines.boards) {
                 throw new Error("runs-derived timelines missing boards");
             }
-            runsDatesMeta = dates;
+            if (fssVersion && fssVersion !== versionForLoad) {
+                for (const k of Object.keys(runsBoardCache)) delete runsBoardCache[k];
+            }
+            runsDatesMeta = datesMetaForLoad;
             timelinesData = timelines;
-            lastTimelinesUpdate = Date.now();
-            window.requestsMade += 2;
-            const date = dates.availableDates[dates.availableDates.length - 1];
+            fssVersion = versionForLoad;
+            window.requestsMade += 1;
+            const date = datesMetaForLoad.availableDates[datesMetaForLoad.availableDates.length - 1];
             if (window.NepDebug) {
-                console.log(`Runs-derived ready as of ${date} (${Object.keys(timelines.boards).length} boards)`);
+                console.log(`Runs-derived ready as of ${date} (${Object.keys(timelines.boards).length} boards, v=${versionForLoad})`);
             }
             return { timelines, date };
         })().finally(() => {
@@ -190,19 +424,20 @@ window.SpeedInfo.make = function () {
     async function loadRunsBoard(modeName, level) {
         const file = LEVEL_TO_RUNS_FILE[level];
         if (!file) throw new Error("Unknown level for runs board: " + level);
+        await loadRunsDerived();
         const folder = modeFolderName(modeName);
         const cacheKey = `${folder}/${file}`;
         const cached = runsBoardCache[cacheKey];
-        if (cached && Date.now() - cached.fetchedAt < CACHE_STALE_THRESHOLD) {
+        if (cached && cached.version === fssVersion) {
             return cached.data;
         }
         if (runsBoardPromises[cacheKey]) return runsBoardPromises[cacheKey];
 
         const url = `${FASTSNAKE_BASE}/runs/${folder}/${file}`;
         runsBoardPromises[cacheKey] = (async () => {
-            const data = await getJSON(url);
+            const data = await getJSON(url, { bust: fssVersion });
             window.requestsMade += 1;
-            runsBoardCache[cacheKey] = { data, fetchedAt: Date.now() };
+            runsBoardCache[cacheKey] = { data, version: fssVersion };
             return data;
         })().finally(() => {
             delete runsBoardPromises[cacheKey];
@@ -382,8 +617,6 @@ window.SpeedInfo.make = function () {
         let size = window.timeKeeper.getCurrentSetting("size");
         let mode = window.CurrentModeNum;
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
-
         // > 6 = beyond Tally (MoreMenu / custom counts)
         if (size > 2 || count > 6) {
             EmptyAll();
@@ -393,8 +626,17 @@ window.SpeedInfo.make = function () {
             EmptyAll();
             return;
         }
-        if (!highscore_modes.includes(mode) && level == "H") {
-            HandleHighscore("Empty")
+        if (!shouldShowCategory(level, size, mode)) {
+            if (level === "H") HandleHighscore("Empty");
+            else if (level === "100") Handle100("Empty");
+            else if (level === "50") Handle50("Empty");
+            else if (level === "25") Handle25("Empty");
+            else if (level === "All") HandleAll("Empty");
+            return;
+        }
+        // Highscore WR: FSS typical HS modes; Tally CE-HS modes on Tally (not Peaceful)
+        if (level === "H" && !canShowSrcHighscore(mode, count)) {
+            HandleHighscore("Empty");
             return;
         }
 
@@ -439,7 +681,8 @@ window.SpeedInfo.make = function () {
                 console.log(`No successful runs found for key: ${cacheKey}`);
             }
             if (level === "H") {
-                HandleHighscore("Empty");
+                // Visible boards with no WR yet should show "None", not a blank row
+                HandleHighscore({ data: { runs: [] } });
             } else {
                 switch (level) {
                     case "25": Handle25("Empty"); break;
@@ -460,7 +703,7 @@ window.SpeedInfo.make = function () {
                 console.log(`Invalid run data structure for key: ${cacheKey}`, bestRun);
             }
             if (level === "H") {
-                HandleHighscore("Empty");
+                HandleHighscore({ data: { runs: [] } });
             } else {
                 switch (level) {
                     case "25": Handle25("Empty"); break;
@@ -591,12 +834,16 @@ window.SpeedInfo.make = function () {
 
         const WALL = 1, PORTAL = 2, CHEESE = 3, KEY = 8, SOKO = 9, POISON = 10;
         const MINESWEEPER = 12, STATUE = 13, SHIELD = 15, HOTDOG = 17, GATE = 19, BRIDGE = 20, BLENDER = 22;
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG, GATE, CHEESE, BRIDGE];
         if (size > 2 || count > 6 || mode == BLENDER) {
             el.innerHTML = "";
             return;
         }
-        if (!highscore_modes.includes(mode) && level == "H") {
+        if (!shouldShowCategory(level, size, mode)) {
+            el.innerHTML = "";
+            return;
+        }
+        // Tracking Highscore: same FSS rules as SRC WR (not Peaceful)
+        if (level === "H" && !canShowSrcHighscore(mode, count)) {
             el.innerHTML = "";
             return;
         }
@@ -927,128 +1174,96 @@ window.SpeedInfo.make = function () {
     });
 
     window.SpeedInfoUpdate = async function () {
-        // Mainly for TimeKeeper, runs when "play" is clicked
+        // Mainly for TimeKeeper, runs when "play" is clicked / after PB saves
+        if (window.ModeRegistry && typeof window.ModeRegistry.has === "function") {
+            try {
+                window.isBridge = window.ModeRegistry.has("bridge");
+            } catch (e) { /* trophy DOM may be missing early */ }
+        }
+
         let count = window.timeKeeper.getCurrentSetting("count");
         let speed = window.timeKeeper.getCurrentSetting("speed");
         let size = window.timeKeeper.getCurrentSetting("size");
-        let modeStr = window.timeKeeper.getCurrentMode("size");
-        storage = JSON.parse(localStorage["snake_timeKeeper"]);
-
-        //change modeStr to gamemode
-        var counter = 0
-        var gamemode = "";
-        for (t of modeStr) {
-            if (t == 1) {
-
-                if(window.isBridge){
-                    switch (counter) {
-                        case 0: gamemode += "Wall, "; break;
-                        case 1: gamemode += "Portal, "; break;
-                        case 2: gamemode += "Cheese, "; break;
-                        case 3: gamemode += "Borderless, "; break;
-                        case 4: gamemode += "Twin, "; break;
-                        case 5: gamemode += "Winged, "; break;
-                        case 6: gamemode += "YinYang, "; break;
-                        case 7: gamemode += "Key, "; break;
-                        case 8: gamemode += "Sokoban, "; break;
-                        case 9: gamemode += "Poison, "; break;
-                        case 10: gamemode += "Dimension, "; break;
-                        case 11: gamemode += "Minesweeper, "; break;
-                        case 12: gamemode += "Statue, "; break;
-                        case 13: gamemode += "Light, "; break;
-                        case 14: gamemode += "Shield, "; break;
-                        case 15: gamemode += "Arrow, "; break;
-                        case 16: gamemode += "Hotdog, "; break;
-                        case 17: gamemode += "Magnet, "; break;
-                        case 18: gamemode += "Gate, "; break;
-                        case 19: gamemode += "Bridge, "; break;
-                        case 20: gamemode += "Peaceful, "; break;
-                        default: gamemode += "Unknown, "; break;
-                    }
-                }else{
-                    switch (counter) {
-                        case 0: gamemode += "Wall, "; break;
-                        case 1: gamemode += "Portal, "; break;
-                        case 2: gamemode += "Cheese, "; break;
-                        case 3: gamemode += "Borderless, "; break;
-                        case 4: gamemode += "Twin, "; break;
-                        case 5: gamemode += "Winged, "; break;
-                        case 6: gamemode += "YinYang, "; break;
-                        case 7: gamemode += "Key, "; break;
-                        case 8: gamemode += "Sokoban, "; break;
-                        case 9: gamemode += "Skull, "; break;
-                        case 10: gamemode += "Dimension, "; break;
-                        case 11: gamemode += "Minesweeper, "; break;
-                        case 12: gamemode += "Statue, "; break;
-                        case 13: gamemode += "Light, "; break;
-                        case 14: gamemode += "Shield, "; break;
-                        case 15: gamemode += "Arrow, "; break;
-                        case 16: gamemode += "Hotdog, "; break;
-                        case 17: gamemode += "Magnet, "; break;
-                        case 18: gamemode += "Gate, "; break;
-                        case 19: gamemode += "Skip, "; break;
-                        case 20: gamemode += "Peaceful, "; break;
-                        default: gamemode += "Unknown, "; break;
-                    }
-                }
-            }
-            counter++;
+        let modeKey = window.timeKeeper.getCurrentMode();
+        let mode = window.CurrentModeNum;
+        let storage = {};
+        try {
+            storage = JSON.parse(localStorage["snake_timeKeeper"] || "{}");
+        } catch (e) {
+            storage = {};
         }
-        if (gamemode == "") {
-            gamemode = "Classic, ";
-        }
-        //gamemode = gamemode.substring(0, gamemode.lastIndexOf(","));
+
+        const gamemode = window.ModeRegistry
+            ? window.ModeRegistry.labelModeKey(modeKey)
+            : modeKey;
+
         mode_label = document.getElementById("mode-selected");
         mode_label2 = document.getElementById("mode-selected2");
 
-        mode_label.innerHTML = gamemode + window.HandleCount(count).substring(0, window.HandleCount(count).lastIndexOf(","));
+        if (window.daily_challenge) {
+            mode_label.innerHTML = "Daily Challenge";
+            mode_label2.innerHTML = "(TimeKeeper disabled)";
+            for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
+                const el = document.getElementById(score);
+                if (el) el.innerHTML = "";
+            }
+            return;
+        }
+
+        mode_label.innerHTML =
+            gamemode +
+            ", " +
+            window.HandleCount(count).substring(0, window.HandleCount(count).lastIndexOf(","));
         mode_label2.innerHTML = window.HandleSpeed(speed) + window.HandleSize(size);
 
-        //dialog = document.getElementById("speedinfo-popup-pudding");
+        const fmt = window.timeKeeper.formatTimeSrcStyle
+            ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
+            : function (ms) {
+                  return String(ms);
+              };
 
-        for (let score of ["att", "25", "50", "100", "ALL", "H"]) {
-            let name = score + "-" + modeStr + "-" + count + "-" + speed + "-" + size;
-            bold = document.getElementById(score);
-            if(window.daily_challenge) {
-                bold.innerHTML = '';
+        for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
+            const name = score + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
+            const bold = document.getElementById(score);
+            if (!bold) continue;
+
+            if (score == "att") {
+                const totalAttempts = typeof storage[name] === "number" ? storage[name] : 0;
+                bold.innerHTML = "Total Attempts: " + totalAttempts;
                 continue;
             }
 
-            if (typeof (storage[name]) != "undefined") {
-
-                if (score == "att") {
-                    totalAttempts = storage[name];
-                    bold.innerHTML = "Total Attempts: " + totalAttempts;
-                    continue;
-                }
-                else if (score == "H") {
-                    bold.innerHTML = "Highscore: " + storage[name].high;
-                    continue;
-                }
-
-                hours = Math.floor(storage[name].time / 3600000);
-                minutes = String(Math.floor((storage[name].time / 60000)-hours*60)).padStart(2, "0");
-                seconds = String(Math.floor((storage[name].time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                score_label = "ALL" === score ? "All" : score;
-                if(hours==0){
-                    bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
-                }else{
-                    bold.innerHTML = score_label + " Apples: " + hours + "h" + minutes + "m" + seconds + "s" + mseconds + "ms";
-                }
-
-            }
-            else {
+            // Match SRC visibility (100/YY50); Highscore always shown locally
+            if (!shouldShowCategory(score === "ALL" ? "All" : score, size, mode)) {
                 bold.innerHTML = "";
+                continue;
+            }
+
+            if (score == "H") {
+                if (typeof storage[name] != "undefined" && storage[name].high != null) {
+                    const highText = String(storage[name].high);
+                    bold.innerHTML =
+                        "Highscore: " +
+                        (canSubmitHighscore(mode, count)
+                            ? pbSubmitLink(highText, "H", mode, count, speed, size)
+                            : highText);
+                } else {
+                    bold.innerHTML = "Highscore: None";
+                }
+                continue;
+            }
+
+            const label = score === "ALL" ? "All Apples" : score + " Apples";
+            if (typeof storage[name] != "undefined" && storage[name].time != null) {
+                bold.innerHTML =
+                    label +
+                    ": " +
+                    pbSubmitLink(fmt(storage[name].time), score, mode, count, speed, size);
+            } else {
+                bold.innerHTML = label + ": None";
             }
         }
-
-        if(window.daily_challenge) {
-            mode_label.innerHTML = 'Daily Challenge'
-            mode_label2.innerHTML = '(TimeKeeper disabled)'
-        }
-
-    }
+    };
 
     window.HandleCount = function (count) {
         switch (count) {

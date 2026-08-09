@@ -77,6 +77,7 @@ window.PuddingMod.runCodeBefore = function () {
     "Theme",
     "DistinctVisual",
     "Counter",
+    "ModeRegistry",
     "TimeKeeper",
     "Fruit",
     "TopBar",

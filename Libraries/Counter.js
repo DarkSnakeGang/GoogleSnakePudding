@@ -159,11 +159,10 @@ window.Counter.alterCode = function (code) {
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
     window.wallCoords = [];
-    window.timeKeeper.playing = false;
     window.BootstrapHide();
     stats.plays.session++;
     stats.plays.lifetime++;
-    window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
+    window.timeKeeper.addAttempt();
     saveStatistics();
     stats.visible = true;
     if((window.CurrentModeNum != 1 && window.CurrentModeNum != 19) && stats.statShown == "walls"){
@@ -178,10 +177,9 @@ window.Counter.alterCode = function (code) {
 
     window.IncrementCounter = function(){
 
-        if(!window.timeKeeper.playing)
+        if(!window.timeKeeper.runStarted)
         {
             window.timeKeeper.start();
-            window.timeKeeper.playing = true;
         }
 
         stats.inputs.game++;
