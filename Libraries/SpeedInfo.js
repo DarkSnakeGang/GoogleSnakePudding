@@ -1145,7 +1145,7 @@ window.SpeedInfo.make = function () {
 
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
-        speedinfoBox.style.display = 'block';
+        speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'visible';
         window.pudding_settings.SpeedInfo = true;
 
@@ -1154,7 +1154,7 @@ window.SpeedInfo.make = function () {
 
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
-        speedinfoBox.style.display = 'block';
+        speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
         document.getElementById('AlwaysOnTimeKeeper').checked = false;
@@ -1173,39 +1173,55 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style = window.puddingSidebarStyle;
         speedinfoBox.id = 'speedinfo-popup-pudding';
         speedinfoBox.style.visibility = 'hidden';
+        speedinfoBox.style.display = 'flex';
+        speedinfoBox.style.flexDirection = 'column';
+        speedinfoBox.style.boxSizing = 'border-box';
         window.speedinfoInput = speedinfoBox;
+        const siSection =
+            "margin:0 0 6px;padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.22);";
+        const siLabel =
+            "margin:3px;color:white;font-family:Roboto,Arial,sans-serif;";
+        const siTitle =
+            "font-weight:bold;color:white;font-family:Roboto,Arial,sans-serif;";
         speedinfoBox.innerHTML = `
 
+        <div id="si-main" style="flex:1;min-height:0;overflow:hidden;">
+        <div id="si-personal" style="${siSection}">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 3px;">
-        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;">Speed Info</span>
+        <span style="${siTitle}">Speed Info</span>
         <button class="btn" style="margin:0;padding:2px 8px;font-size:12px;line-height:1.2;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Details</button>
         </div>
-        <label id="mode-selected" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="mode-selected2" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="25" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="50" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="100" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="ALL" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="H" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="att" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <label id="mode-selected" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="mode-selected2" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="25" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="50" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="100" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="ALL" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="H" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="att" class="form-check-label" style="${siLabel}"></label><br>
+        </div>
 
-        <div id="src-section">
-        <span style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">SRC World Records</span>
-        <label id="25src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="50src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="100src" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="Allsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="Hsrc" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <div id="tracking-section" style="display:none;">
-        <span id="tracking-label" style="text-decoration: underline;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Tracking</span>
-        <label id="25track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="50track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="100track" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="Alltrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
-        <label id="Htrack" class="form-check-label" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;"></label><br>
+        <div id="src-section" style="${siSection}">
+        <span style="${siTitle}display:flex;justify-content:center;align-items:center;text-align:center;">SRC World Records</span>
+        <label id="25src" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="50src" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="100src" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="Allsrc" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="Hsrc" class="form-check-label" style="${siLabel}"></label><br>
+        </div>
+
+        <div id="tracking-section" style="display:none;${siSection}">
+        <span id="tracking-label" style="${siTitle}display:flex;justify-content:center;align-items:center;text-align:center;">Tracking</span>
+        <label id="25track" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="50track" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="100track" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="Alltrack" class="form-check-label" style="${siLabel}"></label><br>
+        <label id="Htrack" class="form-check-label" style="${siLabel}"></label><br>
         </div>
         </div>
-        <br>
+
+        <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
+
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
 
   `;
