@@ -83,6 +83,8 @@ window.TimeKeeper.make = function () {
         if (score == 25 || score == 50 || score == 100) {
             window.timeKeeper.savePB(time, score);
         }
+        // Mirror milestone PBs: refresh Highscore as soon as this run beats the stored best
+        window.timeKeeper.updateHighscoreLive(time, score);
     };
 
     window.timeKeeper.gotAll = function (time, score) {
@@ -143,6 +145,50 @@ window.TimeKeeper.make = function () {
         return getSelectedIndex(name);
     };
 
+    // Mid-run: write Highscore PB when the current apple count beats the stored best
+    // (does not touch sum — death still accumulates run totals for average).
+    window.timeKeeper.updateHighscoreLive = function (time, score) {
+        const ctx = window.timeKeeper.resolveRunContext();
+        if (!window.timeKeeper.shouldTrack(ctx)) return;
+        if (typeof score !== "number" || isNaN(score)) return;
+
+        time = Math.floor(time);
+        const storage = window.timeKeeper.getStorage();
+        const name = window.timeKeeper.buildKey("H", ctx);
+        const appleTime =
+            typeof window.timeKeeper.lastAppleTime !== "undefined"
+                ? window.timeKeeper.lastAppleTime
+                : time;
+        const appleDate =
+            typeof window.timeKeeper.lastAppleDate !== "undefined"
+                ? window.timeKeeper.lastAppleDate
+                : new Date();
+
+        if (typeof storage[name] == "undefined") {
+            storage[name] = {
+                high: score,
+                time: appleTime,
+                date: appleDate,
+                sum: 0,
+            };
+            window.timeKeeper.setStorage(storage);
+            window.timeKeeper.refreshSpeedInfo();
+            return;
+        }
+
+        const cur = storage[name];
+        if (
+            score > cur.high ||
+            (score == cur.high && appleTime < cur.time)
+        ) {
+            cur.high = score;
+            cur.time = appleTime;
+            cur.date = appleDate;
+            window.timeKeeper.setStorage(storage);
+            window.timeKeeper.refreshSpeedInfo();
+        }
+    };
+
     window.timeKeeper.saveScore = function (time, score) {
         const ctx = window.timeKeeper.resolveRunContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
@@ -165,6 +211,7 @@ window.TimeKeeper.make = function () {
                 sum: score,
             };
         } else {
+            if (typeof storage[name].sum !== "number") storage[name].sum = 0;
             storage[name].sum += score;
             if (
                 score > storage[name].high ||
