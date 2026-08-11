@@ -366,7 +366,7 @@ window.CustomBowl.make = function () {
                 </div>
                 <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:15px;margin:0 0 12px 0;text-align:center;"></div>
                 <div id="fruit-bowl-grid" style="padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;"></div>
-                <button type="button" class="btn" style="margin:8px auto 0;display:block;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:auto;min-width:72px;padding:4px 14px;font-size:12px;line-height:1.2;" id="fruit-bowl-close">Close</button>
+                <button type="button" class="btn" style="margin:8px auto 0;display:block;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="fruit-bowl-close">Close</button>
             `;
             host.appendChild(panel);
             applyPanelTheme(panel);

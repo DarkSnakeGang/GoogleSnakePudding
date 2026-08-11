@@ -693,7 +693,10 @@ window.TimeKeeper.make = function () {
         buttonClose.addEventListener("click", function () {
             window.timeKeeper.toggleDialog();
         });
-        buttonClose.style = "color:white;background-color:" + window.button_color + ";";
+        buttonClose.style =
+            "display:block;margin:12px auto 0;color:white;background-color:" +
+            window.button_color +
+            ";";
         buttonClose.className = "btn";
         dialog.appendChild(buttonClose);
 

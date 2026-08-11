@@ -29,18 +29,33 @@ window.BootstrapMenu.make = function () {
 
     // Get the button by its jsname attribute
     window.random_button = document.querySelector(`[jsname="${random_button_jsname}"]`);
+    if (window.random_button) {
+        window._randomButtonOriginalHtml = window.random_button.innerHTML;
+        window._randomButtonOriginalColor = window.random_button.style.color || "";
+    }
+
+    window.applyRandomButtonState = function (disabled) {
+        const btn = window.random_button;
+        if (!btn) return;
+        if (disabled) {
+            btn.style.pointerEvents = "none";
+            btn.textContent = "Disabled";
+            btn.style.color = "grey";
+        } else {
+            btn.style.pointerEvents = "auto";
+            if (window._randomButtonOriginalHtml != null) {
+                btn.innerHTML = window._randomButtonOriginalHtml;
+            } else {
+                btn.textContent = "Shuffle";
+            }
+            btn.style.color = window._randomButtonOriginalColor || "";
+        }
+    };
 
     // Disable the button
     window.ToggleRandom = function () {
         window.pudding_settings.DisableRandom = !window.pudding_settings.DisableRandom;
-        if (window.pudding_settings.DisableRandom) {
-            // Disable it
-            random_button.style.pointerEvents = 'none';
-        }
-        else {
-            // Enable it
-            random_button.style.pointerEvents = 'auto';
-        }
+        window.applyRandomButtonState(window.pudding_settings.DisableRandom);
     }
 
     window.ToggleScrollbar = function () {
@@ -160,7 +175,7 @@ window.BootstrapMenu.make = function () {
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show SpeedInfo</label>
+    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Speed Info</label>
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
@@ -169,6 +184,10 @@ window.BootstrapMenu.make = function () {
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
     <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
+    </div>
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
+    <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
     </div>
     <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
     <div class="form-check form-check-inline">
@@ -230,15 +249,7 @@ window.BootstrapMenu.make = function () {
         randombtn_checkbox = document.getElementById("DisableRandom");
         randombtn_checkbox.addEventListener("change", window.ToggleRandom);
         randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
-
-        if (window.pudding_settings.DisableRandom) {
-            // Disable it
-            random_button.style.pointerEvents = 'none';
-        }
-        else {
-            // Enable it
-            random_button.style.pointerEvents = 'auto';
-        }
+        window.applyRandomButtonState(window.pudding_settings.DisableRandom);
 
         scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
@@ -252,6 +263,16 @@ window.BootstrapMenu.make = function () {
             // Enable it
             document.body.style.overflow = '';
         }
+
+        const saveGameSettingsCheckbox = document.getElementById("SaveGameSettings");
+        if (typeof window.pudding_settings.SaveGameSettings !== "boolean") {
+            window.pudding_settings.SaveGameSettings = true;
+        }
+        saveGameSettingsCheckbox.checked = !!window.pudding_settings.SaveGameSettings;
+        saveGameSettingsCheckbox.addEventListener("change", function () {
+            window.pudding_settings.SaveGameSettings = !!saveGameSettingsCheckbox.checked;
+            if (typeof window.saveSettings === "function") window.saveSettings();
+        });
 
         if (localStorage.getItem('snakeChosenMod') === "PuddingMod" || window.NepDebug) {
             EatThemeRandomizer.style.display = 'none';
@@ -367,6 +388,9 @@ window.BootstrapMenu.make = function () {
 
     const playButton = 'NSjDf';
     document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
+        if (typeof window.saveCurrentGameSettings === "function") {
+            window.saveCurrentGameSettings();
+        }
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
             if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
@@ -390,5 +414,12 @@ window.BootstrapMenu.alterCode = function (code) {
     {
         window.SpeedInfoShow();
     }
+    // After patched game is live: restore saved selectors once per page load
+    // (applySavedGameSettingsOnce polls until #trophy exists)
+    setTimeout(function () {
+        if (typeof window.applySavedGameSettingsOnce === "function") {
+            window.applySavedGameSettingsOnce();
+        }
+    }, 0);
     return code;
 }

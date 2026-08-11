@@ -317,7 +317,7 @@ window.Timer = {
 </div>
 
 </div>
-<button type="button" class="btn" id="close-box" style="margin:10px auto 2px;display:block;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;width:auto;min-width:72px;padding:4px 14px;font-size:12px;line-height:1.2;">Close</button>
+<button type="button" class="btn" id="close-box" style="margin:10px auto 2px;display:block;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;">Close</button>
         `
         const backdrop = document.createElement('div')
         backdrop.id = 'edit-box-backdrop'

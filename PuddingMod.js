@@ -1790,7 +1790,10 @@ window.TimeKeeper.make = function () {
         buttonClose.addEventListener("click", function () {
             window.timeKeeper.toggleDialog();
         });
-        buttonClose.style = "color:white;background-color:" + window.button_color + ";";
+        buttonClose.style =
+            "display:block;margin:12px auto 0;color:white;background-color:" +
+            window.button_color +
+            ";";
         buttonClose.className = "btn";
         dialog.appendChild(buttonClose);
 
@@ -2577,6 +2580,17 @@ window.SettingsSaver.make = function () {
     const COUNT_KEYS = ["0", "1", "2", "3", "4", "5", "6"];
     const COUNT_MINIMA = { 0: 1, 1: 3, 2: 5, 3: 10, 4: 6, 5: 24, 6: 5 };
 
+    const GAME_SETTING_KEYS = [
+        "trophy",
+        "count",
+        "speed",
+        "size",
+        "graphics",
+        "theme",
+        "color",
+        "apple",
+    ];
+
     function defaultPoolForCount(count) {
         const min = COUNT_MINIMA[count] || 1;
         const pool = [];
@@ -2631,7 +2645,9 @@ window.SettingsSaver.make = function () {
                 SelectedPairsByCount: {},
                 DisableRandom: false,
                 randomizeThemeApple: false,
-                ScrollBar: false
+                ScrollBar: false,
+                SaveGameSettings: true,
+                SavedGameSettings: null,
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
@@ -2652,6 +2668,15 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.TrackedPlayerName !== 'string') {
                 pudding_settings.TrackedPlayerName = "";
+            }
+            if (typeof pudding_settings.SaveGameSettings !== 'boolean') {
+                pudding_settings.SaveGameSettings = true;
+            }
+            if (
+                pudding_settings.SavedGameSettings !== null &&
+                typeof pudding_settings.SavedGameSettings !== 'object'
+            ) {
+                pudding_settings.SavedGameSettings = null;
             }
             pudding_settings = migrateSelectedPairsByCount(pudding_settings);
             pudding_settings.SelectedPairs = pudding_settings.SelectedPairsByCount["0"];
@@ -2676,6 +2701,189 @@ window.SettingsSaver.make = function () {
             localStorage.setItem('PuddingSettings', JSON.stringify(s));
         }
     }
+
+    // Read selected child index for a Google Snake selector row
+    window.readGameSettingIndex = function (selectorId) {
+        const root = document.getElementById(selectorId);
+        if (!root || !root.children || !root.children.length) return 0;
+
+        // Selected icon uses tuJOWd (optionally with other classes)
+        for (let i = 0; i < root.children.length; i++) {
+            const el = root.children[i];
+            const cls = el.className || "";
+            if (cls === "tuJOWd" || cls === "DqMRee tuJOWd" || cls === "DqMRee") return i;
+            if (el.classList && el.classList.contains("tuJOWd")) return i;
+        }
+
+        // Odd-class-out (trophy / count style)
+        const classNames = [];
+        let notUnique = "";
+        for (const el of root.children) {
+            if (classNames.indexOf(el.className) === -1) classNames.push(el.className);
+            else {
+                notUnique = el.className;
+                break;
+            }
+        }
+        if (notUnique) {
+            let n = 0;
+            for (const el of root.children) {
+                if (el.className !== notUnique) return n;
+                n++;
+            }
+        }
+        return 0;
+    };
+
+    window.clickGameSettingIndex = function (selectorId, index) {
+        let i = Number(index);
+        if (isNaN(i) || i < 0) i = 0;
+
+        // Google's p7 selector (scroll + settings object). Child .click() does not stick.
+        if (typeof window.puddingMenuSelect === "function") {
+            return window.puddingMenuSelect(selectorId, i);
+        }
+        return false;
+    };
+
+    window._openSnakeSettingsPanel = function () {
+        const gear =
+            document.querySelector('div[jsname="iyH4Cb"]') ||
+            document.querySelector('div[jsname^="iyH4Cb"]');
+        if (gear && typeof gear.click === "function") {
+            gear.click();
+            return true;
+        }
+        return false;
+    };
+
+    window._closeSnakeSettingsPanel = function () {
+        // Native back control uses class p17HVe
+        const back =
+            document.querySelector(".p17HVe") ||
+            document.querySelector('[class^="p17HVe"]') ||
+            document.querySelector('[class*="p17HVe"]');
+        if (back && typeof back.click === "function") {
+            back.click();
+            return true;
+        }
+        return false;
+    };
+
+    window.saveCurrentGameSettings = function () {
+        if (!window.pudding_settings) return;
+        const snap = {};
+        for (const key of GAME_SETTING_KEYS) {
+            snap[key] = window.readGameSettingIndex(key);
+        }
+        // Prefer live vars when DOM class detection is ambiguous
+        if (typeof window.graphics_selected === "number") {
+            snap.graphics = window.graphics_selected;
+        }
+        if (typeof window.fruit_selected === "number") {
+            snap.apple = window.fruit_selected;
+        }
+        window.pudding_settings.SavedGameSettings = snap;
+        if (typeof window.saveSettings === "function") window.saveSettings();
+    };
+
+    window.applySavedGameSettingsOnce = function () {
+        if (window._puddingGameSettingsApplied) return;
+
+        const s = window.pudding_settings;
+        if (!s || !s.SaveGameSettings) {
+            window._puddingGameSettingsApplied = true;
+            return;
+        }
+        const snap = s.SavedGameSettings;
+        if (!snap || typeof snap !== "object") {
+            window._puddingGameSettingsApplied = true;
+            return;
+        }
+
+        const gear =
+            document.querySelector('div[jsname="iyH4Cb"]') ||
+            document.querySelector('div[jsname^="iyH4Cb"]');
+        const trophy = document.getElementById("trophy");
+        const p7Ready = typeof window._puddingSnakeP7 === "function";
+
+        if (!gear || !trophy || !trophy.children || !trophy.children.length || !p7Ready) {
+            if (typeof window._puddingGameSettingsApplyTries !== "number") {
+                window._puddingGameSettingsApplyTries = 0;
+            }
+            window._puddingGameSettingsApplyTries++;
+            if (window._puddingGameSettingsApplyTries > 100) {
+                window._puddingGameSettingsApplied = true;
+                return;
+            }
+            setTimeout(window.applySavedGameSettingsOnce, 50);
+            return;
+        }
+
+        window._puddingGameSettingsApplied = true;
+
+        // Open settings → wait until menu is live → apply via p7 → back (p17HVe).
+        window._openSnakeSettingsPanel();
+
+        const order = [
+            "trophy",
+            "count",
+            "speed",
+            "size",
+            "graphics",
+            "theme",
+            "color",
+            "apple",
+        ];
+
+        let waitTries = 0;
+        function waitMenuThenApply() {
+            waitTries++;
+            const menu = window._puddingSnakeMenu;
+            const ready =
+                menu &&
+                menu.oa === "settings" &&
+                typeof window._puddingSnakeP7 === "function";
+
+            if (!ready) {
+                if (waitTries > 80) {
+                    // Still try back so we don't leave settings open
+                    window._closeSnakeSettingsPanel();
+                    return;
+                }
+                setTimeout(waitMenuThenApply, 50);
+                return;
+            }
+
+            for (const key of order) {
+                if (typeof snap[key] === "number") {
+                    window.puddingMenuSelect(key, snap[key]);
+                }
+            }
+
+            setTimeout(function () {
+                window._closeSnakeSettingsPanel();
+            }, 100);
+        }
+
+        setTimeout(waitMenuThenApply, 50);
+    };
+
+    // Public helper used after alterCode exposes Google's selector.
+    window.puddingMenuSelect = function (id, index) {
+        const menu = window._puddingSnakeMenu;
+        const p7 = window._puddingSnakeP7;
+        if (!menu || typeof p7 !== "function") return false;
+        const row =
+            (menu.ka && menu.ka.iW && menu.ka.iW.get(id)) ||
+            document.getElementById(id);
+        if (!row || !row.children || !row.children.length) return false;
+        let i = Number(index);
+        if (isNaN(i) || i < 0) i = 0;
+        if (i >= row.children.length) i = row.children.length - 1;
+        p7(menu, row, true, i);
+        return true;
+    };
 }
 
 window.SettingsSaver.alterCode = function (code) {
@@ -2693,6 +2901,24 @@ window.SettingsSaver.alterCode = function (code) {
     save_settings_code = `stop\(a\){saveSettings();`
 
     code = code.assertReplace(stop_regex, save_settings_code);
+
+    // Expose Google's menu selector (p7). Child element .click() does not change settings;
+    // selection is scroll-position based and writes a.settings.* inside this function.
+    const menuSelectRegex = /([a-zA-Z0-9_$]{1,8})=function\(a,b,c,d=-1\)\{d=d!==-1\?d:([a-zA-Z0-9_$]{1,8})\(a,b\);for\(var e=0;e<b\.children\.length/;
+    catchError(menuSelectRegex, code);
+    code = code.assertReplace(
+        menuSelectRegex,
+        `$1=window._puddingSnakeP7=function(a,b,c,d=-1){window._puddingSnakeMenu=a;d=d!==-1?d:$2(a,b);for(var e=0;e<b.children.length`
+    );
+
+    // Capture menu when native settings open (Ec).
+    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.oa="settings";/;
+    catchError(openSettingsRegex, code);
+    code = code.assertReplace(
+        openSettingsRegex,
+        `$1(){var a=this.menu;window._puddingSnakeMenu=a;a.oa="settings";`
+    );
+
     return code;
 }
 window.SpeedInfo = {};
@@ -4634,7 +4860,7 @@ window.Timer = {
 </div>
 
 </div>
-<button type="button" class="btn" id="close-box" style="margin:10px auto 2px;display:block;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;width:auto;min-width:72px;padding:4px 14px;font-size:12px;line-height:1.2;">Close</button>
+<button type="button" class="btn" id="close-box" style="margin:10px auto 2px;display:block;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;">Close</button>
         `
         const backdrop = document.createElement('div')
         backdrop.id = 'edit-box-backdrop'
@@ -5311,18 +5537,33 @@ window.BootstrapMenu.make = function () {
 
     // Get the button by its jsname attribute
     window.random_button = document.querySelector(`[jsname="${random_button_jsname}"]`);
+    if (window.random_button) {
+        window._randomButtonOriginalHtml = window.random_button.innerHTML;
+        window._randomButtonOriginalColor = window.random_button.style.color || "";
+    }
+
+    window.applyRandomButtonState = function (disabled) {
+        const btn = window.random_button;
+        if (!btn) return;
+        if (disabled) {
+            btn.style.pointerEvents = "none";
+            btn.textContent = "Disabled";
+            btn.style.color = "grey";
+        } else {
+            btn.style.pointerEvents = "auto";
+            if (window._randomButtonOriginalHtml != null) {
+                btn.innerHTML = window._randomButtonOriginalHtml;
+            } else {
+                btn.textContent = "Shuffle";
+            }
+            btn.style.color = window._randomButtonOriginalColor || "";
+        }
+    };
 
     // Disable the button
     window.ToggleRandom = function () {
         window.pudding_settings.DisableRandom = !window.pudding_settings.DisableRandom;
-        if (window.pudding_settings.DisableRandom) {
-            // Disable it
-            random_button.style.pointerEvents = 'none';
-        }
-        else {
-            // Enable it
-            random_button.style.pointerEvents = 'auto';
-        }
+        window.applyRandomButtonState(window.pudding_settings.DisableRandom);
     }
 
     window.ToggleScrollbar = function () {
@@ -5442,7 +5683,7 @@ window.BootstrapMenu.make = function () {
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show SpeedInfo</label>
+    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Speed Info</label>
     </div>
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
@@ -5451,6 +5692,10 @@ window.BootstrapMenu.make = function () {
     <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
     <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
+    </div>
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
+    <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
     </div>
     <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
     <div class="form-check form-check-inline">
@@ -5512,15 +5757,7 @@ window.BootstrapMenu.make = function () {
         randombtn_checkbox = document.getElementById("DisableRandom");
         randombtn_checkbox.addEventListener("change", window.ToggleRandom);
         randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
-
-        if (window.pudding_settings.DisableRandom) {
-            // Disable it
-            random_button.style.pointerEvents = 'none';
-        }
-        else {
-            // Enable it
-            random_button.style.pointerEvents = 'auto';
-        }
+        window.applyRandomButtonState(window.pudding_settings.DisableRandom);
 
         scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
         scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
@@ -5534,6 +5771,16 @@ window.BootstrapMenu.make = function () {
             // Enable it
             document.body.style.overflow = '';
         }
+
+        const saveGameSettingsCheckbox = document.getElementById("SaveGameSettings");
+        if (typeof window.pudding_settings.SaveGameSettings !== "boolean") {
+            window.pudding_settings.SaveGameSettings = true;
+        }
+        saveGameSettingsCheckbox.checked = !!window.pudding_settings.SaveGameSettings;
+        saveGameSettingsCheckbox.addEventListener("change", function () {
+            window.pudding_settings.SaveGameSettings = !!saveGameSettingsCheckbox.checked;
+            if (typeof window.saveSettings === "function") window.saveSettings();
+        });
 
         if (localStorage.getItem('snakeChosenMod') === "PuddingMod" || window.NepDebug) {
             EatThemeRandomizer.style.display = 'none';
@@ -5649,6 +5896,9 @@ window.BootstrapMenu.make = function () {
 
     const playButton = 'NSjDf';
     document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
+        if (typeof window.saveCurrentGameSettings === "function") {
+            window.saveCurrentGameSettings();
+        }
         window.BootstrapHide();
         if (window.isSnakeMobileVersion) {
             if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
@@ -5672,6 +5922,13 @@ window.BootstrapMenu.alterCode = function (code) {
     {
         window.SpeedInfoShow();
     }
+    // After patched game is live: restore saved selectors once per page load
+    // (applySavedGameSettingsOnce polls until #trophy exists)
+    setTimeout(function () {
+        if (typeof window.applySavedGameSettingsOnce === "function") {
+            window.applySavedGameSettingsOnce();
+        }
+    }, 0);
     return code;
 }
 window.ResetKey = {}
@@ -6127,7 +6384,7 @@ window.CustomBowl.make = function () {
                 </div>
                 <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:15px;margin:0 0 12px 0;text-align:center;"></div>
                 <div id="fruit-bowl-grid" style="padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;"></div>
-                <button type="button" class="btn" style="margin:8px auto 0;display:block;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;width:auto;min-width:72px;padding:4px 14px;font-size:12px;line-height:1.2;" id="fruit-bowl-close">Close</button>
+                <button type="button" class="btn" style="margin:8px auto 0;display:block;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="fruit-bowl-close">Close</button>
             `;
             host.appendChild(panel);
             applyPanelTheme(panel);
@@ -6452,4 +6709,8 @@ window.PuddingMod.runCodeAfter = function () {
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 
+  // Belt-and-suspenders: menu may not exist until after alterCode's setTimeout(0)
+  if (typeof window.applySavedGameSettingsOnce === "function") {
+    setTimeout(window.applySavedGameSettingsOnce, 0);
+  }
 };
