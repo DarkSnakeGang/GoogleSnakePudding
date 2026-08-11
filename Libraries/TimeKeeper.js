@@ -24,12 +24,13 @@ window.TimeKeeper.make = function () {
         }
     };
 
+    // Prefer frozen run settings (no #trophy walk) once a run has started.
     window.timeKeeper.shouldTrack = function (ctx) {
         if (window.daily_challenge) return false;
         if (typeof window.aimTrainer !== "undefined" || typeof window.megaWholeSnakeObject !== "undefined") {
             return false;
         }
-        const c = ctx || window.timeKeeper.resolveRunContext();
+        const c = ctx || window.timeKeeper.getSaveContext();
         if (c.count > 6 || c.speed > 2 || c.size > 2) return false;
         return true;
     };
@@ -64,7 +65,7 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.buildKey = function (prefix, ctx) {
-        const c = ctx || window.timeKeeper.resolveRunContext();
+        const c = ctx || window.timeKeeper.getSaveContext();
         return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
     };
 
@@ -164,7 +165,7 @@ window.TimeKeeper.make = function () {
         if (window.pudding_settings && window.pudding_settings.randomizeThemeApple) {
             window.setTheme(window.getRandomThemeName());
         }
-        if (!window.timeKeeper.shouldTrack()) return;
+        if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
 
         window.timeKeeper.ensurePlaying();
         window.timeKeeper.lastAppleDate = new Date();
@@ -178,7 +179,7 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.gotAll = function (time, score) {
-        if (!window.timeKeeper.shouldTrack()) return;
+        if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
         window.timeKeeper.ensurePlaying();
         window.timeKeeper.savePB(time, "ALL");
         // End of successful run: persist mid-run PB/HS memory
@@ -186,7 +187,7 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.death = function (time, score) {
-        if (!window.timeKeeper.shouldTrack()) {
+        if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) {
             window.timeKeeper.playing = false;
             return;
         }
