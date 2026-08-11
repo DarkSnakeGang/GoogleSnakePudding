@@ -1617,6 +1617,22 @@ window.TimeKeeper.make = function () {
         const btn = document.getElementById("time-keeper");
         if (btn) btn.innerHTML = "Hide";
 
+        const body = document.querySelector("body");
+        const oldBd = document.getElementById("timeKeeperBackdrop");
+        if (oldBd) oldBd.remove();
+        const oldDialog = document.getElementById("timeKeeperDialog");
+        if (oldDialog) oldDialog.remove();
+
+        const backdrop = document.createElement("div");
+        backdrop.id = "timeKeeperBackdrop";
+        backdrop.style.cssText =
+            "position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:10099;" +
+            "background:rgba(0,0,0,0.45);";
+        backdrop.addEventListener("click", function () {
+            window.timeKeeper.hideDialog();
+        });
+        body.insertBefore(backdrop, body.firstChild);
+
         const dialog = document.createElement("div");
         dialog.setAttribute("open", "");
         dialog.setAttribute("id", "timeKeeperDialog");
@@ -1763,13 +1779,14 @@ window.TimeKeeper.make = function () {
                 ";color:white;font-family:Roboto,Arial;min-width:420px;max-width:560px;"
         );
         dialog.classList.add("custom-dialog");
-        const body = document.querySelector("body");
         body.insertBefore(dialog, body.firstChild);
     };
 
     window.timeKeeper.hideDialog = function () {
         const child = document.getElementById("timeKeeperDialog");
         if (child && child.parentElement) child.parentElement.removeChild(child);
+        const backdrop = document.getElementById("timeKeeperBackdrop");
+        if (backdrop && backdrop.parentElement) backdrop.parentElement.removeChild(backdrop);
         window.timeKeeper.dialogActive = false;
         const btn = document.getElementById("time-keeper");
         if (btn) btn.innerHTML = "Details";
@@ -4390,9 +4407,16 @@ window.Timer = {
     window.editTimer = function() {
       // console.warn(window.themes)
 
+      function closeEditBox() {
+        const box = document.getElementById('edit-box')
+        const bd = document.getElementById('edit-box-backdrop')
+        if (box) box.remove()
+        if (bd) bd.remove()
+      }
+
       let editBox = document.getElementById('edit-box')
       if(editBox) {
-        editBox.remove()
+        closeEditBox()
       } else {
         const theme = window.themes[getSelected('#theme', 'DqMRee tuJOWd') || getSelected('#theme', 'tuJOWd')]
 
@@ -4592,8 +4616,15 @@ window.Timer = {
 
 </div>
         `
+        const backdrop = document.createElement('div')
+        backdrop.id = 'edit-box-backdrop'
+        backdrop.style.cssText =
+          'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:999999;' +
+          'background:rgba(0,0,0,0.45);'
+        backdrop.addEventListener('click', closeEditBox)
+        document.body.appendChild(backdrop)
         document.body.appendChild(editBox)
-        document.getElementById('close-box').addEventListener('click', function() { document.getElementById('edit-box').remove() })
+        document.getElementById('close-box').addEventListener('click', closeEditBox)
 
         const wrholders_checkbox = document.getElementById('ShowWrHolders')
         const tracked_input = document.getElementById('TrackedPlayerInput')

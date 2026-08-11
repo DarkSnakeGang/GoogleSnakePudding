@@ -117,9 +117,16 @@ window.Timer = {
     window.editTimer = function() {
       // console.warn(window.themes)
 
+      function closeEditBox() {
+        const box = document.getElementById('edit-box')
+        const bd = document.getElementById('edit-box-backdrop')
+        if (box) box.remove()
+        if (bd) bd.remove()
+      }
+
       let editBox = document.getElementById('edit-box')
       if(editBox) {
-        editBox.remove()
+        closeEditBox()
       } else {
         const theme = window.themes[getSelected('#theme', 'DqMRee tuJOWd') || getSelected('#theme', 'tuJOWd')]
 
@@ -319,8 +326,15 @@ window.Timer = {
 
 </div>
         `
+        const backdrop = document.createElement('div')
+        backdrop.id = 'edit-box-backdrop'
+        backdrop.style.cssText =
+          'position:fixed;left:0;top:0;width:100vw;height:100vh;z-index:999999;' +
+          'background:rgba(0,0,0,0.45);'
+        backdrop.addEventListener('click', closeEditBox)
+        document.body.appendChild(backdrop)
         document.body.appendChild(editBox)
-        document.getElementById('close-box').addEventListener('click', function() { document.getElementById('edit-box').remove() })
+        document.getElementById('close-box').addEventListener('click', closeEditBox)
 
         const wrholders_checkbox = document.getElementById('ShowWrHolders')
         const tracked_input = document.getElementById('TrackedPlayerInput')
