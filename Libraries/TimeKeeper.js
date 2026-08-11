@@ -5,8 +5,9 @@ window.TimeKeeper.make = function () {
     storage v4:
     att-modeKey-count-speed-size : number of started attempts
     25|50|100|ALL-modeKey-count-speed-size: {time, date, att, sum}
-    H-modeKey-count-speed-size: {high, time, date, sum}
+    H-modeKey-count-speed-size: {high, time, date, sum, att}
     modeKey = classic | wall | ... | peaceful | wall+portal (blender)
+    H.att = scored deaths contributing to sum (average = sum/att)
     */
     window.timeKeeper = {};
     window.timeKeeper.debug = false;
@@ -190,6 +191,7 @@ window.TimeKeeper.make = function () {
                 time: appleTime,
                 date: appleDate,
                 sum: 0,
+                att: 0,
             };
             window.timeKeeper.setStorage(storage);
             window.timeKeeper.refreshSpeedInfo();
@@ -229,10 +231,18 @@ window.TimeKeeper.make = function () {
                 time: window.timeKeeper.lastAppleTime,
                 date: window.timeKeeper.lastAppleDate,
                 sum: score,
+                att: 1,
             };
         } else {
             if (typeof storage[name].sum !== "number") storage[name].sum = 0;
+            // Legacy H rows lack att — approximate prior deaths from total attempts
+            if (typeof storage[name].att !== "number") {
+                const attKey = window.timeKeeper.buildKey("att", ctx);
+                const attempts = typeof storage[attKey] === "number" ? storage[attKey] : 0;
+                storage[name].att = attempts > 0 ? attempts : 0;
+            }
             storage[name].sum += score;
+            storage[name].att += 1;
             if (
                 score > storage[name].high ||
                 (score == storage[name].high && time < storage[name].time)
@@ -347,13 +357,21 @@ window.TimeKeeper.make = function () {
         const storage = window.timeKeeper.getStorage();
         const ctx = window.timeKeeper.resolveRunContext();
         const name = window.timeKeeper.buildKey("H", ctx);
-        const attKey = window.timeKeeper.buildKey("att", ctx);
-        const att = typeof storage[attKey] === "number" ? storage[attKey] : 0;
+        const existing = storage[name];
+        // Prefer existing death count; else fall back to total attempts for manual edits
+        let att =
+            existing && typeof existing.att === "number" && existing.att > 0
+                ? existing.att
+                : typeof storage[window.timeKeeper.buildKey("att", ctx)] === "number"
+                  ? storage[window.timeKeeper.buildKey("att", ctx)]
+                  : 0;
+        if (!(att > 0)) att = 1;
         storage[name] = {
             high: highscore,
             time: time,
             date: new Date(),
             sum: average * att,
+            att: att,
         };
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.refreshSpeedInfo();
@@ -371,6 +389,20 @@ window.TimeKeeper.make = function () {
         ).padStart(3, "0");
         if (hours == 0) return minutes + ":" + seconds + ":" + mseconds;
         return hours + ":" + minutes + ":" + seconds + ":" + mseconds;
+    };
+
+    // Short local stamp — no timezone / weekday noise
+    window.timeKeeper.formatAchievedOn = function (raw) {
+        const date = new Date(raw);
+        if (isNaN(date.getTime())) return "—";
+        return date.toLocaleString(undefined, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+        });
     };
 
     // ms → SRC-like 1m2s345ms (shared with SpeedInfo personal rows)
@@ -466,6 +498,20 @@ window.TimeKeeper.make = function () {
             console.error("TimeKeeper storage version unexpected:", storage.version);
             storage.version = 4;
         }
+
+        // Backfill H.att for legacy highscore rows (average used to divide by total attempts)
+        for (const key of Object.keys(storage)) {
+            if (key === "version" || key.slice(0, 2) !== "H-") continue;
+            const rec = storage[key];
+            if (!rec || typeof rec !== "object") continue;
+            if (typeof rec.att === "number") continue;
+            const attKey = "att" + key.slice(1);
+            const attempts = storage[attKey];
+            if (typeof attempts === "number" && attempts > 0) {
+                rec.att = attempts;
+            }
+        }
+
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
     };
 
@@ -514,69 +560,95 @@ window.TimeKeeper.make = function () {
 
         dialog.appendChild(document.createElement("br"));
         dialog.appendChild(document.createElement("br"));
+
         const storage = window.timeKeeper.getStorage();
-        let totalAttempts = 0;
+        const attKey = window.timeKeeper.buildKey("att", ctx);
+        const totalAttempts = typeof storage[attKey] === "number" ? storage[attKey] : 0;
 
-        for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
-            const name = window.timeKeeper.buildKey(score, ctx);
-            if (typeof storage[name] == "undefined") continue;
+        const cellStyle =
+            "box-sizing:border-box;padding:6px 8px;border:1px solid rgba(255,255,255,0.22);border-radius:6px;min-width:0;";
 
-            const label = document.createElement("span");
-            switch (score) {
-                case "25": label.appendChild(document.createTextNode("25 Apples:")); break;
-                case "50": label.appendChild(document.createTextNode("50 Apples:")); break;
-                case "100": label.appendChild(document.createTextNode("100 Apples:")); break;
-                case "ALL": label.appendChild(document.createTextNode("All Apples:")); break;
-                case "att": label.appendChild(document.createTextNode("Total Attempts: ")); break;
-                case "H": label.appendChild(document.createTextNode("Highscore: ")); break;
-                default: break;
-            }
-            dialog.appendChild(label);
-
-            if (score == "att") {
-                totalAttempts = storage[name];
-                dialog.appendChild(document.createTextNode(totalAttempts));
-                dialog.appendChild(document.createElement("br"));
-                dialog.appendChild(document.createElement("br"));
-                continue;
-            }
-
-            if (score == "H") {
-                dialog.appendChild(document.createTextNode(storage[name].high));
-            }
-            dialog.appendChild(document.createElement("br"));
-
-            const bestLabel = score == "H" ? "Duration: " : "Best Time: ";
-            dialog.appendChild(
-                document.createTextNode(bestLabel + window.timeKeeper.formatDuration(storage[name].time))
-            );
-            dialog.appendChild(document.createElement("br"));
-            dialog.appendChild(
-                document.createTextNode("Achieved on: " + new Date(storage[name].date).toString())
-            );
-            dialog.appendChild(document.createElement("br"));
-
-            if (score == "H" && totalAttempts > 0) {
-                dialog.appendChild(
-                    document.createTextNode(
-                        "Average score: " +
-                            (Math.round((100 * storage[name].sum) / totalAttempts) / 100).toString()
-                    )
-                );
-                dialog.appendChild(document.createElement("br"));
-            }
-
-            if (storage[name].att != undefined && storage[name].sum != undefined && storage[name].att > 0) {
-                const avg = Math.floor(storage[name].sum / storage[name].att);
-                dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                dialog.appendChild(document.createElement("br"));
-                dialog.appendChild(
-                    document.createTextNode("Average: " + window.timeKeeper.formatDuration(avg))
-                );
-                dialog.appendChild(document.createElement("br"));
-            }
-            dialog.appendChild(document.createElement("br"));
+        function line(parent, text) {
+            parent.appendChild(document.createTextNode(text));
+            parent.appendChild(document.createElement("br"));
         }
+
+        function titleLine(parent, text) {
+            const span = document.createElement("span");
+            span.style = "font-weight:bold;";
+            span.appendChild(document.createTextNode(text));
+            parent.appendChild(span);
+            parent.appendChild(document.createElement("br"));
+        }
+
+        function buildTimedCell(score) {
+            const cell = document.createElement("div");
+            cell.style = cellStyle;
+            const name = window.timeKeeper.buildKey(score, ctx);
+            const titles = {
+                "25": "25 Apples",
+                "50": "50 Apples",
+                "100": "100 Apples",
+                ALL: "All Apples",
+            };
+            titleLine(cell, titles[score] + ":");
+            const data = storage[name];
+            if (typeof data == "undefined") {
+                line(cell, "None");
+                return cell;
+            }
+            line(cell, "Best Time: " + window.timeKeeper.formatDuration(data.time));
+            line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOn(data.date));
+            if (data.att != undefined && data.sum != undefined && data.att > 0) {
+                const avg = Math.floor(data.sum / data.att);
+                line(cell, "Attempts to this point: " + data.att);
+                line(cell, "Average: " + window.timeKeeper.formatDuration(avg));
+            }
+            return cell;
+        }
+
+        function buildHighscoreCell() {
+            const cell = document.createElement("div");
+            cell.style = cellStyle;
+            titleLine(cell, "Highscore:");
+            const name = window.timeKeeper.buildKey("H", ctx);
+            const data = storage[name];
+            if (typeof data == "undefined" || data.high == null) {
+                line(cell, "None");
+                return cell;
+            }
+            line(cell, String(data.high));
+            line(cell, "Duration: " + window.timeKeeper.formatDuration(data.time));
+            line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOn(data.date));
+            // Prefer H.att (scored deaths); fall back to total attempts for legacy rows
+            let deaths = typeof data.att === "number" && data.att > 0 ? data.att : 0;
+            if (!deaths && totalAttempts > 0) deaths = totalAttempts;
+            if (deaths > 0 && typeof data.sum === "number") {
+                const avg = Math.round((100 * data.sum) / deaths) / 100;
+                line(cell, "Average score: " + avg.toString());
+            }
+            return cell;
+        }
+
+        function buildAttemptsCell() {
+            const cell = document.createElement("div");
+            cell.style = cellStyle;
+            titleLine(cell, "Total Attempts:");
+            line(cell, String(totalAttempts));
+            return cell;
+        }
+
+        function buildRow(left, right) {
+            const row = document.createElement("div");
+            row.style = "display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;";
+            row.appendChild(left);
+            row.appendChild(right);
+            return row;
+        }
+
+        dialog.appendChild(buildRow(buildTimedCell("25"), buildTimedCell("50")));
+        dialog.appendChild(buildRow(buildTimedCell("100"), buildTimedCell("ALL")));
+        dialog.appendChild(buildRow(buildHighscoreCell(), buildAttemptsCell()));
 
         const buttonClose = document.createElement("button");
         buttonClose.appendChild(document.createTextNode("Close"));
@@ -591,7 +663,7 @@ window.TimeKeeper.make = function () {
             "style",
             "outline: none;border-radius: 10px;z-index:10100;background:" +
                 window.real_topbar_color +
-                ";color:white;font-family:Roboto,Arial;"
+                ";color:white;font-family:Roboto,Arial;min-width:420px;max-width:560px;"
         );
         dialog.classList.add("custom-dialog");
         const body = document.querySelector("body");
