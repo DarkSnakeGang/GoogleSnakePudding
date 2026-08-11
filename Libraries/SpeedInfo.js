@@ -734,17 +734,15 @@ window.SpeedInfo.make = function () {
             if (window.NepDebug) {
                 console.log(`No successful runs found for key: ${cacheKey}`);
             }
-            if (level === "H") {
-                // Visible boards with no WR yet should show "None", not a blank row
-                HandleHighscore({ data: { runs: [] } });
-            } else {
-                switch (level) {
-                    case "25": Handle25("Empty"); break;
-                    case "50": Handle50("Empty"); break;
-                    case "100": Handle100("Empty"); break;
-                    case "All": HandleAll("Empty"); break;
-                    default: break;
-                }
+            // Visible boards with no WR yet should show "None" (N/A boards already returned earlier)
+            const empty = { data: { runs: [] } };
+            switch (level) {
+                case "25": Handle25(empty); break;
+                case "50": Handle50(empty); break;
+                case "100": Handle100(empty); break;
+                case "All": HandleAll(empty); break;
+                case "H": HandleHighscore(empty); break;
+                default: break;
             }
             return;
         }
@@ -756,16 +754,14 @@ window.SpeedInfo.make = function () {
             if (window.NepDebug) {
                 console.log(`Invalid run data structure for key: ${cacheKey}`, bestRun);
             }
-            if (level === "H") {
-                HandleHighscore({ data: { runs: [] } });
-            } else {
-                switch (level) {
-                    case "25": Handle25("Empty"); break;
-                    case "50": Handle50("Empty"); break;
-                    case "100": Handle100("Empty"); break;
-                    case "All": HandleAll("Empty"); break;
-                    default: break;
-                }
+            const empty = { data: { runs: [] } };
+            switch (level) {
+                case "25": Handle25(empty); break;
+                case "50": Handle50(empty); break;
+                case "100": Handle100(empty); break;
+                case "All": HandleAll(empty); break;
+                case "H": HandleHighscore(empty); break;
+                default: break;
             }
             return;
         }
