@@ -67,13 +67,29 @@ window.Timer = {
 
     localStorage._snake_pb = localStorage._snake_pb ?? '{}'
     window._pb = JSON.parse(localStorage._snake_pb)
+    window._snakePbDirty = false
+
+    // Persist timer split PBs; mid-run only marks dirty until flush/persist
+    window.flushSnakePb = function () {
+      if (!window._snakePbDirty || !window._pb) return
+      localStorage._snake_pb = JSON.stringify(window._pb)
+      window._snakePbDirty = false
+    }
+    window.persistSnakePb = function () {
+      if (!window._pb) return
+      localStorage._snake_pb = JSON.stringify(window._pb)
+      window._snakePbDirty = false
+    }
+    window.markSnakePbDirty = function () {
+      window._snakePbDirty = true
+    }
 
     // Bridge inserted before Peaceful: old mode index 20 (Peaceful) -> 21
     if (!localStorage._snake_pb_bridge_migrated) {
       if (window._pb[20] && !window._pb[21]) {
         window._pb[21] = window._pb[20];
         delete window._pb[20];
-        localStorage._snake_pb = JSON.stringify(window._pb);
+        window.persistSnakePb();
       }
       localStorage._snake_pb_bridge_migrated = '1';
     }
@@ -753,6 +769,7 @@ window.Timer = {
       resetFunction.replace(
         'reset(){',
         `reset(){this.xdddd=[];
+          if (typeof window.flushSnakePb === "function") window.flushSnakePb();
 
           const _mode  = getSelected('#trophy')
           const _count = getSelected('#count')
@@ -806,8 +823,17 @@ window.Timer = {
       timeFormatFunction.replace(
         'function(a){',
         `window._flj = function(a) {
-          const _splitTimeDiv = document.getElementsByClassName('Jc72He rc48Qb')[0].children[1]
-          _splitTimeDiv.innerHTML = _splitTimeDiv.innerHTML.trimStart()
+          // Cache node; only rewrite when leading whitespace is present (avoid per-tick layout thrash)
+          try {
+            if (!window._splitTimeDivEl) {
+              window._splitTimeDivEl = document.getElementsByClassName('Jc72He rc48Qb')[0].children[1]
+            }
+            const _el = window._splitTimeDivEl
+            const _html = _el.innerHTML
+            if (_html && /^[\\s\\u2000-\\u200B\\uFEFF]/.test(_html)) {
+              _el.innerHTML = _html.trimStart()
+            }
+          } catch (e) {}
         `
       ).replace(
         '"00:00:000"',
@@ -898,7 +924,8 @@ window.Timer = {
           )
         ) {
           window._pb[_mode][_count][_speed][_size][_cat] = window._run[_mode][_count][_speed][_size][_cat]
-          localStorage._snake_pb = JSON.stringify(window._pb)
+          if (typeof window.markSnakePbDirty === "function") window.markSnakePbDirty()
+          else localStorage._snake_pb = JSON.stringify(window._pb)
         }
 
 
@@ -952,7 +979,8 @@ window.Timer = {
 
       if(_delta < 0 || isNaN(_delta)) {
         window._pb[_mode][_count][_speed][_size][_cat] = window._run[_mode][_count][_speed][_size][_cat]
-        localStorage._snake_pb = JSON.stringify(window._pb)
+        if (typeof window.persistSnakePb === "function") window.persistSnakePb()
+        else localStorage._snake_pb = JSON.stringify(window._pb)
       }
 
 

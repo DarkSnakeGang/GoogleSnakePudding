@@ -1296,21 +1296,43 @@ window.SpeedInfo.make = function () {
     });
 
     window.SpeedInfoUpdate = async function () {
-        // Mainly for TimeKeeper, runs when "play" is clicked / after PB saves
-        if (window.ModeRegistry && typeof window.ModeRegistry.has === "function") {
-            try {
-                window.isBridge = window.ModeRegistry.has("bridge");
-            } catch (e) { /* trophy DOM may be missing early */ }
+        // Paint PB text sync; apply gold asynchronously so mid-run refreshes stay light
+        const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
+
+        let count;
+        let speed;
+        let size;
+        let modeKey;
+        let mode = window.CurrentModeNum;
+        const midRun =
+            window.timeKeeper &&
+            (window.timeKeeper.runStarted || window.timeKeeper.playing) &&
+            typeof window.timeKeeper.mode === "string" &&
+            typeof window.timeKeeper.count === "number";
+
+        if (midRun) {
+            modeKey = window.timeKeeper.mode;
+            count = window.timeKeeper.count;
+            speed = window.timeKeeper.speed;
+            size = window.timeKeeper.size;
+        } else {
+            if (window.ModeRegistry && typeof window.ModeRegistry.has === "function") {
+                try {
+                    window.isBridge = window.ModeRegistry.has("bridge");
+                } catch (e) { /* trophy DOM may be missing early */ }
+            }
+            count = window.timeKeeper.getCurrentSetting("count");
+            speed = window.timeKeeper.getCurrentSetting("speed");
+            size = window.timeKeeper.getCurrentSetting("size");
+            modeKey = window.timeKeeper.getCurrentMode();
         }
 
-        let count = window.timeKeeper.getCurrentSetting("count");
-        let speed = window.timeKeeper.getCurrentSetting("speed");
-        let size = window.timeKeeper.getCurrentSetting("size");
-        let modeKey = window.timeKeeper.getCurrentMode();
-        let mode = window.CurrentModeNum;
         let storage = {};
         try {
-            storage = JSON.parse(localStorage["snake_timeKeeper"] || "{}");
+            storage =
+                typeof window.timeKeeper.getStorage === "function"
+                    ? window.timeKeeper.getStorage()
+                    : JSON.parse(localStorage["snake_timeKeeper"] || "{}");
         } catch (e) {
             storage = {};
         }
@@ -1347,6 +1369,8 @@ window.SpeedInfo.make = function () {
                   return String(ms);
               };
 
+        const goldJobs = [];
+
         for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
             const name = score + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
             const bold = document.getElementById(score);
@@ -1372,14 +1396,18 @@ window.SpeedInfo.make = function () {
             if (score == "H") {
                 if (typeof storage[name] != "undefined" && storage[name].high != null) {
                     const highText = String(storage[name].high) + " Apples";
-                    // Gold only when an SRC highscore board applies (HS mode any count, or Tally CE modes)
-                    const hsApplies = canShowSrcHighscore(mode, count);
-                    const gold =
-                        hsApplies &&
-                        (await shouldGoldPb("H", mode, count, speed, size, storage[name], modeKey));
                     bold.innerHTML =
                         "Highscore: " +
-                        pbValueHtml(highText, "H", mode, count, speed, size, gold);
+                        pbValueHtml(highText, "H", mode, count, speed, size, false);
+                    if (canShowSrcHighscore(mode, count)) {
+                        goldJobs.push({
+                            score: "H",
+                            elId: "H",
+                            labelPrefix: "Highscore: ",
+                            displayText: highText,
+                            pb: storage[name],
+                        });
+                    }
                 } else {
                     bold.innerHTML = "Highscore: None";
                 }
@@ -1388,23 +1416,72 @@ window.SpeedInfo.make = function () {
 
             const label = score === "ALL" ? "All Apples" : score + " Apples";
             if (typeof storage[name] != "undefined" && storage[name].time != null) {
-                const gold = await shouldGoldPb(
-                    score,
-                    mode,
-                    count,
-                    speed,
-                    size,
-                    storage[name],
-                    modeKey
-                );
+                const displayText = fmt(storage[name].time);
                 bold.innerHTML =
                     label +
                     ": " +
-                    pbValueHtml(fmt(storage[name].time), score, mode, count, speed, size, gold);
+                    pbValueHtml(displayText, score, mode, count, speed, size, false);
+                goldJobs.push({
+                    score: score,
+                    elId: score,
+                    labelPrefix: label + ": ",
+                    displayText: displayText,
+                    pb: storage[name],
+                });
             } else {
                 bold.innerHTML = label + ": None";
             }
         }
+
+        if (goldJobs.length === 0) return;
+
+        // Gold off the hot path: parallel checks, then patch colors if still current
+        const goldMode = mode;
+        const goldCount = count;
+        const goldSpeed = speed;
+        const goldSize = size;
+        const goldModeKey = modeKey;
+        setTimeout(function () {
+            if (gen !== window._speedInfoUpdateGen) return;
+            Promise.all(
+                goldJobs.map(function (job) {
+                    return shouldGoldPb(
+                        job.score,
+                        goldMode,
+                        goldCount,
+                        goldSpeed,
+                        goldSize,
+                        job.pb,
+                        goldModeKey
+                    ).then(function (gold) {
+                        return { job: job, gold: gold };
+                    });
+                })
+            )
+                .then(function (results) {
+                    if (gen !== window._speedInfoUpdateGen) return;
+                    for (let i = 0; i < results.length; i++) {
+                        const r = results[i];
+                        if (!r.gold) continue;
+                        const el = document.getElementById(r.job.elId);
+                        if (!el) continue;
+                        el.innerHTML =
+                            r.job.labelPrefix +
+                            pbValueHtml(
+                                r.job.displayText,
+                                r.job.score,
+                                goldMode,
+                                goldCount,
+                                goldSpeed,
+                                goldSize,
+                                true
+                            );
+                    }
+                })
+                .catch(function (e) {
+                    if (window.NepDebug) console.error("SpeedInfo gold update failed:", e);
+                });
+        }, 0);
     };
 
     window.HandleCount = function (count) {

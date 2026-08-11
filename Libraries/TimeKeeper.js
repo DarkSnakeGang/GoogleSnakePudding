@@ -111,11 +111,37 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.getStorage = function () {
-        return JSON.parse(localStorage.getItem("snake_timeKeeper") || '{"version":4}');
+        if (!window.timeKeeper._storageCache) {
+            try {
+                window.timeKeeper._storageCache = JSON.parse(
+                    localStorage.getItem("snake_timeKeeper") || '{"version":4}'
+                );
+            } catch (e) {
+                window.timeKeeper._storageCache = { version: 4 };
+            }
+        }
+        return window.timeKeeper._storageCache;
     };
 
+    // Persist immediately (settings edits, attempt count, end-of-run flush helpers)
     window.timeKeeper.setStorage = function (storage) {
+        window.timeKeeper._storageCache = storage;
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
+        window.timeKeeper._storageDirty = false;
+    };
+
+    // Mid-run mutations stay in memory until flushStorage (death / All)
+    window.timeKeeper.markStorageDirty = function () {
+        window.timeKeeper._storageDirty = true;
+    };
+
+    window.timeKeeper.flushStorage = function () {
+        if (!window.timeKeeper._storageDirty || !window.timeKeeper._storageCache) return;
+        localStorage.setItem(
+            "snake_timeKeeper",
+            JSON.stringify(window.timeKeeper._storageCache)
+        );
+        window.timeKeeper._storageDirty = false;
     };
 
     // Compat: callers expecting mode "string" now get stable modeKey
@@ -155,6 +181,8 @@ window.TimeKeeper.make = function () {
         if (!window.timeKeeper.shouldTrack()) return;
         window.timeKeeper.ensurePlaying();
         window.timeKeeper.savePB(time, "ALL");
+        // End of successful run: persist mid-run PB/HS memory
+        window.timeKeeper.flushStorage();
     };
 
     window.timeKeeper.death = function (time, score) {
@@ -209,7 +237,7 @@ window.TimeKeeper.make = function () {
         return getSelectedIndex(name);
     };
 
-    // Mid-run: write Highscore PB when the current apple count beats the stored best
+    // Mid-run: update Highscore PB in memory when current apples beat the stored best
     window.timeKeeper.updateHighscoreLive = function (time, score) {
         const ctx = window.timeKeeper.getSaveContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
@@ -233,7 +261,7 @@ window.TimeKeeper.make = function () {
                 time: appleTime,
                 date: appleDate,
             };
-            window.timeKeeper.setStorage(storage);
+            window.timeKeeper.markStorageDirty();
             window.timeKeeper.refreshSpeedInfo();
             return;
         }
@@ -246,7 +274,7 @@ window.TimeKeeper.make = function () {
             cur.high = score;
             cur.time = appleTime;
             cur.date = appleDate;
-            window.timeKeeper.setStorage(storage);
+            window.timeKeeper.markStorageDirty();
             window.timeKeeper.refreshSpeedInfo();
         }
     };
@@ -284,6 +312,7 @@ window.TimeKeeper.make = function () {
             delete storage[name].sum;
             delete storage[name].att;
         }
+        // End of run: persist memory (including any mid-run PB/HS dirty state)
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.refreshSpeedInfo();
     };
@@ -312,7 +341,8 @@ window.TimeKeeper.make = function () {
                 };
             }
         }
-        window.timeKeeper.setStorage(storage);
+        // Mid-run (25/50/100) or pre-flush ALL: keep in memory only
+        window.timeKeeper.markStorageDirty();
         window.timeKeeper.refreshSpeedInfo();
     };
 
@@ -534,6 +564,8 @@ window.TimeKeeper.make = function () {
         }
 
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
+        window.timeKeeper._storageCache = storage;
+        window.timeKeeper._storageDirty = false;
     };
 
     window.timeKeeper.showDialog = function () {

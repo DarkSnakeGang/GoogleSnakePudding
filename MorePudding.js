@@ -1208,11 +1208,37 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.getStorage = function () {
-        return JSON.parse(localStorage.getItem("snake_timeKeeper") || '{"version":4}');
+        if (!window.timeKeeper._storageCache) {
+            try {
+                window.timeKeeper._storageCache = JSON.parse(
+                    localStorage.getItem("snake_timeKeeper") || '{"version":4}'
+                );
+            } catch (e) {
+                window.timeKeeper._storageCache = { version: 4 };
+            }
+        }
+        return window.timeKeeper._storageCache;
     };
 
+    // Persist immediately (settings edits, attempt count, end-of-run flush helpers)
     window.timeKeeper.setStorage = function (storage) {
+        window.timeKeeper._storageCache = storage;
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
+        window.timeKeeper._storageDirty = false;
+    };
+
+    // Mid-run mutations stay in memory until flushStorage (death / All)
+    window.timeKeeper.markStorageDirty = function () {
+        window.timeKeeper._storageDirty = true;
+    };
+
+    window.timeKeeper.flushStorage = function () {
+        if (!window.timeKeeper._storageDirty || !window.timeKeeper._storageCache) return;
+        localStorage.setItem(
+            "snake_timeKeeper",
+            JSON.stringify(window.timeKeeper._storageCache)
+        );
+        window.timeKeeper._storageDirty = false;
     };
 
     // Compat: callers expecting mode "string" now get stable modeKey
@@ -1252,6 +1278,8 @@ window.TimeKeeper.make = function () {
         if (!window.timeKeeper.shouldTrack()) return;
         window.timeKeeper.ensurePlaying();
         window.timeKeeper.savePB(time, "ALL");
+        // End of successful run: persist mid-run PB/HS memory
+        window.timeKeeper.flushStorage();
     };
 
     window.timeKeeper.death = function (time, score) {
@@ -1306,7 +1334,7 @@ window.TimeKeeper.make = function () {
         return getSelectedIndex(name);
     };
 
-    // Mid-run: write Highscore PB when the current apple count beats the stored best
+    // Mid-run: update Highscore PB in memory when current apples beat the stored best
     window.timeKeeper.updateHighscoreLive = function (time, score) {
         const ctx = window.timeKeeper.getSaveContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
@@ -1330,7 +1358,7 @@ window.TimeKeeper.make = function () {
                 time: appleTime,
                 date: appleDate,
             };
-            window.timeKeeper.setStorage(storage);
+            window.timeKeeper.markStorageDirty();
             window.timeKeeper.refreshSpeedInfo();
             return;
         }
@@ -1343,7 +1371,7 @@ window.TimeKeeper.make = function () {
             cur.high = score;
             cur.time = appleTime;
             cur.date = appleDate;
-            window.timeKeeper.setStorage(storage);
+            window.timeKeeper.markStorageDirty();
             window.timeKeeper.refreshSpeedInfo();
         }
     };
@@ -1381,6 +1409,7 @@ window.TimeKeeper.make = function () {
             delete storage[name].sum;
             delete storage[name].att;
         }
+        // End of run: persist memory (including any mid-run PB/HS dirty state)
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.refreshSpeedInfo();
     };
@@ -1409,7 +1438,8 @@ window.TimeKeeper.make = function () {
                 };
             }
         }
-        window.timeKeeper.setStorage(storage);
+        // Mid-run (25/50/100) or pre-flush ALL: keep in memory only
+        window.timeKeeper.markStorageDirty();
         window.timeKeeper.refreshSpeedInfo();
     };
 
@@ -1631,6 +1661,8 @@ window.TimeKeeper.make = function () {
         }
 
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
+        window.timeKeeper._storageCache = storage;
+        window.timeKeeper._storageDirty = false;
     };
 
     window.timeKeeper.showDialog = function () {
@@ -4219,21 +4251,43 @@ window.SpeedInfo.make = function () {
     });
 
     window.SpeedInfoUpdate = async function () {
-        // Mainly for TimeKeeper, runs when "play" is clicked / after PB saves
-        if (window.ModeRegistry && typeof window.ModeRegistry.has === "function") {
-            try {
-                window.isBridge = window.ModeRegistry.has("bridge");
-            } catch (e) { /* trophy DOM may be missing early */ }
+        // Paint PB text sync; apply gold asynchronously so mid-run refreshes stay light
+        const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
+
+        let count;
+        let speed;
+        let size;
+        let modeKey;
+        let mode = window.CurrentModeNum;
+        const midRun =
+            window.timeKeeper &&
+            (window.timeKeeper.runStarted || window.timeKeeper.playing) &&
+            typeof window.timeKeeper.mode === "string" &&
+            typeof window.timeKeeper.count === "number";
+
+        if (midRun) {
+            modeKey = window.timeKeeper.mode;
+            count = window.timeKeeper.count;
+            speed = window.timeKeeper.speed;
+            size = window.timeKeeper.size;
+        } else {
+            if (window.ModeRegistry && typeof window.ModeRegistry.has === "function") {
+                try {
+                    window.isBridge = window.ModeRegistry.has("bridge");
+                } catch (e) { /* trophy DOM may be missing early */ }
+            }
+            count = window.timeKeeper.getCurrentSetting("count");
+            speed = window.timeKeeper.getCurrentSetting("speed");
+            size = window.timeKeeper.getCurrentSetting("size");
+            modeKey = window.timeKeeper.getCurrentMode();
         }
 
-        let count = window.timeKeeper.getCurrentSetting("count");
-        let speed = window.timeKeeper.getCurrentSetting("speed");
-        let size = window.timeKeeper.getCurrentSetting("size");
-        let modeKey = window.timeKeeper.getCurrentMode();
-        let mode = window.CurrentModeNum;
         let storage = {};
         try {
-            storage = JSON.parse(localStorage["snake_timeKeeper"] || "{}");
+            storage =
+                typeof window.timeKeeper.getStorage === "function"
+                    ? window.timeKeeper.getStorage()
+                    : JSON.parse(localStorage["snake_timeKeeper"] || "{}");
         } catch (e) {
             storage = {};
         }
@@ -4270,6 +4324,8 @@ window.SpeedInfo.make = function () {
                   return String(ms);
               };
 
+        const goldJobs = [];
+
         for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
             const name = score + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
             const bold = document.getElementById(score);
@@ -4295,14 +4351,18 @@ window.SpeedInfo.make = function () {
             if (score == "H") {
                 if (typeof storage[name] != "undefined" && storage[name].high != null) {
                     const highText = String(storage[name].high) + " Apples";
-                    // Gold only when an SRC highscore board applies (HS mode any count, or Tally CE modes)
-                    const hsApplies = canShowSrcHighscore(mode, count);
-                    const gold =
-                        hsApplies &&
-                        (await shouldGoldPb("H", mode, count, speed, size, storage[name], modeKey));
                     bold.innerHTML =
                         "Highscore: " +
-                        pbValueHtml(highText, "H", mode, count, speed, size, gold);
+                        pbValueHtml(highText, "H", mode, count, speed, size, false);
+                    if (canShowSrcHighscore(mode, count)) {
+                        goldJobs.push({
+                            score: "H",
+                            elId: "H",
+                            labelPrefix: "Highscore: ",
+                            displayText: highText,
+                            pb: storage[name],
+                        });
+                    }
                 } else {
                     bold.innerHTML = "Highscore: None";
                 }
@@ -4311,23 +4371,72 @@ window.SpeedInfo.make = function () {
 
             const label = score === "ALL" ? "All Apples" : score + " Apples";
             if (typeof storage[name] != "undefined" && storage[name].time != null) {
-                const gold = await shouldGoldPb(
-                    score,
-                    mode,
-                    count,
-                    speed,
-                    size,
-                    storage[name],
-                    modeKey
-                );
+                const displayText = fmt(storage[name].time);
                 bold.innerHTML =
                     label +
                     ": " +
-                    pbValueHtml(fmt(storage[name].time), score, mode, count, speed, size, gold);
+                    pbValueHtml(displayText, score, mode, count, speed, size, false);
+                goldJobs.push({
+                    score: score,
+                    elId: score,
+                    labelPrefix: label + ": ",
+                    displayText: displayText,
+                    pb: storage[name],
+                });
             } else {
                 bold.innerHTML = label + ": None";
             }
         }
+
+        if (goldJobs.length === 0) return;
+
+        // Gold off the hot path: parallel checks, then patch colors if still current
+        const goldMode = mode;
+        const goldCount = count;
+        const goldSpeed = speed;
+        const goldSize = size;
+        const goldModeKey = modeKey;
+        setTimeout(function () {
+            if (gen !== window._speedInfoUpdateGen) return;
+            Promise.all(
+                goldJobs.map(function (job) {
+                    return shouldGoldPb(
+                        job.score,
+                        goldMode,
+                        goldCount,
+                        goldSpeed,
+                        goldSize,
+                        job.pb,
+                        goldModeKey
+                    ).then(function (gold) {
+                        return { job: job, gold: gold };
+                    });
+                })
+            )
+                .then(function (results) {
+                    if (gen !== window._speedInfoUpdateGen) return;
+                    for (let i = 0; i < results.length; i++) {
+                        const r = results[i];
+                        if (!r.gold) continue;
+                        const el = document.getElementById(r.job.elId);
+                        if (!el) continue;
+                        el.innerHTML =
+                            r.job.labelPrefix +
+                            pbValueHtml(
+                                r.job.displayText,
+                                r.job.score,
+                                goldMode,
+                                goldCount,
+                                goldSpeed,
+                                goldSize,
+                                true
+                            );
+                    }
+                })
+                .catch(function (e) {
+                    if (window.NepDebug) console.error("SpeedInfo gold update failed:", e);
+                });
+        }, 0);
     };
 
     window.HandleCount = function (count) {
@@ -4606,13 +4715,29 @@ window.Timer = {
 
     localStorage._snake_pb = localStorage._snake_pb ?? '{}'
     window._pb = JSON.parse(localStorage._snake_pb)
+    window._snakePbDirty = false
+
+    // Persist timer split PBs; mid-run only marks dirty until flush/persist
+    window.flushSnakePb = function () {
+      if (!window._snakePbDirty || !window._pb) return
+      localStorage._snake_pb = JSON.stringify(window._pb)
+      window._snakePbDirty = false
+    }
+    window.persistSnakePb = function () {
+      if (!window._pb) return
+      localStorage._snake_pb = JSON.stringify(window._pb)
+      window._snakePbDirty = false
+    }
+    window.markSnakePbDirty = function () {
+      window._snakePbDirty = true
+    }
 
     // Bridge inserted before Peaceful: old mode index 20 (Peaceful) -> 21
     if (!localStorage._snake_pb_bridge_migrated) {
       if (window._pb[20] && !window._pb[21]) {
         window._pb[21] = window._pb[20];
         delete window._pb[20];
-        localStorage._snake_pb = JSON.stringify(window._pb);
+        window.persistSnakePb();
       }
       localStorage._snake_pb_bridge_migrated = '1';
     }
@@ -5292,6 +5417,7 @@ window.Timer = {
       resetFunction.replace(
         'reset(){',
         `reset(){this.xdddd=[];
+          if (typeof window.flushSnakePb === "function") window.flushSnakePb();
 
           const _mode  = getSelected('#trophy')
           const _count = getSelected('#count')
@@ -5345,8 +5471,17 @@ window.Timer = {
       timeFormatFunction.replace(
         'function(a){',
         `window._flj = function(a) {
-          const _splitTimeDiv = document.getElementsByClassName('Jc72He rc48Qb')[0].children[1]
-          _splitTimeDiv.innerHTML = _splitTimeDiv.innerHTML.trimStart()
+          // Cache node; only rewrite when leading whitespace is present (avoid per-tick layout thrash)
+          try {
+            if (!window._splitTimeDivEl) {
+              window._splitTimeDivEl = document.getElementsByClassName('Jc72He rc48Qb')[0].children[1]
+            }
+            const _el = window._splitTimeDivEl
+            const _html = _el.innerHTML
+            if (_html && /^[\\s\\u2000-\\u200B\\uFEFF]/.test(_html)) {
+              _el.innerHTML = _html.trimStart()
+            }
+          } catch (e) {}
         `
       ).replace(
         '"00:00:000"',
@@ -5437,7 +5572,8 @@ window.Timer = {
           )
         ) {
           window._pb[_mode][_count][_speed][_size][_cat] = window._run[_mode][_count][_speed][_size][_cat]
-          localStorage._snake_pb = JSON.stringify(window._pb)
+          if (typeof window.markSnakePbDirty === "function") window.markSnakePbDirty()
+          else localStorage._snake_pb = JSON.stringify(window._pb)
         }
 
 
@@ -5491,7 +5627,8 @@ window.Timer = {
 
       if(_delta < 0 || isNaN(_delta)) {
         window._pb[_mode][_count][_speed][_size][_cat] = window._run[_mode][_count][_speed][_size][_cat]
-        localStorage._snake_pb = JSON.stringify(window._pb)
+        if (typeof window.persistSnakePb === "function") window.persistSnakePb()
+        else localStorage._snake_pb = JSON.stringify(window._pb)
       }
 
 
