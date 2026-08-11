@@ -162,14 +162,6 @@ window.Timer = {
         const iconSel = 'cursor: pointer; border: 0.45vh ridge #af4490ff; border-radius: 1vh; width: 3.2vh; height: 3.2vh;'
         const halfCol = 'flex:1;min-width:0;'
         editBox.innerHTML = `
-        <span id="close-box" style="
-        position: absolute;
-        top: 8px;
-        right: 12px;
-        cursor: pointer;
-        color: #ffffff;
-        font-size: 0.9em;
-      ">&#x2715</span>
 <label class="form-check-label" style="font-size: 2.8vh; display:block; margin-top:2px; margin-bottom:2px;">
         Custom Timer/Splits Settings
       </label>
@@ -325,6 +317,7 @@ window.Timer = {
 </div>
 
 </div>
+<button type="button" class="btn" id="close-box" style="margin:10px auto 2px;display:block;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;width:auto;min-width:72px;padding:4px 14px;font-size:12px;line-height:1.2;">Close</button>
         `
         const backdrop = document.createElement('div')
         backdrop.id = 'edit-box-backdrop'
