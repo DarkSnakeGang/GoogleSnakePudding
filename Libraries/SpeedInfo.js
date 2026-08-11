@@ -1357,7 +1357,12 @@ window.SpeedInfo.make = function () {
             if (!bold) continue;
 
             if (score == "att") {
-                const totalAttempts = typeof storage[name] === "number" ? storage[name] : 0;
+                const totalAttempts =
+                    typeof window.timeKeeper.getAttemptTotal === "function"
+                        ? window.timeKeeper.getAttemptTotal(storage[name])
+                        : typeof storage[name] === "number"
+                          ? storage[name]
+                          : 0;
                 bold.innerHTML = "Total Attempts: " + totalAttempts;
                 continue;
             }

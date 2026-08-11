@@ -1100,11 +1100,12 @@ window.TimeKeeper = {};
 window.TimeKeeper.make = function () {
     /*
     storage v4:
-    att-modeKey-count-speed-size : number of started attempts
+    att-modeKey-count-speed-size : number (legacy) OR
+      { total, lastAttempt, session, lastSession }
+      session = attempts since this page load; lastSession = previous page's session count
     25|50|100|ALL-modeKey-count-speed-size: {time, date, att, sum}
-    H-modeKey-count-speed-size: {high, time, date, sum, att}
+    H-modeKey-count-speed-size: {high, time, date}
     modeKey = classic | wall | ... | peaceful | wall+portal (blender)
-    H.att = scored deaths contributing to sum (average = sum/att)
     */
     window.timeKeeper = {};
     window.timeKeeper.debug = false;
@@ -1164,17 +1165,46 @@ window.TimeKeeper.make = function () {
         return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
     };
 
-    // Average of death scores cannot exceed the PB high. Legacy sum/att pairs
-    // (huge sum + undercounted att) get cleared so average can rebuild cleanly.
-    window.timeKeeper.sanitizeHighscoreRecord = function (rec) {
-        if (!rec || typeof rec !== "object") return rec;
-        const high = Number(rec.high);
-        if (!(high >= 0) || typeof rec.sum !== "number") return rec;
-        if (typeof rec.att === "number" && rec.att > 0 && rec.sum / rec.att > high + 1e-9) {
-            rec.sum = 0;
-            rec.att = 0;
+    // Normalize legacy number / partial objects into the attempt stats record
+    window.timeKeeper.normalizeAttemptRecord = function (raw) {
+        if (typeof raw === "number" && !isNaN(raw)) {
+            return {
+                total: raw,
+                lastAttempt: null,
+                session: 0,
+                lastSession: 0,
+            };
         }
-        return rec;
+        if (!raw || typeof raw !== "object") {
+            return {
+                total: 0,
+                lastAttempt: null,
+                session: 0,
+                lastSession: 0,
+            };
+        }
+        return {
+            total: typeof raw.total === "number" ? raw.total : 0,
+            lastAttempt: raw.lastAttempt != null ? raw.lastAttempt : null,
+            session: typeof raw.session === "number" ? raw.session : 0,
+            lastSession: typeof raw.lastSession === "number" ? raw.lastSession : 0,
+        };
+    };
+
+    window.timeKeeper.getAttemptTotal = function (raw) {
+        if (typeof raw === "number" && !isNaN(raw)) return raw;
+        if (raw && typeof raw === "object" && typeof raw.total === "number") return raw.total;
+        return 0;
+    };
+
+    // On page load: roll previous page's session into lastSession
+    window.timeKeeper.rollAttemptSession = function (rec) {
+        const r = window.timeKeeper.normalizeAttemptRecord(rec);
+        if (r.session > 0) {
+            r.lastSession = r.session;
+            r.session = 0;
+        }
+        return r;
     };
 
     window.timeKeeper.getStorage = function () {
@@ -1277,7 +1307,6 @@ window.TimeKeeper.make = function () {
     };
 
     // Mid-run: write Highscore PB when the current apple count beats the stored best
-    // (does not touch sum — death still accumulates run totals for average).
     window.timeKeeper.updateHighscoreLive = function (time, score) {
         const ctx = window.timeKeeper.getSaveContext();
         if (!window.timeKeeper.shouldTrack(ctx)) return;
@@ -1300,8 +1329,6 @@ window.TimeKeeper.make = function () {
                 high: score,
                 time: appleTime,
                 date: appleDate,
-                sum: 0,
-                att: 0,
             };
             window.timeKeeper.setStorage(storage);
             window.timeKeeper.refreshSpeedInfo();
@@ -1340,37 +1367,19 @@ window.TimeKeeper.make = function () {
                 high: score,
                 time: window.timeKeeper.lastAppleTime,
                 date: window.timeKeeper.lastAppleDate,
-                sum: score,
-                att: 1,
             };
-        } else {
-            if (typeof storage[name].sum !== "number") storage[name].sum = 0;
-            // Legacy H rows lack att — only adopt total attempts when that keeps avg ≤ high
-            if (typeof storage[name].att !== "number") {
-                const attKey = window.timeKeeper.buildKey("att", ctx);
-                const attempts = typeof storage[attKey] === "number" ? storage[attKey] : 0;
-                const high = Number(storage[name].high);
-                if (
-                    attempts > 0 &&
-                    high >= 0 &&
-                    storage[name].sum / attempts <= high + 1e-9
-                ) {
-                    storage[name].att = attempts;
-                } else {
-                    storage[name].sum = 0;
-                    storage[name].att = 0;
-                }
-            }
-            storage[name].sum += score;
-            storage[name].att += 1;
-            if (
-                score > storage[name].high ||
-                (score == storage[name].high && time < storage[name].time)
-            ) {
-                storage[name].high = score;
-                storage[name].time = window.timeKeeper.lastAppleTime;
-                storage[name].date = window.timeKeeper.lastAppleDate;
-            }
+        } else if (
+            score > storage[name].high ||
+            (score == storage[name].high && time < storage[name].time)
+        ) {
+            storage[name].high = score;
+            storage[name].time = window.timeKeeper.lastAppleTime;
+            storage[name].date = window.timeKeeper.lastAppleDate;
+        }
+        // Drop unused average accumulators if present
+        if (storage[name]) {
+            delete storage[name].sum;
+            delete storage[name].att;
         }
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.refreshSpeedInfo();
@@ -1433,11 +1442,12 @@ window.TimeKeeper.make = function () {
 
         const storage = window.timeKeeper.getStorage();
         const name = window.timeKeeper.buildKey("att", ctx);
-        if (typeof storage[name] == "undefined") {
-            storage[name] = 1;
-        } else {
-            storage[name] += 1;
-        }
+        const rec = window.timeKeeper.normalizeAttemptRecord(storage[name]);
+        const now = new Date();
+        rec.total += 1;
+        rec.lastAttempt = now;
+        rec.session += 1;
+        storage[name] = rec;
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.runStarted = false;
         window.timeKeeper.playing = false;
@@ -1448,7 +1458,9 @@ window.TimeKeeper.make = function () {
         if (isNaN(attempts)) return;
         const storage = window.timeKeeper.getStorage();
         const name = window.timeKeeper.buildKey("att");
-        storage[name] = attempts;
+        const rec = window.timeKeeper.normalizeAttemptRecord(storage[name]);
+        rec.total = attempts;
+        storage[name] = rec;
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.refreshSpeedInfo();
     };
@@ -1470,28 +1482,16 @@ window.TimeKeeper.make = function () {
         window.timeKeeper.refreshSpeedInfo();
     };
 
-    window.timeKeeper.setScore = function (highscore, time, average) {
+    window.timeKeeper.setScore = function (highscore, time) {
         if (isNaN(highscore)) return;
         if (isNaN(time)) return;
-        if (isNaN(average)) return;
         const storage = window.timeKeeper.getStorage();
         const ctx = window.timeKeeper.resolveRunContext();
         const name = window.timeKeeper.buildKey("H", ctx);
-        const existing = storage[name];
-        // Prefer existing death count; else fall back to total attempts for manual edits
-        let att =
-            existing && typeof existing.att === "number" && existing.att > 0
-                ? existing.att
-                : typeof storage[window.timeKeeper.buildKey("att", ctx)] === "number"
-                  ? storage[window.timeKeeper.buildKey("att", ctx)]
-                  : 0;
-        if (!(att > 0)) att = 1;
         storage[name] = {
             high: highscore,
             time: time,
             date: new Date(),
-            sum: average * att,
-            att: att,
         };
         window.timeKeeper.setStorage(storage);
         window.timeKeeper.refreshSpeedInfo();
@@ -1511,18 +1511,14 @@ window.TimeKeeper.make = function () {
         return hours + ":" + minutes + ":" + seconds + ":" + mseconds;
     };
 
-    // Short local stamp — no timezone / weekday noise
+    // Local calendar date as YYYY-MM-DD
     window.timeKeeper.formatAchievedOn = function (raw) {
         const date = new Date(raw);
         if (isNaN(date.getTime())) return "—";
-        return date.toLocaleString(undefined, {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-        });
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        return y + "-" + m + "-" + d;
     };
 
     // ms → SRC-like 1m2s345ms (shared with SpeedInfo personal rows)
@@ -1619,30 +1615,19 @@ window.TimeKeeper.make = function () {
             storage.version = 4;
         }
 
-        // Backfill / repair H.att for legacy highscore rows
+        // Strip unused highscore average fields (sum/att) from H-* rows
         for (const key of Object.keys(storage)) {
             if (key === "version" || key.slice(0, 2) !== "H-") continue;
             const rec = storage[key];
             if (!rec || typeof rec !== "object") continue;
-            if (typeof rec.att !== "number") {
-                const attKey = "att" + key.slice(1);
-                const attempts = storage[attKey];
-                const high = Number(rec.high);
-                if (
-                    typeof attempts === "number" &&
-                    attempts > 0 &&
-                    typeof rec.sum === "number" &&
-                    high >= 0 &&
-                    rec.sum / attempts <= high + 1e-9
-                ) {
-                    rec.att = attempts;
-                } else if (typeof rec.sum === "number" && high >= 0) {
-                    // Inconsistent legacy sum — drop average accumulators, keep PB
-                    rec.sum = 0;
-                    rec.att = 0;
-                }
-            }
-            window.timeKeeper.sanitizeHighscoreRecord(rec);
+            delete rec.sum;
+            delete rec.att;
+        }
+
+        // Migrate att-* numbers → objects; roll previous page session into last/best
+        for (const key of Object.keys(storage)) {
+            if (key === "version" || key.slice(0, 4) !== "att-") continue;
+            storage[key] = window.timeKeeper.rollAttemptSession(storage[key]);
         }
 
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
@@ -1712,7 +1697,7 @@ window.TimeKeeper.make = function () {
 
         const storage = window.timeKeeper.getStorage();
         const attKey = window.timeKeeper.buildKey("att", ctx);
-        const totalAttempts = typeof storage[attKey] === "number" ? storage[attKey] : 0;
+        const attemptRec = window.timeKeeper.normalizeAttemptRecord(storage[attKey]);
 
         const cellStyle =
             "box-sizing:border-box;padding:6px 8px;border:1px solid rgba(255,255,255,0.22);border-radius:6px;min-width:0;";
@@ -1769,28 +1754,6 @@ window.TimeKeeper.make = function () {
             line(cell, String(data.high));
             line(cell, "Duration: " + window.timeKeeper.formatDuration(data.time));
             line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOn(data.date));
-            const sumBefore = data.sum;
-            const attBefore = data.att;
-            window.timeKeeper.sanitizeHighscoreRecord(data);
-            if (data.sum !== sumBefore || data.att !== attBefore) {
-                window.timeKeeper.setStorage(storage);
-            }
-            // Prefer H.att (scored deaths); fall back to total attempts only if avg ≤ high
-            let deaths = typeof data.att === "number" && data.att > 0 ? data.att : 0;
-            if (
-                !deaths &&
-                totalAttempts > 0 &&
-                typeof data.sum === "number" &&
-                data.sum / totalAttempts <= Number(data.high) + 1e-9
-            ) {
-                deaths = totalAttempts;
-            }
-            if (deaths > 0 && typeof data.sum === "number") {
-                const avg = Math.round((100 * data.sum) / deaths) / 100;
-                if (avg <= Number(data.high) + 1e-9) {
-                    line(cell, "Average score: " + avg.toString());
-                }
-            }
             return cell;
         }
 
@@ -1798,7 +1761,26 @@ window.TimeKeeper.make = function () {
             const cell = document.createElement("div");
             cell.style = cellStyle;
             titleLine(cell, "Total Attempts:");
-            line(cell, String(totalAttempts));
+            line(cell, String(attemptRec.total));
+            if (attemptRec.lastAttempt != null) {
+                line(
+                    cell,
+                    "Latest: " + window.timeKeeper.formatAchievedOn(attemptRec.lastAttempt)
+                );
+            }
+            line(cell, "This session: " + attemptRec.session);
+            line(cell, "Last session: " + attemptRec.lastSession);
+            if (attemptRec.bestSession > 0) {
+                let bestLine = "Best session: " + attemptRec.bestSession;
+                if (attemptRec.bestSessionDate != null) {
+                    // Date only (YYYY-MM-DD), no time
+                    bestLine +=
+                        " (" +
+                        window.timeKeeper.formatAchievedOn(attemptRec.bestSessionDate) +
+                        ")";
+                }
+                line(cell, bestLine);
+            }
             return cell;
         }
 
@@ -4083,7 +4065,12 @@ window.SpeedInfo.make = function () {
             if (!bold) continue;
 
             if (score == "att") {
-                const totalAttempts = typeof storage[name] === "number" ? storage[name] : 0;
+                const totalAttempts =
+                    typeof window.timeKeeper.getAttemptTotal === "function"
+                        ? window.timeKeeper.getAttemptTotal(storage[name])
+                        : typeof storage[name] === "number"
+                          ? storage[name]
+                          : 0;
                 bold.innerHTML = "Total Attempts: " + totalAttempts;
                 continue;
             }
