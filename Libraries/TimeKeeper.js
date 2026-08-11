@@ -67,6 +67,19 @@ window.TimeKeeper.make = function () {
         return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
     };
 
+    // Average of death scores cannot exceed the PB high. Legacy sum/att pairs
+    // (huge sum + undercounted att) get cleared so average can rebuild cleanly.
+    window.timeKeeper.sanitizeHighscoreRecord = function (rec) {
+        if (!rec || typeof rec !== "object") return rec;
+        const high = Number(rec.high);
+        if (!(high >= 0) || typeof rec.sum !== "number") return rec;
+        if (typeof rec.att === "number" && rec.att > 0 && rec.sum / rec.att > high + 1e-9) {
+            rec.sum = 0;
+            rec.att = 0;
+        }
+        return rec;
+    };
+
     window.timeKeeper.getStorage = function () {
         return JSON.parse(localStorage.getItem("snake_timeKeeper") || '{"version":4}');
     };
@@ -235,11 +248,21 @@ window.TimeKeeper.make = function () {
             };
         } else {
             if (typeof storage[name].sum !== "number") storage[name].sum = 0;
-            // Legacy H rows lack att — approximate prior deaths from total attempts
+            // Legacy H rows lack att — only adopt total attempts when that keeps avg ≤ high
             if (typeof storage[name].att !== "number") {
                 const attKey = window.timeKeeper.buildKey("att", ctx);
                 const attempts = typeof storage[attKey] === "number" ? storage[attKey] : 0;
-                storage[name].att = attempts > 0 ? attempts : 0;
+                const high = Number(storage[name].high);
+                if (
+                    attempts > 0 &&
+                    high >= 0 &&
+                    storage[name].sum / attempts <= high + 1e-9
+                ) {
+                    storage[name].att = attempts;
+                } else {
+                    storage[name].sum = 0;
+                    storage[name].att = 0;
+                }
             }
             storage[name].sum += score;
             storage[name].att += 1;
@@ -499,17 +522,30 @@ window.TimeKeeper.make = function () {
             storage.version = 4;
         }
 
-        // Backfill H.att for legacy highscore rows (average used to divide by total attempts)
+        // Backfill / repair H.att for legacy highscore rows
         for (const key of Object.keys(storage)) {
             if (key === "version" || key.slice(0, 2) !== "H-") continue;
             const rec = storage[key];
             if (!rec || typeof rec !== "object") continue;
-            if (typeof rec.att === "number") continue;
-            const attKey = "att" + key.slice(1);
-            const attempts = storage[attKey];
-            if (typeof attempts === "number" && attempts > 0) {
-                rec.att = attempts;
+            if (typeof rec.att !== "number") {
+                const attKey = "att" + key.slice(1);
+                const attempts = storage[attKey];
+                const high = Number(rec.high);
+                if (
+                    typeof attempts === "number" &&
+                    attempts > 0 &&
+                    typeof rec.sum === "number" &&
+                    high >= 0 &&
+                    rec.sum / attempts <= high + 1e-9
+                ) {
+                    rec.att = attempts;
+                } else if (typeof rec.sum === "number" && high >= 0) {
+                    // Inconsistent legacy sum — drop average accumulators, keep PB
+                    rec.sum = 0;
+                    rec.att = 0;
+                }
             }
+            window.timeKeeper.sanitizeHighscoreRecord(rec);
         }
 
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
@@ -636,12 +672,27 @@ window.TimeKeeper.make = function () {
             line(cell, String(data.high));
             line(cell, "Duration: " + window.timeKeeper.formatDuration(data.time));
             line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOn(data.date));
-            // Prefer H.att (scored deaths); fall back to total attempts for legacy rows
+            const sumBefore = data.sum;
+            const attBefore = data.att;
+            window.timeKeeper.sanitizeHighscoreRecord(data);
+            if (data.sum !== sumBefore || data.att !== attBefore) {
+                window.timeKeeper.setStorage(storage);
+            }
+            // Prefer H.att (scored deaths); fall back to total attempts only if avg ≤ high
             let deaths = typeof data.att === "number" && data.att > 0 ? data.att : 0;
-            if (!deaths && totalAttempts > 0) deaths = totalAttempts;
+            if (
+                !deaths &&
+                totalAttempts > 0 &&
+                typeof data.sum === "number" &&
+                data.sum / totalAttempts <= Number(data.high) + 1e-9
+            ) {
+                deaths = totalAttempts;
+            }
             if (deaths > 0 && typeof data.sum === "number") {
                 const avg = Math.round((100 * data.sum) / deaths) / 100;
-                line(cell, "Average score: " + avg.toString());
+                if (avg <= Number(data.high) + 1e-9) {
+                    line(cell, "Average score: " + avg.toString());
+                }
             }
             return cell;
         }
