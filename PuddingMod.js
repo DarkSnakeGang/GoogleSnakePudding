@@ -1661,9 +1661,9 @@ window.TimeKeeper.make = function () {
         const ctx = window.timeKeeper.resolveRunContext();
         const gamemode = window.ModeRegistry.labelModeKey(ctx.modeKey);
 
-        const bold = document.createElement("u");
+        const bold = document.createElement("div");
         bold.appendChild(document.createTextNode("TimeKeeper Details"));
-        bold.style = "color:white;font-family:Roboto,Arial;";
+        bold.style = "color:white;font-family:Roboto,Arial;font-weight:bold;text-align:center;";
         dialog.appendChild(bold);
         dialog.appendChild(document.createElement("br"));
         dialog.appendChild(document.createTextNode("Mode: " + gamemode));
@@ -1770,17 +1770,6 @@ window.TimeKeeper.make = function () {
             }
             line(cell, "This session: " + attemptRec.session);
             line(cell, "Last session: " + attemptRec.lastSession);
-            if (attemptRec.bestSession > 0) {
-                let bestLine = "Best session: " + attemptRec.bestSession;
-                if (attemptRec.bestSessionDate != null) {
-                    // Date only (YYYY-MM-DD), no time
-                    bestLine +=
-                        " (" +
-                        window.timeKeeper.formatAchievedOn(attemptRec.bestSessionDate) +
-                        ")";
-                }
-                line(cell, bestLine);
-            }
             return cell;
         }
 

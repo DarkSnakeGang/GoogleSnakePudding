@@ -564,9 +564,9 @@ window.TimeKeeper.make = function () {
         const ctx = window.timeKeeper.resolveRunContext();
         const gamemode = window.ModeRegistry.labelModeKey(ctx.modeKey);
 
-        const bold = document.createElement("u");
+        const bold = document.createElement("div");
         bold.appendChild(document.createTextNode("TimeKeeper Details"));
-        bold.style = "color:white;font-family:Roboto,Arial;";
+        bold.style = "color:white;font-family:Roboto,Arial;font-weight:bold;text-align:center;";
         dialog.appendChild(bold);
         dialog.appendChild(document.createElement("br"));
         dialog.appendChild(document.createTextNode("Mode: " + gamemode));
