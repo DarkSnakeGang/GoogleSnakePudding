@@ -1552,6 +1552,19 @@ window.TimeKeeper.make = function () {
         return y + "-" + m + "-" + d;
     };
 
+    // Local calendar date + time as YYYY-MM-DD HH:MM:SS
+    window.timeKeeper.formatAchievedOnWithTime = function (raw) {
+        const date = new Date(raw);
+        if (isNaN(date.getTime())) return "—";
+        const y = date.getFullYear();
+        const mo = String(date.getMonth() + 1).padStart(2, "0");
+        const d = String(date.getDate()).padStart(2, "0");
+        const h = String(date.getHours()).padStart(2, "0");
+        const mi = String(date.getMinutes()).padStart(2, "0");
+        const s = String(date.getSeconds()).padStart(2, "0");
+        return y + "-" + mo + "-" + d + " " + h + ":" + mi + ":" + s;
+    };
+
     // ms → SRC-like 1m2s345ms (shared with SpeedInfo personal rows)
     window.timeKeeper.formatTimeSrcStyle = function (ms) {
         ms = Math.floor(Number(ms) || 0);
@@ -1765,7 +1778,7 @@ window.TimeKeeper.make = function () {
                 return cell;
             }
             line(cell, "Best Time: " + window.timeKeeper.formatDuration(data.time));
-            line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOn(data.date));
+            line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOnWithTime(data.date));
             if (data.att != undefined && data.sum != undefined && data.att > 0) {
                 const avg = Math.floor(data.sum / data.att);
                 line(cell, "Attempts to this point: " + data.att);
@@ -1786,7 +1799,7 @@ window.TimeKeeper.make = function () {
             }
             line(cell, String(data.high));
             line(cell, "Duration: " + window.timeKeeper.formatDuration(data.time));
-            line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOn(data.date));
+            line(cell, "Achieved on: " + window.timeKeeper.formatAchievedOnWithTime(data.date));
             return cell;
         }
 
