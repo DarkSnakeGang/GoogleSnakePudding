@@ -59,6 +59,10 @@ window.Timer = {
 
     window._cat = 3
 
+    function refreshSplitPanel() {
+      if (typeof window.SplitPanelRefresh === "function") window.SplitPanelRefresh()
+    }
+
     localStorage._snake_timer_format = localStorage._snake_timer_format ?? 1
     window._format = localStorage._snake_timer_format
 
@@ -477,9 +481,11 @@ window.Timer = {
             while(_splits.includes(+splitScore)) {
               _splits.splice(_splits.indexOf(+splitScore), 1)
             }
+            refreshSplitPanel()
           })
 
           if(!window._splits.includes(+splitScore)) window._splits.push(+splitScore)
+          refreshSplitPanel()
 
           function handleChange() {
             const val = splitInput.value.split(':')
@@ -508,6 +514,7 @@ window.Timer = {
             _pb[_mode][_count][_speed][_size][_cat][key] = time || ''
 
             localStorage._snake_pb = JSON.stringify(_pb)
+            refreshSplitPanel()
 
 
             splitInput.value = time === 0 ? '' : time.timeFormat()
@@ -578,6 +585,7 @@ window.Timer = {
             _pb[_mode][_count][_speed][_size][_cat][key] = time || ''
 
             localStorage._snake_pb = JSON.stringify(_pb)
+            refreshSplitPanel()
 
 
             el.value = time === 0 ? '' : time.timeFormat()
@@ -646,6 +654,7 @@ window.Timer = {
                 while(window._splits.includes(+_splitName)) {
                   window._splits.splice(window._splits.indexOf(+_splitName), 1)
                 }
+                refreshSplitPanel()
               })
 
               if(!window._splits.includes(+_splitName)) window._splits.push(+_splitName)
@@ -677,6 +686,7 @@ window.Timer = {
                 _pb[_mode][_count][_speed][_size][_cat][key] = time || ''
 
                 localStorage._snake_pb = JSON.stringify(_pb)
+                refreshSplitPanel()
 
                 splitInput.value = time === 0 ? '' : time.timeFormat()
               }
@@ -700,6 +710,7 @@ window.Timer = {
 
             }
           }
+          refreshSplitPanel()
         }
         updateToMode()
 
@@ -808,6 +819,7 @@ window.Timer = {
           deltaDiv.innerHTML = '-'.color('white')
 
           window._lastDelta = 0
+          if (typeof window.SplitPanelOnReset === "function") window.SplitPanelOnReset()
 
         `
       )
@@ -890,9 +902,10 @@ window.Timer = {
         const _split = ${ticks} * ${dt} * 1e-3
 
         window._run[_mode][_count][_speed][_size][_cat][${score}] = _split
+        let _delta = NaN
 
         if(window._pb[_mode][_count][_speed][_size][_cat][${score}]) {
-          const _delta = _split - window._pb[_mode][_count][_speed][_size][_cat][${score}]
+          _delta = _split - window._pb[_mode][_count][_speed][_size][_cat][${score}]
           const _absDeltaString = Math.abs(_delta).timeFormat()
           if(_delta !== 0)
             deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
@@ -928,6 +941,7 @@ window.Timer = {
           else localStorage._snake_pb = JSON.stringify(window._pb)
         }
 
+        if (typeof window.SplitPanelOnSplit === "function") window.SplitPanelOnSplit(${score}, _split, _delta)
 
 
 
@@ -982,6 +996,8 @@ window.Timer = {
         if (typeof window.persistSnakePb === "function") window.persistSnakePb()
         else localStorage._snake_pb = JSON.stringify(window._pb)
       }
+
+      if (typeof window.SplitPanelOnSplit === "function") window.SplitPanelOnSplit("ALL", _time, _delta)
 
 
 

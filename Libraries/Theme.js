@@ -4,6 +4,7 @@ window.Theme.make = function () {
 
   // style for all pudding sidebar overlays
   window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
+  window.puddingSidebarStyleLeft = 'position:absolute;right:100%;left:auto;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
 
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
@@ -375,6 +376,8 @@ window.Theme.alterCode = function (code) {
 
     document.getElementById('settings-popup-pudding').style.background = real_top_bar;
     document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const splitPanel = document.getElementById('split-panel-pudding');
+    if (splitPanel) splitPanel.style.background = real_top_bar;
     const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');
     if (portalPanel) {
       portalPanel.style.background = real_top_bar;

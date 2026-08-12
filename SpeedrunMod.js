@@ -70,6 +70,7 @@ window.Theme.make = function () {
 
   // style for all pudding sidebar overlays
   window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
+  window.puddingSidebarStyleLeft = 'position:absolute;right:100%;left:auto;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
 
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
@@ -441,6 +442,8 @@ window.Theme.alterCode = function (code) {
 
     document.getElementById('settings-popup-pudding').style.background = real_top_bar;
     document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const splitPanel = document.getElementById('split-panel-pudding');
+    if (splitPanel) splitPanel.style.background = real_top_bar;
     const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');
     if (portalPanel) {
       portalPanel.style.background = real_top_bar;
@@ -897,6 +900,7 @@ window.SettingsSaver.make = function () {
                 ScrollBar: false,
                 SaveGameSettings: true,
                 SavedGameSettings: null,
+                SplitPanel: false,
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
@@ -920,6 +924,9 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.SaveGameSettings !== 'boolean') {
                 pudding_settings.SaveGameSettings = true;
+            }
+            if (typeof pudding_settings.SplitPanel !== 'boolean') {
+                pudding_settings.SplitPanel = false;
             }
             if (
                 pudding_settings.SavedGameSettings !== null &&
@@ -2442,9 +2449,15 @@ window.SpeedInfo.make = function () {
         return true;
     }
 
+    // SRC removed Statue Bomb and Statue 10a highscore (non-competitive max-score ties)
+    function isRemovedStatueHighscore(mode, count) {
+        return mode === 13 && (count === 3 || count === 5); // Statue + 10 Apples or Bomb
+    }
+
     // FSS HS boards: typical HS modes on any count; on Tally every mode except Peaceful/Blender
     function canShowSrcHighscore(mode, count) {
         if (mode === 21 || mode === 22) return false; // Peaceful, Blender
+        if (isRemovedStatueHighscore(mode, count)) return false;
         if (TYPICAL_HIGHSCORE_MODES[mode]) return true;
         if (count === TALLY_COUNT) return true;
         return false;
@@ -2453,6 +2466,7 @@ window.SpeedInfo.make = function () {
     // Submit link only when SRC has a real board (HS category or CE Tally-HS mode)
     function canSubmitHighscore(mode, count) {
         if (mode === 21 || mode === 22) return false;
+        if (isRemovedStatueHighscore(mode, count)) return false;
         if (SRC_HS_CATEGORY_BY_MODE[mode]) return true;
         if (count === TALLY_COUNT && CE_TALLY_MODE_BY_MODE[mode]) return true;
         return false;
@@ -2467,6 +2481,7 @@ window.SpeedInfo.make = function () {
         if (size > 2 || count > 6 || speed > 2) return null;
 
         if (score === "H") {
+            if (!canSubmitHighscore(mode, count)) return null;
             const hsCat = SRC_HS_CATEGORY_BY_MODE[mode];
             if (hsCat) {
                 const x = [

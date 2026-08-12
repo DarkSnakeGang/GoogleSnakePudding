@@ -86,6 +86,7 @@ window.PuddingMod.runCodeBefore = function () {
     "SpeedInfo",
     "InputDisplay",
     "Timer",
+    "SplitPanel",
     "BootstrapMenu",
     "ResetKey",
     "RenderDelayFix",

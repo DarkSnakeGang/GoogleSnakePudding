@@ -14,6 +14,7 @@ lib_list = [
     "SpeedInfo",
     "InputDisplay",
     "Timer",
+    "SplitPanel",
     "BootstrapMenu",
     "ResetKey",
     "RenderDelayFix",

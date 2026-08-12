@@ -178,6 +178,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Speed Info</label>
     </div>
     <div class="form-check form-check-inline">
+    <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
+    <label class="form-check-label" for="ShowSplitPanel" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Split Panel</label>
+    </div>
+    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
     </div>
@@ -246,6 +250,13 @@ window.BootstrapMenu.make = function () {
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
         speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
 
+        splitpanel_checkbox = document.getElementById("ShowSplitPanel");
+        if (typeof window.pudding_settings.SplitPanel !== "boolean") {
+            window.pudding_settings.SplitPanel = false;
+        }
+        splitpanel_checkbox.checked = !!window.pudding_settings.SplitPanel;
+        splitpanel_checkbox.addEventListener("change", window.ToggleSplitPanel);
+
         randombtn_checkbox = document.getElementById("DisableRandom");
         randombtn_checkbox.addEventListener("change", window.ToggleRandom);
         randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
@@ -293,6 +304,10 @@ window.BootstrapMenu.make = function () {
             speedinfo_checkbox.disabled = true;
             speedinfo_checkbox.checked = false;
             window.SpeedInfoHide();
+
+            splitpanel_checkbox.disabled = true;
+            splitpanel_checkbox.checked = false;
+            if (typeof window.SplitPanelHide === "function") window.SplitPanelHide();
 
             input_checkbox.disabled = true;
             ScrollLeftBtn.style.display = '';

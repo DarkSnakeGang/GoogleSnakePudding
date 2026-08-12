@@ -165,9 +165,15 @@ window.SpeedInfo.make = function () {
         return true;
     }
 
+    // SRC removed Statue Bomb and Statue 10a highscore (non-competitive max-score ties)
+    function isRemovedStatueHighscore(mode, count) {
+        return mode === 13 && (count === 3 || count === 5); // Statue + 10 Apples or Bomb
+    }
+
     // FSS HS boards: typical HS modes on any count; on Tally every mode except Peaceful/Blender
     function canShowSrcHighscore(mode, count) {
         if (mode === 21 || mode === 22) return false; // Peaceful, Blender
+        if (isRemovedStatueHighscore(mode, count)) return false;
         if (TYPICAL_HIGHSCORE_MODES[mode]) return true;
         if (count === TALLY_COUNT) return true;
         return false;
@@ -176,6 +182,7 @@ window.SpeedInfo.make = function () {
     // Submit link only when SRC has a real board (HS category or CE Tally-HS mode)
     function canSubmitHighscore(mode, count) {
         if (mode === 21 || mode === 22) return false;
+        if (isRemovedStatueHighscore(mode, count)) return false;
         if (SRC_HS_CATEGORY_BY_MODE[mode]) return true;
         if (count === TALLY_COUNT && CE_TALLY_MODE_BY_MODE[mode]) return true;
         return false;
@@ -190,6 +197,7 @@ window.SpeedInfo.make = function () {
         if (size > 2 || count > 6 || speed > 2) return null;
 
         if (score === "H") {
+            if (!canSubmitHighscore(mode, count)) return null;
             const hsCat = SRC_HS_CATEGORY_BY_MODE[mode];
             if (hsCat) {
                 const x = [

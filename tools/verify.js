@@ -29,6 +29,7 @@ const LIBS = [
   "SpeedInfo",
   "InputDisplay",
   "Timer",
+  "SplitPanel",
   "BootstrapMenu",
   "ResetKey",
   "RenderDelayFix",
