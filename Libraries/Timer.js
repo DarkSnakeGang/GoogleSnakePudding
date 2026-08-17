@@ -876,12 +876,31 @@ window.Timer = {
       )
     )
 
+    let score
+    let ticks
+    let dt
+    let winTicks
+    let winDt
     const stuffBlock = code.match(
       /[a-zA-Z0-9_$]{1,8}=this\.header,[a-zA-Z0-9_$]{1,8}=\n?this\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}=this\.ticks,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8};/
-    )[0]
-    const score = stuffBlock.match(/header,[a-zA-Z0-9_$]{1,8}=\n?this\.[a-zA-Z0-9_$]{1,8}/)[0].replace(/header,[a-zA-Z0-9_$]{1,8}=/,'')
-    const ticks = stuffBlock.match(/[a-zA-Z0-9_$]{1,8}=this\.ticks/)[0].replace(/[a-zA-Z0-9_$]{1,8}=/,'')
-    const dt    = stuffBlock.match(/ticks,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}/)[0].replace(/ticks,[a-zA-Z0-9_$]{1,8}=/,'')
+    )
+    if (stuffBlock) {
+      score = stuffBlock[0].match(/header,[a-zA-Z0-9_$]{1,8}=\n?this\.[a-zA-Z0-9_$]{1,8}/)[0].replace(/header,[a-zA-Z0-9_$]{1,8}=/,'')
+      ticks = stuffBlock[0].match(/[a-zA-Z0-9_$]{1,8}=this\.ticks/)[0].replace(/[a-zA-Z0-9_$]{1,8}=/,'')
+      dt    = stuffBlock[0].match(/ticks,[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}/)[0].replace(/ticks,[a-zA-Z0-9_$]{1,8}=/,'')
+      winTicks = ticks
+      winDt = dt
+    } else {
+      // v13: 25/50/100 HUD lives in q7E=function(a,b,c,d){if(b===25...
+      score = 'b'
+      ticks = 'c'
+      dt = 'd'
+      const scoreCtor = code.match(
+        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+      )
+      winTicks = 'this.ticks'
+      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.Fb'
+    }
 
 
 
@@ -968,7 +987,7 @@ window.Timer = {
       const _speed = getSelected('#speed')
       const _size  = getSelected('#size')
 
-      const _time = ${ticks} * ${dt} * 1e-3
+      const _time = ${winTicks} * ${winDt} * 1e-3
 
       let _delta = NaN
 

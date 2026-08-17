@@ -500,18 +500,20 @@ window.CustomBowl.alterCode = function (code) {
         `if(a.settings.${fruit_setting}===24){`
     );
 
-    // Before in-place portal retype, drop the eaten pair from "showing" (type=-1).
+    // v12: Ni&&(this.wa.ka[vd].type=aaF(this.wa),this.wa.ka[Ok].type=this.wa.ka[vd].type)
+    // v13: e&&(a.wa.ka[k].type=Q3E(a.wa),a.wa.ka[d].type=a.wa.ka[k].type)
     const inplace_regex = new RegExp(
-        `Ni&&\\(this\\.wa\\.ka\\[vd\\]\\.type=${aaf_name}\\(this\\.wa\\),this\\.wa\\.ka\\[Ok\\]\\.type=this\\.wa\\.ka\\[vd\\]\\.type\\)`
+        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2wa\\),\\2wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2wa\\.ka\\[\\3\\]\\.type\\)`
     );
     catchError(inplace_regex, code);
+    const inplace_match = code.match(inplace_regex);
     code = code.assertReplace(
         inplace_regex,
-        `Ni&&(this.wa.ka[vd].type=-1,this.wa.ka[Ok].type=-1,this.wa.ka[vd].type=${aaf_name}(this.wa),this.wa.ka[Ok].type=this.wa.ka[vd].type)`
+        `${inplace_match[1]}&&(${inplace_match[2]}wa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}wa),${inplace_match[2]}wa.ka[${inplace_match[4]}].type=${inplace_match[2]}wa.ka[${inplace_match[3]}].type)`
     );
 
     const refill_regex = new RegExp(
-        `if\\(([a-zA-Z0-9_$]{1,8})\\(a\\.settings,2\\)&&b\\.length>0\\)for\\(b\\[0\\]\\.type=${aaf_name}\\(a\\.([a-zA-Z0-9_$]{1,8})\\),b\\[1\\]\\.type=b\\[0\\]\\.type,a=2;a<b\\.length;a\\+=2\\)b\\[a\\]\\.type=\\(b\\[a-2\\]\\.type\\+1\\)%24,b\\[a\\+1\\]\\.type=b\\[a\\]\\.type`
+        `if\\(([a-zA-Z0-9_$]{1,8})\\(a\\.settings,2\\)&&b\\.length>0\\)for\\(b\\[0\\]\\.type=${aaf_name}\\(a\\.([a-zA-Z0-9_$]{1,8})\\),b\\[1\\]\\.type=b\\[0\\]\\.type,a=2;a<b\\.length;a\\+=2\\)b\\[a\\]\\.type=\\(b\\[a-2\\]\\.type\\+1\\)%\\n?24,b\\[a\\+1\\]\\.type=b\\[a\\]\\.type`
     );
     catchError(refill_regex, code);
     const refill_match = code.match(refill_regex);

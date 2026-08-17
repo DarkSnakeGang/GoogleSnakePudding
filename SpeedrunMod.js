@@ -1403,20 +1403,35 @@ window.Counter.alterCode = function (code) {
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
-    wall_spawn_regex = new RegExp(/(?:let|const|var) [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
-    catchError(wall_spawn_regex, code)
-    wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
+    // v12: let Ni=ucF(this.Ca,this.Sb(null,5));
+    // v13: (h=p6E(a.Ca,a.Vb(null,5)))&&(...)
+    const wall_spawn_let = /(?:let|const|var) ([a-zA-Z0-9_$]{1,8})=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/
+    const wall_spawn_assign = /\(([a-zA-Z0-9_$]{1,8})=[a-zA-Z0-9_$]{1,8}\((?:this|a)\.[a-zA-Z0-9_$]{1,8},(?:this|a)\.[a-zA-Z0-9_$]{1,8}\(null,5\)\)\)/
 
-    wall_counter_code = `${code.match(wall_spawn_regex)[0]}
+    const wall_let_match = code.match(wall_spawn_let)
+    if (wall_let_match) {
+        catchError(wall_spawn_let, code)
+        const wall_pos = wall_let_match[1]
+        const wall_counter_code = `${wall_let_match[0]}
     if(${wall_pos}){stats.walls.game++;
     window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
     updateCounterDisplay();}
     `
-    if (window.NepDebug) {
-        console.log("Wall thing: " + wall_pos)
-        console.log("Wall thing 2: " + wall_counter_code)
+        if (window.NepDebug) {
+            console.log("Wall thing: " + wall_pos)
+            console.log("Wall thing 2: " + wall_counter_code)
+        }
+        code = code.assertReplace(wall_spawn_let, wall_counter_code)
+    } else {
+        catchError(wall_spawn_assign, code)
+        const wall_assign_match = code.match(wall_spawn_assign)
+        const wall_pos = wall_assign_match[1]
+        const inner = wall_assign_match[0].slice(1, -1)
+        code = code.assertReplace(
+            wall_spawn_assign,
+            `(${inner},${wall_pos}&&(stats.walls.game++,window.wallCoords.push([${wall_pos}.x,${wall_pos}.y]),updateCounterDisplay()),${wall_pos})`
+        )
     }
-    code = code.assertReplace(wall_spawn_regex, wall_counter_code);
     
 
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
@@ -2239,23 +2254,38 @@ window.TimeKeeper.alterCode = function (code) {
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
 
-    scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,4}\=\=\=\n?25/)[0].split("=")[0];
-    scoreFunc = func.match(
-        `${window.escapeRegex(scoreFuncVar.replace("\n", ""))}=\n?this.[a-zA-Z0-9$]{1,6}`
-    )[0].split("=")[1];
-    timeFunc = func.match(/\([a-zA-Z0-9$]{1,6}\*[a-zA-Z0-9$]{1,6}\)/)[0];
-    ticksVar = timeFunc.split("(")[1].split("*")[0];
-    tickLengthVar = timeFunc.split("*")[1].split(")")[0];
-    realTicks = func.match(`${escapeRegex(ticksVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split("=")[1];
-    realTickLength = func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,6}`)[0].split(
-        "="
-    )[1];
-    timeFunc = `${realTicks}*${realTickLength}`;
+    // v12: this.header=c;this.Oh=this.Eb=this.ticks=this.ob=0
+    // v13: this.header=c;this.Sh=this.Fb=this.ticks=this.ob=0
+    const scoreCtor = code.match(
+        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+    );
+    let scoreFunc;
+    let timeFunc;
+    if (scoreCtor) {
+        scoreFunc = "this." + scoreCtor[1];
+        timeFunc = "this.ticks*this." + scoreCtor[2];
+    } else {
+        scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,8}\=\=\=\n?25/)[0].split("=")[0];
+        scoreFunc = func.match(
+            `${window.escapeRegex(scoreFuncVar.replace("\n", ""))}=\n?this.[a-zA-Z0-9$]{1,8}`
+        )[0].split("=")[1];
+        timeFunc = func.match(/\([a-zA-Z0-9$]{1,8}\*[a-zA-Z0-9$]{1,8}\)/)[0];
+        ticksVar = timeFunc.split("(")[1].split("*")[0];
+        tickLengthVar = timeFunc.split("*")[1].split(")")[0];
+        realTicks = func.match(`${escapeRegex(ticksVar)}=this.[a-zA-Z0-9$]{1,8}`)[0].split("=")[1];
+        realTickLength = func.match(`${escapeRegex(tickLengthVar)}=this.[a-zA-Z0-9$]{1,8}`)[0].split(
+            "="
+        )[1];
+        timeFunc = `${realTicks}*${realTickLength}`;
+    }
 
     ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");";
-    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,4}\=\=\=\n?25/);
-    ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
-    func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
+    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,8}\=\=\=\n?25/);
+    const if25_in_tick = func.match(if25_regex);
+    if (if25_in_tick) {
+        ownFuncIndex = func.indexOf(if25_in_tick[0]);
+        func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
+    }
 
     func =
         func.slice(0, func.indexOf("WIN.play()") + 11) +
@@ -2266,7 +2296,7 @@ window.TimeKeeper.alterCode = function (code) {
         ")," +
         func.slice(func.indexOf("WIN.play()") + 11);
 
-    death = func.match(/if\(this.[a-zA-Z0-9$]{1,4}\|\|this.[a-zA-Z0-9$]{1,4}\)/)[0];
+    death = func.match(/if\(this.[a-zA-Z0-9$]{1,8}\|\|this.[a-zA-Z0-9$]{1,8}\)/)[0];
     death = death.slice(death.indexOf("(") + 1, death.indexOf("|"));
     func =
         func.slice(0, func.indexOf("{") + 1) +
@@ -2280,6 +2310,16 @@ window.TimeKeeper.alterCode = function (code) {
         func.slice(func.indexOf("{") + 1);
 
     code = code.assertReplace(func_regex, func + StartOfNext);
+
+    // v13 moved the 25/50/100 HUD update out of tick() into a helper.
+    if (!if25_in_tick) {
+        const appleHud = /([a-zA-Z0-9_$]{1,8})=function\(a,b,c,d\)\{if\(b===25\|\|b===50\|\|b===100\)/;
+        window.catchError(appleHud, code);
+        code = code.assertReplace(
+            appleHud,
+            "$1=function(a,b,c,d){window.timeKeeper.gotApple(Math.floor(c*d),b);if(b===25||b===50||b===100)"
+        );
+    }
     return code;
 };
 window.SpeedInfo = {};

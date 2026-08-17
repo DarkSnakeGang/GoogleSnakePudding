@@ -224,20 +224,35 @@ window.Counter.alterCode = function (code) {
 
     code = code.assertReplace(stop_regex, save_stats_code);
 
-    wall_spawn_regex = new RegExp(/(?:let|const|var) [a-zA-Z0-9_$]{1,8}=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/gm)
-    catchError(wall_spawn_regex, code)
-    wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
+    // v12: let Ni=ucF(this.Ca,this.Sb(null,5));
+    // v13: (h=p6E(a.Ca,a.Vb(null,5)))&&(...)
+    const wall_spawn_let = /(?:let|const|var) ([a-zA-Z0-9_$]{1,8})=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/
+    const wall_spawn_assign = /\(([a-zA-Z0-9_$]{1,8})=[a-zA-Z0-9_$]{1,8}\((?:this|a)\.[a-zA-Z0-9_$]{1,8},(?:this|a)\.[a-zA-Z0-9_$]{1,8}\(null,5\)\)\)/
 
-    wall_counter_code = `${code.match(wall_spawn_regex)[0]}
+    const wall_let_match = code.match(wall_spawn_let)
+    if (wall_let_match) {
+        catchError(wall_spawn_let, code)
+        const wall_pos = wall_let_match[1]
+        const wall_counter_code = `${wall_let_match[0]}
     if(${wall_pos}){stats.walls.game++;
     window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
     updateCounterDisplay();}
     `
-    if (window.NepDebug) {
-        console.log("Wall thing: " + wall_pos)
-        console.log("Wall thing 2: " + wall_counter_code)
+        if (window.NepDebug) {
+            console.log("Wall thing: " + wall_pos)
+            console.log("Wall thing 2: " + wall_counter_code)
+        }
+        code = code.assertReplace(wall_spawn_let, wall_counter_code)
+    } else {
+        catchError(wall_spawn_assign, code)
+        const wall_assign_match = code.match(wall_spawn_assign)
+        const wall_pos = wall_assign_match[1]
+        const inner = wall_assign_match[0].slice(1, -1)
+        code = code.assertReplace(
+            wall_spawn_assign,
+            `(${inner},${wall_pos}&&(stats.walls.game++,window.wallCoords.push([${wall_pos}.x,${wall_pos}.y]),updateCounterDisplay()),${wall_pos})`
+        )
     }
-    code = code.assertReplace(wall_spawn_regex, wall_counter_code);
     
 
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
