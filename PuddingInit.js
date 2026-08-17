@@ -80,6 +80,7 @@ window.PuddingMod.runCodeBefore = function () {
     "ModeRegistry",
     "TimeKeeper",
     "Fruit",
+    "GraphicsMix",
     "TopBar",
     "SnakeColor",
     "SettingsSaver",
@@ -97,7 +98,14 @@ window.PuddingMod.runCodeBefore = function () {
   libUrlPrefix = window.NepDebug ? "http://127.0.0.1:5500/Libraries/" : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
   window.Libraries.forEach(LibName => {
     console.log("Loading library: " + LibName)
-    eval("window." + LibName + ".make();")
+    try {
+      if (!window[LibName] && typeof window.loadCode === "function") {
+        window.loadCode(libUrlPrefix + LibName + ".js");
+      }
+      eval("window." + LibName + ".make();")
+    } catch (e) {
+      console.error("Library failed: " + LibName, e);
+    }
   });
 
 
@@ -146,6 +154,10 @@ window.PuddingMod.runCodeAfter = function () {
   }
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
+
+  if (typeof window.appendPairGraphicsIcons === "function") {
+    window.appendPairGraphicsIcons();
+  }
 
   // Belt-and-suspenders: menu may not exist until after alterCode's setTimeout(0)
   if (typeof window.applySavedGameSettingsOnce === "function") {

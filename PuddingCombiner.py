@@ -8,6 +8,7 @@ lib_list = [
     "ModeRegistry",
     "TimeKeeper",
     "Fruit",
+    "GraphicsMix",
     "TopBar",
     "SnakeColor",
     "SettingsSaver",

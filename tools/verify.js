@@ -23,6 +23,7 @@ const LIBS = [
   "Counter",
   "TimeKeeper",
   "Fruit",
+  "GraphicsMix",
   "TopBar",
   "SnakeColor",
   "SettingsSaver",
@@ -226,12 +227,15 @@ function installBrowserStubs() {
         }
         return apple;
       }
-      if (s === "#count" || s === "#speed" || s === "#trophy" || s === "#size") {
+      if (s === "#count" || s === "#speed" || s === "#trophy" || s === "#size" || s === "#graphics") {
         const box = makeEl("div");
-        const n = s === "#trophy" ? 23 : s === "#count" ? 7 : 3;
+        const n = s === "#trophy" ? 23 : s === "#count" ? 7 : s === "#graphics" ? 4 : 3;
         for (let i = 0; i < n; i++) {
           const img = makeEl("img");
           img.src = `https://example.com/${s.slice(1)}_${i}.png`;
+          img.complete = true;
+          img.naturalWidth = 128;
+          img.width = 128;
           box.appendChild(img);
         }
         return box;
