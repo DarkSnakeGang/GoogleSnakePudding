@@ -2766,6 +2766,7 @@ window.SettingsSaver = {};
 window.SettingsSaver.make = function () {
     const COUNT_KEYS = ["0", "1", "2", "3", "4", "5", "6"];
     const COUNT_MINIMA = { 0: 1, 1: 3, 2: 5, 3: 10, 4: 6, 5: 24, 6: 5 };
+    const PUDDING_SETTINGS_VERSION = 1;
 
     const GAME_SETTING_KEYS = [
         "trophy",
@@ -2777,6 +2778,93 @@ window.SettingsSaver.make = function () {
         "color",
         "apple",
     ];
+
+    // v12/v13 share the same menu rows today; caps are fallbacks when DOM is not ready yet.
+    const FALLBACK_ROW_LIMITS = {
+        trophy: 25,
+        count: 7,
+        speed: 3,
+        size: 3,
+        graphics: 7,
+        theme: 24,
+        color: 24,
+        apple: 50,
+    };
+
+    function getSelectorRowLength(selectorId) {
+        const row = document.getElementById(selectorId);
+        return row && row.children ? row.children.length : 0;
+    }
+
+    function clampSettingIndex(index, maxLen) {
+        let i = Number(index);
+        if (isNaN(i) || i < 0) return 0;
+        if (!maxLen || maxLen <= 0) return i;
+        return Math.min(i, maxLen - 1);
+    }
+
+    function nativeGraphicsCount() {
+        return window.nativeGraphicsCount || 4;
+    }
+
+    // Pair-mix slots (indices >= native count) map back to a native style if mix icons are missing.
+    function fallbackNativeGraphics(savedIndex) {
+        const n = nativeGraphicsCount();
+        const g = Number(savedIndex);
+        if (isNaN(g) || g < 0) return 0;
+        if (g < n - 1) return g;
+        const pools = {};
+        pools[n - 1] = 0;
+        pools[n] = 0;
+        pools[n + 1] = 1;
+        pools[n + 2] = 0;
+        return Object.prototype.hasOwnProperty.call(pools, g) ? pools[g] : 0;
+    }
+
+    function requiredGraphicsRowLength(savedGraphics) {
+        const g = Number(savedGraphics);
+        if (isNaN(g) || g < 0) return nativeGraphicsCount();
+        const n = nativeGraphicsCount();
+        if (g < n) return n;
+        return n + 3;
+    }
+
+    function graphicsRowReady(savedGraphics) {
+        const len = getSelectorRowLength("graphics");
+        if (!len) return false;
+        return len >= requiredGraphicsRowLength(savedGraphics);
+    }
+
+    function sanitizeSavedGameSettings(snap, options) {
+        if (!snap || typeof snap !== "object") return snap;
+        const out = Object.assign({}, snap);
+        const savedRows = out._rowLengths && typeof out._rowLengths === "object" ? out._rowLengths : null;
+        const allowGraphicsFallback = !!(options && options.allowGraphicsFallback);
+
+        for (const key of GAME_SETTING_KEYS) {
+            if (typeof out[key] !== "number" || isNaN(out[key])) continue;
+
+            let maxLen = getSelectorRowLength(key);
+            if (!maxLen && savedRows && typeof savedRows[key] === "number") {
+                maxLen = savedRows[key];
+            }
+            if (!maxLen && FALLBACK_ROW_LIMITS[key]) {
+                maxLen = FALLBACK_ROW_LIMITS[key];
+            }
+
+            if (key === "graphics" && maxLen && out[key] >= nativeGraphicsCount()) {
+                if (allowGraphicsFallback && maxLen < requiredGraphicsRowLength(out[key])) {
+                    out[key] = fallbackNativeGraphics(out[key]);
+                } else {
+                    out[key] = clampSettingIndex(out[key], maxLen);
+                }
+            } else if (maxLen) {
+                out[key] = clampSettingIndex(out[key], maxLen);
+            }
+        }
+
+        return out;
+    }
 
     function defaultPoolForCount(count) {
         const min = COUNT_MINIMA[count] || 1;
@@ -2815,10 +2903,31 @@ window.SettingsSaver.make = function () {
         return settings;
     }
 
+    function migratePuddingSettings(settings) {
+        if (!settings || typeof settings !== "object") return settings;
+
+        if (typeof settings.StorageVersion !== "number") {
+            settings.StorageVersion = PUDDING_SETTINGS_VERSION;
+        }
+
+        settings = migrateSelectedPairsByCount(settings);
+        settings.SelectedPairs = settings.SelectedPairsByCount["0"];
+
+        if (settings.SavedGameSettings && typeof settings.SavedGameSettings === "object") {
+            settings.SavedGameSettings = sanitizeSavedGameSettings(settings.SavedGameSettings, {
+                allowGraphicsFallback: true,
+            });
+        }
+
+        settings.StorageVersion = PUDDING_SETTINGS_VERSION;
+        return settings;
+    }
+
     window.loadSettings = function () {
         let pudding_settings = localStorage.getItem('PuddingSettings');
         if (pudding_settings === null) {
             pudding_settings = {
+                StorageVersion: PUDDING_SETTINGS_VERSION,
                 Skull: false,
                 SokoGoals: true,
                 InputDisplay: false,
@@ -2842,6 +2951,7 @@ window.SettingsSaver.make = function () {
             }
         } else {
             pudding_settings = JSON.parse(pudding_settings);
+            const needsPersist = typeof pudding_settings.StorageVersion !== "number";
             if (typeof pudding_settings.PortalPairs !== 'boolean') {
                 pudding_settings.PortalPairs = false;
             }
@@ -2869,13 +2979,19 @@ window.SettingsSaver.make = function () {
             ) {
                 pudding_settings.SavedGameSettings = null;
             }
-            pudding_settings = migrateSelectedPairsByCount(pudding_settings);
-            pudding_settings.SelectedPairs = pudding_settings.SelectedPairsByCount["0"];
+            pudding_settings = migratePuddingSettings(pudding_settings);
+            if (needsPersist) {
+                window._puddingSettingsNeedsPersist = true;
+            }
         }
 
         return pudding_settings;
     }
     window.pudding_settings = window.loadSettings();
+    if (window._puddingSettingsNeedsPersist && typeof window.saveSettings === "function") {
+        window.saveSettings();
+        window._puddingSettingsNeedsPersist = false;
+    }
 
     window.saveSettings = function () {
         const s = window.pudding_settings;
@@ -2974,7 +3090,15 @@ window.SettingsSaver.make = function () {
         if (typeof window.fruit_selected === "number") {
             snap.apple = window.fruit_selected;
         }
-        window.pudding_settings.SavedGameSettings = snap;
+        snap._rowLengths = {};
+        for (const key of GAME_SETTING_KEYS) {
+            const len = getSelectorRowLength(key);
+            if (len) snap._rowLengths[key] = len;
+        }
+        snap._nativeGraphicsCount = nativeGraphicsCount();
+        window.pudding_settings.SavedGameSettings = sanitizeSavedGameSettings(snap, {
+            allowGraphicsFallback: false,
+        });
         if (typeof window.saveSettings === "function") window.saveSettings();
     };
 
@@ -2986,11 +3110,12 @@ window.SettingsSaver.make = function () {
             window._puddingGameSettingsApplied = true;
             return;
         }
-        const snap = s.SavedGameSettings;
+        let snap = s.SavedGameSettings;
         if (!snap || typeof snap !== "object") {
             window._puddingGameSettingsApplied = true;
             return;
         }
+        snap = sanitizeSavedGameSettings(snap, { allowGraphicsFallback: false });
 
         const gear =
             document.querySelector('div[jsname="iyH4Cb"]') ||
@@ -3044,6 +3169,20 @@ window.SettingsSaver.make = function () {
                 }
                 setTimeout(waitMenuThenApply, 50);
                 return;
+            }
+
+            if (typeof snap.graphics === "number" && snap.graphics >= nativeGraphicsCount()) {
+                if (typeof window.appendPairGraphicsIcons === "function") {
+                    window.appendPairGraphicsIcons();
+                }
+                if (!graphicsRowReady(snap.graphics)) {
+                    if (waitTries > 80) {
+                        snap = sanitizeSavedGameSettings(snap, { allowGraphicsFallback: true });
+                    } else {
+                        setTimeout(waitMenuThenApply, 50);
+                        return;
+                    }
+                }
             }
 
             for (const key of order) {
