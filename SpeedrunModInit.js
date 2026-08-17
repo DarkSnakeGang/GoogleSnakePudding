@@ -71,7 +71,8 @@ window.SpeedrunMod.runCodeBefore = function () {
     "SpeedInfo",
     "TopBar",
     "BootstrapMenuSpeedrun",
-    "ResetKey",
+    "ResetKeySpeedrun",
+    "SpeedrunPerf",
   ];
   console.log("Enabling Speedrun Mod");
 
@@ -82,6 +83,10 @@ window.SpeedrunMod.runCodeBefore = function () {
     console.log("Loading library: " + LibName);
     eval("window." + LibName + ".make();");
   });
+
+  if (window.pudding_settings) {
+    window.pudding_settings.randomizeThemeApple = false;
+  }
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -124,5 +129,18 @@ window.SpeedrunMod.runCodeAfter = function () {
 
   if (typeof window.applySavedGameSettingsOnce === "function") {
     setTimeout(window.applySavedGameSettingsOnce, 0);
+  }
+
+  const prefetchSrc = function () {
+    if (typeof window.getAllSrc === "function") {
+      window.getAllSrc().catch(function (e) {
+        console.error("getAllSrc error:", e);
+      });
+    }
+  };
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback(prefetchSrc, { timeout: 2500 });
+  } else {
+    setTimeout(prefetchSrc, 0);
   }
 };

@@ -25,7 +25,8 @@ const LIBS = [
   "SpeedInfo",
   "TopBar",
   "BootstrapMenuSpeedrun",
-  "ResetKey",
+  "ResetKeySpeedrun",
+  "SpeedrunPerf",
 ];
 
 const version = process.argv[2] || "current";

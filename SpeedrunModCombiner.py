@@ -11,7 +11,8 @@ LIB_ORDER = [
     "SpeedInfo",
     "TopBar",
     "BootstrapMenuSpeedrun",
-    "ResetKey",
+    "ResetKeySpeedrun",
+    "SpeedrunPerf",
 ]
 OUTPUT = "SpeedrunMod.js"
 INIT = "SpeedrunModInit.js"
