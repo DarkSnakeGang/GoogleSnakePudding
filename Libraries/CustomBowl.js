@@ -215,6 +215,24 @@ window.CustomBowl.make = function () {
         return showing;
     }
 
+    // When every pool type still looks "on board", pick the least-used ones
+    // (the eaten slot, once cleared to -1, is the only 0-count type at minimum).
+    function rarestPoolTypes(appleManager, pool) {
+        const counts = new Map();
+        for (let i = 0; i < pool.length; i++) counts.set(pool[i], 0);
+        const apples = getAppleList(appleManager);
+        if (apples) {
+            for (const apple of apples) {
+                if (!apple) continue;
+                const t = Number(apple.type);
+                if (counts.has(t)) counts.set(t, counts.get(t) + 1);
+            }
+        }
+        let best = Infinity;
+        counts.forEach(function (n) { if (n < best) best = n; });
+        return pool.filter(function (t) { return counts.get(t) === best; });
+    }
+
     function isCustomBowlActive(settings) {
         if (!(window.pudding_settings && window.pudding_settings.PortalPairs && settings)) return false;
         const prop = window.__fruitBowlSettingProp || "Ka";
@@ -261,7 +279,7 @@ window.CustomBowl.make = function () {
                 window.__bowlUniquePicks.forEach(function (t) { showing.add(t); });
             }
             const available = pool.filter((t) => !showing.has(t));
-            const source = available.length > 0 ? available : pool;
+            const source = available.length > 0 ? available : rarestPoolTypes(appleManager, pool);
             const picked = source[Math.floor(Math.random() * source.length)];
             rememberUniquePick(picked);
             return picked;
@@ -676,6 +694,28 @@ window.CustomBowl.alterCode = function (code) {
     code = code.assertReplace(
         inplace_regex,
         `${inplace_match[1]}&&(${inplace_match[2]}wa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}wa),${inplace_match[2]}wa.ka[${inplace_match[4]}].type=${inplace_match[2]}wa.ka[${inplace_match[3]}].type)`
+    );
+
+    // Non-portal eat/respawn (3a/5a/10a): clear the reused slot first, same as
+    // tally's type:-1 new apple, so the eaten type leaves "showing" and can re-roll.
+    const eat_retype_regex = new RegExp(
+        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.wa\\)\\)`
+    );
+    catchError(eat_retype_regex, code);
+    code = code.assertReplace(
+        eat_retype_regex,
+        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.wa))`
+    );
+
+    // Non-portal start-of-game fill: stage every slot as -1, then pick sequentially
+    // so typesOnBoard sees earlier apples in the same wave.
+    const classic_fill_regex = new RegExp(
+        `else for\\(var ([a-zA-Z0-9_$]{1,8}) of this\\.${apple_array}\\)\\1\\.type=${aaf_name}\\(this\\)`
+    );
+    catchError(classic_fill_regex, code);
+    code = code.assertReplace(
+        classic_fill_regex,
+        `else{for(var $1 of this.${apple_array})$1.type=-1;for($1 of this.${apple_array})$1.type=${aaf_name}(this)}`
     );
 
     const refill_regex = new RegExp(
