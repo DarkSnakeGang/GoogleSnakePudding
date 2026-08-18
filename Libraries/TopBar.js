@@ -23,8 +23,10 @@ window.TopBar.make = function () {
   }
 
   window.setup_topbar_checkbox = function () {
-    const topbarCheckbox = document.getElementById("TopBarIcons");
-    if (!topbarCheckbox || document.getElementById("settings-popup-pudding")) return;
+    const settingsBox = document.getElementById("settings-popup-pudding");
+    const topbarCheckbox = (settingsBox && settingsBox.querySelector("#TopBarIcons"))
+      || document.getElementById("TopBarIcons");
+    if (!topbarCheckbox) return;
     if (topbarCheckbox.dataset.topbarBound === "1") {
       topbarCheckbox.checked = !!window.pudding_settings.TopBar;
       return;

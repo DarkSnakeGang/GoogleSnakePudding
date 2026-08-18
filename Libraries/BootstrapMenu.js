@@ -225,9 +225,15 @@ window.BootstrapMenu.make = function () {
         input_checkbox.checked = window.pudding_settings.InputDisplay;
         toggle_input_display();
 
-        topbar_checkbox = document.getElementById("TopBarIcons");
-        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
-        topbar_checkbox.checked = window.pudding_settings.TopBar;
+        if (typeof window.setup_topbar_checkbox === "function") {
+            window.setup_topbar_checkbox();
+        } else {
+            const topbar_checkbox = settingsBox.querySelector("#TopBarIcons");
+            if (topbar_checkbox) {
+                topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
+                topbar_checkbox.checked = window.pudding_settings.TopBar;
+            }
+        }
 
         speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
         speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);

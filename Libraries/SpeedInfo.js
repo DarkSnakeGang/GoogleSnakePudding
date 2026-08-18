@@ -1363,8 +1363,8 @@ window.SpeedInfo.make = function () {
 
         <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:6px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
         <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
-        <label class="form-check-label" for="TopBarIcons" style="${siLabel}">Top Bar Icons</label>
+        <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
+        <label class="form-check-label" data-speedrun-topbar-label style="${siLabel}">Top Bar Icons</label>
         </div>
         <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button>
         </div>
@@ -1381,6 +1381,10 @@ window.SpeedInfo.make = function () {
         if (window.SpeedrunMod) {
             const speedrunControls = document.getElementById("speedrun-controls-section");
             if (speedrunControls) speedrunControls.style.display = "block";
+            const speedrunTopbar = speedinfoBox.querySelector("[data-speedrun-topbar]");
+            if (speedrunTopbar) speedrunTopbar.id = "TopBarIcons";
+            const speedrunTopbarLabel = speedinfoBox.querySelector("[data-speedrun-topbar-label]");
+            if (speedrunTopbarLabel) speedrunTopbarLabel.setAttribute("for", "TopBarIcons");
             if (typeof window.setup_topbar_checkbox === "function") {
                 window.setup_topbar_checkbox();
             }
