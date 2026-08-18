@@ -1662,11 +1662,19 @@ window.TopBar.make = function () {
     }
   }
 
-  const topbarCheckbox = document.getElementById("TopBarIcons");
-  if (topbarCheckbox && !document.getElementById("settings-popup-pudding")) {
+  window.setup_topbar_checkbox = function () {
+    const topbarCheckbox = document.getElementById("TopBarIcons");
+    if (!topbarCheckbox || document.getElementById("settings-popup-pudding")) return;
+    if (topbarCheckbox.dataset.topbarBound === "1") {
+      topbarCheckbox.checked = !!window.pudding_settings.TopBar;
+      return;
+    }
     topbarCheckbox.addEventListener("change", window.toggle_topbar_icons);
     topbarCheckbox.checked = !!window.pudding_settings.TopBar;
-  }
+    topbarCheckbox.dataset.topbarBound = "1";
+  };
+
+  window.setup_topbar_checkbox();
 
 }
 
@@ -3190,6 +3198,9 @@ window.SpeedInfo.make = function () {
         if (window.SpeedrunMod) {
             const speedrunControls = document.getElementById("speedrun-controls-section");
             if (speedrunControls) speedrunControls.style.display = "block";
+            if (typeof window.setup_topbar_checkbox === "function") {
+                window.setup_topbar_checkbox();
+            }
         }
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');

@@ -1381,6 +1381,9 @@ window.SpeedInfo.make = function () {
         if (window.SpeedrunMod) {
             const speedrunControls = document.getElementById("speedrun-controls-section");
             if (speedrunControls) speedrunControls.style.display = "block";
+            if (typeof window.setup_topbar_checkbox === "function") {
+                window.setup_topbar_checkbox();
+            }
         }
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
