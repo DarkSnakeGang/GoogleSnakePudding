@@ -1,222 +1,225 @@
 # Google Snake Pudding
 
-Pudding Mod is the main visual and quality-of-life mod for Google Snake speedrunning. It adds fruits, themes, snake colors, stat tracking, timers, and a large in-game settings menu. This repository also ships related bundles (Speedrun Mod, More Pudding) and maintains versioned branches for older game dumps on [googlesnakemods.com](https://googlesnakemods.com).
+Pudding Mod is a visual and quality-of-life mod for Google Snake speedrunning. Play it on [googlesnakemods.com](https://googlesnakemods.com) by selecting **Pudding Mod**, or load `PuddingMod.js` through the Tampermonkey mod loader on Search / FBX.
+
+This repository also ships Speedrun Mod and a few combo loaders. Game settings and Pudding toggles live in `localStorage` (`PuddingSettings`). `StorageVersion: 1` keeps those saves usable when switching between v11, v12, and v/current in the same browser.
 
 ![Pudding Mod showcase](https://static.wikia.nocookie.net/google-snake-game/images/6/67/Pudding_Mod_Showcase.png/revision/latest/scale-to-width-down/838?cb=20230605135736)
 
 ---
 
-## Where to play
+## Files in this repository
 
-| Site | URL | Notes |
-|------|-----|-------|
-| Google Snake Mods (web) | [googlesnakemods.com/v/current/](https://googlesnakemods.com/v/current/) | Latest game version (v13). Select **Pudding Mod** from the mod picker. |
-| Older versions | [googlesnakemods.com/v/11/](https://googlesnakemods.com/v/11/), [v/12/](https://googlesnakemods.com/v/12/) | Branch-matched builds from this repo. |
-| Google Search / FBX | Tampermonkey + [Google Snake Mod Loader](https://github.com/DarkSnakeGang/GoogleSnakeModLoader) | Uses the same `mod-info.json` URLs as the website. |
-
-Settings, PBs, and mod toggles are stored in browser `localStorage` under `PuddingSettings`. As of `StorageVersion: 1`, saves migrate cleanly when switching between v11, v12, and v/current on the same browser.
-
----
-
-## Bundles in this repository
-
-| File | Branch (typical) | Description |
-|------|------------------|-------------|
-| `PuddingMod.js` | `main` (v13), `v12`, `v11`, … | Full Pudding Mod. Built from `Libraries/*.js` + `PuddingInit.js` via `PuddingCombiner.py`. |
-| `SpeedrunMod.js` | `main` | Lighter bundle: speedrun-focused features without the full Pudding menu weight. Built via `SpeedrunModCombiner.py`. |
-| `MorePudding.js` | `main` | Pudding Mod + Visibility Mod + More Menu Mod chain. Built via `MoreBuilder.py`. |
-| `ChimeraMod.js` | `main` | Experimental combined bundle (not in official mod picker). |
-| `Combo/LevelEditorPudding.js` | `main` | Pudding + Level Editor loader combo. |
-
-Official mod-loader entries point at raw GitHub URLs; see [Shipped mods](#shipped-mods-on-googlesnakemods) below.
-
----
-
-## Pudding Mod (v13 / `main`)
-
-Current target: **game version 13** (`v/current` on googlesnakemods.com). The bundled libraries are:
-
-| Library | Role |
-|---------|------|
-| `Core` | Shared helpers and bootstrap hooks. |
-| `Theme` | Extra themes; menu and in-game theme apply instantly. |
-| `DistinctVisual` | Distinct Sokoban goals and poison/skull fruit visuals. |
-| `Counter` | Wall spawn counter overlay. |
-| `ModeRegistry` | Maps trophy modes to labels and bit indices for stat tracking. |
-| `TimeKeeper` | PBs, mode times, 25/50/100-apple HUD milestones. |
-| `Fruit` | Extended fruit list, golden fruit rarities, realism/graphics hooks. |
-| `GraphicsMix` | Pair-mix graphics styles (blend two native styles in the graphics row). |
-| `TopBar` | Optional top bar showing count and speed icons. |
-| `SnakeColor` | Additional snake color options. |
-| `SettingsSaver` | `PuddingSettings` load/save, game-settings snapshot/restore. |
-| `SpeedInfo` | Always-on speedrun info panel, WR boards, tracked player name. |
-| `InputDisplay` | On-screen input history. |
-| `Timer` | In-game timer modes (ALL, 25, 50, 100, etc.). |
-| `SplitPanel` | LiveSplit-style side panel with auto-updating SRC-style splits. |
-| `BootstrapMenu` | In-game gear menu (Bootstrap UI injected into snake settings). |
-| `ResetKey` | Quick reset keybind. |
-| `RenderDelayFix` | Fixes render delay edge cases on some builds. |
-| `CustomBowl` | Custom fruit-bowl pool per apple count (replaces legacy portal-pairs UI). |
-
-### Visual and gameplay extras
-
-- **Fruits** — Many additional apple/food types beyond vanilla, including rare golden variants (Golden Apple ~1 in 1M, Golden Cherry ~1 in 5M, Golden Strawberry ~1 in 10M, Golden Carrot ~1 in 50M, Golden Watermelon ~1 in 100M). Skull poison fruit optional via settings.
-- **Themes and colors** — Extra game themes and snake colors; theme changes apply to the menu immediately.
-- **Graphics pair-mix** — Three blended graphics icons appended after the native styles; saved indices clamp safely when switching game versions.
-- **Sokoban / poison** — Optional distinct goal and poison visuals (toggle in menu).
-- **Top bar** — Optional icons for current count and speed setting.
-- **Wall counter** — Shows wall-mode spawn progress.
-
-### Speedrun and stat features
-
-- **TimeKeeper** — Personal bests and run stats per mode; integrates with game reset/stop hooks.
-- **Speed info panel** — Optional always-visible run info; WR holder display and custom tracked player name.
-- **Timer** — Multiple timer targets (including ALL apples); works with mode-specific rules.
-- **Split panel** — Optional left panel with segment times that refresh during the run.
-- **Input display** — Shows recent inputs for route review and streaming.
-
-### Settings menu (gear icon)
-
-Toggle from the Pudding bootstrap panel:
-
-- Skull poison fruit
-- Distinct Sokoban goals
-- Input display
-- Top bar icons
-- Show speed info
-- Show split panel
-- Disable randomizer (locks the in-game dice/random button)
-- Remove scrollbar
-- Save game settings (trophy, count, speed, size, graphics, theme, color, apple)
-- Custom bowl fruits (per-count fruit pool editor for fruit-bowl / portal-style counts)
-
-### Saved game settings
-
-When **Save Game Settings** is enabled, Pudding remembers the native Google Snake menu selections (mode, count, speed, map size, graphics, theme, color, fruit). On load it opens settings briefly, applies selections through Google's internal menu API, then closes. Indices are clamped to the current game's row lengths so switching between v11, v12, and v13 does not break restores. Pair-mix graphics slots wait for mix icons to exist before applying.
-
-### v13-specific technical notes
-
-- `main` registers `window.PuddingMod` at the first line of the bundle so the v13 web loader can find the mod object early.
-- googlesnakemods.com v13 preloads the selected mod from `mod-info.json` in `url-rules.js` before `snake.js` runs (fixes "Selected mod is not loaded" for all mods on v/current).
-- Verify hooks against live snake: `node tools/verify.js current`.
-
----
-
-## Speedrun Mod
-
-Shipped on **`main`** for game version 12+ in mod-info (same `SpeedrunMod.js` URL). A trimmed Pudding fork aimed at runners who want core timing/stats without the full feature surface:
-
-- Shared speedrun libraries (`SpeedrunPerf`, lighter menu via `BootstrapMenuSpeedrun`)
-- Omits much of the full Pudding menu weight while keeping essential timing workflows
-- Same `PuddingSettings` storage format when both mods share a browser profile (only one mod should be active at a time)
-
-Build: `python SpeedrunModCombiner.py`
-
----
-
-## More Pudding
-
-`MorePudding.js` chains:
-
-1. Pudding Mod (`PuddingMod.alterSnakeCode`)
-2. Visibility Mod (delete/hide game elements)
-3. More Menu Mod (extra speeds, counts, sizes)
-
-Build: `python MoreBuilder.py`. Useful for offline testing; the website mod picker loads each mod separately unless you use a custom URL.
+| File | What it is |
+|------|------------|
+| `PuddingMod.js` | Full Pudding Mod. Built from `Libraries/*.js` + `PuddingInit.js` by `PuddingCombiner.py`. |
+| `SpeedrunMod.js` | Lighter speedrun-focused bundle. Built by `SpeedrunModCombiner.py`. |
+| `MorePudding.js` | Pudding, then Visibility, then More Menu, applied in that order. Built by `MoreBuilder.py`. |
+| `ChimeraMod.js` | Experimental combined bundle. |
+| `Combo/LevelEditorPudding.js` | Loader that runs Pudding together with Level Editor. |
+| `PauseGameMod.js` | Standalone pause helper. |
 
 ---
 
 ## Version branches
 
-| Game version | Git branch | PuddingMod URL (mod-info) |
-|--------------|------------|---------------------------|
-| 1–10 | Historical branches (`dice_added_version`, `shield_stable`, `arrow`, …) | Per-version entries in mod-info |
-| 11 | `v11` | `.../GoogleSnakePudding/v11/PuddingMod.js` |
-| 12 | `v12` | `.../GoogleSnakePudding/v12/PuddingMod.js` |
-| 13 (current) | `main` | `.../GoogleSnakePudding/main/PuddingMod.js` |
+Each branch is a Pudding build for one Google Snake dump. `mod-info.json` on the website maps game version to the matching `PuddingMod.js` URL.
 
-Each branch tracks the Closure dump for that era. Do not expect v11 to include v13-only libraries (GraphicsMix, CustomBowl, SplitPanel, etc.). Storage migration on v11 preserves fields from newer versions without applying unsupported features.
+| Game version | Git branch | PuddingMod.js |
+|--------------|------------|---------------|
+| 1 | `dice_added_version` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/dice_added_version/PuddingMod.js` |
+| 2 | `shield_stable` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/shield_stable/PuddingMod.js` |
+| 3 | `arrow` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/arrow/PuddingMod.js` |
+| 4 | `pre_dpad` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/pre_dpad/PuddingMod.js` |
+| 5 | `pre_hotdog` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/pre_hotdog/PuddingMod.js` |
+| 6 | `hotdog` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/hotdog/PuddingMod.js` |
+| 7 | `magnet` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/magnet/PuddingMod.js` |
+| 8 | `broken_gate` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/broken_gate/PuddingMod.js` |
+| 9 | `v9` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/v9/PuddingMod.js` |
+| 10 | `v10` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/v10/PuddingMod.js` |
+| 11 | `v11` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/v11/PuddingMod.js` |
+| 12 | `v12` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/v12/PuddingMod.js` |
+| 13 (`v/current`) | `main` | `https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/PuddingMod.js` |
 
----
+Other branches that are not wired as official version dumps: `chess`, `early_access`, `fetch_wall_pattern`.
 
-## Shipped mods on googlesnakemods
-
-From [GoogleSnakeModLoader `mod-info.json`](https://github.com/DarkSnakeGang/GoogleSnakeModLoader/blob/main/build/mod-info.json). Mods not hosted in this repo are linked for completeness.
-
-| Mod key | Display name | Repository / author | Web support (high level) |
-|---------|--------------|---------------------|---------------------------|
-| `PuddingMod` | Pudding Mod | **This repo** — Yarmiplay | v1–13; mobile (no input display / speed info on mobile) |
-| `SpeedrunMod` | Speedrun Mod | **This repo** — Yarmiplay | v12+ |
-| `moreMenu` | More Menu Mod | [GoogleSnakeCustomMenuStuff](https://github.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff) — Fizhes, ScienceCrafter | v3–12 |
-| `VisibilityMod` | Visibility Mod | [GoogleSnakeDeleteStuffMod](https://github.com/DarkSnakeGang/GoogleSnakeDeleteStuffMod) — TF2Llama, Yarmiplay | v1–12; bundled in More Pudding |
-| `levelEditorMod` | Level Editor Mod | [GoogleSnakeLevelEditor](https://github.com/DarkSnakeGang/GoogleSnakeLevelEditor) — TF2Llama | v2–4, v12 |
-| `mouseMode` | Mouse Mode | [GoogleSnakeMouseMode](https://github.com/DarkSnakeGang/GoogleSnakeMouseMode) — TF2Llama | v2–5, v12 |
-| `RemixMod` | Remix Mod | [GoogleSnakeRemix](https://github.com/DarkSnakeGang/GoogleSnakeRemix) — Fizhes, TF2Llama, Yarmiplay | gsmOnly; v2–5, v12 |
-| `RemixUltraMod` | Remix Ultra Mod | GoogleSnakeRemix | gsmOnly; v12 (Remix + Level Editor) |
-| `ConwayMod` | Conway Mod | [ConwayMod](https://github.com/DarkSnakeGang/ConwayMod) — cyt | gsmOnly; v1 |
-
-**Remix Mod** combines More Menu, Visibility, and Pudding-style features (Candy/Chess/Burger modes, cat speed, dice counts on supported versions). **Remix Ultra** adds Level Editor on top.
+Older branches do not include later libraries. v11 has no GraphicsMix, CustomBowl, SplitPanel, or ModeRegistry. Its saver still writes `StorageVersion: 1` and leaves newer fields alone so visiting v11 does not wipe a v12/v13 save.
 
 ---
 
-## Building from source
+## Pudding Mod (`main`, game v13)
 
-Requirements: Python 3, Node.js (for verify scripts).
+Current target is **v13** at [googlesnakemods.com/v/current/](https://googlesnakemods.com/v/current/). Features below are what `main` ships.
+
+### BootstrapMenu
+
+Adds a **Pudding Mod Settings** panel on the side of the game, not inside Google's own settings. Open/close it from the Pudding UI on the top bar. The panel is styled with a stripped Bootstrap stylesheet (`bootstrap-stripped.css`).
+
+From this panel you can:
+
+- Choose what the counter overlay shows, then **Edit stat** / **Reset stats**
+- Toggle Skull Poison Fruit, Distinct Soko Goals, Input Display, Top Bar Icons, Show Speed Info, Show Split Panel, Disable Randomizer, Remove Scrollbar, Save Game Settings
+- Open **Timer settings**
+- Rebind the reset key
+- Open **Custom Bowl Fruits**
+- Optionally disable the native Shuffle / randomizer button (`Disable Randomizer`)
+
+### Counter
+
+The overlay next to the top bar is not only a wall counter. It tracks several stats in `localStorage` (`inputCounterMod`) and can show one of:
+
+- Inputs this game, this session, or lifetime (arrow keys / WASD, no repeats)
+- Resets this session or lifetime
+- Fruit eaten this session or lifetime
+- Walls spawned this game (Wall / blender-with-wall; hidden automatically on other modes)
+- Hidden
+
+You can edit the currently shown number or wipe all counter stats from the side panel.
+
+### InputDisplay
+
+A D-pad overlay (up / left / down / right) that lights up for the **current** direction. It sits in the Speed Info area. It does not keep a history of inputs.
+
+### Timer
+
+Not an always-on HUD clock. `Timer.js` is the **Custom Timer/Splits Settings** dialog (opened from the side panel). From there you pick mode / count / speed / size for a category, set comparison times for 25, 50, 100, and ALL, add custom split scores, choose time format, and toggle delta display. Split PBs are stored in `localStorage._snake_pb`. The same dialog also has WR-holder and tracked-player fields used by Speed Info.
+
+### SplitPanel
+
+Optional LiveSplit-style panel on the left. Rows follow the current timer category (25, 50, 100, ALL, plus any custom splits). Times update during the run.
+
+### TimeKeeper
+
+Personal-best and attempt tracking per mode, count, speed, and size. Stores 25 / 50 / 100 / ALL times and high scores in `localStorage`, including blender combinations. Daily challenge and extra More-Menu-only settings are skipped. Starts the run clock on the first counted input.
+
+### SpeedInfo
+
+Optional always-visible speedrun panel: current category, PBs, attempt counts, and optional Speedrun.com / FastSnakeStats WR boards. Can show WR holders and a tracked SRC username (configured in Timer settings). On mobile this panel is not used.
+
+### Fruit
+
+Extra selectable foods, each with Normal, Pixel, and Realism sprites:
+
+Pudding, Blueberries, Red Pepper, Lime, Green Grapes, Burger, Cheese, Fries, Hotdog, Pizza, Steak, Coconut, Poop, Egg, Musa Banana, Pear, Jacko, Ice, Red Pudding, Cabbage, Heart.
+
+Secret golden fruits cannot be picked from the menu. If one rolls in place of a normal apple:
+
+- Golden Apple — 1 in 1m
+- Golden Cherry — 1 in 5m
+- Golden Strawberry — 1 in 10m
+- Golden Carrot — 1 in 50m
+- Golden Watermelon — 1 in 100m
+
+### DistinctVisual
+
+Optional poison-mode skull fruit instead of the usual poison apple, and optional red Sokoban goal boxes so goals are easier to tell from crates. Both have Normal / Pixel / Realism art.
+
+### Theme
+
+Adds extra board themes that apply to tiles, borders, top bar, buttons, and the end screen as soon as you pick them. Included themes: Default Sun, Official Dark, Snow, Volcano, Desert, Official Jungle, Pool, Space, True Dark, Planeptune, Lastation, Pacman, Sonic, Jungle, Pudding, Ice. A custom-color theme can be filled from advanced settings.
+
+### SnakeColor
+
+Extra snake palettes in the color row, including pride-flag sets, Monochrome, and Catalonia, each with a matching Yin Yang pair color.
+
+### GraphicsMix
+
+After the four native graphics styles, three split icons mix two styles at random each apple: Classic|Pixel, Pixel|Realism, Classic|Realism. Saved mix indices fall back to a native style if those icons are missing (for example after switching game version).
+
+### TopBar
+
+Optional count and speed icons in the native top bar so you can see those settings without opening Google's menu.
+
+### CustomBowl
+
+Replaces the old portal-pairs fruit picker. When fruit bowl is selected, you choose which fruits can spawn, with a separate pool per apple count (1, 3, 5, 10, dice, bomb, tally). Each pool has a minimum size. Fruit 24 (the bowl itself) is never included.
+
+### SettingsSaver
+
+Loads and writes `PuddingSettings`. With **Save Game Settings** on, it snapshots Google's trophy / count / speed / size / graphics / theme / color / apple rows, then restores them on the next load by driving the native menu API. Indices are clamped to the current row lengths. Mix-graphics slots wait until the mix icons exist.
+
+### ResetKey
+
+Default reset is Shift. Click **Reset Key** in the side panel and press another key to rebind. The bind is stored in `localStorage.keybinds`.
+
+### RenderDelayFix
+
+Holds the first tick after reset until the board has drawn once, and queues a key that was pressed during that gap so the first turn is not dropped.
+
+### ModeRegistry
+
+Internal map of trophy modes (Classic through Bridge, plus Peaceful and Blender) to labels and bit indices. TimeKeeper and SpeedInfo use it so blender combinations and older save keys stay named correctly.
+
+### Core
+
+Shared helpers used while patching `snake.js` (`assertReplace`, image UI helpers, and similar).
+
+---
+
+## Speedrun Mod
+
+`SpeedrunMod.js` on `main` is a lighter bundle for runners who want timing and stats without the full fruit / theme / bowl surface. Libraries: Core, Theme, ModeRegistry, DistinctVisual, SettingsSaver, Counter, TimeKeeper, SpeedInfo, TopBar, BootstrapMenuSpeedrun, ResetKeySpeedrun, SpeedrunPerf.
+
+`SpeedrunPerf` trims work that does not matter mid-run. The speedrun menu is a smaller side panel (`BootstrapMenuSpeedrun`).
+
+mod-info currently lists Speedrun Mod for game v12 using this same `main/SpeedrunMod.js` URL.
+
+---
+
+## More Pudding and combos
+
+`MorePudding.js` is a single file that applies Pudding, then Visibility (hide / delete game elements), then More Menu (extra speeds, counts, sizes). The website picker loads those as separate mods; this bundle is for custom URL / offline use.
+
+`Combo/LevelEditorPudding.js` loads Pudding and Level Editor together. `ChimeraMod.js` is an older experimental mashup kept in the tree.
+
+---
+
+## Building
+
+Python 3 for combiners. Node.js for verify scripts.
 
 ```bash
-# Full Pudding Mod bundle
 python PuddingCombiner.py
-
-# Speedrun Mod bundle
 python SpeedrunModCombiner.py
-
-# More Pudding chain
 python MoreBuilder.py
 
-# Verify regex hooks against live v/current snake.js
 node tools/verify.js current
-
-# Verify against a local snake dump
 node tools/verify.js path/to/snake.js
 ```
 
-Library sources live in `Libraries/`. Entrypoints: `PuddingInit.js`, `SpeedrunModInit.js`, `MorePuddingInit.js`. Combined output overwrites `PuddingMod.js`, `SpeedrunMod.js`, or `MorePudding.js` at the repo root — commit those files after rebuilding for GitHub raw URLs to update.
+Library sources are in `Libraries/`. Init files: `PuddingInit.js`, `SpeedrunModInit.js`, `MorePuddingInit.js`. Combiners overwrite the root bundles; commit those after a rebuild so GitHub raw URLs update.
+
+`window.PuddingMod` is assigned on line 1 of `PuddingMod.js` so the v13 website loader can see the mod object before libraries finish evaluating.
 
 ---
 
-## Storage format (`PuddingSettings`)
-
-Key fields (non-exhaustive):
+## Storage (`PuddingSettings`)
 
 | Field | Purpose |
 |-------|---------|
-| `StorageVersion` | Migration marker (currently `1`). |
+| `StorageVersion` | Migration marker (`1`). |
 | `Skull`, `SokoGoals`, `InputDisplay`, `TopBar`, `SpeedInfo` | Feature toggles. |
-| `DisableRandom`, `ScrollBar`, `SaveGameSettings`, `SplitPanel` | UI and behavior toggles. |
-| `SelectedPairs` / `SelectedPairsByCount` | Custom fruit-bowl pools per count index. |
-| `SavedGameSettings` | Snapshot of native menu indices + row metadata. |
-| `ShowWrHolders`, `TrackedPlayerName` | Speed info / WR display. |
-| `PortalPairs`, `AlwaysUniqueFruit` | Legacy portal-pairs era; superseded by CustomBowl on v12+. |
+| `DisableRandom`, `ScrollBar`, `SaveGameSettings`, `SplitPanel` | UI toggles. |
+| `SelectedPairs` / `SelectedPairsByCount` | Custom bowl pools. |
+| `SavedGameSettings` | Native menu snapshot plus row-length metadata. |
+| `ShowWrHolders`, `TrackedPlayerName` | Speed Info WR display. |
+| `PortalPairs`, `AlwaysUniqueFruit` | Older portal-pairs fields; CustomBowl superseded them on v12+. |
 
-Legacy readme archived in [`README.legacy.md`](README.legacy.md).
+Counter stats are a separate key: `inputCounterMod`. Timer split PBs: `_snake_pb`. Reset bind: `keybinds`.
+
+The previous short README is in [`README.legacy.md`](README.legacy.md).
 
 ---
 
-## Dice Mod (historical)
+## Dice counts (historical)
 
-Dice counts (1–6, 1–12, 4–9 apple spawns) were originally a separate Pudding-era experiment. Google added dice counts to the base game; old dice branches remain in git history but are not the focus of current development.
+Dice / blue dice / green dice apple counts started as a Pudding-era experiment. They are in the base game now. Branch `dice_added_version` is the v1 dump from that period.
 
 ---
 
 ## Links
 
 - [googlesnakemods.com](https://googlesnakemods.com)
-- [Google Snake Mod Loader](https://github.com/DarkSnakeGang/GoogleSnakeModLoader)
-- [Google Snake Mods Website](https://github.com/DarkSnakeGang/GoogleSnakeModsWebsite)
-- [Official Google Snake Discord](https://discord.gg/dDuCTm62EZ) — `#snake-modding` for bugs and feedback
+- [Official Google Snake Discord](https://discord.gg/dDuCTm62EZ) — `#snake-modding`
 
----
-
-## License / contributing
-
-Report bugs in Discord or via GitHub issues on this repository. When changing hook regexes, always run `tools/verify.js` against the target game version before pushing bundled `.js` files.
+When changing `snake.js` hooks, run `tools/verify.js` against the target game version before pushing bundles.
