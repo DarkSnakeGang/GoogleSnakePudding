@@ -2905,6 +2905,26 @@ window.SettingsSaver.make = function () {
         return settings;
     }
 
+    function copyPool(pool, fallbackCount) {
+        if (Array.isArray(pool)) {
+            return pool.map(Number).filter((n) => !isNaN(n) && n !== 24);
+        }
+        return defaultPoolForCount(fallbackCount);
+    }
+
+    function migrateSelectedPairsByCountGeneral(settings) {
+        if (!settings.SelectedPairsByCountGeneral || typeof settings.SelectedPairsByCountGeneral !== "object") {
+            settings.SelectedPairsByCountGeneral = {};
+        }
+        for (const key of COUNT_KEYS) {
+            if (!Array.isArray(settings.SelectedPairsByCountGeneral[key])) {
+                const src = settings.SelectedPairsByCount && settings.SelectedPairsByCount[key];
+                settings.SelectedPairsByCountGeneral[key] = copyPool(src, Number(key));
+            }
+        }
+        return settings;
+    }
+
     function migratePuddingSettings(settings) {
         if (!settings || typeof settings !== "object") return settings;
 
@@ -2914,6 +2934,7 @@ window.SettingsSaver.make = function () {
 
         settings = migrateSelectedPairsByCount(settings);
         settings.SelectedPairs = settings.SelectedPairsByCount["0"];
+        settings = migrateSelectedPairsByCountGeneral(settings);
 
         if (settings.SavedGameSettings && typeof settings.SavedGameSettings === "object") {
             settings.SavedGameSettings = sanitizeSavedGameSettings(settings.SavedGameSettings, {
@@ -2938,9 +2959,10 @@ window.SettingsSaver.make = function () {
                 ShowWrHolders: true,
                 TrackedPlayerName: "",
                 PortalPairs: false,
-                AlwaysUniqueFruit: false,
+                AlwaysUniqueFruit: true,
                 SelectedPairs: defaultPoolForCount(0),
                 SelectedPairsByCount: {},
+                SelectedPairsByCountGeneral: {},
                 DisableRandom: false,
                 randomizeThemeApple: false,
                 ScrollBar: false,
@@ -2950,6 +2972,7 @@ window.SettingsSaver.make = function () {
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
+                pudding_settings.SelectedPairsByCountGeneral[key] = defaultPoolForCount(Number(key)).slice();
             }
         } else {
             pudding_settings = JSON.parse(pudding_settings);
@@ -2958,7 +2981,7 @@ window.SettingsSaver.make = function () {
                 pudding_settings.PortalPairs = false;
             }
             if (typeof pudding_settings.AlwaysUniqueFruit !== 'boolean') {
-                pudding_settings.AlwaysUniqueFruit = false;
+                pudding_settings.AlwaysUniqueFruit = true;
             }
             if (typeof pudding_settings.ScrollBar !== 'boolean') {
                 pudding_settings.ScrollBar = false;
@@ -6382,19 +6405,6 @@ window.BootstrapMenu.make = function () {
         window.applyRandomButtonState(window.pudding_settings.DisableRandom);
     }
 
-    window.ToggleScrollbar = function () {
-        window.pudding_settings.ScrollBar = !window.pudding_settings.ScrollBar;
-        if (window.pudding_settings.ScrollBar) {
-            // Disable it
-            document.body.style.overflow = 'hidden';
-        }
-        else {
-            // Enable it
-            document.body.style.overflow = '';
-        }
-    }
-
-
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -6510,10 +6520,6 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
-    <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
-    </div>
-    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
     <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
     </div>
@@ -6585,19 +6591,6 @@ window.BootstrapMenu.make = function () {
         randombtn_checkbox.addEventListener("change", window.ToggleRandom);
         randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
         window.applyRandomButtonState(window.pudding_settings.DisableRandom);
-
-        scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
-        scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
-        scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
-
-        if (window.pudding_settings.ScrollBar) {
-            // Disable it
-            document.body.style.overflow = 'hidden';
-        }
-        else {
-            // Enable it
-            document.body.style.overflow = '';
-        }
 
         const saveGameSettingsCheckbox = document.getElementById("SaveGameSettings");
         if (typeof window.pudding_settings.SaveGameSettings !== "boolean") {
@@ -6865,34 +6858,95 @@ window.CustomBowl.make = function () {
     window.custom_pair_call_counter = 0;
     window.__portalAppleArrayName = window.__portalAppleArrayName || "ka";
     window.__customBowlCountOverride = null;
+    window._fruitBowlTab = window._fruitBowlTab || "general";
+
+    function clampCountIndex(count) {
+        const n = Number(count);
+        if (isNaN(n)) return 0;
+        if (n < 0) return 0;
+        if (n > 6) return 6;
+        return n;
+    }
+
+    function readCountIndexFromDom() {
+        const root = document.getElementById("count");
+        if (!root || !root.children || !root.children.length) return null;
+        for (let i = 0; i < root.children.length; i++) {
+            const el = root.children[i];
+            const cls = el.className || "";
+            if ((el.classList && el.classList.contains("tuJOWd")) || /\btuJOWd\b/.test(cls)) {
+                return i;
+            }
+        }
+        const classNames = [];
+        let notUnique = "";
+        for (const el of root.children) {
+            if (classNames.indexOf(el.className) === -1) classNames.push(el.className);
+            else {
+                notUnique = el.className;
+                break;
+            }
+        }
+        if (notUnique) {
+            let n = 0;
+            for (const el of root.children) {
+                if (el.className !== notUnique) return n;
+                n++;
+            }
+        }
+        return null;
+    }
 
     function getCountIndex() {
         if (typeof window.__customBowlCountOverride === "number" && !isNaN(window.__customBowlCountOverride)) {
-            return window.__customBowlCountOverride;
+            return clampCountIndex(window.__customBowlCountOverride);
         }
-        if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
-            const c = window.timeKeeper.getCurrentSetting("count");
-            if (typeof c === "number" && !isNaN(c)) return c;
-        }
-        if (typeof window.count_var !== "undefined") {
-            const c = Number(window.count_var);
-            if (!isNaN(c)) return c;
-        }
+        const fromDom = readCountIndexFromDom();
+        if (fromDom !== null) return clampCountIndex(fromDom);
+        try {
+            if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
+                const c = window.timeKeeper.getCurrentSetting("count");
+                if (typeof c === "number" && !isNaN(c)) return clampCountIndex(c);
+            }
+        } catch (e) { /* set_ref may not exist yet */ }
         return 0;
     }
 
-    window.getPortalPairMinimum = function () {
-        const count = getCountIndex();
+    function countMinima(count) {
         return COUNT_MINIMA.hasOwnProperty(count) ? COUNT_MINIMA[count] : 1;
+    }
+
+    window.getPortalPairMinimum = function () {
+        return countMinima(getCountIndex());
     };
 
     function countKey(count) {
         return String(count);
     }
 
+    function isPortalTab() {
+        return window._fruitBowlTab === "portal";
+    }
+
+    function storeNameForKind(kind) {
+        return kind === "general" ? "SelectedPairsByCountGeneral" : "SelectedPairsByCount";
+    }
+
+    function minForKind(kind, count) {
+        count = clampCountIndex(count);
+        if (kind === "portal") return countMinima(count);
+        if (window.pudding_settings && window.pudding_settings.AlwaysUniqueFruit) {
+            return countMinima(count);
+        }
+        return 1;
+    }
+
+    function minForTab() {
+        return minForKind(isPortalTab() ? "portal" : "general", getCountIndex());
+    }
+
     function defaultPoolForCount(count) {
-        const min = COUNT_MINIMA.hasOwnProperty(count) ? COUNT_MINIMA[count] : 1;
-        return normalizePool([], min);
+        return normalizePool([], countMinima(count));
     }
 
     function normalizePool(pool, min) {
@@ -6907,41 +6961,78 @@ window.CustomBowl.make = function () {
         return next;
     }
 
-    function ensurePairsByCountStore() {
-        if (!window.pudding_settings.SelectedPairsByCount || typeof window.pudding_settings.SelectedPairsByCount !== "object") {
-            window.pudding_settings.SelectedPairsByCount = {};
+    function copyPoolArray(pool, fallbackCount) {
+        if (Array.isArray(pool)) {
+            return pool.map(Number).filter((n) => !isNaN(n) && n !== FRUIT_BOWL_INDEX);
         }
-        for (const c of Object.keys(COUNT_MINIMA)) {
-            const key = countKey(c);
-            if (!Array.isArray(window.pudding_settings.SelectedPairsByCount[key])) {
-                window.pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(c));
-            }
-        }
+        return defaultPoolForCount(fallbackCount);
     }
 
-    function getPoolForCurrentCount(minOverride) {
-        ensurePairsByCountStore();
+    function ensureStore(kind) {
+        const name = storeNameForKind(kind);
+        if (!window.pudding_settings[name] || typeof window.pudding_settings[name] !== "object") {
+            window.pudding_settings[name] = {};
+        }
+        const store = window.pudding_settings[name];
+        const portalStore = window.pudding_settings.SelectedPairsByCount;
+        for (const c of Object.keys(COUNT_MINIMA)) {
+            const key = countKey(c);
+            if (!Array.isArray(store[key])) {
+                const src = kind === "general" && portalStore && Array.isArray(portalStore[key])
+                    ? portalStore[key]
+                    : null;
+                store[key] = copyPoolArray(src, Number(c));
+            }
+        }
+        return store;
+    }
+
+    function getPoolForKind(kind, minOverride) {
+        const store = ensureStore(kind);
         const count = getCountIndex();
         const key = countKey(count);
-        const min = Math.max(window.getPortalPairMinimum(), minOverride || 0);
-        const pool = normalizePool(window.pudding_settings.SelectedPairsByCount[key], min);
-        window.pudding_settings.SelectedPairsByCount[key] = pool;
-        window.pudding_settings.SelectedPairs = pool;
+        const min = Math.max(minForKind(kind, count), minOverride || 0);
+        const pool = normalizePool(store[key], min);
+        store[key] = pool;
+        if (kind === "portal") {
+            window.pudding_settings.SelectedPairs = pool;
+        }
         return pool;
     }
 
-    function setPoolForCurrentCount(pool) {
-        ensurePairsByCountStore();
+    function setPoolForKind(kind, pool) {
+        const store = ensureStore(kind);
         const count = getCountIndex();
         const key = countKey(count);
-        const min = window.getPortalPairMinimum();
+        const min = minForKind(kind, count);
         const next = normalizePool(pool, min);
-        window.pudding_settings.SelectedPairsByCount[key] = next;
-        window.pudding_settings.SelectedPairs = next;
+        store[key] = next;
+        if (kind === "portal") {
+            window.pudding_settings.SelectedPairs = next;
+        }
         return next;
     }
 
+    function getPoolForCurrentCount(minOverride) {
+        return getPoolForKind(isPortalTab() ? "portal" : "general", minOverride);
+    }
+
+    function setPoolForCurrentCount(pool) {
+        return setPoolForKind(isPortalTab() ? "portal" : "general", pool);
+    }
+
     function ensurePoolMeetsMinimum() {
+        ensureStore("portal");
+        ensureStore("general");
+        getPoolForKind("portal");
+        if (window.pudding_settings && window.pudding_settings.AlwaysUniqueFruit) {
+            const store = ensureStore("general");
+            for (const c of Object.keys(COUNT_MINIMA)) {
+                const key = countKey(c);
+                store[key] = normalizePool(store[key], countMinima(Number(c)));
+            }
+        }
+        getPoolForKind("general");
         return getPoolForCurrentCount();
     }
 
@@ -6978,16 +7069,29 @@ window.CustomBowl.make = function () {
         }
     }
 
+    function rememberUniquePick(type) {
+        if (!window.__bowlUniquePicks) window.__bowlUniquePicks = new Set();
+        window.__bowlUniquePicks.add(type);
+        if (!window.__bowlUniquePicksClear) {
+            window.__bowlUniquePicksClear = true;
+            setTimeout(function () {
+                window.__bowlUniquePicks = new Set();
+                window.__bowlUniquePicksClear = false;
+            }, 0);
+        }
+    }
+
     /**
      * Roll a fruit from the custom bowl pool.
-     * Unique (pool − showing) when portal OR AlwaysUniqueFruit is on.
-     * Portal always uses unique logic; the checkbox enables it for other modes.
-     * If allowed is empty, fall back to full pool (re-roll eaten type when board is full).
+     * Portal always unique + portal store.
+     * Other modes use General store; unique iff AlwaysUniqueFruit.
+     * Simultaneous 3a/5a picks in one turn share __bowlUniquePicks.
      */
     window.pickCustomPortalType = function (appleManager, isPortal) {
         syncCountOverride(appleManager && appleManager.settings);
         try {
-            const pool = ensurePoolMeetsMinimum();
+            const kind = isPortal ? "portal" : "general";
+            const pool = getPoolForKind(kind);
             if (!pool.length) return 0;
             const useUnique = !!isPortal ||
                 !!(window.pudding_settings && window.pudding_settings.AlwaysUniqueFruit);
@@ -6995,9 +7099,14 @@ window.CustomBowl.make = function () {
                 return pool[Math.floor(Math.random() * pool.length)];
             }
             const showing = typesOnBoard(appleManager);
+            if (window.__bowlUniquePicks) {
+                window.__bowlUniquePicks.forEach(function (t) { showing.add(t); });
+            }
             const available = pool.filter((t) => !showing.has(t));
             const source = available.length > 0 ? available : pool;
-            return source[Math.floor(Math.random() * source.length)];
+            const picked = source[Math.floor(Math.random() * source.length)];
+            rememberUniquePick(picked);
+            return picked;
         } finally {
             window.__customBowlCountOverride = null;
         }
@@ -7073,23 +7182,41 @@ window.CustomBowl.make = function () {
         return options;
     }
 
+    function tabButtonStyle(active) {
+        const bg = active ? "#1155CC" : "rgba(17,85,204,0.45)";
+        return "margin:0;padding:4px 16px;color:white;background-color:" + bg +
+            ";font-family:Roboto,Arial,sans-serif;border:1px solid rgba(255,255,255,0.25);";
+    }
+
+    function syncTabUi() {
+        const portalBtn = document.getElementById("fruit-bowl-tab-portal");
+        const generalBtn = document.getElementById("fruit-bowl-tab-general");
+        const uniqueRow = document.getElementById("fruit-bowl-unique-row");
+        const portalNote = document.getElementById("fruit-bowl-portal-note");
+        const portalOn = isPortalTab();
+        if (portalBtn) portalBtn.style.cssText = tabButtonStyle(portalOn);
+        if (generalBtn) generalBtn.style.cssText = tabButtonStyle(!portalOn);
+        if (uniqueRow) uniqueRow.style.display = portalOn ? "none" : "flex";
+        if (portalNote) portalNote.style.display = portalOn ? "block" : "none";
+    }
+
     function updateStatusLabel() {
         const el = document.getElementById("fruit-bowl-status");
         if (!el) return;
         const pool = getPoolForCurrentCount();
-        const min = window.getPortalPairMinimum();
+        const min = minForTab();
         el.textContent = `Selected ${pool.length} / min ${min}`;
     }
 
     function renderFruitGrid() {
         const grid = document.getElementById("fruit-bowl-grid");
         if (!grid) return;
-        const pool = new Set(ensurePoolMeetsMinimum());
+        const pool = new Set(getPoolForCurrentCount());
         const options = buildFruitOptions();
-        const min = window.getPortalPairMinimum();
+        const min = minForTab();
         grid.innerHTML = "";
 
-        const rowSize = 6;
+        const rowSize = 7;
         for (let i = 0; i < options.length; i += rowSize) {
             const row = document.createElement("div");
             row.style = "display:flex;flex-wrap:nowrap;gap:8px;margin-bottom:8px;justify-content:center;";
@@ -7141,13 +7268,21 @@ window.CustomBowl.make = function () {
             grid.style.opacity = window.pudding_settings.PortalPairs ? "1" : "0.45";
             grid.style.pointerEvents = window.pudding_settings.PortalPairs ? "auto" : "none";
         }
+        syncTabUi();
+    }
+
+    function setFruitBowlTab(tab) {
+        window._fruitBowlTab = tab === "general" ? "general" : "portal";
+        ensurePoolMeetsMinimum();
+        syncPanelEnabledState();
+        renderFruitGrid();
     }
 
     // Theme background is applied separately via applyPanelTheme (Theme.js sets real_topbar_color).
     const PANEL_STYLE =
         "position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:100000;" +
         "padding:18px 20px 16px;display:none;border-radius:8px;" +
-        "width:min(480px,92vw);min-width:280px;height:auto;min-height:320px;max-height:min(720px,88vh);" +
+        "width:min(560px,92vw);min-width:280px;height:auto;min-height:320px;max-height:min(720px,88vh);" +
         "overflow-x:hidden;overflow-y:auto;visibility:hidden;box-sizing:border-box;" +
         "box-shadow:0 12px 36px rgba(0,0,0,0.5);border:2px solid rgba(255,255,255,0.18);";
 
@@ -7197,22 +7332,31 @@ window.CustomBowl.make = function () {
         }
 
         let panel = document.getElementById("fruit-bowl-popup-pudding");
+        if (panel && !document.getElementById("fruit-bowl-tab-portal")) {
+            panel.remove();
+            panel = null;
+        }
         if (!panel) {
             panel = document.createElement("div");
             panel.id = "fruit-bowl-popup-pudding";
             panel.style.cssText = PANEL_STYLE;
             panel.innerHTML = `
-                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:14px;font-size:22px;font-weight:bold;letter-spacing:0.2px;">Fruit Bowl Settings</div>
+                <div style="color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:10px;font-size:22px;font-weight:bold;letter-spacing:0.2px;">Fruit Bowl Settings</div>
+                <div style="display:flex;justify-content:center;gap:8px;margin:0 auto 12px;">
+                    <button type="button" class="btn" id="fruit-bowl-tab-general">General</button>
+                    <button type="button" class="btn" id="fruit-bowl-tab-portal">Portal</button>
+                </div>
                 <div style="display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;margin:0 auto 12px;width:100%;">
                     <div style="display:flex;align-items:center;gap:8px;">
                         <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-enable" style="margin:0;float:none;position:static;">
                         <label class="form-check-label" for="fruit-bowl-enable" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.2;">Enable custom fruit bowl</label>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;">
+                    <div id="fruit-bowl-unique-row" style="display:none;align-items:center;gap:8px;">
                         <input class="form-check-input" type="checkbox" role="switch" id="fruit-bowl-always-unique" style="margin:0;float:none;position:static;">
                         <label class="form-check-label" for="fruit-bowl-always-unique" style="margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.2;">Always Unique Fruit</label>
                     </div>
                 </div>
+                <div id="fruit-bowl-portal-note" style="display:none;color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:14px;margin:0 0 10px 0;text-align:center;">Portal fruit bowl is always unique</div>
                 <div id="fruit-bowl-status" style="color:#dce8c8;font-family:Roboto,Arial,sans-serif;font-size:15px;margin:0 0 12px 0;text-align:center;"></div>
                 <div id="fruit-bowl-grid" style="padding:4px 0 8px;display:flex;flex-direction:column;align-items:center;"></div>
                 <button type="button" class="btn" style="margin:8px auto 0;display:block;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="fruit-bowl-close">Close</button>
@@ -7220,6 +7364,12 @@ window.CustomBowl.make = function () {
             host.appendChild(panel);
             applyPanelTheme(panel);
 
+            document.getElementById("fruit-bowl-tab-portal").addEventListener("click", function () {
+                setFruitBowlTab("portal");
+            });
+            document.getElementById("fruit-bowl-tab-general").addEventListener("click", function () {
+                setFruitBowlTab("general");
+            });
             document.getElementById("fruit-bowl-enable").addEventListener("change", function () {
                 window.pudding_settings.PortalPairs = !!this.checked;
                 ensurePoolMeetsMinimum();
@@ -7229,8 +7379,17 @@ window.CustomBowl.make = function () {
             });
             document.getElementById("fruit-bowl-always-unique").addEventListener("change", function () {
                 window.pudding_settings.AlwaysUniqueFruit = !!this.checked;
+                if (this.checked) {
+                    const store = ensureStore("general");
+                    for (const c of Object.keys(COUNT_MINIMA)) {
+                        const key = countKey(c);
+                        store[key] = normalizePool(store[key], countMinima(Number(c)));
+                    }
+                }
+                getPoolForKind("general");
                 if (typeof window.saveSettings === "function") window.saveSettings();
                 syncPanelEnabledState();
+                renderFruitGrid();
             });
             document.getElementById("fruit-bowl-close").addEventListener("click", function () {
                 window.PortalPairsPanelHide();
@@ -7340,7 +7499,7 @@ window.CustomBowl.alterCode = function (code) {
         `if(${portal_check}(a.settings,2)){var b=Math.floor(48/a.${apple_array}.length);`
     );
 
-    // Custom bowl pick: portal → showing-list uniqueness; other modes → random from pool.
+    // Custom bowl pick: portal → portal store + unique; other modes → general store + AlwaysUniqueFruit.
     code = code.assertReplace(
         aaf_regex,
         `${aaf_name}=function(a){` +

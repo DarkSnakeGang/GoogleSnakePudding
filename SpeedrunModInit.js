@@ -1,4 +1,4 @@
-window.SpeedrunMod = {};
+window.SpeedrunMod = window.SpeedrunMod || {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
@@ -81,7 +81,14 @@ window.SpeedrunMod.runCodeBefore = function () {
     : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/Libraries/";
   window.Libraries.forEach((LibName) => {
     console.log("Loading library: " + LibName);
-    eval("window." + LibName + ".make();");
+    try {
+      if (!window[LibName] && typeof window.loadCode === "function") {
+        window.loadCode(libUrlPrefix + LibName + ".js");
+      }
+      eval("window." + LibName + ".make();");
+    } catch (e) {
+      console.error("Library failed: " + LibName, e);
+    }
   });
 
   if (window.pudding_settings) {

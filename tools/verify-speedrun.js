@@ -195,7 +195,10 @@ function installBrowserStubs() {
       }
       return makeEl("div");
     },
-    querySelectorAll() {
+    querySelectorAll(sel) {
+      if (String(sel).includes("Mute") || String(sel).includes("aria-label")) {
+        return [makeEl("div"), makeEl("div")];
+      }
       return [];
     },
     getElementsByClassName() {

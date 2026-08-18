@@ -58,7 +58,7 @@ Adds a **Pudding Mod Settings** panel on the side of the game, not inside Google
 From this panel you can:
 
 - Choose what the counter overlay shows, then **Edit stat** / **Reset stats**
-- Toggle Skull Poison Fruit, Distinct Soko Goals, Input Display, Top Bar Icons, Show Speed Info, Show Split Panel, Disable Randomizer, Remove Scrollbar, Save Game Settings
+- Toggle Skull Poison Fruit, Distinct Soko Goals, Input Display, Top Bar Icons, Show Speed Info, Show Split Panel, Disable Randomizer, Save Game Settings
 - Open **Timer settings**
 - Rebind the reset key
 - Open **Custom Bowl Fruits**
@@ -132,7 +132,12 @@ Optional count and speed icons in the native top bar so you can see those settin
 
 ### CustomBowl
 
-Replaces the old portal-pairs fruit picker. When fruit bowl is selected, you choose which fruits can spawn, with a separate pool per apple count (1, 3, 5, 10, dice, bomb, tally). Each pool has a minimum size. Fruit 24 (the bowl itself) is never included.
+When fruit bowl is selected, **Enable custom fruit bowl** keeps two saved pools, edited from **General** (default) and **Portal** tabs:
+
+- **General**: **Always Unique Fruit** lives here (default on). Unique off: every apple count may have a single fruit. Unique on: same minima as Portal, and a too-small pool is padded. Stored in `SelectedPairsByCountGeneral`.
+- **Portal**: always unique; cannot go below the apple-count minimum (1 / 3 / 5 / 10 / 6 / 24 / 5). Stored in `SelectedPairsByCount` (`SelectedPairs` still mirrors count `0`).
+
+The open tab is only for editing. In-game, Portal (including blender-with-portal) uses the Portal pool; every other mode uses General. Fruit 24 (the bowl itself) is never included.
 
 ### SettingsSaver
 
@@ -158,11 +163,11 @@ Shared helpers used while patching `snake.js` (`assertReplace`, image UI helpers
 
 ## Speedrun Mod
 
-`SpeedrunMod.js` on `main` is a lighter bundle for runners who want timing and stats without the full fruit / theme / bowl surface. Libraries: Core, Theme, ModeRegistry, DistinctVisual, SettingsSaver, Counter, TimeKeeper, SpeedInfo, TopBar, BootstrapMenuSpeedrun, ResetKeySpeedrun, SpeedrunPerf.
+`SpeedrunMod.js` on `main` is a lighter bundle for runners who want timing and stats without the full fruit / theme / bowl surface. It targets the same **v13** game as Pudding Mod (`googlesnakemods.com/v/current/`). Libraries: Core, Theme, ModeRegistry, DistinctVisual, SettingsSaver, Counter, TimeKeeper, SpeedInfo, TopBar, BootstrapMenuSpeedrun, ResetKeySpeedrun, SpeedrunPerf.
 
 `SpeedrunPerf` trims work that does not matter mid-run. The speedrun menu is a smaller side panel (`BootstrapMenuSpeedrun`).
 
-mod-info currently lists Speedrun Mod for game v12 using this same `main/SpeedrunMod.js` URL.
+`window.SpeedrunMod` is assigned on line 1 of `SpeedrunMod.js` so the v13 website loader can see the mod object before libraries finish evaluating. The picker still needs a `version: 13` entry in `mod-info.json` (same `main/SpeedrunMod.js` URL as v12).
 
 ---
 
@@ -184,12 +189,13 @@ python SpeedrunModCombiner.py
 python MoreBuilder.py
 
 node tools/verify.js current
+node tools/verify-speedrun.js current
 node tools/verify.js path/to/snake.js
 ```
 
 Library sources are in `Libraries/`. Init files: `PuddingInit.js`, `SpeedrunModInit.js`, `MorePuddingInit.js`. Combiners overwrite the root bundles; commit those after a rebuild so GitHub raw URLs update.
 
-`window.PuddingMod` is assigned on line 1 of `PuddingMod.js` so the v13 website loader can see the mod object before libraries finish evaluating.
+`window.PuddingMod` / `window.SpeedrunMod` are assigned on line 1 of their bundles so the v13 website loader can see the mod object before libraries finish evaluating.
 
 ---
 
@@ -199,11 +205,14 @@ Library sources are in `Libraries/`. Init files: `PuddingInit.js`, `SpeedrunModI
 |-------|---------|
 | `StorageVersion` | Migration marker (`1`). |
 | `Skull`, `SokoGoals`, `InputDisplay`, `TopBar`, `SpeedInfo` | Feature toggles. |
-| `DisableRandom`, `ScrollBar`, `SaveGameSettings`, `SplitPanel` | UI toggles. |
-| `SelectedPairs` / `SelectedPairsByCount` | Custom bowl pools. |
+| `DisableRandom`, `SaveGameSettings`, `SplitPanel` | UI toggles. |
+| `ScrollBar` | Leftover field; ignored by the current UI so older builds that still read it are unchanged. |
+| `SelectedPairs` / `SelectedPairsByCount` | Portal custom bowl pools. |
+| `SelectedPairsByCountGeneral` | General custom bowl pools. Copied from `SelectedPairsByCount` on first load if missing. |
 | `SavedGameSettings` | Native menu snapshot plus row-length metadata. |
 | `ShowWrHolders`, `TrackedPlayerName` | Speed Info WR display. |
-| `PortalPairs`, `AlwaysUniqueFruit` | Older portal-pairs fields; CustomBowl superseded them on v12+. |
+| `PortalPairs` | Enable custom fruit bowl. |
+| `AlwaysUniqueFruit` | General-tab uniqueness (default `true` when missing). Portal is always unique. |
 
 Counter stats are a separate key: `inputCounterMod`. Timer split PBs: `_snake_pb`. Reset bind: `keybinds`.
 

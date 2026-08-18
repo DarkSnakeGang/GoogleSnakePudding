@@ -58,19 +58,6 @@ window.BootstrapMenu.make = function () {
         window.applyRandomButtonState(window.pudding_settings.DisableRandom);
     }
 
-    window.ToggleScrollbar = function () {
-        window.pudding_settings.ScrollBar = !window.pudding_settings.ScrollBar;
-        if (window.pudding_settings.ScrollBar) {
-            // Disable it
-            document.body.style.overflow = 'hidden';
-        }
-        else {
-            // Enable it
-            document.body.style.overflow = '';
-        }
-    }
-
-
     window.BootstrapSetup = function () {
 
         const a = new Image();
@@ -186,10 +173,6 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
     </div>
     <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="RemoveScrollbar">
-    <label class="form-check-label" for="RemoveScrollbar" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Remove Scrollbar</label>
-    </div>
-    <div class="form-check form-check-inline">
     <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
     <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
     </div>
@@ -261,19 +244,6 @@ window.BootstrapMenu.make = function () {
         randombtn_checkbox.addEventListener("change", window.ToggleRandom);
         randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
         window.applyRandomButtonState(window.pudding_settings.DisableRandom);
-
-        scrollbtn_checkbox = document.getElementById("RemoveScrollbar");
-        scrollbtn_checkbox.addEventListener("change", window.ToggleScrollbar);
-        scrollbtn_checkbox.checked = window.pudding_settings.ScrollBar;
-
-        if (window.pudding_settings.ScrollBar) {
-            // Disable it
-            document.body.style.overflow = 'hidden';
-        }
-        else {
-            // Enable it
-            document.body.style.overflow = '';
-        }
 
         const saveGameSettingsCheckbox = document.getElementById("SaveGameSettings");
         if (typeof window.pudding_settings.SaveGameSettings !== "boolean") {

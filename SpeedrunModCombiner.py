@@ -17,6 +17,7 @@ LIB_ORDER = [
 OUTPUT = "SpeedrunMod.js"
 INIT = "SpeedrunModInit.js"
 LIBS_DIR = Path("Libraries")
+INIT_MARKER = "////////////////////////////////////////////////////////////////////\n//RUNCODEBEFORE"
 
 
 def main() -> None:
@@ -37,10 +38,20 @@ def main() -> None:
             print(f"  - {path}")
         raise SystemExit(1)
 
-    parts = []
+    init_content = init_path.read_text(encoding="utf-8")
+    if INIT_MARKER in init_content:
+        init_header, init_body = init_content.split(INIT_MARKER, 1)
+    else:
+        init_header = ""
+        init_body = init_content
+
+    parts = [init_header]
     for name in LIB_ORDER:
         parts.append((libs_dir / f"{name}.js").read_text(encoding="utf-8"))
-    parts.append(init_path.read_text(encoding="utf-8"))
+    if INIT_MARKER in init_content:
+        parts.append(INIT_MARKER + init_body)
+    else:
+        parts.append(init_body)
 
     output_path.write_text("".join(parts), encoding="utf-8")
     size_kb = output_path.stat().st_size / 1024

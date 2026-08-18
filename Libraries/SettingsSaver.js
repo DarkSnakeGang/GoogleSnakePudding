@@ -140,6 +140,26 @@ window.SettingsSaver.make = function () {
         return settings;
     }
 
+    function copyPool(pool, fallbackCount) {
+        if (Array.isArray(pool)) {
+            return pool.map(Number).filter((n) => !isNaN(n) && n !== 24);
+        }
+        return defaultPoolForCount(fallbackCount);
+    }
+
+    function migrateSelectedPairsByCountGeneral(settings) {
+        if (!settings.SelectedPairsByCountGeneral || typeof settings.SelectedPairsByCountGeneral !== "object") {
+            settings.SelectedPairsByCountGeneral = {};
+        }
+        for (const key of COUNT_KEYS) {
+            if (!Array.isArray(settings.SelectedPairsByCountGeneral[key])) {
+                const src = settings.SelectedPairsByCount && settings.SelectedPairsByCount[key];
+                settings.SelectedPairsByCountGeneral[key] = copyPool(src, Number(key));
+            }
+        }
+        return settings;
+    }
+
     function migratePuddingSettings(settings) {
         if (!settings || typeof settings !== "object") return settings;
 
@@ -149,6 +169,7 @@ window.SettingsSaver.make = function () {
 
         settings = migrateSelectedPairsByCount(settings);
         settings.SelectedPairs = settings.SelectedPairsByCount["0"];
+        settings = migrateSelectedPairsByCountGeneral(settings);
 
         if (settings.SavedGameSettings && typeof settings.SavedGameSettings === "object") {
             settings.SavedGameSettings = sanitizeSavedGameSettings(settings.SavedGameSettings, {
@@ -173,9 +194,10 @@ window.SettingsSaver.make = function () {
                 ShowWrHolders: true,
                 TrackedPlayerName: "",
                 PortalPairs: false,
-                AlwaysUniqueFruit: false,
+                AlwaysUniqueFruit: true,
                 SelectedPairs: defaultPoolForCount(0),
                 SelectedPairsByCount: {},
+                SelectedPairsByCountGeneral: {},
                 DisableRandom: false,
                 randomizeThemeApple: false,
                 ScrollBar: false,
@@ -185,6 +207,7 @@ window.SettingsSaver.make = function () {
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
+                pudding_settings.SelectedPairsByCountGeneral[key] = defaultPoolForCount(Number(key)).slice();
             }
         } else {
             pudding_settings = JSON.parse(pudding_settings);
@@ -193,7 +216,7 @@ window.SettingsSaver.make = function () {
                 pudding_settings.PortalPairs = false;
             }
             if (typeof pudding_settings.AlwaysUniqueFruit !== 'boolean') {
-                pudding_settings.AlwaysUniqueFruit = false;
+                pudding_settings.AlwaysUniqueFruit = true;
             }
             if (typeof pudding_settings.ScrollBar !== 'boolean') {
                 pudding_settings.ScrollBar = false;
