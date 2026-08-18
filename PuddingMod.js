@@ -1,3 +1,5 @@
+window.PuddingMod = window.PuddingMod || {};
+
 window.Core = {};
 
 window.Core.make = function () {
@@ -7392,8 +7394,6 @@ window.CustomBowl.alterCode = function (code) {
 
     return code;
 };
-window.PuddingMod = {};
-
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////

@@ -1,4 +1,4 @@
-window.PuddingMod = {};
+window.PuddingMod = window.PuddingMod || {};
 
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
