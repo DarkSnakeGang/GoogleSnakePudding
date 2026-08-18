@@ -234,6 +234,7 @@ function installBrowserStubs() {
   global.getComputedStyle = () => new Proxy({}, { get: () => "" });
 
   global.window.NepDebug = false;
+  global.window.SpeedrunMod = {};
   global.window.pudding_settings = {
     Skull: false,
     SokoGoals: true,
