@@ -159,10 +159,19 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.gotApple = function (time, score) {
-        stats.apples.session++;
-        stats.apples.lifetime++;
-        updateCounterDisplay();
-        if (window.pudding_settings && window.pudding_settings.randomizeThemeApple) {
+        if (typeof stats !== "undefined" && stats.apples) {
+            stats.apples.session++;
+            stats.apples.lifetime++;
+            if (typeof updateCounterDisplay === "function") {
+                updateCounterDisplay();
+            }
+        }
+        if (
+            window.pudding_settings &&
+            window.pudding_settings.randomizeThemeApple &&
+            typeof window.setTheme === "function" &&
+            typeof window.getRandomThemeName === "function"
+        ) {
             window.setTheme(window.getRandomThemeName());
         }
         if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;

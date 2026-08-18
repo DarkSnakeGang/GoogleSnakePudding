@@ -17,16 +17,12 @@ const ROOT = path.resolve(__dirname, "..");
 const LIBS = [
   "Core",
   "Theme",
+  "SpeedrunCss",
   "ModeRegistry",
-  "DistinctVisual",
-  "SettingsSaver",
-  "Counter",
   "TimeKeeper",
   "SpeedInfo",
   "TopBar",
-  "BootstrapMenuSpeedrun",
-  "ResetKeySpeedrun",
-  "SpeedrunPerf",
+  "ResetKey",
 ];
 
 const version = process.argv[2] || "current";

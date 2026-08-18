@@ -163,9 +163,9 @@ Shared helpers used while patching `snake.js` (`assertReplace`, image UI helpers
 
 ## Speedrun Mod
 
-`SpeedrunMod.js` on `main` is a lighter bundle for runners who want timing and stats without the full fruit / theme / bowl surface. It targets the same **v13** game as Pudding Mod (`googlesnakemods.com/v/current/`). Libraries: Core, Theme, ModeRegistry, DistinctVisual, SettingsSaver, Counter, TimeKeeper, SpeedInfo, TopBar, BootstrapMenuSpeedrun, ResetKeySpeedrun, SpeedrunPerf.
+`SpeedrunMod.js` on `main` is a minimal bundle for runners who want timing and stats without the full Pudding surface. It targets the same **v13** game as Pudding Mod (`googlesnakemods.com/v/current/`). Libraries: Core, Theme, SpeedrunCss, ModeRegistry, TimeKeeper, SpeedInfo, TopBar, ResetKey.
 
-`SpeedrunPerf` trims work that does not matter mid-run. The speedrun menu is a smaller side panel (`BootstrapMenuSpeedrun`).
+Speed Info (with TimeKeeper PB/attempt tracking and FastSnakeStats WR fetching), Top Bar icons, and the reset keybind are always available. The Speed Info panel uses the stripped Bootstrap stylesheet (`bootstrap-stripped.css` via `SpeedrunCss`) and includes **Top Bar Icons** and **Reset Key** controls at the bottom. Extra board themes from `Theme.js` appear in the native theme picker. Toggle Speed Info visibility via `PuddingSettings.SpeedInfo` in `localStorage`. Reset defaults to Shift and is stored in `localStorage.keybinds`.
 
 `window.SpeedrunMod` is assigned on line 1 of `SpeedrunMod.js` so the v13 website loader can see the mod object before libraries finish evaluating. The picker still needs a `version: 13` entry in `mod-info.json` (same `main/SpeedrunMod.js` URL as v12).
 

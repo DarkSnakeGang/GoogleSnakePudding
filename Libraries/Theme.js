@@ -374,8 +374,10 @@ window.Theme.alterCode = function (code) {
       }
     }
 
-    document.getElementById('settings-popup-pudding').style.background = real_top_bar;
-    document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const settingsBox = document.getElementById('settings-popup-pudding');
+    if (settingsBox) settingsBox.style.background = real_top_bar;
+    const speedinfo = document.getElementById('speedinfo-popup-pudding');
+    if (speedinfo) speedinfo.style.background = real_top_bar;
     const splitPanel = document.getElementById('split-panel-pudding');
     if (splitPanel) splitPanel.style.background = real_top_bar;
     const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');

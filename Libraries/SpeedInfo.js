@@ -1191,7 +1191,8 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
-        document.getElementById('AlwaysOnTimeKeeper').checked = false;
+        const speedInfoToggle = document.getElementById("AlwaysOnTimeKeeper");
+        if (speedInfoToggle) speedInfoToggle.checked = false;
     }
 
     window.SpeedInfoSetup = function () {
@@ -1254,6 +1255,14 @@ window.SpeedInfo.make = function () {
         </div>
         </div>
 
+        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:6px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
+        <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
+        <label class="form-check-label" for="TopBarIcons" style="${siLabel}">Top Bar Icons</label>
+        </div>
+        <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button>
+        </div>
+
         <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
 
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
@@ -1262,6 +1271,11 @@ window.SpeedInfo.make = function () {
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
         updateTrackingSectionVisibility();
+
+        if (window.SpeedrunMod) {
+            const speedrunControls = document.getElementById("speedrun-controls-section");
+            if (speedrunControls) speedrunControls.style.display = "block";
+        }
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
         speedinfoCloseElements.addEventListener('click', window.SpeedInfoHide);

@@ -3,16 +3,12 @@ from pathlib import Path
 LIB_ORDER = [
     "Core",
     "Theme",
+    "SpeedrunCss",
     "ModeRegistry",
-    "DistinctVisual",
-    "SettingsSaver",
-    "Counter",
     "TimeKeeper",
     "SpeedInfo",
     "TopBar",
-    "BootstrapMenuSpeedrun",
-    "ResetKeySpeedrun",
-    "SpeedrunPerf",
+    "ResetKey",
 ]
 OUTPUT = "SpeedrunMod.js"
 INIT = "SpeedrunModInit.js"

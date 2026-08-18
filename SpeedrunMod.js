@@ -442,8 +442,10 @@ window.Theme.alterCode = function (code) {
       }
     }
 
-    document.getElementById('settings-popup-pudding').style.background = real_top_bar;
-    document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const settingsBox = document.getElementById('settings-popup-pudding');
+    if (settingsBox) settingsBox.style.background = real_top_bar;
+    const speedinfo = document.getElementById('speedinfo-popup-pudding');
+    if (speedinfo) speedinfo.style.background = real_top_bar;
     const splitPanel = document.getElementById('split-panel-pudding');
     if (splitPanel) splitPanel.style.background = real_top_bar;
     const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');
@@ -498,6 +500,53 @@ window.Theme.alterCode = function (code) {
   code = code.assertReplace(reset_regex, set_on_reset)
   return code;
 }
+window.SpeedrunCss = {};
+
+window.SpeedrunCss.make = function () {
+    const cssUrl = window.NepDebug
+        ? "http://127.0.0.1:5500/bootstrap-stripped.css"
+        : "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css";
+
+    const xhr = new XMLHttpRequest();
+
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            const cssText = xhr.responseText;
+            window.bootstrap_css = cssText;
+
+            const styleElement = document.getElementsByTagName("style")[0];
+            if (styleElement) {
+                styleElement.innerHTML = styleElement.innerHTML + cssText;
+            }
+
+            let styleElnew = document.getElementById("custom-style");
+            if (!styleElnew) {
+                styleElnew = document.createElement("style");
+                styleElnew.id = "custom-style";
+                document.head.appendChild(styleElnew);
+            }
+            styleElnew.innerHTML = cssText;
+        } else {
+            console.error("Failed to load Bootstrap CSS:", xhr.status, xhr.statusText);
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error("Network error while loading Bootstrap CSS");
+    };
+
+    xhr.ontimeout = function () {
+        console.error("Timeout while loading Bootstrap CSS");
+    };
+
+    xhr.timeout = 10000;
+    xhr.open("GET", cssUrl, true);
+    xhr.send();
+};
+
+window.SpeedrunCss.alterCode = function (code) {
+    return code;
+};
 window.ModeRegistry = {};
 
 // Known middle modes (between Classic and Peaceful). Peaceful/Classic/Blender are positional.
@@ -714,920 +763,6 @@ window.ModeRegistry.make = function () {
 window.ModeRegistry.alterCode = function (code) {
     return code;
 };
-window.DistinctVisual = {};
-
-window.DistinctVisual.make = function () {
-
-    window.toggle_skull_func = function toggle_skull_func() {
-        window.pudding_settings.Skull = !window.pudding_settings.Skull;
-    }
-
-    window.toggle_soko_goal = function toggle_soko_goal() {
-        window.pudding_settings.SokoGoals = !window.pudding_settings.SokoGoals;
-    }
-
-    function i(src) {
-        let img = new Image();
-        img.src = src;
-        img.crossOrigin = 'Anonymous';
-        img.width = img.height = 128;
-        return img;
-    }
-
-    window.skull = i('https://www.google.com/logos/fnbx/snake_arcade/v12/trophy_10.png');
-    window.px_skull = i('https://www.google.com/logos/fnbx/snake_arcade/pixel/px_trophy_10.png');
-    window.real_skull = i('https://i.postimg.cc/prstgqbL/poison-skull.png');
-    window.ghost_skull = i('https://i.postimg.cc/DZqL146Z/poison-ghost.png');
-    window.px_ghost_skull = i('https://i.postimg.cc/cLF34LtP/px-poison-ghost.png');
-
-    // window.skull_toggle = false;
-    // window.soko_toggle = true;
-
-    window.distinct_soko_goal = new Image();
-    window.distinct_soko_goal.src = 'https://i.postimg.cc/x11nt4Pb/box-distinct-soko-goals.png';
-    window.distinct_soko_goal.currentSrc = 'https://i.postimg.cc/x11nt4Pb/box-distinct-soko-goals.png';
-    window.distinct_soko_goal.crossOrigin = "Anonymous";
-
-    window.distinct_soko_goal_px = new Image();
-    window.distinct_soko_goal_px.src = 'https://i.postimg.cc/NFnWqP35/px-box-red.png';
-    window.distinct_soko_goal_px.currentSrc = 'https://i.postimg.cc/NFnWqP35/px-box-red.png';
-    window.distinct_soko_goal_px.crossOrigin = "Anonymous";
-
-}
-
-window.DistinctVisual.alterCode = function (code) {
-
-    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
-    catchError(realism_draw, code);
-    realism_switch = code.match(realism_draw)[0];
-
-    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
-    catchError(realism_path, code);
-    last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
-
-    get_graphics = realism_switch.split(':')[1].split(')')[0];
-
-    window.drawing_apple = true;
-
-    get_apple_stuff = new RegExp(/(?:let|const|var).*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
-    catchError(get_apple_stuff, code);
-    poison_default = code.match(get_apple_stuff)[0]
-    b_graphics = poison_default.split('(')[2].split(')')[0]
-
-    get_apple_code = `
-    if(window.pudding_settings.Skull){
-        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[1].split('?')[0]} - 1 : b.type;
-    }
-    ${poison_default}
-    `
-
-    code = code.assertReplace(get_apple_stuff, get_apple_code)
-
-    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
-    catchError(disable_real_grey, code);
-    real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[1]
-
-    new_grey_code = `
-    if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
-        ${real_grey.slice(0, -1).slice(0, -1).slice(0, -1)}0)
-    }
-    else {
-        ${real_grey}
-    }
-    `
-
-    code = code.assertReplace(disable_real_grey, new_grey_code)
-
-    // Match only the box goal creation. v12 puts the sequence.png creation on the
-    // same line just before it, which a greedy match swallows — that truncated the
-    // rebuilt call and grabbed the sequence property instead of the box one.
-    sokondeez = new RegExp(/this\.[a-zA-Z0-9_$]{1,8}=new [a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},"[^"]*box[^"]*",\d+,this\.[a-zA-Z0-9_$]{1,8},"[^"]*"\)/)
-    catchError(sokondeez, code);
-    sokondeez_code = code.match(sokondeez)[0]
-
-    sokondeez_nuts = `
-    window.SokoRef=this;
-    window.DefaultSokoGoal=${sokondeez_code};
-    window.DistinctSokoFinal=${sokondeez_code.split('=')[1].split('"')[0]} "${window.distinct_soko_goal.src}" ${sokondeez_code.split('"')[2]} "${window.distinct_soko_goal_px.src}" ${sokondeez_code.split('"')[4]}
-    `
-
-    code = code.assertReplace(sokondeez, sokondeez_nuts)
-
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
-
-    set_on_reset = `;
-    if (window.pudding_settings.SokoGoals) {
-        window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DistinctSokoFinal;
-    }
-    else {
-        window.SokoRef.${sokondeez_code.split('=')[0].split('.')[1]} = window.DefaultSokoGoal;
-    }
-    $&`
-    code = code.assertReplace(reset_regex, set_on_reset)
-
-    return code;
-}
-window.SettingsSaver = {};
-
-window.SettingsSaver.make = function () {
-    const COUNT_KEYS = ["0", "1", "2", "3", "4", "5", "6"];
-    const COUNT_MINIMA = { 0: 1, 1: 3, 2: 5, 3: 10, 4: 6, 5: 24, 6: 5 };
-    const PUDDING_SETTINGS_VERSION = 1;
-
-    const GAME_SETTING_KEYS = [
-        "trophy",
-        "count",
-        "speed",
-        "size",
-        "graphics",
-        "theme",
-        "color",
-        "apple",
-    ];
-
-    // v12/v13 share the same menu rows today; caps are fallbacks when DOM is not ready yet.
-    const FALLBACK_ROW_LIMITS = {
-        trophy: 25,
-        count: 7,
-        speed: 3,
-        size: 3,
-        graphics: 7,
-        theme: 24,
-        color: 24,
-        apple: 50,
-    };
-
-    function getSelectorRowLength(selectorId) {
-        const row = document.getElementById(selectorId);
-        return row && row.children ? row.children.length : 0;
-    }
-
-    function clampSettingIndex(index, maxLen) {
-        let i = Number(index);
-        if (isNaN(i) || i < 0) return 0;
-        if (!maxLen || maxLen <= 0) return i;
-        return Math.min(i, maxLen - 1);
-    }
-
-    function nativeGraphicsCount() {
-        return window.nativeGraphicsCount || 4;
-    }
-
-    // Pair-mix slots (indices >= native count) map back to a native style if mix icons are missing.
-    function fallbackNativeGraphics(savedIndex) {
-        const n = nativeGraphicsCount();
-        const g = Number(savedIndex);
-        if (isNaN(g) || g < 0) return 0;
-        if (g < n - 1) return g;
-        const pools = {};
-        pools[n - 1] = 0;
-        pools[n] = 0;
-        pools[n + 1] = 1;
-        pools[n + 2] = 0;
-        return Object.prototype.hasOwnProperty.call(pools, g) ? pools[g] : 0;
-    }
-
-    function requiredGraphicsRowLength(savedGraphics) {
-        const g = Number(savedGraphics);
-        if (isNaN(g) || g < 0) return nativeGraphicsCount();
-        const n = nativeGraphicsCount();
-        if (g < n) return n;
-        return n + 3;
-    }
-
-    function graphicsRowReady(savedGraphics) {
-        const len = getSelectorRowLength("graphics");
-        if (!len) return false;
-        return len >= requiredGraphicsRowLength(savedGraphics);
-    }
-
-    function sanitizeSavedGameSettings(snap, options) {
-        if (!snap || typeof snap !== "object") return snap;
-        const out = Object.assign({}, snap);
-        const savedRows = out._rowLengths && typeof out._rowLengths === "object" ? out._rowLengths : null;
-        const allowGraphicsFallback = !!(options && options.allowGraphicsFallback);
-
-        for (const key of GAME_SETTING_KEYS) {
-            if (typeof out[key] !== "number" || isNaN(out[key])) continue;
-
-            let maxLen = getSelectorRowLength(key);
-            if (!maxLen && savedRows && typeof savedRows[key] === "number") {
-                maxLen = savedRows[key];
-            }
-            if (!maxLen && FALLBACK_ROW_LIMITS[key]) {
-                maxLen = FALLBACK_ROW_LIMITS[key];
-            }
-
-            if (key === "graphics" && maxLen && out[key] >= nativeGraphicsCount()) {
-                if (allowGraphicsFallback && maxLen < requiredGraphicsRowLength(out[key])) {
-                    out[key] = fallbackNativeGraphics(out[key]);
-                } else {
-                    out[key] = clampSettingIndex(out[key], maxLen);
-                }
-            } else if (maxLen) {
-                out[key] = clampSettingIndex(out[key], maxLen);
-            }
-        }
-
-        return out;
-    }
-
-    function defaultPoolForCount(count) {
-        const min = COUNT_MINIMA[count] || 1;
-        const pool = [];
-        for (let i = 0; pool.length < min; i++) {
-            if (i === 24) continue; // skip fruit bowl
-            pool.push(i);
-        }
-        return pool;
-    }
-
-    function migrateSelectedPairsByCount(settings) {
-        if (settings.SelectedPairsByCount && typeof settings.SelectedPairsByCount === "object") {
-            for (const key of COUNT_KEYS) {
-                if (!Array.isArray(settings.SelectedPairsByCount[key])) {
-                    settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
-                }
-            }
-            return settings;
-        }
-
-        const legacy = Array.isArray(settings.SelectedPairs) ? settings.SelectedPairs.map(Number) : null;
-        settings.SelectedPairsByCount = {};
-        for (const key of COUNT_KEYS) {
-            const count = Number(key);
-            const min = COUNT_MINIMA[count];
-            // Seed each count with only its own minimum slice of the old shared list
-            const seed = legacy ? legacy.slice(0, min) : defaultPoolForCount(count);
-            const pool = Array.from(new Set(seed.map(Number).filter((n) => !isNaN(n) && n !== 24)));
-            for (let i = 0; pool.length < min; i++) {
-                if (i === 24) continue;
-                if (!pool.includes(i)) pool.push(i);
-            }
-            settings.SelectedPairsByCount[key] = pool;
-        }
-        return settings;
-    }
-
-    function copyPool(pool, fallbackCount) {
-        if (Array.isArray(pool)) {
-            return pool.map(Number).filter((n) => !isNaN(n) && n !== 24);
-        }
-        return defaultPoolForCount(fallbackCount);
-    }
-
-    function migrateSelectedPairsByCountGeneral(settings) {
-        if (!settings.SelectedPairsByCountGeneral || typeof settings.SelectedPairsByCountGeneral !== "object") {
-            settings.SelectedPairsByCountGeneral = {};
-        }
-        for (const key of COUNT_KEYS) {
-            if (!Array.isArray(settings.SelectedPairsByCountGeneral[key])) {
-                const src = settings.SelectedPairsByCount && settings.SelectedPairsByCount[key];
-                settings.SelectedPairsByCountGeneral[key] = copyPool(src, Number(key));
-            }
-        }
-        return settings;
-    }
-
-    function migratePuddingSettings(settings) {
-        if (!settings || typeof settings !== "object") return settings;
-
-        if (typeof settings.StorageVersion !== "number") {
-            settings.StorageVersion = PUDDING_SETTINGS_VERSION;
-        }
-
-        settings = migrateSelectedPairsByCount(settings);
-        settings.SelectedPairs = settings.SelectedPairsByCount["0"];
-        settings = migrateSelectedPairsByCountGeneral(settings);
-
-        if (settings.SavedGameSettings && typeof settings.SavedGameSettings === "object") {
-            settings.SavedGameSettings = sanitizeSavedGameSettings(settings.SavedGameSettings, {
-                allowGraphicsFallback: true,
-            });
-        }
-
-        settings.StorageVersion = PUDDING_SETTINGS_VERSION;
-        return settings;
-    }
-
-    window.loadSettings = function () {
-        let pudding_settings = localStorage.getItem('PuddingSettings');
-        if (pudding_settings === null) {
-            pudding_settings = {
-                StorageVersion: PUDDING_SETTINGS_VERSION,
-                Skull: false,
-                SokoGoals: true,
-                InputDisplay: false,
-                TopBar: true,
-                SpeedInfo: false,
-                ShowWrHolders: true,
-                TrackedPlayerName: "",
-                PortalPairs: false,
-                AlwaysUniqueFruit: true,
-                SelectedPairs: defaultPoolForCount(0),
-                SelectedPairsByCount: {},
-                SelectedPairsByCountGeneral: {},
-                DisableRandom: false,
-                randomizeThemeApple: false,
-                ScrollBar: false,
-                SaveGameSettings: true,
-                SavedGameSettings: null,
-                SplitPanel: false,
-            };
-            for (const key of COUNT_KEYS) {
-                pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
-                pudding_settings.SelectedPairsByCountGeneral[key] = defaultPoolForCount(Number(key)).slice();
-            }
-        } else {
-            pudding_settings = JSON.parse(pudding_settings);
-            const needsPersist = typeof pudding_settings.StorageVersion !== "number";
-            if (typeof pudding_settings.PortalPairs !== 'boolean') {
-                pudding_settings.PortalPairs = false;
-            }
-            if (typeof pudding_settings.AlwaysUniqueFruit !== 'boolean') {
-                pudding_settings.AlwaysUniqueFruit = true;
-            }
-            if (typeof pudding_settings.ScrollBar !== 'boolean') {
-                pudding_settings.ScrollBar = false;
-            }
-            if (typeof pudding_settings.ShowWrHolders !== 'boolean') {
-                pudding_settings.ShowWrHolders = true;
-            }
-            if (typeof pudding_settings.TrackedPlayerName !== 'string') {
-                pudding_settings.TrackedPlayerName = "";
-            }
-            if (typeof pudding_settings.SaveGameSettings !== 'boolean') {
-                pudding_settings.SaveGameSettings = true;
-            }
-            if (typeof pudding_settings.SplitPanel !== 'boolean') {
-                pudding_settings.SplitPanel = false;
-            }
-            if (
-                pudding_settings.SavedGameSettings !== null &&
-                typeof pudding_settings.SavedGameSettings !== 'object'
-            ) {
-                pudding_settings.SavedGameSettings = null;
-            }
-            pudding_settings = migratePuddingSettings(pudding_settings);
-            if (needsPersist) {
-                window._puddingSettingsNeedsPersist = true;
-            }
-        }
-
-        return pudding_settings;
-    }
-    window.pudding_settings = window.loadSettings();
-    if (window._puddingSettingsNeedsPersist && typeof window.saveSettings === "function") {
-        window.saveSettings();
-        window._puddingSettingsNeedsPersist = false;
-    }
-
-    window.saveSettings = function () {
-        const s = window.pudding_settings;
-        if (typeof s !== 'undefined' &&
-            typeof s.Skull !== 'undefined' &&
-            typeof s.SokoGoals !== 'undefined' &&
-            typeof s.InputDisplay !== 'undefined' &&
-            typeof s.TopBar !== 'undefined' &&
-            typeof s.SpeedInfo !== 'undefined' &&
-            typeof s.PortalPairs !== 'undefined' &&
-            typeof s.DisableRandom !== 'undefined' &&
-            typeof s.randomizeThemeApple !== 'undefined'
-        ) {
-            localStorage.setItem('PuddingSettings', JSON.stringify(s));
-        }
-    }
-
-    // Read selected child index for a Google Snake selector row
-    window.readGameSettingIndex = function (selectorId) {
-        const root = document.getElementById(selectorId);
-        if (!root || !root.children || !root.children.length) return 0;
-
-        // Selected icon uses tuJOWd (optionally with other classes)
-        for (let i = 0; i < root.children.length; i++) {
-            const el = root.children[i];
-            const cls = el.className || "";
-            if (cls === "tuJOWd" || cls === "DqMRee tuJOWd" || cls === "DqMRee") return i;
-            if (el.classList && el.classList.contains("tuJOWd")) return i;
-        }
-
-        // Odd-class-out (trophy / count style)
-        const classNames = [];
-        let notUnique = "";
-        for (const el of root.children) {
-            if (classNames.indexOf(el.className) === -1) classNames.push(el.className);
-            else {
-                notUnique = el.className;
-                break;
-            }
-        }
-        if (notUnique) {
-            let n = 0;
-            for (const el of root.children) {
-                if (el.className !== notUnique) return n;
-                n++;
-            }
-        }
-        return 0;
-    };
-
-    window.clickGameSettingIndex = function (selectorId, index) {
-        let i = Number(index);
-        if (isNaN(i) || i < 0) i = 0;
-
-        // Google's p7 selector (scroll + settings object). Child .click() does not stick.
-        if (typeof window.puddingMenuSelect === "function") {
-            return window.puddingMenuSelect(selectorId, i);
-        }
-        return false;
-    };
-
-    window._openSnakeSettingsPanel = function () {
-        const gear =
-            document.querySelector('div[jsname="iyH4Cb"]') ||
-            document.querySelector('div[jsname^="iyH4Cb"]');
-        if (gear && typeof gear.click === "function") {
-            gear.click();
-            return true;
-        }
-        return false;
-    };
-
-    window._closeSnakeSettingsPanel = function () {
-        // Native back control uses class p17HVe
-        const back =
-            document.querySelector(".p17HVe") ||
-            document.querySelector('[class^="p17HVe"]') ||
-            document.querySelector('[class*="p17HVe"]');
-        if (back && typeof back.click === "function") {
-            back.click();
-            return true;
-        }
-        return false;
-    };
-
-    window.saveCurrentGameSettings = function () {
-        if (!window.pudding_settings) return;
-        const snap = {};
-        for (const key of GAME_SETTING_KEYS) {
-            snap[key] = window.readGameSettingIndex(key);
-        }
-        // Prefer live vars when DOM class detection is ambiguous
-        if (typeof window.graphics_selected === "number") {
-            snap.graphics = window.graphics_selected;
-        }
-        if (typeof window.fruit_selected === "number") {
-            snap.apple = window.fruit_selected;
-        }
-        snap._rowLengths = {};
-        for (const key of GAME_SETTING_KEYS) {
-            const len = getSelectorRowLength(key);
-            if (len) snap._rowLengths[key] = len;
-        }
-        snap._nativeGraphicsCount = nativeGraphicsCount();
-        window.pudding_settings.SavedGameSettings = sanitizeSavedGameSettings(snap, {
-            allowGraphicsFallback: false,
-        });
-        if (typeof window.saveSettings === "function") window.saveSettings();
-    };
-
-    window.applySavedGameSettingsOnce = function () {
-        if (window._puddingGameSettingsApplied) return;
-
-        const s = window.pudding_settings;
-        if (!s || !s.SaveGameSettings) {
-            window._puddingGameSettingsApplied = true;
-            return;
-        }
-        let snap = s.SavedGameSettings;
-        if (!snap || typeof snap !== "object") {
-            window._puddingGameSettingsApplied = true;
-            return;
-        }
-        snap = sanitizeSavedGameSettings(snap, { allowGraphicsFallback: false });
-
-        const gear =
-            document.querySelector('div[jsname="iyH4Cb"]') ||
-            document.querySelector('div[jsname^="iyH4Cb"]');
-        const trophy = document.getElementById("trophy");
-        const p7Ready = typeof window._puddingSnakeP7 === "function";
-
-        if (!gear || !trophy || !trophy.children || !trophy.children.length || !p7Ready) {
-            if (typeof window._puddingGameSettingsApplyTries !== "number") {
-                window._puddingGameSettingsApplyTries = 0;
-            }
-            window._puddingGameSettingsApplyTries++;
-            if (window._puddingGameSettingsApplyTries > 100) {
-                window._puddingGameSettingsApplied = true;
-                return;
-            }
-            setTimeout(window.applySavedGameSettingsOnce, 50);
-            return;
-        }
-
-        window._puddingGameSettingsApplied = true;
-
-        // Open settings → wait until menu is live → apply via p7 → back (p17HVe).
-        window._openSnakeSettingsPanel();
-
-        const order = [
-            "trophy",
-            "count",
-            "speed",
-            "size",
-            "graphics",
-            "theme",
-            "color",
-            "apple",
-        ];
-
-        let waitTries = 0;
-        function waitMenuThenApply() {
-            waitTries++;
-            const menu = window._puddingSnakeMenu;
-            const ready =
-                menu &&
-                menu.oa === "settings" &&
-                typeof window._puddingSnakeP7 === "function";
-
-            if (!ready) {
-                if (waitTries > 80) {
-                    // Still try back so we don't leave settings open
-                    window._closeSnakeSettingsPanel();
-                    return;
-                }
-                setTimeout(waitMenuThenApply, 50);
-                return;
-            }
-
-            if (typeof snap.graphics === "number" && snap.graphics >= nativeGraphicsCount()) {
-                if (typeof window.appendPairGraphicsIcons === "function") {
-                    window.appendPairGraphicsIcons();
-                }
-                if (!graphicsRowReady(snap.graphics)) {
-                    if (waitTries > 80) {
-                        snap = sanitizeSavedGameSettings(snap, { allowGraphicsFallback: true });
-                    } else {
-                        setTimeout(waitMenuThenApply, 50);
-                        return;
-                    }
-                }
-            }
-
-            for (const key of order) {
-                if (typeof snap[key] === "number") {
-                    window.puddingMenuSelect(key, snap[key]);
-                }
-            }
-
-            setTimeout(function () {
-                window._closeSnakeSettingsPanel();
-            }, 100);
-        }
-
-        setTimeout(waitMenuThenApply, 50);
-    };
-
-    // Public helper used after alterCode exposes Google's selector.
-    window.puddingMenuSelect = function (id, index) {
-        const menu = window._puddingSnakeMenu;
-        const p7 = window._puddingSnakeP7;
-        if (!menu || typeof p7 !== "function") return false;
-        const row =
-            (menu.ka && menu.ka.iW && menu.ka.iW.get(id)) ||
-            document.getElementById(id);
-        if (!row || !row.children || !row.children.length) return false;
-        let i = Number(index);
-        if (isNaN(i) || i < 0) i = 0;
-        if (i >= row.children.length) i = row.children.length - 1;
-        p7(menu, row, true, i);
-        return true;
-    };
-}
-
-window.SettingsSaver.alterCode = function (code) {
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
-
-    settings_reset_code = `
-    saveSettings();
-    $&`
-
-    catchError(reset_regex, code)
-    code = code.assertReplace(reset_regex, settings_reset_code);
-
-    stop_regex = new RegExp(/stop\(a\){/)
-    catchError(stop_regex, code)
-    save_settings_code = `stop\(a\){saveSettings();`
-
-    code = code.assertReplace(stop_regex, save_settings_code);
-
-    // Expose Google's menu selector (p7). Child element .click() does not change settings;
-    // selection is scroll-position based and writes a.settings.* inside this function.
-    const menuSelectRegex = /([a-zA-Z0-9_$]{1,8})=function\(a,b,c,d=-1\)\{d=d!==-1\?d:([a-zA-Z0-9_$]{1,8})\(a,b\);for\(var e=0;e<b\.children\.length/;
-    catchError(menuSelectRegex, code);
-    code = code.assertReplace(
-        menuSelectRegex,
-        `$1=window._puddingSnakeP7=function(a,b,c,d=-1){window._puddingSnakeMenu=a;d=d!==-1?d:$2(a,b);for(var e=0;e<b.children.length`
-    );
-
-    // Capture menu when native settings open (Ec).
-    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.oa="settings";/;
-    catchError(openSettingsRegex, code);
-    code = code.assertReplace(
-        openSettingsRegex,
-        `$1(){var a=this.menu;window._puddingSnakeMenu=a;a.oa="settings";`
-    );
-
-    return code;
-}
-window.Counter = {};
-
-window.Counter.make = function () {
-    window.loadStatistics = function () {
-        let stats = localStorage.getItem('inputCounterMod');
-        if (stats === null) {
-            stats = {
-                visible: true,
-                statShown: 'inputs',
-                statDurationShown: 'game',
-                inputs: {
-                    game: 0,
-                    session: 0,
-                    lifetime: 0
-                },
-                plays: {
-                    session: 0,
-                    lifetime: 0
-                },
-                apples: {
-                    session: 0,
-                    lifetime: 0
-                }
-            };
-        } else {
-            stats = JSON.parse(stats);
-        }
-
-        if (typeof stats.apples === 'undefined') {
-            stats.apples = {
-                session: 0,
-                lifetime: 0
-            }
-        }
-
-        //Make sure these get reset
-        stats.inputs.game = 0;
-        stats.inputs.session = 0;
-        stats.plays.session = 0;
-        stats.apples.session = 0;
-        stats.visible = true;
-
-        stats.walls = {
-            game: 0
-        };
-
-        stats.hide = {
-            count: ""
-        };
-
-        return stats;
-    }
-    window.stats = window.loadStatistics();
-    window.saveStatistics = function () {
-        if (typeof stats !== 'undefined' &&
-            typeof stats.statShown !== 'undefined' &&
-            typeof stats.statDurationShown !== 'undefined' &&
-            typeof stats.inputs !== 'undefined' &&
-            typeof stats.plays !== 'undefined' &&
-            typeof stats.inputs.game !== 'undefined' &&
-            typeof stats.inputs.session !== 'undefined' &&
-            typeof stats.inputs.lifetime !== 'undefined' &&
-            typeof stats.plays.session !== 'undefined' &&
-            typeof stats.plays.lifetime !== 'undefined' &&
-            typeof stats.apples.session !== 'undefined' &&
-            typeof stats.apples.lifetime !== 'undefined' &&
-            typeof stats.visible !== 'undefined'
-        ) {
-            localStorage.setItem('inputCounterMod', JSON.stringify(stats));
-        }
-    }
-    window.updateCounterDisplay = function () {
-        divList.innerHTML = stats[stats.statShown][stats.statDurationShown];
-    }
-    window.promptToResetStats = function () {
-        let userResponse = prompt('Type DELETE to reset all stats. Cannot be undone');
-        if (userResponse === 'DELETE') {
-            localStorage.removeItem('inputCounterMod');
-            stats = {
-                visible: true,
-                statShown: 'inputs',
-                statDurationShown: 'game',
-                inputs: {
-                    game: 0,
-                    session: 0,
-                    lifetime: 0
-                },
-                plays: {
-                    session: 0,
-                    lifetime: 0
-                },
-                apples: {
-                    session: 0,
-                    lifetime: 0
-                }
-            };
-            saveStatistics();
-            updateCounterDisplay();
-            alert('All stats have been reset');
-        } else {
-            alert('Did not reset all stats');
-        }
-    }
-
-    window.promptToEditStatCount = function () {
-        if (stats.statShown === 'hide' || stats.statShown === 'walls') {
-            alert(`Not changing stat for "hide" or "walls"`)
-            return;
-        }
-        let userResponse = prompt(`Change the stat count for "${stats.statShown} - ${stats.statDurationShown}"? This won't change any of the other stats. Current value: ${stats[stats.statShown][stats.statDurationShown]}`, stats[stats.statShown][stats.statDurationShown]);
-        userResponse = parseInt(userResponse, 10);
-        if (isNaN(userResponse)) {
-            alert('Invalid - did not change stat count');
-        } else {
-            stats[stats.statShown][stats.statDurationShown] = userResponse;
-            saveStatistics();
-            updateCounterDisplay();
-            alert(`Changed stat count to ${userResponse}`);
-        }
-    }
-
-    window.getStatIconImageSrc = function () {
-        switch (stats.statShown) {
-            case 'hide':
-                return "https://i.postimg.cc/bNFfLPCn/Empty.png"
-            case 'walls':
-                return "https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_01.png"
-            case 'apples':
-                return "https://www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"
-            case 'plays':
-                return "https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png"
-            default:
-                return "https://www.google.com/logos/fnbx/snake_arcade/keys.svg"
-        }
-    }
-
-    window.setCounter = function () {
-        //stats.visible = !stats.visible;
-        if (stats.visible) {
-            document.getElementById('stat-icon').style.display = 'inline';
-            document.getElementById('counter-num').style.display = 'inherit';
-            //document.getElementById('toggle-counter').innerHTML = 'Hide counter';
-        }
-        else {
-            document.getElementById('stat-icon').style.display = 'none';
-            document.getElementById('counter-num').style.display = 'none';
-            //document.getElementById('toggle-counter').innerHTML = 'Show counter';
-        }
-        saveStatistics();
-    }
-
-}
-
-window.Counter.alterCode = function (code) {
-
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
-    window.wallCoords = [];
-
-    counter_reset_code = `;stats.inputs.game = 0;
-    stats.walls.game = 0;
-    window.wallCoords = [];
-    window.BootstrapHide();
-    stats.plays.session++;
-    stats.plays.lifetime++;
-    window.timeKeeper.addAttempt();
-    saveStatistics();
-    stats.visible = true;
-    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 19) && stats.statShown == "walls"){
-        stats.visible = false;
-    }
-    window.setCounter();
-    updateCounterDisplay();
-    $&`
-
-    catchError(reset_regex, code)
-    code = code.assertReplace(reset_regex, counter_reset_code);
-
-    window.IncrementCounter = function(){
-
-        if(!window.timeKeeper.runStarted)
-        {
-            window.timeKeeper.start();
-        }
-
-        stats.inputs.game++;
-        stats.inputs.session++;
-        stats.inputs.lifetime++;
-        stats.statShown === 'inputs' && updateCounterDisplay();
-
-    }
-
-
-    document.addEventListener('keydown', (event)=> {
-        const ae = document.activeElement;
-        if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable)) return;
-        if(!event.repeat)
-        {
-            if ((event.key === 'ArrowRight') || (event.code === 'KeyD')){
-                window.IncrementCounter();
-            }
-            else if (event.key === 'ArrowLeft'|| (event.code === 'KeyA'))
-            {
-                window.IncrementCounter();
-            }
-            else if (event.key === 'ArrowDown'|| (event.code === 'KeyS'))
-            {
-                window.IncrementCounter();
-            }
-            else if (event.key === 'ArrowUp'|| (event.code === 'KeyW'))
-            {
-                window.IncrementCounter();
-            }
-        }
-    }
-      );
-
-
-
-
-    stop_regex = new RegExp(/stop\(a\){/)
-    catchError(stop_regex, code)
-    save_stats_code = `stop\(a\){saveStatistics();`
-    
-
-    code = code.assertReplace(stop_regex, save_stats_code);
-
-    // v12: let Ni=ucF(this.Ca,this.Sb(null,5));
-    // v13: (h=p6E(a.Ca,a.Vb(null,5)))&&(...)
-    const wall_spawn_let = /(?:let|const|var) ([a-zA-Z0-9_$]{1,8})=\n?[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},this\.[a-zA-Z0-9_$]{1,8}\(null,5\)\);/
-    const wall_spawn_assign = /\(([a-zA-Z0-9_$]{1,8})=[a-zA-Z0-9_$]{1,8}\((?:this|a)\.[a-zA-Z0-9_$]{1,8},(?:this|a)\.[a-zA-Z0-9_$]{1,8}\(null,5\)\)\)/
-
-    const wall_let_match = code.match(wall_spawn_let)
-    if (wall_let_match) {
-        catchError(wall_spawn_let, code)
-        const wall_pos = wall_let_match[1]
-        const wall_counter_code = `${wall_let_match[0]}
-    if(${wall_pos}){stats.walls.game++;
-    window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
-    updateCounterDisplay();}
-    `
-        if (window.NepDebug) {
-            console.log("Wall thing: " + wall_pos)
-            console.log("Wall thing 2: " + wall_counter_code)
-        }
-        code = code.assertReplace(wall_spawn_let, wall_counter_code)
-    } else {
-        catchError(wall_spawn_assign, code)
-        const wall_assign_match = code.match(wall_spawn_assign)
-        const wall_pos = wall_assign_match[1]
-        const inner = wall_assign_match[0].slice(1, -1)
-        code = code.assertReplace(
-            wall_spawn_assign,
-            `(${inner},${wall_pos}&&(stats.walls.game++,window.wallCoords.push([${wall_pos}.x,${wall_pos}.y]),updateCounterDisplay()),${wall_pos})`
-        )
-    }
-    
-
-    window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
-        if(window.timeKeeper.getCurrentSetting("size") != 1)
-            return false;
-
-        // Initialize an array of 90 tiles, all initialized to '1' (empty)
-        let board = Array(90).fill('1');
-
-        // Set '2' (wall) for each coordinate in the list
-        coordinates.forEach(coord => {
-            let [x, y] = coord;
-            let index = y * 10 + x; // Calculate the index in the 1D array
-            board[index] = '2'; // Set '2' at the calculated index
-        });
-
-        // Join the array into a single string of 90 characters
-        return board.join('');
-    }
-
-    let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
-
-    death_wall_icon.addEventListener("click", function () {
-        pattern_string = window.coordinatesToBoardString(window.wallCoords)
-        if(pattern_string){
-            navigator.clipboard.writeText("pattern " + pattern_string);
-        }
-    });
-    
-
-    return code;
-}
 window.TimeKeeper = {};
 
 window.TimeKeeper.make = function () {
@@ -1789,10 +924,19 @@ window.TimeKeeper.make = function () {
     };
 
     window.timeKeeper.gotApple = function (time, score) {
-        stats.apples.session++;
-        stats.apples.lifetime++;
-        updateCounterDisplay();
-        if (window.pudding_settings && window.pudding_settings.randomizeThemeApple) {
+        if (typeof stats !== "undefined" && stats.apples) {
+            stats.apples.session++;
+            stats.apples.lifetime++;
+            if (typeof updateCounterDisplay === "function") {
+                updateCounterDisplay();
+            }
+        }
+        if (
+            window.pudding_settings &&
+            window.pudding_settings.randomizeThemeApple &&
+            typeof window.setTheme === "function" &&
+            typeof window.getRandomThemeName === "function"
+        ) {
             window.setTheme(window.getRandomThemeName());
         }
         if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
@@ -3679,7 +2823,8 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
-        document.getElementById('AlwaysOnTimeKeeper').checked = false;
+        const speedInfoToggle = document.getElementById("AlwaysOnTimeKeeper");
+        if (speedInfoToggle) speedInfoToggle.checked = false;
     }
 
     window.SpeedInfoSetup = function () {
@@ -3742,6 +2887,14 @@ window.SpeedInfo.make = function () {
         </div>
         </div>
 
+        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:6px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
+        <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
+        <label class="form-check-label" for="TopBarIcons" style="${siLabel}">Top Bar Icons</label>
+        </div>
+        <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button>
+        </div>
+
         <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
 
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
@@ -3750,6 +2903,11 @@ window.SpeedInfo.make = function () {
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
         updateTrackingSectionVisibility();
+
+        if (window.SpeedrunMod) {
+            const speedrunControls = document.getElementById("speedrun-controls-section");
+            if (speedrunControls) speedrunControls.style.display = "block";
+        }
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
         speedinfoCloseElements.addEventListener('click', window.SpeedInfoHide);
@@ -4093,6 +3251,18 @@ window.TopBar.make = function () {
 
   window.toggle_topbar_icons = function () {
     window.pudding_settings.TopBar = !window.pudding_settings.TopBar;
+    if (typeof window.saveSettings === "function") {
+      window.saveSettings();
+    }
+    if (typeof window.apply_topbar_icons === "function") {
+      window.apply_topbar_icons();
+    }
+  }
+
+  const topbarCheckbox = document.getElementById("TopBarIcons");
+  if (topbarCheckbox && !document.getElementById("settings-popup-pudding")) {
+    topbarCheckbox.addEventListener("change", window.toggle_topbar_icons);
+    topbarCheckbox.checked = !!window.pudding_settings.TopBar;
   }
 
 }
@@ -4101,6 +3271,63 @@ window.TopBar.alterCode = function (code) {
 
   window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
   window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
+  const appleRoot = document.querySelector('#apple');
+  window.apple_img_arr = appleRoot ? Array.from(appleRoot.children).map(el => el.src) : [];
+
+  window.getSelectorRowIndex = function (selectorId) {
+    const elementList = document.getElementById(selectorId);
+    if (!elementList || !elementList.children.length) return 0;
+    let number = 0;
+    const classNames = [];
+    let notUnique = "";
+    for (const element of elementList.children) {
+      if (classNames.indexOf(element.className) === -1) {
+        classNames.push(element.className);
+      } else {
+        notUnique = element.className;
+        break;
+      }
+    }
+    for (const element of elementList.children) {
+      if (element.className !== notUnique) return number;
+      number++;
+    }
+    return 0;
+  };
+
+  window.apply_topbar_icons = function () {
+    if (typeof window.control_mute_img !== "function") return;
+    if (!window.speed_img_arr || !window.count_img_arr) return;
+
+    const daily = !!window.daily_challenge;
+    const topBar = !!(window.pudding_settings && window.pudding_settings.TopBar) && !daily;
+
+    let speedIdx = 0;
+    let countIdx = 0;
+    if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
+      try {
+        speedIdx = window.timeKeeper.getCurrentSetting("speed");
+        countIdx = window.timeKeeper.getCurrentSetting("count");
+      } catch (e) { /* settings refs may be unavailable early */ }
+    }
+
+    const speedSrc = window.speed_img_arr[speedIdx] || window.speed_img_arr[0];
+    window.control_mute_img(topBar, speedSrc);
+
+    if (!window.fruit_jsname) return;
+    const fruitImg = document.querySelector('[jsname="' + window.fruit_jsname + '"]');
+    if (!fruitImg) return;
+
+    if (topBar) {
+      fruitImg.src = window.count_img_arr[countIdx] || window.count_img_arr[0];
+      return;
+    }
+
+    if (window.apple_img_arr && window.apple_img_arr.length) {
+      const appleIdx = window.getSelectorRowIndex("apple");
+      fruitImg.src = window.apple_img_arr[appleIdx] || window.apple_img_arr[0];
+    }
+  };
 
   count_regex = new RegExp(/case "count"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   speed_regex = new RegExp(/case "speed"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
@@ -4126,6 +3353,7 @@ window.TopBar.alterCode = function (code) {
   //code = code.assertReplace(speed_regex, set_speed_code);
 
   fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
+  window.fruit_jsname = fruit_jsname;
   fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
 
   window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
@@ -4172,648 +3400,57 @@ window.TopBar.alterCode = function (code) {
   eval(count_var + `=0`)
   eval(size_var + `=0`)
 
+  window.apply_topbar_icons();
+
   return code;
 }
-window.BootstrapMenuSpeedrun = {};
+window.ResetKey = {}
 
-window.BootstrapMenuSpeedrun.make = function () {
+window.ResetKey.make = function (){
+  keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
 
-    window.bootstrapVisible = false;
+  // Code for reset key
+  let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+  function setupKeybindPicker(buttonId, keybindType) {
+      const button = document.getElementById(buttonId);
+      if (!button) return;
+      if(!keybinds[keybindType]){
+          keybinds[keybindType] = "Shift";
+      }
+      button.textContent = `Reset Key: ${keybinds[keybindType]}`;
 
-    window.BootstrapShow = function () {
-        const settingsBox = document.getElementById('settings-popup-pudding');
-        settingsBox.style.display = 'block';
-        settingsBox.style.visibility = 'visible';
-        window.bootstrapVisible = true;
+      button.addEventListener("click", () => {
+          button.textContent = "Press any key...";
+          document.addEventListener("keydown", function handler(e) {
+          keybinds[keybindType] = e.key;
+          button.textContent = `Reset Key: ${e.key}`;
+          localStorage.setItem("keybinds", JSON.stringify(keybinds));
+          document.removeEventListener("keydown", handler);
+          });
+      });
+  }
 
-    }
-
-    window.BootstrapHide = function () {
-        const settingsBox = document.getElementById('settings-popup-pudding');
-        settingsBox.style.visibility = 'hidden';
-        if (typeof window.PortalPairsPanelHide === "function") {
-            window.PortalPairsPanelHide();
-        }
-        if (window.bootstrapVisible && typeof window.getAllSrc != "undefined") {
-            window.getAllSrc();
-        }
-        window.bootstrapVisible = false;
-
-    }
-
-    random_button_jsname = 'qycu7d' // Hardcoded because I'm lazy
-
-    // Get the button by its jsname attribute
-    window.random_button = document.querySelector(`[jsname="${random_button_jsname}"]`);
-    if (window.random_button) {
-        window._randomButtonOriginalHtml = window.random_button.innerHTML;
-        window._randomButtonOriginalColor = window.random_button.style.color || "";
-    }
-
-    window.applyRandomButtonState = function (disabled) {
-        const btn = window.random_button;
-        if (!btn) return;
-        if (disabled) {
-            btn.style.pointerEvents = "none";
-            btn.textContent = "Disabled";
-            btn.style.color = "grey";
-        } else {
-            btn.style.pointerEvents = "auto";
-            if (window._randomButtonOriginalHtml != null) {
-                btn.innerHTML = window._randomButtonOriginalHtml;
-            } else {
-                btn.textContent = "Shuffle";
-            }
-            btn.style.color = window._randomButtonOriginalColor || "";
-        }
-    };
-
-    // Disable the button
-    window.ToggleRandom = function () {
-        window.pudding_settings.DisableRandom = !window.pudding_settings.DisableRandom;
-        window.applyRandomButtonState(window.pudding_settings.DisableRandom);
-    }
-
-    window.BootstrapSetup = function () {
-
-        const a = new Image();
-        a.src = getStatIconImageSrc();
-        a.id = 'stat-icon';
-        a.width = a.height = 25;
-        a.style = 'position:relative;left:200px;top:70px;';
-        window.divList = document.createElement('div');
-        divList.class = 'counter-num'
-        divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
-        divList.id = 'counter-num'
-
-        document.getElementsByClassName('sEOCsb')[0].appendChild(a);
-        document.getElementsByClassName('sEOCsb')[0].appendChild(divList);
-
-        const css_stripped = window.NepDebug
-            ? "http://127.0.0.1:5500/bootstrap-stripped.css"
-            : 'https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakePudding/main/bootstrap-stripped.css';
-
-        const xhr = new XMLHttpRequest();
-
-        xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                const cssText = xhr.responseText;
-                window.bootstrap_css = cssText;
-
-                const styleElement = document.getElementsByTagName('style')[0];
-                if (styleElement) {
-                    styleElement.innerHTML = styleElement.innerHTML + cssText;
-                }
-
-                let styleElnew = document.getElementById('custom-style');
-                if (!styleElnew) {
-                    styleElnew = document.createElement('style');
-                    styleElnew.id = 'custom-style';
-                    document.head.appendChild(styleElnew);
-                    styleElnew.innerHTML = cssText;
-                }
-            } else {
-                console.error('Failed to load Bootstrap CSS:', xhr.status, xhr.statusText);
-            }
-        };
-
-        xhr.onerror = function () {
-            console.error('Network error while loading Bootstrap CSS');
-        };
-
-        xhr.ontimeout = function () {
-            console.error('Timeout while loading Bootstrap CSS');
-        };
-
-        xhr.timeout = 10000;
-        xhr.open('GET', css_stripped, true);
-        xhr.send();
-
-        const settingsBox = document.createElement('div');
-        settingsBox.style = window.puddingSidebarStyle;
-        settingsBox.style.display = 'none';
-        settingsBox.id = 'settings-popup-pudding';
-        settingsBox.innerHTML = `
-
-        <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-
-        <span style="color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Speedrun Mod Settings</span>
-
-    <select style="margin-top:3px;margin-bottom:3px;margin-left: auto; margin-right: auto;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center; align:center;" id="stat-chooser" class="form-control">
-        <option value="inputGame">Count game inputs</option>
-        <option value="inputSession">Count session inputs</option>
-        <option value="inputLifetime">Count lifetime inputs</option>
-        <option value="playsSession">Count session resets</option>
-        <option value="playsLifetime">Count lifetime resets</option>
-        <option value="applesSession">Count fruit session</option>
-        <option value="applesLifetime">Count fruit lifetime</option>
-        <option value="wallsGame">Count walls</option>
-        <option value="hideCount">Hide counter</option>
-    </select>
-
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat</button>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset stats</button><br>
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
-    <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
-    <label class="form-check-label" for="DistinctSokoGoals" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Distinct Soko Goals</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
-    <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Speed Info</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
-    <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
-    <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
-    </div>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
-
-<select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
-  <option value="0">Default Rainbow</option>
-</select>
-
-  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
-
-  <br>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeftBtn">Scroll Left</button><br>
-
-  `;
-
-  document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
-
-        ScrollLeftBtn = document.getElementById("ScrollLeftBtn");
-        ScrollLeftBtn.style.display = 'none';
-
-        skull_checkbox = document.getElementById("SkullPoisonFruit");
-        skull_checkbox.checked = window.pudding_settings.Skull;
-        skull_checkbox.addEventListener("change", toggle_skull_func);
-
-        soko_checkbox = document.getElementById("DistinctSokoGoals");
-        soko_checkbox.checked = window.pudding_settings.SokoGoals;
-        soko_checkbox.addEventListener("change", toggle_soko_goal);
-
-        topbar_checkbox = document.getElementById("TopBarIcons");
-        topbar_checkbox.addEventListener("change", window.toggle_topbar_icons);
-        topbar_checkbox.checked = window.pudding_settings.TopBar;
-
-        speedinfo_checkbox = document.getElementById("AlwaysOnTimeKeeper");
-        speedinfo_checkbox.addEventListener("change", window.ToggleSpeedInfo);
-        speedinfo_checkbox.checked = window.pudding_settings.SpeedInfo;
-
-        randombtn_checkbox = document.getElementById("DisableRandom");
-        randombtn_checkbox.addEventListener("change", window.ToggleRandom);
-        randombtn_checkbox.checked = window.pudding_settings.DisableRandom;
-        window.applyRandomButtonState(window.pudding_settings.DisableRandom);
-
-        const saveGameSettingsCheckbox = document.getElementById("SaveGameSettings");
-        if (typeof window.pudding_settings.SaveGameSettings !== "boolean") {
-            window.pudding_settings.SaveGameSettings = true;
-        }
-        saveGameSettingsCheckbox.checked = !!window.pudding_settings.SaveGameSettings;
-        saveGameSettingsCheckbox.addEventListener("change", function () {
-            window.pudding_settings.SaveGameSettings = !!saveGameSettingsCheckbox.checked;
-            if (typeof window.saveSettings === "function") window.saveSettings();
-        });
-
-        if(window.isSnakeMobileVersion){
-            speedinfo_checkbox.disabled = true;
-            speedinfo_checkbox.checked = false;
-            window.SpeedInfoHide();
-
-            ScrollLeftBtn.style.display = '';
-            ScrollLeftBtn.addEventListener("click", function () {
-                document.documentElement.scrollLeft -= 800;
-            });
-        }
-
-        let settingsToValues = {
-            inputs: {
-                game: 'inputGame',
-                session: 'inputSession',
-                lifetime: 'inputLifetime'
-            },
-            plays: {
-                session: 'playsSession',
-                lifetime: 'playsLifetime'
-            },
-            apples: {
-                session: 'applesSession',
-                lifetime: 'applesLifetime'
-            },
-            walls: {
-                game: 'wallsGame'
-            },
-            hide: {
-                count: 'hideCount'
-            }
-        }
-
-        let valuesToSettings = {
-            inputGame: { stat: 'inputs', duration: 'game' },
-            inputSession: { stat: 'inputs', duration: 'session' },
-            inputLifetime: { stat: 'inputs', duration: 'lifetime' },
-            playsSession: { stat: 'plays', duration: 'session' },
-            playsLifetime: { stat: 'plays', duration: 'lifetime' },
-            applesSession: { stat: 'apples', duration: 'session' },
-            applesLifetime: { stat: 'apples', duration: 'lifetime' },
-            wallsGame: { stat: 'walls', duration: 'game' },
-            hideCount: { stat: 'hide', duration: 'count' },
-        }
-
-        document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
-
-        const settingsCloseElements = document.getElementById('settings-close');
-        settingsCloseElements.addEventListener('click', window.BootstrapHide);
-
-        document.getElementById('stat-chooser').onchange = function () {
-            stats.statShown = valuesToSettings[this.value].stat;
-            stats.statDurationShown = valuesToSettings[this.value].duration;
-            document.getElementById('stat-icon').src = getStatIconImageSrc();
-            updateCounterDisplay();
-        }
-
-        document.getElementById('edit-stat').addEventListener('click', promptToEditStatCount);
-        document.getElementById('reset-stats').addEventListener('click', promptToResetStats);
-    }
-
-    window.BootstrapSetup();
-
-    window.ToggleBootstrap = function () {
-        if (!window.bootstrapVisible) {
-            // Show it
-            window.BootstrapShow();
-        }
-        else {
-            // Hide it
-            window.BootstrapHide();
-        }
-    }
-
-    //Listeners to hide/show settings box
-    const settingsButton = 'iyH4Cb';
-    document.querySelector("div[jsname^=\"" + settingsButton + "\"]").addEventListener("click", (e) => {
-        window.BootstrapShow();
-        if (window.isSnakeMobileVersion) {
-            window.enableScrollMobile();
-            if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
-                document.getElementById('delete-stuff-popup').hidden = false;
-            }
-        }
-    });
-
-    const backButton = 'p17HVe';
-    document.querySelector("[class^=\"" + backButton + "\"]").addEventListener("click", (e) => {
-        window.BootstrapHide();
-        if (window.isSnakeMobileVersion) {
-            if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
-                document.getElementById('delete-stuff-popup').hidden = true;
-            }
-        }
-    });
-
-    const playButton = 'NSjDf';
-    document.querySelector("[jsname^=\"" + playButton + "\"]").addEventListener("click", (e) => {
-        if (typeof window.saveCurrentGameSettings === "function") {
-            window.saveCurrentGameSettings();
-        }
-        window.BootstrapHide();
-        if (window.isSnakeMobileVersion) {
-            if (localStorage.getItem('snakeChosenMod') === "VisibilityMod") {
-                document.getElementById('delete-stuff-popup').hidden = true;
-            }
-        }
-    });
-
-
-    // Function to enable horizontal scroll
-    window.enableScrollMobile = function () {
-        // Enable scroll by setting overflow to auto
-        document.body.style.overflowX = 'auto';
-        document.documentElement.scrollLeft = document.documentElement.scrollWidth;
-    }
-
+  // Apply to each bind
+  setupKeybindPicker("ResetKeybind", "resetKey");
 }
 
-window.BootstrapMenuSpeedrun.alterCode = function (code) {
-    if(window.pudding_settings.SpeedInfo)
-    {
-        window.SpeedInfoShow();
-    }
-    setTimeout(function () {
-        if (typeof window.applySavedGameSettingsOnce === "function") {
-            window.applySavedGameSettingsOnce();
+window.ResetKey.alterCode = function(code){
+  document.addEventListener('keydown', function(e){
+    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    let resetButton = document.getElementById('ResetKeybind');
+    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
+    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
+        if(e.key === keybinds["resetKey"]){
+            const keydownEvent = new KeyboardEvent('keydown', {
+                keyCode: 27
+            });
+            document.dispatchEvent(keydownEvent);
+            document.querySelector('[jsname="NSjDf"]').click();
         }
-    }, 0);
-    return code;
+    }
+  });
+  return code
 }
-window.ResetKeySpeedrun = {};
-
-window.ResetKeySpeedrun.make = function () {
-    window._speedrunKeybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
-    if (!window._speedrunKeybinds.resetKey) {
-        window._speedrunKeybinds.resetKey = "Shift";
-    }
-
-    const button = document.getElementById("ResetKeybind");
-    window._speedrunResetKeyButton = button;
-    if (button) {
-        button.textContent = "Reset Key: " + window._speedrunKeybinds.resetKey;
-        button.addEventListener("click", function () {
-            button.textContent = "Press any key...";
-            document.addEventListener("keydown", function handler(e) {
-                window._speedrunKeybinds.resetKey = e.key;
-                button.textContent = "Reset Key: " + e.key;
-                localStorage.setItem("keybinds", JSON.stringify(window._speedrunKeybinds));
-                document.removeEventListener("keydown", handler);
-            });
-        });
-    }
-};
-
-window.ResetKeySpeedrun.alterCode = function (code) {
-    document.addEventListener("keydown", function (e) {
-        if (e.repeat) return;
-        const keybinds = window._speedrunKeybinds || {};
-        if (e.key !== keybinds.resetKey) return;
-
-        const resetButton = window._speedrunResetKeyButton || document.getElementById("ResetKeybind");
-        window._speedrunResetKeyButton = resetButton;
-        if (resetButton && resetButton.textContent === "Press any key...") return;
-        if (window.timeKeeper && window.timeKeeper.dialogActive) return;
-        if (document.getElementById("edit-box")) return;
-
-        document.dispatchEvent(new KeyboardEvent("keydown", { keyCode: 27 }));
-        const play = document.querySelector('[jsname="NSjDf"]');
-        if (play) play.click();
-    });
-    return code;
-};
-window.SpeedrunPerf = {};
-
-window.SpeedrunPerf.make = function () {
-    function inRun() {
-        const tk = window.timeKeeper;
-        return !!(tk && (tk.playing || tk.runStarted) && !tk._deathHandled);
-    }
-
-    function allowFullSpeedInfo() {
-        return !!window._speedrunAllowSpeedInfo || !inRun();
-    }
-
-    // --- Death latch: original death() is injected at the start of every tick ---
-    if (window.timeKeeper && typeof window.timeKeeper.death === "function") {
-        const origDeath = window.timeKeeper.death;
-        window.timeKeeper.death = function (time, score) {
-            if (window.timeKeeper._deathHandled) return;
-            window.timeKeeper._deathHandled = true;
-            origDeath(time, score);
-            if (typeof window.timeKeeper.flushStorage === "function") {
-                window.timeKeeper.flushStorage();
-            }
-        };
-    }
-
-    if (window.timeKeeper && typeof window.timeKeeper.start === "function") {
-        const origStart = window.timeKeeper.start;
-        window.timeKeeper.start = function () {
-            window.timeKeeper._deathHandled = false;
-            return origStart.apply(this, arguments);
-        };
-    }
-
-    if (window.timeKeeper && typeof window.timeKeeper.addAttempt === "function") {
-        const origAddAttempt = window.timeKeeper.addAttempt;
-        window.timeKeeper.addAttempt = function () {
-            const result = origAddAttempt.apply(this, arguments);
-            window.timeKeeper._deathHandled = false;
-            return result;
-        };
-    }
-
-    // --- gotApple: freeze context first, skip Dragon Fruit, cheap counter ---
-    if (window.timeKeeper && typeof window.timeKeeper.gotApple === "function") {
-        const origCounter = window.updateCounterDisplay;
-        window.timeKeeper.gotApple = function (time, score) {
-            window.timeKeeper.ensurePlaying();
-            if (typeof stats !== "undefined") {
-                stats.apples.session++;
-                stats.apples.lifetime++;
-                if (stats.statShown === "apples" && typeof origCounter === "function") {
-                    origCounter();
-                }
-            }
-            if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
-
-            window.timeKeeper.lastAppleDate = new Date();
-            window.timeKeeper.lastAppleTime = time;
-
-            if (score == 25 || score == 50 || score == 100) {
-                window.timeKeeper.savePB(time, score);
-            }
-            window.timeKeeper.updateHighscoreLive(time, score);
-        };
-    }
-
-    if (window.timeKeeper && typeof window.timeKeeper.gotAll === "function") {
-        const origGotAll = window.timeKeeper.gotAll;
-        window.timeKeeper.gotAll = function (time, score) {
-            window._speedrunAllowSpeedInfo = true;
-            try {
-                return origGotAll(time, score);
-            } finally {
-                window._speedrunAllowSpeedInfo = false;
-            }
-        };
-    }
-
-    // --- Speed Info: skip if hidden; no gold/WR work mid-run ---
-    function cheapHsPaint() {
-        try {
-            if (!window.pudding_settings || !window.pudding_settings.SpeedInfo) return;
-            const el = document.getElementById("H");
-            if (!el || !window.timeKeeper) return;
-            const storage = window.timeKeeper.getStorage();
-            const ctx = window.timeKeeper.getSaveContext();
-            const rec = storage[window.timeKeeper.buildKey("H", ctx)];
-            if (rec && rec.high != null) {
-                el.textContent = "Highscore: " + rec.high + " Apples";
-            }
-        } catch (e) {}
-    }
-
-    if (typeof window.SpeedInfoUpdate === "function") {
-        const origSpeedInfoUpdate = window.SpeedInfoUpdate;
-        let debounceTimer = null;
-        let debouncePromise = null;
-        window.SpeedInfoUpdate = function () {
-            if (window.pudding_settings && window.pudding_settings.SpeedInfo === false) {
-                return Promise.resolve();
-            }
-            if (!allowFullSpeedInfo()) {
-                cheapHsPaint();
-                return Promise.resolve();
-            }
-            if (debounceTimer) return debouncePromise || Promise.resolve();
-            debouncePromise = new Promise(function (resolve, reject) {
-                debounceTimer = setTimeout(function () {
-                    debounceTimer = null;
-                    origSpeedInfoUpdate()
-                        .then(resolve, reject)
-                        .finally(function () {
-                            debouncePromise = null;
-                        });
-                }, 32);
-            });
-            return debouncePromise;
-        };
-    }
-
-    if (typeof window.getAllSrc === "function") {
-        const origGetAllSrc = window.getAllSrc;
-        window.getAllSrc = function () {
-            if (inRun()) return Promise.resolve();
-            return origGetAllSrc.apply(this, arguments);
-        };
-        // Shared SpeedInfo kicks getAllSrc on the first gameplay reset; prefetch idle instead
-        window.first_time_call = false;
-    }
-
-    // --- saveSettings: skip while a run is in progress (reset injects this first) ---
-    if (typeof window.saveSettings === "function") {
-        const origSaveSettings = window.saveSettings;
-        window.saveSettings = function () {
-            if (window.timeKeeper && window.timeKeeper.runStarted) return;
-            return origSaveSettings.apply(this, arguments);
-        };
-    }
-
-    // --- Blender: cache random.png row; never scan every img ---
-    if (window.ModeRegistry && typeof window.ModeRegistry._blenderSelectedIds === "function") {
-        window.ModeRegistry._blenderSelectedIds = function (modes) {
-            if (!window._speedrunBlenderRow) {
-                const img =
-                    document.querySelector('#trophy img[src*="random.png"]') ||
-                    document.querySelector('img[src*="random.png"]');
-                if (img) {
-                    try {
-                        window._speedrunBlenderRow = img.parentElement.parentElement.parentElement;
-                    } catch (e) {
-                        return [];
-                    }
-                }
-            }
-            const row = window._speedrunBlenderRow;
-            if (!row) return [];
-            try {
-                const ids = [];
-                let counter = -1;
-                const trophyModes = modes.filter(function (m) {
-                    return m.id !== "classic" && m.id !== "blender";
-                });
-                for (const child of row.children) {
-                    counter++;
-                    if (counter === 0) continue;
-                    const selected =
-                        child.firstElementChild &&
-                        child.firstElementChild.classList.length > 1 &&
-                        child.firstElementChild.children.length > 0;
-                    if (!selected) continue;
-                    const entry = trophyModes[counter - 1];
-                    if (entry) ids.push(entry.id);
-                }
-                return ids;
-            } catch (e) {
-                return [];
-            }
-        };
-    }
-
-    // --- setTheme: no eval ---
-    if (typeof window.setTheme === "function" && Array.isArray(window.themes)) {
-        window.setTheme = function (theme_name) {
-            const theme = window.themes.find(function (t) {
-                return t.name === theme_name;
-            });
-            if (!theme) return;
-
-            const colorByKey = {
-                sep_color: theme.sep_color,
-                topbar_color: theme.topbar_color,
-                buttons_color: theme.buttons_color,
-                bg_color: theme.bg_color,
-                bottom_color: theme.bottom_color,
-            };
-            const loops = [
-                { loop_on: window.ui_sep, attribute: "borderBottomColor", color: "sep_color" },
-                { loop_on: window.ui_topbar, attribute: "background", color: "topbar_color" },
-                { loop_on: window.ui_buttons, attribute: "background", color: "buttons_color" },
-                { loop_on: window.input_button, attribute: "background", color: "buttons_color" },
-                { loop_on: window.ui_background, attribute: "background", color: "bg_color" },
-                { loop_on: window.ui_bottom, attribute: "background", color: "bottom_color" },
-                { loop_on: window.boot_button, attribute: "backgroundColor", color: "buttons_color" },
-                { loop_on: window.boot_check, attribute: "backgroundColor", color: "buttons_color" },
-                { loop_on: window.boot_dropdown, attribute: "backgroundColor", color: "buttons_color" },
-            ];
-            for (let i = 0; i < loops.length; i++) {
-                const spec = loops[i];
-                if (!spec.loop_on) continue;
-                const value = colorByKey[spec.color];
-                for (let h = 0; h < spec.loop_on.length; h++) {
-                    const node = spec.loop_on[h];
-                    if (node && node.style) node.style[spec.attribute] = value;
-                }
-            }
-
-            const settingsBox = document.getElementById("settings-popup-pudding");
-            if (settingsBox) settingsBox.style.background = theme.real_top_bar;
-            const speedinfo = document.getElementById("speedinfo-popup-pudding");
-            if (speedinfo) speedinfo.style.background = theme.real_top_bar;
-            const splitPanel = document.getElementById("split-panel-pudding");
-            if (splitPanel) splitPanel.style.background = theme.real_top_bar;
-
-            window.real_topbar_color = theme.real_top_bar;
-            window.button_color = theme.buttons_color;
-
-            if (window.snake) {
-                if (theme_name !== "Globe") {
-                    window.snake.setCustomTheme(
-                        theme.light_tiles,
-                        theme.dark_tiles,
-                        theme.shadow,
-                        theme.border,
-                        theme.key_block_sign_color,
-                        theme.real_top_bar,
-                        theme.endscreen_background
-                    );
-                } else {
-                    window.snake.clearCustomTheme();
-                }
-            }
-        };
-    }
-};
-
-window.SpeedrunPerf.alterCode = function (code) {
-    // Wall spawn: only paint the counter when walls are the selected stat
-    code = code.replace(
-        /window\.wallCoords\.push\(\[([^\]]+)\]\);\s*updateCounterDisplay\(\);/,
-        'window.wallCoords.push([$1]);if(stats.statShown==="walls")updateCounterDisplay();'
-    );
-    return code;
-};
 ////////////////////////////////////////////////////////////////////
 //RUNCODEBEFORE
 ////////////////////////////////////////////////////////////////////
@@ -4874,19 +3511,42 @@ window.SpeedrunMod.runCodeBefore = function () {
     return false;
   };
 
+  window.loadSpeedrunSettings = function () {
+    let settings = null;
+    try {
+      const raw = localStorage.getItem("PuddingSettings");
+      if (raw) settings = JSON.parse(raw);
+    } catch (e) {
+      settings = null;
+    }
+    if (!settings || typeof settings !== "object") {
+      settings = {};
+    }
+    if (typeof settings.TopBar !== "boolean") settings.TopBar = true;
+    if (typeof settings.SpeedInfo !== "boolean") settings.SpeedInfo = false;
+    if (typeof settings.ShowWrHolders !== "boolean") settings.ShowWrHolders = true;
+    if (typeof settings.TrackedPlayerName !== "string") settings.TrackedPlayerName = "";
+    return settings;
+  };
+
+  window.pudding_settings = window.loadSpeedrunSettings();
+
+  window.saveSettings = function () {
+    const s = window.pudding_settings;
+    if (s && typeof s === "object") {
+      localStorage.setItem("PuddingSettings", JSON.stringify(s));
+    }
+  };
+
   window.Libraries = [
     "Core",
     "Theme",
+    "SpeedrunCss",
     "ModeRegistry",
-    "DistinctVisual",
-    "SettingsSaver",
-    "Counter",
     "TimeKeeper",
     "SpeedInfo",
     "TopBar",
-    "BootstrapMenuSpeedrun",
-    "ResetKeySpeedrun",
-    "SpeedrunPerf",
+    "ResetKey",
   ];
   console.log("Enabling Speedrun Mod");
 
@@ -4905,9 +3565,6 @@ window.SpeedrunMod.runCodeBefore = function () {
     }
   });
 
-  if (window.pudding_settings) {
-    window.pudding_settings.randomizeThemeApple = false;
-  }
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -4948,8 +3605,8 @@ window.SpeedrunMod.runCodeAfter = function () {
   let canvasNode = document.getElementsByClassName("jNB0Ic")[0];
   document.getElementsByClassName("EjCLSb")[0].insertBefore(modIndicator, canvasNode);
 
-  if (typeof window.applySavedGameSettingsOnce === "function") {
-    setTimeout(window.applySavedGameSettingsOnce, 0);
+  if (window.pudding_settings && window.pudding_settings.SpeedInfo && typeof window.SpeedInfoShow === "function") {
+    window.SpeedInfoShow();
   }
 
   const prefetchSrc = function () {

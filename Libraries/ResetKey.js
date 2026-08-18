@@ -7,6 +7,7 @@ window.ResetKey.make = function (){
   let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
   function setupKeybindPicker(buttonId, keybindType) {
       const button = document.getElementById(buttonId);
+      if (!button) return;
       if(!keybinds[keybindType]){
           keybinds[keybindType] = "Shift";
       }

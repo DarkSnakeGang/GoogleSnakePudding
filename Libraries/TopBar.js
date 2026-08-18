@@ -14,6 +14,18 @@ window.TopBar.make = function () {
 
   window.toggle_topbar_icons = function () {
     window.pudding_settings.TopBar = !window.pudding_settings.TopBar;
+    if (typeof window.saveSettings === "function") {
+      window.saveSettings();
+    }
+    if (typeof window.apply_topbar_icons === "function") {
+      window.apply_topbar_icons();
+    }
+  }
+
+  const topbarCheckbox = document.getElementById("TopBarIcons");
+  if (topbarCheckbox && !document.getElementById("settings-popup-pudding")) {
+    topbarCheckbox.addEventListener("change", window.toggle_topbar_icons);
+    topbarCheckbox.checked = !!window.pudding_settings.TopBar;
   }
 
 }
@@ -22,6 +34,63 @@ window.TopBar.alterCode = function (code) {
 
   window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
   window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
+  const appleRoot = document.querySelector('#apple');
+  window.apple_img_arr = appleRoot ? Array.from(appleRoot.children).map(el => el.src) : [];
+
+  window.getSelectorRowIndex = function (selectorId) {
+    const elementList = document.getElementById(selectorId);
+    if (!elementList || !elementList.children.length) return 0;
+    let number = 0;
+    const classNames = [];
+    let notUnique = "";
+    for (const element of elementList.children) {
+      if (classNames.indexOf(element.className) === -1) {
+        classNames.push(element.className);
+      } else {
+        notUnique = element.className;
+        break;
+      }
+    }
+    for (const element of elementList.children) {
+      if (element.className !== notUnique) return number;
+      number++;
+    }
+    return 0;
+  };
+
+  window.apply_topbar_icons = function () {
+    if (typeof window.control_mute_img !== "function") return;
+    if (!window.speed_img_arr || !window.count_img_arr) return;
+
+    const daily = !!window.daily_challenge;
+    const topBar = !!(window.pudding_settings && window.pudding_settings.TopBar) && !daily;
+
+    let speedIdx = 0;
+    let countIdx = 0;
+    if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
+      try {
+        speedIdx = window.timeKeeper.getCurrentSetting("speed");
+        countIdx = window.timeKeeper.getCurrentSetting("count");
+      } catch (e) { /* settings refs may be unavailable early */ }
+    }
+
+    const speedSrc = window.speed_img_arr[speedIdx] || window.speed_img_arr[0];
+    window.control_mute_img(topBar, speedSrc);
+
+    if (!window.fruit_jsname) return;
+    const fruitImg = document.querySelector('[jsname="' + window.fruit_jsname + '"]');
+    if (!fruitImg) return;
+
+    if (topBar) {
+      fruitImg.src = window.count_img_arr[countIdx] || window.count_img_arr[0];
+      return;
+    }
+
+    if (window.apple_img_arr && window.apple_img_arr.length) {
+      const appleIdx = window.getSelectorRowIndex("apple");
+      fruitImg.src = window.apple_img_arr[appleIdx] || window.apple_img_arr[0];
+    }
+  };
 
   count_regex = new RegExp(/case "count"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   speed_regex = new RegExp(/case "speed"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
@@ -47,6 +116,7 @@ window.TopBar.alterCode = function (code) {
   //code = code.assertReplace(speed_regex, set_speed_code);
 
   fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
+  window.fruit_jsname = fruit_jsname;
   fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
 
   window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
@@ -92,6 +162,8 @@ window.TopBar.alterCode = function (code) {
   eval(speed_var + `=0`)
   eval(count_var + `=0`)
   eval(size_var + `=0`)
+
+  window.apply_topbar_icons();
 
   return code;
 }

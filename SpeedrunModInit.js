@@ -60,19 +60,42 @@ window.SpeedrunMod.runCodeBefore = function () {
     return false;
   };
 
+  window.loadSpeedrunSettings = function () {
+    let settings = null;
+    try {
+      const raw = localStorage.getItem("PuddingSettings");
+      if (raw) settings = JSON.parse(raw);
+    } catch (e) {
+      settings = null;
+    }
+    if (!settings || typeof settings !== "object") {
+      settings = {};
+    }
+    if (typeof settings.TopBar !== "boolean") settings.TopBar = true;
+    if (typeof settings.SpeedInfo !== "boolean") settings.SpeedInfo = false;
+    if (typeof settings.ShowWrHolders !== "boolean") settings.ShowWrHolders = true;
+    if (typeof settings.TrackedPlayerName !== "string") settings.TrackedPlayerName = "";
+    return settings;
+  };
+
+  window.pudding_settings = window.loadSpeedrunSettings();
+
+  window.saveSettings = function () {
+    const s = window.pudding_settings;
+    if (s && typeof s === "object") {
+      localStorage.setItem("PuddingSettings", JSON.stringify(s));
+    }
+  };
+
   window.Libraries = [
     "Core",
     "Theme",
+    "SpeedrunCss",
     "ModeRegistry",
-    "DistinctVisual",
-    "SettingsSaver",
-    "Counter",
     "TimeKeeper",
     "SpeedInfo",
     "TopBar",
-    "BootstrapMenuSpeedrun",
-    "ResetKeySpeedrun",
-    "SpeedrunPerf",
+    "ResetKey",
   ];
   console.log("Enabling Speedrun Mod");
 
@@ -91,9 +114,6 @@ window.SpeedrunMod.runCodeBefore = function () {
     }
   });
 
-  if (window.pudding_settings) {
-    window.pudding_settings.randomizeThemeApple = false;
-  }
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -134,8 +154,8 @@ window.SpeedrunMod.runCodeAfter = function () {
   let canvasNode = document.getElementsByClassName("jNB0Ic")[0];
   document.getElementsByClassName("EjCLSb")[0].insertBefore(modIndicator, canvasNode);
 
-  if (typeof window.applySavedGameSettingsOnce === "function") {
-    setTimeout(window.applySavedGameSettingsOnce, 0);
+  if (window.pudding_settings && window.pudding_settings.SpeedInfo && typeof window.SpeedInfoShow === "function") {
+    window.SpeedInfoShow();
   }
 
   const prefetchSrc = function () {
