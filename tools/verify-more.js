@@ -234,7 +234,13 @@ function installBrowserStubs() {
       this.width = 0;
       this.height = 0;
       this.class = "";
-      this.classList = { add() {}, remove() {} };
+      this.classList = {
+        add() {},
+        remove() {},
+        contains() {
+          return false;
+        },
+      };
     }
   };
   global.IntersectionObserver = class {

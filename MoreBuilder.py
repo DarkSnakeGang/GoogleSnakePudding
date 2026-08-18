@@ -1,14 +1,13 @@
 import urllib.request
+import os
 
-url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/main/modloadercode.js"  # Replace with the actual URL of the file you want to download
-destination_file = "MoreMenuMod.js"  # Replace with the desired local file name
+if not os.path.exists("MoreMenuMod.js"):
+    url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/main/modloadercode.js"
+    urllib.request.urlretrieve(url, "MoreMenuMod.js")
 
-urllib.request.urlretrieve(url, destination_file)
-
-url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeDeleteStuffMod/main/VisibilityInit.js"  # Replace with the actual URL of the file you want to download
-destination_file = "VisibilityMod.js"  # Replace with the desired local file name
-
-urllib.request.urlretrieve(url, destination_file)
+if not os.path.exists("VisibilityMod.js"):
+    url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeDeleteStuffMod/main/VisibilityInit.js"
+    urllib.request.urlretrieve(url, "VisibilityMod.js")
 
 mpm_file = open("MorePudding.js", "w", encoding='utf-8')
 mpm_combo = open("MorePuddingInit.js", encoding='utf-8')

@@ -8275,7 +8275,7 @@ window.moreMenu = {
       /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\(\n?d\n?\.\n?isMobile\n?\?\n?175\n?:\n?135\n?\)\n?\*\n?a\n?;/
     )[0]
     const selectedSpeed = code.match(
-      /switch\n?\(\n?d\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case(\n? \n?|\n)1\n?:\n?a\n?=\n?\.66/
+      /switch\n?\(\n?d\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case(\n? \n?|\n)?1\n?:\n?a\n?=\n?\.66/
     )[0].match(
       /d\n?\.\n?[a-zA-Z0-9_$]{1,8}/
     )[0].replace('d', 'this.settings')
@@ -8285,18 +8285,12 @@ window.moreMenu = {
     )[0]
     const replacePoint = tickFunction.match(
       /\.5\n?:\n?1\.25\n?\);\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\+\+;/
-    )[0]
+    )
   
     window.bunnyTurtleSpeed = 1.33
     window.lightningSnailSpeed = 1.85
-  
-    code = code.assertReplace(tickFunction,
-      tickFunction.replaceAll(
-        '&&', ' && '
-      ).replace(
-        replacePoint,
-        replacePoint
-         + `
+
+    const speedMultiplierBlock = `
           window.bunnyTurtleSpeed = Math.random() < .5 ? .66 : 1.33
           window.lightningSnailSpeed = Math.random() < .5 ? .45 : 1.85
           let speedMultiplier
@@ -8344,19 +8338,47 @@ window.moreMenu = {
               speedMultiplier = 1
               break
           }
-          ${tileLengthSetLine.replace(/\*\n?a/, '* speedMultiplier').replace('d.isMobile', 'this.settings.isMobile')}
+          ${tileLengthSetLine.replace(/\*\n?a/, '* speedMultiplier').replace(/d\.isMobile/g, 'this.settings.isMobile')}
         `
+  
+    if (replacePoint) {
+      code = code.assertReplace(tickFunction,
+        tickFunction.replaceAll(
+          '&&', ' && '
+        ).replace(
+          replacePoint[0],
+          replacePoint[0] + speedMultiplierBlock
+        )
       )
-    )
+    } else {
+      const tickAnchor = tickFunction.match(
+        /\}else if\(!window\.timeKeeper\.runStarted\)\{window\.timeKeeper\.start\(\);\}/
+      )
+      if (!tickAnchor) {
+        throw new Error('More Menu: could not find tick speed injection point')
+      }
+      code = code.assertReplace(
+        tickFunction,
+        tickFunction.assertReplace(tickAnchor[0], tickAnchor[0] + speedMultiplierBlock)
+      )
+    }
   
     const resetFunction1 = code.match(
       /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
     )[0]
+
+    const speedSwitchRegex =
+      /a:switch\(d\.[a-zA-Z0-9_$]{1,8}\)\{case 1:a=\.66;break a;case 2:a=1\.33;break a;default:a=1\}/
+    const speedSwitchLegacyRegex =
+      /\{case 1:a=\.66[^}]*?1\}/
+    const resetSpeedField = resetFunction1.match(
+      /switch\(d\.([a-zA-Z0-9_$]{1,8})\)\{case 1:a=\.66/
+    )[1]
   
     code = code.assertReplace(resetFunction1,
       resetFunction1.assertReplace(
-        /{case 1:a=\.66[^}]*?1}/,
-        `{
+        speedSwitchRegex.test(resetFunction1) ? speedSwitchRegex : speedSwitchLegacyRegex,
+        `a:switch(d.${resetSpeedField}){
           case 1:
             a = .66
             break a
@@ -9484,13 +9506,13 @@ Same as replace, but throws an error if nothing is changed
     fruitRegex,
     deleteModDebug);
 
-  //Regular fruit vs poison fruit. `nla` marks the poisonous half of the fruit set in poison mode.
+  //Regular fruit vs poison fruit. `nla` was the v12 poison marker; `Oka` is the v13 one.
   funcWithFruit = assertReplace(funcWithFruit, fruitRegex,
-    '(window.visiFullPass || (b.nla ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
+    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
 
   //Mirrored copy (in twin/infinity layouts), using the same poison marker.
   funcWithFruit = assertReplace(funcWithFruit, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-\([$a-zA-Z0-9_]{0,6}\/2\),-\([$a-zA-Z0-9_]{0,6}\/2\),[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '(window.visiFullPass || (b.nla ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
+    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
 
   //For compatitibilty, also change this code for animatedSnakeColours
   /*
@@ -9512,9 +9534,9 @@ Same as replace, but throws an error if nothing is changed
     wallInsideRegex,
     deleteModDebug);
 
-  //for walls / locks / hotdog walls (same renderer; distinguished by k.ez and k.XNa)
+  //for walls / locks / hotdog walls (same renderer; v12 uses ez/XNa, v13 uses ty/yNa)
   funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '(k.ez?window.checkboxes.checkboxStatuses.hotdogWalls:(k.XNa!==void 0&&k.XNa>=0?window.checkboxes.checkboxStatuses.locks:window.checkboxes.checkboxStatuses.walls))&&$&');
+    '((k.ez||k.ty)?window.checkboxes.checkboxStatuses.hotdogWalls:(((k.XNa!==void 0&&k.XNa>=0)||(k.yNa!==void 0&&k.yNa>=0))?window.checkboxes.checkboxStatuses.locks:window.checkboxes.checkboxStatuses.walls))&&$&');
 
   //lock icon on wall
   funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
@@ -9611,18 +9633,19 @@ Same as replace, but throws an error if nothing is changed
   funcWithMiscRendering = assertReplace(funcWithMiscRendering, /[$a-zA-Z0-9_]{1,6}\.context\.fillRect\([$a-zA-Z0-9_]{1,6}\*[$a-zA-Z0-9_.]{1,24}-[$a-zA-Z0-9_]{1,6}\.x\+[$a-zA-Z0-9_]{1,6}\.x,[$a-zA-Z0-9_]{1,6}\*[$a-zA-Z0-9_.]{1,24}-[$a-zA-Z0-9_]{1,6}\.y\+[$a-zA-Z0-9_]{1,6}\.y,[$a-zA-Z0-9_.]{1,24},[$a-zA-Z0-9_.]{1,24}\)/,
     'window.checkboxes.checkboxStatuses.darkTiles && $&');
 
-  //Light mode: snake-head glow (TbF) vs apple glow (fruit list loop)
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /TbF\(/g,
-    'window.checkboxes.checkboxStatuses.lightSnake&&TbF(');
+  //Light mode: snake-head glow helper renamed between builds (TbF on v12, N5E-like on v13)
+  let lightSnakeCallRegex = /(?:TbF\(|[$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_]{1,6},[$a-zA-Z0-9_.]{1,24},[$a-zA-Z0-9_.]{1,24},Math\.max\(2,)/g;
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, lightSnakeCallRegex,
+    'window.checkboxes.checkboxStatuses.lightSnake&&$&');
 
   funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_]{1,6}\.wb\.wa\.ka\)\{)/,
     'if(window.checkboxes.checkboxStatuses.lightFruit)$1');
 
   //Inline active bridges/gates drawn in the compositor (not only via helper functions)
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /f7\(this\.settings,20\)/g,
-    'f7(this.settings,20)&&window.checkboxes.checkboxStatuses.bridges');
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /f7\(this\.settings,19\)/g,
-    'f7(this.settings,19)&&window.checkboxes.checkboxStatuses.gates');
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,20\)/g,
+    '$&&&window.checkboxes.checkboxStatuses.bridges');
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,19\)/g,
+    '$&&&window.checkboxes.checkboxStatuses.gates');
 
   //Snake, fruit, keys and boxes are drawn into the sprite layer, and the shadow is taken straight
   //off that layer's silhouette. When Shadow Included is off and something is hidden, duplicating
@@ -9632,10 +9655,10 @@ Same as replace, but throws an error if nothing is changed
   let shadowFnName = funcWithShadow_Origin.match(/^([$a-zA-Z0-9_]{1,6})=function/)[1];
   let sceneRegionRegex = new RegExp(
     '(this\\.[$a-zA-Z0-9_]{1,6}\\.render\\(a,b,[$a-zA-Z0-9_]{1,6}\\(this\\)\\);[\\s\\S]*?)' +
-    '(f7\\(this\\.settings,4\\)\\|\\|' + shadowFnName.replace(/\$/g, '\\$') + '\\(this\\);)');
+    '([ef]7\\(this\\.settings,4\\)\\|\\|' + shadowFnName.replace(/\$/g, '\\$') + '\\(this\\);)');
 
   funcWithMiscRendering = assertReplace(funcWithMiscRendering, sceneRegionRegex,
-    'window.visiBeginShadowPass(this,f7(this.settings,4));$1$2if(window.visiEndShadowPass(this)){$1}');
+    'window.visiBeginShadowPass(this,this.ka.canvas.width!==this.context.canvas.width||this.ka.canvas.height!==this.context.canvas.height);$1$2if(window.visiEndShadowPass(this)){$1}');
 
   //eval(funcWithMiscRendering);
 
@@ -9728,21 +9751,9 @@ if(window.NepDebug){
   //eval(funcWithPortals);
 
   //For flashing snake body when we eat an apple
-  let eatInsideRegex = /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){(?:var|let|const) [$a-zA-Z0-9_]{0,6}=[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6};[$a-zA-Z0-9_]{0,6}\|\|\([$a-zA-Z0-9_]{0,6}=!0/;
-
-  let funcWithEat_Origin = findFunctionInCode(code, /tick\(\)$/,
-    eatInsideRegex,
-    deleteModDebug);
-
-  let funcWithEat = findFunctionInCode(code, /tick\(\)$/,
-    eatInsideRegex,
-    deleteModDebug);
-
-  funcWithEat = assertReplace(funcWithEat, /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){/,
-    '$& window.checkboxes.checkboxStatuses.flashSnake && window.brieflyShowSnake();');
-
-  //funcWithEat = swapInMainClassPrototype(mainClass, funcWithEat);
-  //eval(funcWithEat);
+  let eatInsideRegex = /[a-z]\&&\([a-z]\.[$a-zA-Z0-9_]{0,6}=!1,[a-z]\.[$a-zA-Z0-9_]{0,6}=!0,[a-z]\.[$a-zA-Z0-9_]{0,6}=10\)/;
+  code = assertReplace(code, eatInsideRegex,
+    '$&;window.checkboxes.checkboxStatuses.flashSnake&&window.brieflyShowSnake()');
 
   //Mine radius: the dashed red circle plus its fading blast preview. Both are helper calls
   //shaped `helper(renderer, centre, offsetX, offsetY, radius)`, once for the board and once per
@@ -9779,7 +9790,7 @@ if(window.NepDebug){
     shieldsFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.shields)return;');
 
   //Gates (mode 19): BbF dashed rectangles
-  let gatesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_.]{1,20}\.Yfa\)/);
+  let gatesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_.]{1,20}\.(?:Yfa|pfa)\)/);
   if (!gatesFnMatch) {
     throw new Error('Visibility mod: could not find gate drawer (BbF)');
   }
@@ -9798,8 +9809,8 @@ if(window.NepDebug){
 
   //Border chrome CSS background-color (same palette index as the canvas border fill)
   code = assertReplaceAll(code,
-    /_\.on\(([$a-zA-Z0-9_.()]{1,40}),"background-color",([$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,20},[$a-zA-Z0-9_.]{1,20},3\))\)/g,
-    '($1&&window.visiBorderEls.push($1),window.visiBorderColor=$2,_.on($1,"background-color",window.checkboxes.checkboxStatuses.border?$2:"transparent"))'
+    /_\.(?:on|pn)\(([$a-zA-Z0-9_.()]{1,40}),"background-color",([$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,30},[$a-zA-Z0-9_.]{1,30},3\))\)/g,
+    '($1&&window.visiBorderEls.push($1),window.visiBorderColor=$2,_.pn($1,"background-color",window.checkboxes.checkboxStatuses.border?$2:"transparent"))'
   );
 
     // Mines
@@ -9869,7 +9880,6 @@ if(window.NepDebug){
   code = code.assertReplace(funcWithKeyRendering_Origin, funcWithKeyRendering)
   code = code.assertReplace(funcWithBodyLines_Origin, funcWithBodyLines)
   code = code.assertReplace(funcWithPortals_Origin, funcWithPortals)
-  code = code.assertReplace(funcWithEat_Origin, funcWithEat)
 
   // Disables statue break animation
   if (!window.catchError(/[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6},[a-z],new _\.[$a-zA-Z0-9_]{0,6}\([a-z],[a-z]\),[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g, code)) {
@@ -9939,7 +9949,7 @@ window.MorePudding.alterSnakeCode = function(code) {
 window.MorePudding.runCodeAfter = function() {
   //window.moreMenu.runCodeAfter();
   let modIndicator = document.createElement('div');
-  modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
+  modIndicator.style='position:absolute;font-family:Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
   modIndicator.textContent = 'More Pudding Mod';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
