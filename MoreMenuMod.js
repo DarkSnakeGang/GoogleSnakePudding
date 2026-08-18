@@ -504,18 +504,18 @@ window.moreMenu = {
         '}}',
         `}
           const appleCountDisplay = document.body.getElementsByClassName('UJhXPd wSwbef EWyEF')[0]
-  
-          // [...appleCountDisplay.children].forEach((e, i) => i > 1 && (appleCountDisplay.removeChild(appleCountDisplay.children[i])))
-          for(let i = 2; i < appleCountDisplay.children.length; i++) {
-            appleCountDisplay.removeChild(appleCountDisplay.children[i])
-          }
+          if (appleCountDisplay) {
+            while (appleCountDisplay.children.length > 2) {
+              appleCountDisplay.removeChild(appleCountDisplay.children[2])
+            }
 
-          if(${selectedAppleCount1} > 3) {
-            const __src = document.querySelector('#count').children[${selectedAppleCount1}].src
-            const __img = window.uiImage(__src)
-            __img.style.position = 'relative'
-            __img.style.left = '50px'
-            appleCountDisplay.appendChild(__img)
+            if(${selectedAppleCount1} > 3) {
+              const __src = document.querySelector('#count').children[${selectedAppleCount1}].src
+              const __img = window.uiImage(__src)
+              __img.style.position = 'relative'
+              __img.style.left = '50px'
+              appleCountDisplay.appendChild(__img)
+            }
           }
         } 
         `
