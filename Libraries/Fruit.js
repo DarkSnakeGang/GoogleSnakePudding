@@ -120,17 +120,41 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
     });
-    new_fruit.push({ // Cabbage
-        "Normal": 'https://i.postimg.cc/j59z8v1m/cabbage.png',
-        "Pixel": 'https://i.postimg.cc/FR1ygwT0/cabbage-px.png',
-        "Real": "https://i.postimg.cc/yd1GyLFv/cabbage-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
+    new_fruit.push({ // Boiled Egg
+        "Normal": 'https://i.postimg.cc/NMgtGCTG/boiled-egg-normal.png',
+        "Pixel": 'https://i.postimg.cc/hjSn4ZxK/boiled-egg-pixel.png',
+        "Real": "https://i.postimg.cc/XJVWN1FJ/boiled-egg-real.png",
+        "Poison_values": 'b,\'#e7dfa4\',\'#909090\',20',
     });
-    new_fruit.push({ // Heart
-        "Normal": 'https://i.postimg.cc/8PGLRXCb/heart.png',
-        "Pixel": 'https://i.postimg.cc/v8fW6wGB/pixel-heart.png',
-        "Real": "https://i.postimg.cc/3NXmMmtp/real-heart.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
+    new_fruit.push({ // Bacon
+        "Normal": 'https://i.postimg.cc/ZRTmYs3m/bacon-normal.png',
+        "Pixel": 'https://i.postimg.cc/C1F0MrDS/bacon-pixel.png',
+        "Real": "https://i.postimg.cc/XJVWN1FV/bacon-real.png",
+        "Poison_values": 'b,\'#9b441c\',\'#909090\',20',
+    });
+    new_fruit.push({ // White Onion
+        "Normal": 'https://i.postimg.cc/262D1dF5/white-onion-normal.png',
+        "Pixel": 'https://i.postimg.cc/qRjTNcXg/white-onion-pixel.png',
+        "Real": "https://i.postimg.cc/LXNpJkBJ/white-onion-real.png",
+        "Poison_values": 'b,\'#f5f0e6\',\'#909090\',20',
+    });
+    new_fruit.push({ // Purple Onion
+        "Normal": 'https://i.postimg.cc/j5sTq3N7/purple-onion-normal.png',
+        "Pixel": 'https://i.postimg.cc/j5ZbD6Qd/purple-onion-pixel.png',
+        "Real": "https://i.postimg.cc/nz0JXKYz/purple-onion-real.png",
+        "Poison_values": 'b,\'#7b3fa0\',\'#909090\',20',
+    });
+    new_fruit.push({ // Cooked Steak
+        "Normal": 'https://i.postimg.cc/C1F0MrDK/cooked-steak-normal.png',
+        "Pixel": 'https://i.postimg.cc/NMgtGCTF/cooked-steak-pixel.png',
+        "Real": "https://i.postimg.cc/FR9vFCcf/cooked-steak-real.png",
+        "Poison_values": 'b,\'#6d2e1c\',\'#909090\',20',
+    });
+    new_fruit.push({ // Cucumber
+        "Normal": 'https://i.postimg.cc/zBJND2WR/cucumber-normal.png',
+        "Pixel": 'https://i.postimg.cc/50xJ9KvQ/cucumber-pixel.png',
+        "Real": "https://i.postimg.cc/PxtHfVZp/cucumber-real.png",
+        "Poison_values": 'b,\'#93ef13\',\'#909090\',20',
     });
 
     last_fruit_num = document.querySelector('#apple').children.length - 1;

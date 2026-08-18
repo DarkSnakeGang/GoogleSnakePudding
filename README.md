@@ -100,7 +100,7 @@ Optional always-visible speedrun panel: current category, PBs, attempt counts, a
 
 Extra selectable foods, each with Normal, Pixel, and Realism sprites:
 
-Pudding, Blueberries, Red Pepper, Lime, Green Grapes, Burger, Cheese, Fries, Hotdog, Pizza, Steak, Coconut, Poop, Egg, Musa Banana, Pear, Jacko, Ice, Red Pudding, Cabbage, Heart.
+Pudding, Blueberries, Red Pepper, Lime, Green Grapes, Burger, Cheese, Fries, Hotdog, Pizza, Steak, Coconut, Poop, Egg, Musa Banana, Pear, Jacko, Ice, Red Pudding, Boiled Egg, Bacon, White Onion, Purple Onion, Cooked Steak, Cucumber.
 
 Secret golden fruits cannot be picked from the menu. If one rolls in place of a normal apple:
 
