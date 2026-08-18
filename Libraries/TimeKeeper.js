@@ -150,16 +150,8 @@ window.TimeKeeper.make = function () {
         return window.ModeRegistry.getCurrentModeKey();
     };
 
-    window.timeKeeper.ensurePlaying = function () {
-        if (!window.timeKeeper.runStarted) {
-            window.timeKeeper.start();
-        } else {
-            window.timeKeeper.playing = true;
-        }
-    };
-
     window.timeKeeper.gotApple = function (time, score) {
-        if (typeof stats !== "undefined" && stats.apples) {
+        if (!window.SpeedrunMod && typeof stats !== "undefined" && stats.apples) {
             stats.apples.session++;
             stats.apples.lifetime++;
             if (typeof updateCounterDisplay === "function") {
@@ -167,6 +159,7 @@ window.TimeKeeper.make = function () {
             }
         }
         if (
+            !window.SpeedrunMod &&
             window.pudding_settings &&
             window.pudding_settings.randomizeThemeApple &&
             typeof window.setTheme === "function" &&
@@ -176,23 +169,24 @@ window.TimeKeeper.make = function () {
         }
         if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
 
-        window.timeKeeper.ensurePlaying();
         window.timeKeeper.lastAppleDate = new Date();
         window.timeKeeper.lastAppleTime = time;
 
         if (score == 25 || score == 50 || score == 100) {
             window.timeKeeper.savePB(time, score);
         }
-        // Mirror milestone PBs: refresh Highscore as soon as this run beats the stored best
         window.timeKeeper.updateHighscoreLive(time, score);
     };
 
     window.timeKeeper.gotAll = function (time, score) {
         if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
-        window.timeKeeper.ensurePlaying();
+        if (window.timeKeeper.playing || window.timeKeeper.runStarted) {
+            window.timeKeeper.saveScore(time, score);
+        }
         window.timeKeeper.savePB(time, "ALL");
         // End of successful run: persist mid-run PB/HS memory
         window.timeKeeper.flushStorage();
+        window.timeKeeper.playing = false;
     };
 
     window.timeKeeper.death = function (time, score) {
@@ -241,10 +235,19 @@ window.TimeKeeper.make = function () {
             return 0;
         };
 
-        if (name != "trophy") {
+        if (!window.SpeedrunMod && name != "trophy") {
             return eval(window[name + "_var"]);
         }
         return getSelectedIndex(name);
+    };
+
+    window.timeKeeper.scheduleLiveRefresh = function () {
+        if (window.timeKeeper._liveRefreshQueued) return;
+        window.timeKeeper._liveRefreshQueued = true;
+        queueMicrotask(function () {
+            window.timeKeeper._liveRefreshQueued = false;
+            window.timeKeeper.refreshSpeedInfo();
+        });
     };
 
     // Mid-run: update Highscore PB in memory when current apples beat the stored best
@@ -253,40 +256,39 @@ window.TimeKeeper.make = function () {
         if (!window.timeKeeper.shouldTrack(ctx)) return;
         if (typeof score !== "number" || isNaN(score)) return;
 
-        time = Math.floor(time);
         const storage = window.timeKeeper.getStorage();
         const name = window.timeKeeper.buildKey("H", ctx);
         const appleTime =
             typeof window.timeKeeper.lastAppleTime !== "undefined"
                 ? window.timeKeeper.lastAppleTime
-                : time;
-        const appleDate =
-            typeof window.timeKeeper.lastAppleDate !== "undefined"
-                ? window.timeKeeper.lastAppleDate
-                : new Date();
+                : Math.floor(time);
 
         if (typeof storage[name] == "undefined") {
             storage[name] = {
                 high: score,
                 time: appleTime,
-                date: appleDate,
+                date:
+                    typeof window.timeKeeper.lastAppleDate !== "undefined"
+                        ? window.timeKeeper.lastAppleDate
+                        : new Date(),
             };
             window.timeKeeper.markStorageDirty();
-            window.timeKeeper.refreshSpeedInfo();
+            window.timeKeeper.scheduleLiveRefresh();
             return;
         }
 
         const cur = storage[name];
-        if (
-            score > cur.high ||
-            (score == cur.high && appleTime < cur.time)
-        ) {
-            cur.high = score;
-            cur.time = appleTime;
-            cur.date = appleDate;
-            window.timeKeeper.markStorageDirty();
-            window.timeKeeper.refreshSpeedInfo();
-        }
+        if (score < cur.high) return;
+        if (score == cur.high && appleTime >= cur.time) return;
+
+        cur.high = score;
+        cur.time = appleTime;
+        cur.date =
+            typeof window.timeKeeper.lastAppleDate !== "undefined"
+                ? window.timeKeeper.lastAppleDate
+                : new Date();
+        window.timeKeeper.markStorageDirty();
+        window.timeKeeper.scheduleLiveRefresh();
     };
 
     window.timeKeeper.saveScore = function (time, score) {
@@ -857,7 +859,7 @@ window.TimeKeeper.alterCode = function (code) {
         timeFunc +
         ")," +
         scoreFunc +
-        ");}" +
+        ");}else if(!window.timeKeeper.runStarted){window.timeKeeper.start();}" +
         func.slice(func.indexOf("{") + 1);
 
     code = code.assertReplace(func_regex, func + StartOfNext);

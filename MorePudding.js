@@ -442,8 +442,10 @@ window.Theme.alterCode = function (code) {
       }
     }
 
-    document.getElementById('settings-popup-pudding').style.background = real_top_bar;
-    document.getElementById('speedinfo-popup-pudding').style.background = real_top_bar;
+    const settingsBox = document.getElementById('settings-popup-pudding');
+    if (settingsBox) settingsBox.style.background = real_top_bar;
+    const speedinfo = document.getElementById('speedinfo-popup-pudding');
+    if (speedinfo) speedinfo.style.background = real_top_bar;
     const splitPanel = document.getElementById('split-panel-pudding');
     if (splitPanel) splitPanel.style.background = real_top_bar;
     const portalPanel = document.getElementById('fruit-bowl-popup-pudding') || document.getElementById('portal-pairs-popup-pudding');
@@ -1267,40 +1269,43 @@ window.TimeKeeper.make = function () {
         return window.ModeRegistry.getCurrentModeKey();
     };
 
-    window.timeKeeper.ensurePlaying = function () {
-        if (!window.timeKeeper.runStarted) {
-            window.timeKeeper.start();
-        } else {
-            window.timeKeeper.playing = true;
-        }
-    };
-
     window.timeKeeper.gotApple = function (time, score) {
-        stats.apples.session++;
-        stats.apples.lifetime++;
-        updateCounterDisplay();
-        if (window.pudding_settings && window.pudding_settings.randomizeThemeApple) {
+        if (!window.SpeedrunMod && typeof stats !== "undefined" && stats.apples) {
+            stats.apples.session++;
+            stats.apples.lifetime++;
+            if (typeof updateCounterDisplay === "function") {
+                updateCounterDisplay();
+            }
+        }
+        if (
+            !window.SpeedrunMod &&
+            window.pudding_settings &&
+            window.pudding_settings.randomizeThemeApple &&
+            typeof window.setTheme === "function" &&
+            typeof window.getRandomThemeName === "function"
+        ) {
             window.setTheme(window.getRandomThemeName());
         }
         if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
 
-        window.timeKeeper.ensurePlaying();
         window.timeKeeper.lastAppleDate = new Date();
         window.timeKeeper.lastAppleTime = time;
 
         if (score == 25 || score == 50 || score == 100) {
             window.timeKeeper.savePB(time, score);
         }
-        // Mirror milestone PBs: refresh Highscore as soon as this run beats the stored best
         window.timeKeeper.updateHighscoreLive(time, score);
     };
 
     window.timeKeeper.gotAll = function (time, score) {
         if (!window.timeKeeper.shouldTrack(window.timeKeeper.getSaveContext())) return;
-        window.timeKeeper.ensurePlaying();
+        if (window.timeKeeper.playing || window.timeKeeper.runStarted) {
+            window.timeKeeper.saveScore(time, score);
+        }
         window.timeKeeper.savePB(time, "ALL");
         // End of successful run: persist mid-run PB/HS memory
         window.timeKeeper.flushStorage();
+        window.timeKeeper.playing = false;
     };
 
     window.timeKeeper.death = function (time, score) {
@@ -1349,10 +1354,19 @@ window.TimeKeeper.make = function () {
             return 0;
         };
 
-        if (name != "trophy") {
+        if (!window.SpeedrunMod && name != "trophy") {
             return eval(window[name + "_var"]);
         }
         return getSelectedIndex(name);
+    };
+
+    window.timeKeeper.scheduleLiveRefresh = function () {
+        if (window.timeKeeper._liveRefreshQueued) return;
+        window.timeKeeper._liveRefreshQueued = true;
+        queueMicrotask(function () {
+            window.timeKeeper._liveRefreshQueued = false;
+            window.timeKeeper.refreshSpeedInfo();
+        });
     };
 
     // Mid-run: update Highscore PB in memory when current apples beat the stored best
@@ -1361,40 +1375,39 @@ window.TimeKeeper.make = function () {
         if (!window.timeKeeper.shouldTrack(ctx)) return;
         if (typeof score !== "number" || isNaN(score)) return;
 
-        time = Math.floor(time);
         const storage = window.timeKeeper.getStorage();
         const name = window.timeKeeper.buildKey("H", ctx);
         const appleTime =
             typeof window.timeKeeper.lastAppleTime !== "undefined"
                 ? window.timeKeeper.lastAppleTime
-                : time;
-        const appleDate =
-            typeof window.timeKeeper.lastAppleDate !== "undefined"
-                ? window.timeKeeper.lastAppleDate
-                : new Date();
+                : Math.floor(time);
 
         if (typeof storage[name] == "undefined") {
             storage[name] = {
                 high: score,
                 time: appleTime,
-                date: appleDate,
+                date:
+                    typeof window.timeKeeper.lastAppleDate !== "undefined"
+                        ? window.timeKeeper.lastAppleDate
+                        : new Date(),
             };
             window.timeKeeper.markStorageDirty();
-            window.timeKeeper.refreshSpeedInfo();
+            window.timeKeeper.scheduleLiveRefresh();
             return;
         }
 
         const cur = storage[name];
-        if (
-            score > cur.high ||
-            (score == cur.high && appleTime < cur.time)
-        ) {
-            cur.high = score;
-            cur.time = appleTime;
-            cur.date = appleDate;
-            window.timeKeeper.markStorageDirty();
-            window.timeKeeper.refreshSpeedInfo();
-        }
+        if (score < cur.high) return;
+        if (score == cur.high && appleTime >= cur.time) return;
+
+        cur.high = score;
+        cur.time = appleTime;
+        cur.date =
+            typeof window.timeKeeper.lastAppleDate !== "undefined"
+                ? window.timeKeeper.lastAppleDate
+                : new Date();
+        window.timeKeeper.markStorageDirty();
+        window.timeKeeper.scheduleLiveRefresh();
     };
 
     window.timeKeeper.saveScore = function (time, score) {
@@ -1851,6 +1864,14 @@ window.TimeKeeper.make = function () {
         dialog.appendChild(buildRow(buildTimedCell("100"), buildTimedCell("ALL")));
         dialog.appendChild(buildRow(buildHighscoreCell(), buildAttemptsCell()));
 
+        if (window.SpeedrunMod && typeof window.buildSpeedInfoTrackingControls === "function") {
+            const trackingControls = window.buildSpeedInfoTrackingControls();
+            dialog.appendChild(trackingControls);
+            if (typeof window.wireSpeedInfoTrackingControls === "function") {
+                window.wireSpeedInfoTrackingControls(trackingControls);
+            }
+        }
+
         const buttonClose = document.createElement("button");
         buttonClose.appendChild(document.createTextNode("Close"));
         buttonClose.addEventListener("click", function () {
@@ -1957,7 +1978,7 @@ window.TimeKeeper.alterCode = function (code) {
         timeFunc +
         ")," +
         scoreFunc +
-        ");}" +
+        ");}else if(!window.timeKeeper.runStarted){window.timeKeeper.start();}" +
         func.slice(func.indexOf("{") + 1);
 
     code = code.assertReplace(func_regex, func + StartOfNext);
@@ -2422,7 +2443,27 @@ window.TopBar.make = function () {
 
   window.toggle_topbar_icons = function () {
     window.pudding_settings.TopBar = !window.pudding_settings.TopBar;
+    if (typeof window.saveSettings === "function") {
+      window.saveSettings();
+    }
+    if (typeof window.apply_topbar_icons === "function") {
+      window.apply_topbar_icons();
+    }
   }
+
+  window.setup_topbar_checkbox = function () {
+    const topbarCheckbox = document.getElementById("TopBarIcons");
+    if (!topbarCheckbox || document.getElementById("settings-popup-pudding")) return;
+    if (topbarCheckbox.dataset.topbarBound === "1") {
+      topbarCheckbox.checked = !!window.pudding_settings.TopBar;
+      return;
+    }
+    topbarCheckbox.addEventListener("change", window.toggle_topbar_icons);
+    topbarCheckbox.checked = !!window.pudding_settings.TopBar;
+    topbarCheckbox.dataset.topbarBound = "1";
+  };
+
+  window.setup_topbar_checkbox();
 
 }
 
@@ -2430,6 +2471,63 @@ window.TopBar.alterCode = function (code) {
 
   window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
   window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
+  const appleRoot = document.querySelector('#apple');
+  window.apple_img_arr = appleRoot ? Array.from(appleRoot.children).map(el => el.src) : [];
+
+  window.getSelectorRowIndex = function (selectorId) {
+    const elementList = document.getElementById(selectorId);
+    if (!elementList || !elementList.children.length) return 0;
+    let number = 0;
+    const classNames = [];
+    let notUnique = "";
+    for (const element of elementList.children) {
+      if (classNames.indexOf(element.className) === -1) {
+        classNames.push(element.className);
+      } else {
+        notUnique = element.className;
+        break;
+      }
+    }
+    for (const element of elementList.children) {
+      if (element.className !== notUnique) return number;
+      number++;
+    }
+    return 0;
+  };
+
+  window.apply_topbar_icons = function () {
+    if (typeof window.control_mute_img !== "function") return;
+    if (!window.speed_img_arr || !window.count_img_arr) return;
+
+    const daily = !!window.daily_challenge;
+    const topBar = !!(window.pudding_settings && window.pudding_settings.TopBar) && !daily;
+
+    let speedIdx = 0;
+    let countIdx = 0;
+    if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
+      try {
+        speedIdx = window.timeKeeper.getCurrentSetting("speed");
+        countIdx = window.timeKeeper.getCurrentSetting("count");
+      } catch (e) { /* settings refs may be unavailable early */ }
+    }
+
+    const speedSrc = window.speed_img_arr[speedIdx] || window.speed_img_arr[0];
+    window.control_mute_img(topBar, speedSrc);
+
+    if (!window.fruit_jsname) return;
+    const fruitImg = document.querySelector('[jsname="' + window.fruit_jsname + '"]');
+    if (!fruitImg) return;
+
+    if (topBar) {
+      fruitImg.src = window.count_img_arr[countIdx] || window.count_img_arr[0];
+      return;
+    }
+
+    if (window.apple_img_arr && window.apple_img_arr.length) {
+      const appleIdx = window.getSelectorRowIndex("apple");
+      fruitImg.src = window.apple_img_arr[appleIdx] || window.apple_img_arr[0];
+    }
+  };
 
   count_regex = new RegExp(/case "count"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
   speed_regex = new RegExp(/case "speed"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
@@ -2455,6 +2553,7 @@ window.TopBar.alterCode = function (code) {
   //code = code.assertReplace(speed_regex, set_speed_code);
 
   fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
+  window.fruit_jsname = fruit_jsname;
   fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
 
   window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
@@ -2500,6 +2599,8 @@ window.TopBar.alterCode = function (code) {
   eval(speed_var + `=0`)
   eval(count_var + `=0`)
   eval(size_var + `=0`)
+
+  window.apply_topbar_icons();
 
   return code;
 }
@@ -4174,6 +4275,112 @@ window.SpeedInfo.make = function () {
         updateTrackingSectionVisibility();
     };
 
+    window.buildSpeedInfoTrackingControls = function () {
+        const btnColor = window.button_color || "#1155CC";
+        const section = document.createElement("div");
+        section.className = "speedinfo-tracking-controls";
+        section.style.cssText =
+            "margin:12px 0 0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,0.22);";
+        section.innerHTML = `
+        <div style="font-weight:bold;color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:8px;">SRC / Tracking</div>
+        <div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap;text-align:left;">
+          <div style="display:flex;align-items:center;gap:6px;padding-top:4px;">
+            <input class="form-check-input" type="checkbox" role="switch" id="ShowWrHolders" style="width:1.3em;height:1.3em;margin:0;">
+            <label class="form-check-label" for="ShowWrHolders" style="margin:0;white-space:nowrap;color:white;font-family:Roboto,Arial,sans-serif;">Show WR holders</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <label for="TrackedPlayerInput" class="form-check-label" style="margin:0;white-space:nowrap;color:white;font-family:Roboto,Arial,sans-serif;">Track player</label>
+            <input type="text" class="form-control" id="TrackedPlayerInput" list="tracked-player-suggestions" placeholder="SRC username" autocomplete="off" style="width:140px;display:inline-block;background-color:${btnColor};color:white;font-family:Roboto,Arial,sans-serif;border:1px solid rgba(255,255,255,0.25);border-radius:4px;outline:none;text-align:left;caret-color:white;padding:2px 6px;">
+            <datalist id="tracked-player-suggestions"></datalist>
+            <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerSet">Set</button>
+            <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerClear">Clear</button>
+          </div>
+        </div>`;
+        return section;
+    };
+
+    window.wireSpeedInfoTrackingControls = function (root) {
+        if (!root || !window.pudding_settings) return;
+
+        const wrholders_checkbox = root.querySelector("#ShowWrHolders");
+        const tracked_input = root.querySelector("#TrackedPlayerInput");
+        const trackedSetBtn = root.querySelector("#TrackedPlayerSet");
+        const trackedClearBtn = root.querySelector("#TrackedPlayerClear");
+        if (!wrholders_checkbox || !tracked_input || !trackedSetBtn || !trackedClearBtn) return;
+
+        function syncSpeedInfoExclusiveUi() {
+            const tracking = !!(window.pudding_settings.TrackedPlayerName || "").trim();
+            if (tracking) {
+                wrholders_checkbox.checked = false;
+                wrholders_checkbox.disabled = true;
+                wrholders_checkbox.title = "Clear tracked player to show WR holders";
+            } else {
+                wrholders_checkbox.disabled = false;
+                wrholders_checkbox.title = "";
+                wrholders_checkbox.checked = !!window.pudding_settings.ShowWrHolders;
+            }
+            tracked_input.value = window.pudding_settings.TrackedPlayerName || "";
+        }
+
+        function refreshSrcAfterSpeedInfoChange() {
+            if (typeof window.refreshTrackedPlayerUi === "function") {
+                window.refreshTrackedPlayerUi();
+            }
+            if (typeof window.getAllSrc === "function") {
+                window.getAllSrc().catch(function (e) {
+                    console.error("getAllSrc error:", e);
+                });
+            }
+        }
+
+        syncSpeedInfoExclusiveUi();
+        if (typeof window.fillTrackedPlayerSuggestions === "function") {
+            window.fillTrackedPlayerSuggestions();
+        }
+
+        tracked_input.addEventListener("keydown", function (evt) {
+            evt.stopPropagation();
+            if (evt.key === "Enter") {
+                evt.preventDefault();
+                trackedSetBtn.click();
+            }
+        });
+        tracked_input.addEventListener("keyup", function (evt) {
+            evt.stopPropagation();
+        });
+
+        wrholders_checkbox.addEventListener("change", function () {
+            if (wrholders_checkbox.disabled) return;
+            if (wrholders_checkbox.checked) {
+                window.pudding_settings.TrackedPlayerName = "";
+                tracked_input.value = "";
+            }
+            window.pudding_settings.ShowWrHolders = !!wrholders_checkbox.checked;
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            syncSpeedInfoExclusiveUi();
+            refreshSrcAfterSpeedInfoChange();
+        });
+
+        trackedSetBtn.addEventListener("click", function () {
+            const name = (tracked_input.value || "").trim();
+            window.pudding_settings.TrackedPlayerName = name;
+            if (name) {
+                window.pudding_settings.ShowWrHolders = false;
+            }
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            syncSpeedInfoExclusiveUi();
+            refreshSrcAfterSpeedInfoChange();
+        });
+
+        trackedClearBtn.addEventListener("click", function () {
+            tracked_input.value = "";
+            window.pudding_settings.TrackedPlayerName = "";
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            syncSpeedInfoExclusiveUi();
+            refreshSrcAfterSpeedInfoChange();
+        });
+    };
+
     window.fillTrackedPlayerSuggestions = function () {
         const list = document.getElementById("tracked-player-suggestions");
         if (!list) return;
@@ -4493,7 +4700,8 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
-        document.getElementById('AlwaysOnTimeKeeper').checked = false;
+        const speedInfoToggle = document.getElementById("AlwaysOnTimeKeeper");
+        if (speedInfoToggle) speedInfoToggle.checked = false;
     }
 
     window.SpeedInfoSetup = function () {
@@ -4556,6 +4764,14 @@ window.SpeedInfo.make = function () {
         </div>
         </div>
 
+        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:6px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
+        <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
+        <label class="form-check-label" for="TopBarIcons" style="${siLabel}">Top Bar Icons</label>
+        </div>
+        <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button>
+        </div>
+
         <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
 
   <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
@@ -4564,6 +4780,14 @@ window.SpeedInfo.make = function () {
 
   document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
         updateTrackingSectionVisibility();
+
+        if (window.SpeedrunMod) {
+            const speedrunControls = document.getElementById("speedrun-controls-section");
+            if (speedrunControls) speedrunControls.style.display = "block";
+            if (typeof window.setup_topbar_checkbox === "function") {
+                window.setup_topbar_checkbox();
+            }
+        }
 
         const speedinfoCloseElements = document.getElementById('speedinfo-close');
         speedinfoCloseElements.addEventListener('click', window.SpeedInfoHide);
@@ -4875,19 +5099,17 @@ window.SpeedInfo.alterCode = function (code) {
     mode_get_code = `case "trophy":queueMicrotask(function(){window.SpeedInfoUpdate().catch(function(e){console.error('SpeedInfoUpdate error:',e);});window.getAllSrc().catch(function(e){console.error('getAllSrc error:',e);});});window.CurrentModeNum = `
     code = code.assertReplace(mode_regex, mode_get_code);
 
-    /*
-    count_regex = new RegExp(/case "count"\:/)
-    count_get_code = `case "count":window.getAllSrc();`
-    code = code.assertReplace(mode_regex, count_get_code);
+    const settings_refresh =
+        'queueMicrotask(function(){window.SpeedInfoUpdate().catch(function(e){console.error("SpeedInfoUpdate error:",e);});window.getAllSrc().catch(function(e){console.error("getAllSrc error:",e);});if(typeof window.apply_topbar_icons==="function")window.apply_topbar_icons();});';
 
-    speed_regex = new RegExp(/case "speed"\:/)
-    speed_get_code = `case "speed":window.getAllSrc();`
-    code = code.assertReplace(speed_regex, speed_get_code);
+    count_regex = new RegExp(/case "count"\:/);
+    code = code.assertReplace(count_regex, 'case "count":' + settings_refresh);
 
-    size_regex = new RegExp(/case "size"\:/)
-    size_get_code = `case "size":window.getAllSrc();`
-    code = code.assertReplace(size_regex, size_get_code);
-    */
+    speed_regex = new RegExp(/case "speed"\:/);
+    code = code.assertReplace(speed_regex, 'case "speed":' + settings_refresh);
+
+    size_regex = new RegExp(/case "size"\:/);
+    code = code.assertReplace(size_regex, 'case "size":' + settings_refresh);
 
     return code;
 }
@@ -5379,69 +5601,9 @@ window.Timer = {
         document.body.appendChild(editBox)
         document.getElementById('close-box').addEventListener('click', closeEditBox)
 
-        const wrholders_checkbox = document.getElementById('ShowWrHolders')
-        const tracked_input = document.getElementById('TrackedPlayerInput')
-        const trackedSetBtn = document.getElementById('TrackedPlayerSet')
-        const trackedClearBtn = document.getElementById('TrackedPlayerClear')
-
-        function syncSpeedInfoExclusiveUi() {
-          const tracking = !!(window.pudding_settings.TrackedPlayerName || '').trim()
-          if (tracking) {
-            wrholders_checkbox.checked = false
-            wrholders_checkbox.disabled = true
-            wrholders_checkbox.title = 'Clear tracked player to show WR holders'
-          } else {
-            wrholders_checkbox.disabled = false
-            wrholders_checkbox.title = ''
-            wrholders_checkbox.checked = !!window.pudding_settings.ShowWrHolders
-          }
-          tracked_input.value = window.pudding_settings.TrackedPlayerName || ''
+        if (typeof window.wireSpeedInfoTrackingControls === "function") {
+          window.wireSpeedInfoTrackingControls(editBox)
         }
-
-        function refreshSrcAfterSpeedInfoChange() {
-          if (typeof window.refreshTrackedPlayerUi === 'function') {
-            window.refreshTrackedPlayerUi()
-          }
-          if (typeof window.getAllSrc === 'function') {
-            window.getAllSrc().catch(e => console.error('getAllSrc error:', e))
-          }
-        }
-
-        syncSpeedInfoExclusiveUi()
-        if (typeof window.fillTrackedPlayerSuggestions === 'function') {
-          window.fillTrackedPlayerSuggestions()
-        }
-
-        wrholders_checkbox.addEventListener('change', function () {
-          if (wrholders_checkbox.disabled) return
-          if (wrholders_checkbox.checked) {
-            window.pudding_settings.TrackedPlayerName = ''
-            tracked_input.value = ''
-          }
-          window.pudding_settings.ShowWrHolders = !!wrholders_checkbox.checked
-          if (typeof window.saveSettings === 'function') window.saveSettings()
-          syncSpeedInfoExclusiveUi()
-          refreshSrcAfterSpeedInfoChange()
-        })
-
-        trackedSetBtn.addEventListener('click', function () {
-          const name = (tracked_input.value || '').trim()
-          window.pudding_settings.TrackedPlayerName = name
-          if (name) {
-            window.pudding_settings.ShowWrHolders = false
-          }
-          if (typeof window.saveSettings === 'function') window.saveSettings()
-          syncSpeedInfoExclusiveUi()
-          refreshSrcAfterSpeedInfoChange()
-        })
-
-        trackedClearBtn.addEventListener('click', function () {
-          tracked_input.value = ''
-          window.pudding_settings.TrackedPlayerName = ''
-          if (typeof window.saveSettings === 'function') window.saveSettings()
-          syncSpeedInfoExclusiveUi()
-          refreshSrcAfterSpeedInfoChange()
-        })
 
         const toggleDelta = document.getElementById('edit-delta')
         toggleDelta.checked = +_showDelta
@@ -6788,6 +6950,7 @@ window.ResetKey.make = function (){
   let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
   function setupKeybindPicker(buttonId, keybindType) {
       const button = document.getElementById(buttonId);
+      if (!button) return;
       if(!keybinds[keybindType]){
           keybinds[keybindType] = "Shift";
       }
@@ -6809,11 +6972,31 @@ window.ResetKey.make = function (){
 }
 
 window.ResetKey.alterCode = function(code){
+  if (window.SpeedrunMod) {
+    const keyHandler =
+      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.VTa\?a\.Qh:void 0/;
+    code = code.assertReplace(
+      keyHandler,
+      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.VTa?a.Qh:void 0"
+    );
+  }
+
+  function isTypingInField() {
+    const ae = document.activeElement;
+    return !!(
+      ae &&
+      (ae.tagName === "INPUT" ||
+        ae.tagName === "TEXTAREA" ||
+        ae.tagName === "SELECT" ||
+        ae.isContentEditable)
+    );
+  }
+
   document.addEventListener('keydown', function(e){
     let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
     let resetButton = document.getElementById('ResetKeybind');
     let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
-    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
+    if(!(isSettingKeybind || isTypingInField() || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
         if(e.key === keybinds["resetKey"]){
             const keydownEvent = new KeyboardEvent('keydown', {
                 keyCode: 27
