@@ -5,3 +5,5 @@ testCode.js
 MoreMenuMod.js
 MouseMod.js
 VisibilityMod.js
+tools/.broken-*.js
+node_modules/
