@@ -4,7 +4,7 @@ Pudding Mod is a visual and quality-of-life mod for Google Snake speedrunning. P
 
 This repository also ships Speedrun Mod and a few combo loaders. Game settings and Pudding toggles live in `localStorage` (`PuddingSettings`). `StorageVersion: 1` keeps those saves usable when switching between v11, v12, and v/current in the same browser.
 
-![Pudding Mod showcase](https://static.wikia.nocookie.net/google-snake-game/images/6/67/Pudding_Mod_Showcase.png/revision/latest/scale-to-width-down/838?cb=20230605135736)
+![Pudding Mod showcase](docs/pudding-mod-showcase.png)
 
 ---
 
@@ -53,7 +53,7 @@ Current target is **v13** at [googlesnakemods.com/v/current/](https://googlesnak
 
 ### BootstrapMenu
 
-Adds a **Pudding Mod Settings** panel on the side of the game, not inside Google's own settings. Open/close it from the Pudding UI on the top bar. The panel is styled with a stripped Bootstrap stylesheet (`bootstrap-stripped.css`).
+Adds a **Pudding Mod Settings** panel on the side of the game, not inside Google's own settings. Open it by clicking **Settings** in the game; it closes when you go back or start playing. The panel is styled with a stripped Bootstrap stylesheet (`bootstrap-stripped.css`).
 
 From this panel you can:
 
