@@ -1508,6 +1508,14 @@ window.TimeKeeper.make = function () {
         dialog.appendChild(buildRow(buildTimedCell("100"), buildTimedCell("ALL")));
         dialog.appendChild(buildRow(buildHighscoreCell(), buildAttemptsCell()));
 
+        if (window.SpeedrunMod && typeof window.buildSpeedInfoTrackingControls === "function") {
+            const trackingControls = window.buildSpeedInfoTrackingControls();
+            dialog.appendChild(trackingControls);
+            if (typeof window.wireSpeedInfoTrackingControls === "function") {
+                window.wireSpeedInfoTrackingControls(trackingControls);
+            }
+        }
+
         const buttonClose = document.createElement("button");
         buttonClose.appendChild(document.createTextNode("Close"));
         buttonClose.addEventListener("click", function () {
@@ -1630,6 +1638,175 @@ window.TimeKeeper.alterCode = function (code) {
     }
     return code;
 };
+window.TopBar = {};
+
+window.TopBar.make = function () {
+
+  // Code that runs before anything else here, loading variables, etc.
+  // Recommended to use "window." for things
+  window.getImgFromElement = function getImgFromElement(element) {
+    return element.replace('class=', '').replace('width=', '').replace('height=', '').split('=')[1].split('"')[1];
+  }
+
+ // window.topbar_icons = true;
+  window.count_setting = 0;
+  window.speed_setting = 0;
+
+  window.toggle_topbar_icons = function () {
+    window.pudding_settings.TopBar = !window.pudding_settings.TopBar;
+    if (typeof window.saveSettings === "function") {
+      window.saveSettings();
+    }
+    if (typeof window.apply_topbar_icons === "function") {
+      window.apply_topbar_icons();
+    }
+  }
+
+  const topbarCheckbox = document.getElementById("TopBarIcons");
+  if (topbarCheckbox && !document.getElementById("settings-popup-pudding")) {
+    topbarCheckbox.addEventListener("change", window.toggle_topbar_icons);
+    topbarCheckbox.checked = !!window.pudding_settings.TopBar;
+  }
+
+}
+
+window.TopBar.alterCode = function (code) {
+
+  window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
+  window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
+  const appleRoot = document.querySelector('#apple');
+  window.apple_img_arr = appleRoot ? Array.from(appleRoot.children).map(el => el.src) : [];
+
+  window.getSelectorRowIndex = function (selectorId) {
+    const elementList = document.getElementById(selectorId);
+    if (!elementList || !elementList.children.length) return 0;
+    let number = 0;
+    const classNames = [];
+    let notUnique = "";
+    for (const element of elementList.children) {
+      if (classNames.indexOf(element.className) === -1) {
+        classNames.push(element.className);
+      } else {
+        notUnique = element.className;
+        break;
+      }
+    }
+    for (const element of elementList.children) {
+      if (element.className !== notUnique) return number;
+      number++;
+    }
+    return 0;
+  };
+
+  window.apply_topbar_icons = function () {
+    if (typeof window.control_mute_img !== "function") return;
+    if (!window.speed_img_arr || !window.count_img_arr) return;
+
+    const daily = !!window.daily_challenge;
+    const topBar = !!(window.pudding_settings && window.pudding_settings.TopBar) && !daily;
+
+    let speedIdx = 0;
+    let countIdx = 0;
+    if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
+      try {
+        speedIdx = window.timeKeeper.getCurrentSetting("speed");
+        countIdx = window.timeKeeper.getCurrentSetting("count");
+      } catch (e) { /* settings refs may be unavailable early */ }
+    }
+
+    const speedSrc = window.speed_img_arr[speedIdx] || window.speed_img_arr[0];
+    window.control_mute_img(topBar, speedSrc);
+
+    if (!window.fruit_jsname) return;
+    const fruitImg = document.querySelector('[jsname="' + window.fruit_jsname + '"]');
+    if (!fruitImg) return;
+
+    if (topBar) {
+      fruitImg.src = window.count_img_arr[countIdx] || window.count_img_arr[0];
+      return;
+    }
+
+    if (window.apple_img_arr && window.apple_img_arr.length) {
+      const appleIdx = window.getSelectorRowIndex("apple");
+      fruitImg.src = window.apple_img_arr[appleIdx] || window.apple_img_arr[0];
+    }
+  };
+
+  count_regex = new RegExp(/case "count"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  speed_regex = new RegExp(/case "speed"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+  size_regex = new RegExp(/case "size"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
+
+  count_ref = code.match(count_regex)[0].split('.')[2]
+  speed_ref = code.match(speed_regex)[0].split('.')[2]
+  size_ref = code.match(size_regex)[0].split('.')[2]
+
+  settings_reference = code.match(count_regex)[0].split(':')[1].split('.')[0] + '.' + code.match(count_regex)[0].split('.')[1]
+
+  //set_count_code = `$&${count_var}=`
+  //set_speed_code = `$&${speed_var}=`
+
+  code = code.assertReplace(/switch\(b\){case "apple"\:/, `window.set_ref = ${settings_reference}; $&`);
+
+  count_var = `window.set_ref.${count_ref}`
+  speed_var = `window.set_ref.${speed_ref}`
+  size_var = `window.set_ref.${size_ref}`
+
+
+  //code = code.assertReplace(count_regex, set_count_code);
+  //code = code.assertReplace(speed_regex, set_speed_code);
+
+  fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
+  window.fruit_jsname = fruit_jsname;
+  fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
+
+  window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
+  window.mute_default_innerHTML = [window.mute_divs[0].innerHTML, window.mute_divs[1].innerHTML]
+  window.mute_speed_element = document.createElement('img');
+  window.mute_speed_element.classList.add('EFcTud')
+  window.mute_speed_element.src = "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png"
+  window.mute_speed_element.style.padding = '0px';
+  window.mute_speed_copy = window.mute_speed_element.cloneNode(true);
+
+  window.control_mute_img = function control_mute_img(TopBar, SpeedSrc) {
+    if (TopBar) {
+      for (let index = 0; index < window.mute_divs.length; index++) {
+        const element = window.mute_divs[index];
+        element.innerHTML = ''
+      }
+      window.mute_speed_element.src = SpeedSrc
+      window.mute_speed_copy.src = SpeedSrc
+      window.mute_divs[0].appendChild(window.mute_speed_element)
+      window.mute_divs[1].appendChild(window.mute_speed_copy)
+      return;
+    }
+    for (let index = 0; index < window.mute_divs.length; index++) {
+      const element = window.mute_divs[index];
+      element.innerHTML = window.mute_default_innerHTML[index]
+    }
+  }
+
+  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+
+  set_on_reset = `;
+  if (window.pudding_settings.TopBar && !window.daily_challenge) {
+    ${fruit_src} = window.count_img_arr[${count_var}]
+  }
+  window.control_mute_img(window.pudding_settings.TopBar, window.speed_img_arr[${speed_var}])
+  if(window.daily_challenge){
+    window.control_mute_img(false, window.speed_img_arr[${speed_var}])
+  }
+  $&`
+  code = code.assertReplace(reset_regex, set_on_reset)
+
+  window.set_ref = {};
+  eval(speed_var + `=0`)
+  eval(count_var + `=0`)
+  eval(size_var + `=0`)
+
+  window.apply_topbar_icons();
+
+  return code;
+}
 window.SpeedInfo = {};
 
 window.SpeedInfo.make = function () {
@@ -2504,6 +2681,112 @@ window.SpeedInfo.make = function () {
         updateTrackingSectionVisibility();
     };
 
+    window.buildSpeedInfoTrackingControls = function () {
+        const btnColor = window.button_color || "#1155CC";
+        const section = document.createElement("div");
+        section.className = "speedinfo-tracking-controls";
+        section.style.cssText =
+            "margin:12px 0 0;padding:12px 0 0;border-top:1px solid rgba(255,255,255,0.22);";
+        section.innerHTML = `
+        <div style="font-weight:bold;color:white;font-family:Roboto,Arial,sans-serif;text-align:center;margin-bottom:8px;">SRC / Tracking</div>
+        <div style="display:flex;gap:10px;align-items:flex-start;justify-content:center;flex-wrap:wrap;text-align:left;">
+          <div style="display:flex;align-items:center;gap:6px;padding-top:4px;">
+            <input class="form-check-input" type="checkbox" role="switch" id="ShowWrHolders" style="width:1.3em;height:1.3em;margin:0;">
+            <label class="form-check-label" for="ShowWrHolders" style="margin:0;white-space:nowrap;color:white;font-family:Roboto,Arial,sans-serif;">Show WR holders</label>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <label for="TrackedPlayerInput" class="form-check-label" style="margin:0;white-space:nowrap;color:white;font-family:Roboto,Arial,sans-serif;">Track player</label>
+            <input type="text" class="form-control" id="TrackedPlayerInput" list="tracked-player-suggestions" placeholder="SRC username" autocomplete="off" style="width:140px;display:inline-block;background-color:${btnColor};color:white;font-family:Roboto,Arial,sans-serif;border:1px solid rgba(255,255,255,0.25);border-radius:4px;outline:none;text-align:left;caret-color:white;padding:2px 6px;">
+            <datalist id="tracked-player-suggestions"></datalist>
+            <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerSet">Set</button>
+            <button class="btn" type="button" style="margin:0;color:white;background-color:${btnColor};font-family:Roboto,Arial,sans-serif;padding:2px 10px;" id="TrackedPlayerClear">Clear</button>
+          </div>
+        </div>`;
+        return section;
+    };
+
+    window.wireSpeedInfoTrackingControls = function (root) {
+        if (!root || !window.pudding_settings) return;
+
+        const wrholders_checkbox = root.querySelector("#ShowWrHolders");
+        const tracked_input = root.querySelector("#TrackedPlayerInput");
+        const trackedSetBtn = root.querySelector("#TrackedPlayerSet");
+        const trackedClearBtn = root.querySelector("#TrackedPlayerClear");
+        if (!wrholders_checkbox || !tracked_input || !trackedSetBtn || !trackedClearBtn) return;
+
+        function syncSpeedInfoExclusiveUi() {
+            const tracking = !!(window.pudding_settings.TrackedPlayerName || "").trim();
+            if (tracking) {
+                wrholders_checkbox.checked = false;
+                wrholders_checkbox.disabled = true;
+                wrholders_checkbox.title = "Clear tracked player to show WR holders";
+            } else {
+                wrholders_checkbox.disabled = false;
+                wrholders_checkbox.title = "";
+                wrholders_checkbox.checked = !!window.pudding_settings.ShowWrHolders;
+            }
+            tracked_input.value = window.pudding_settings.TrackedPlayerName || "";
+        }
+
+        function refreshSrcAfterSpeedInfoChange() {
+            if (typeof window.refreshTrackedPlayerUi === "function") {
+                window.refreshTrackedPlayerUi();
+            }
+            if (typeof window.getAllSrc === "function") {
+                window.getAllSrc().catch(function (e) {
+                    console.error("getAllSrc error:", e);
+                });
+            }
+        }
+
+        syncSpeedInfoExclusiveUi();
+        if (typeof window.fillTrackedPlayerSuggestions === "function") {
+            window.fillTrackedPlayerSuggestions();
+        }
+
+        tracked_input.addEventListener("keydown", function (evt) {
+            evt.stopPropagation();
+            if (evt.key === "Enter") {
+                evt.preventDefault();
+                trackedSetBtn.click();
+            }
+        });
+        tracked_input.addEventListener("keyup", function (evt) {
+            evt.stopPropagation();
+        });
+
+        wrholders_checkbox.addEventListener("change", function () {
+            if (wrholders_checkbox.disabled) return;
+            if (wrholders_checkbox.checked) {
+                window.pudding_settings.TrackedPlayerName = "";
+                tracked_input.value = "";
+            }
+            window.pudding_settings.ShowWrHolders = !!wrholders_checkbox.checked;
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            syncSpeedInfoExclusiveUi();
+            refreshSrcAfterSpeedInfoChange();
+        });
+
+        trackedSetBtn.addEventListener("click", function () {
+            const name = (tracked_input.value || "").trim();
+            window.pudding_settings.TrackedPlayerName = name;
+            if (name) {
+                window.pudding_settings.ShowWrHolders = false;
+            }
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            syncSpeedInfoExclusiveUi();
+            refreshSrcAfterSpeedInfoChange();
+        });
+
+        trackedClearBtn.addEventListener("click", function () {
+            tracked_input.value = "";
+            window.pudding_settings.TrackedPlayerName = "";
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            syncSpeedInfoExclusiveUi();
+            refreshSrcAfterSpeedInfoChange();
+        });
+    };
+
     window.fillTrackedPlayerSuggestions = function () {
         const list = document.getElementById("tracked-player-suggestions");
         if (!list) return;
@@ -3219,190 +3502,19 @@ window.SpeedInfo.alterCode = function (code) {
     mode_get_code = `case "trophy":queueMicrotask(function(){window.SpeedInfoUpdate().catch(function(e){console.error('SpeedInfoUpdate error:',e);});window.getAllSrc().catch(function(e){console.error('getAllSrc error:',e);});});window.CurrentModeNum = `
     code = code.assertReplace(mode_regex, mode_get_code);
 
-    /*
-    count_regex = new RegExp(/case "count"\:/)
-    count_get_code = `case "count":window.getAllSrc();`
-    code = code.assertReplace(mode_regex, count_get_code);
+    const settings_refresh =
+        'queueMicrotask(function(){window.SpeedInfoUpdate().catch(function(e){console.error("SpeedInfoUpdate error:",e);});window.getAllSrc().catch(function(e){console.error("getAllSrc error:",e);});if(typeof window.apply_topbar_icons==="function")window.apply_topbar_icons();});';
 
-    speed_regex = new RegExp(/case "speed"\:/)
-    speed_get_code = `case "speed":window.getAllSrc();`
-    code = code.assertReplace(speed_regex, speed_get_code);
+    count_regex = new RegExp(/case "count"\:/);
+    code = code.assertReplace(count_regex, 'case "count":' + settings_refresh);
 
-    size_regex = new RegExp(/case "size"\:/)
-    size_get_code = `case "size":window.getAllSrc();`
-    code = code.assertReplace(size_regex, size_get_code);
-    */
+    speed_regex = new RegExp(/case "speed"\:/);
+    code = code.assertReplace(speed_regex, 'case "speed":' + settings_refresh);
+
+    size_regex = new RegExp(/case "size"\:/);
+    code = code.assertReplace(size_regex, 'case "size":' + settings_refresh);
 
     return code;
-}
-window.TopBar = {};
-
-window.TopBar.make = function () {
-
-  // Code that runs before anything else here, loading variables, etc.
-  // Recommended to use "window." for things
-  window.getImgFromElement = function getImgFromElement(element) {
-    return element.replace('class=', '').replace('width=', '').replace('height=', '').split('=')[1].split('"')[1];
-  }
-
- // window.topbar_icons = true;
-  window.count_setting = 0;
-  window.speed_setting = 0;
-
-  window.toggle_topbar_icons = function () {
-    window.pudding_settings.TopBar = !window.pudding_settings.TopBar;
-    if (typeof window.saveSettings === "function") {
-      window.saveSettings();
-    }
-    if (typeof window.apply_topbar_icons === "function") {
-      window.apply_topbar_icons();
-    }
-  }
-
-  const topbarCheckbox = document.getElementById("TopBarIcons");
-  if (topbarCheckbox && !document.getElementById("settings-popup-pudding")) {
-    topbarCheckbox.addEventListener("change", window.toggle_topbar_icons);
-    topbarCheckbox.checked = !!window.pudding_settings.TopBar;
-  }
-
-}
-
-window.TopBar.alterCode = function (code) {
-
-  window.count_img_arr = Array.from(document.querySelector('#count').children).map(el=>el.src);
-  window.speed_img_arr = Array.from(document.querySelector('#speed').children).map(el=>el.src);
-  const appleRoot = document.querySelector('#apple');
-  window.apple_img_arr = appleRoot ? Array.from(appleRoot.children).map(el => el.src) : [];
-
-  window.getSelectorRowIndex = function (selectorId) {
-    const elementList = document.getElementById(selectorId);
-    if (!elementList || !elementList.children.length) return 0;
-    let number = 0;
-    const classNames = [];
-    let notUnique = "";
-    for (const element of elementList.children) {
-      if (classNames.indexOf(element.className) === -1) {
-        classNames.push(element.className);
-      } else {
-        notUnique = element.className;
-        break;
-      }
-    }
-    for (const element of elementList.children) {
-      if (element.className !== notUnique) return number;
-      number++;
-    }
-    return 0;
-  };
-
-  window.apply_topbar_icons = function () {
-    if (typeof window.control_mute_img !== "function") return;
-    if (!window.speed_img_arr || !window.count_img_arr) return;
-
-    const daily = !!window.daily_challenge;
-    const topBar = !!(window.pudding_settings && window.pudding_settings.TopBar) && !daily;
-
-    let speedIdx = 0;
-    let countIdx = 0;
-    if (window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function") {
-      try {
-        speedIdx = window.timeKeeper.getCurrentSetting("speed");
-        countIdx = window.timeKeeper.getCurrentSetting("count");
-      } catch (e) { /* settings refs may be unavailable early */ }
-    }
-
-    const speedSrc = window.speed_img_arr[speedIdx] || window.speed_img_arr[0];
-    window.control_mute_img(topBar, speedSrc);
-
-    if (!window.fruit_jsname) return;
-    const fruitImg = document.querySelector('[jsname="' + window.fruit_jsname + '"]');
-    if (!fruitImg) return;
-
-    if (topBar) {
-      fruitImg.src = window.count_img_arr[countIdx] || window.count_img_arr[0];
-      return;
-    }
-
-    if (window.apple_img_arr && window.apple_img_arr.length) {
-      const appleIdx = window.getSelectorRowIndex("apple");
-      fruitImg.src = window.apple_img_arr[appleIdx] || window.apple_img_arr[0];
-    }
-  };
-
-  count_regex = new RegExp(/case "count"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-  speed_regex = new RegExp(/case "speed"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-  size_regex = new RegExp(/case "size"\:[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/)
-
-  count_ref = code.match(count_regex)[0].split('.')[2]
-  speed_ref = code.match(speed_regex)[0].split('.')[2]
-  size_ref = code.match(size_regex)[0].split('.')[2]
-
-  settings_reference = code.match(count_regex)[0].split(':')[1].split('.')[0] + '.' + code.match(count_regex)[0].split('.')[1]
-
-  //set_count_code = `$&${count_var}=`
-  //set_speed_code = `$&${speed_var}=`
-
-  code = code.assertReplace(/switch\(b\){case "apple"\:/, `window.set_ref = ${settings_reference}; $&`);
-
-  count_var = `window.set_ref.${count_ref}`
-  speed_var = `window.set_ref.${speed_ref}`
-  size_var = `window.set_ref.${size_ref}`
-
-
-  //code = code.assertReplace(count_regex, set_count_code);
-  //code = code.assertReplace(speed_regex, set_speed_code);
-
-  fruit_jsname = document.querySelector('[src$="apple_00.png"]').getAttribute("jsname")
-  window.fruit_jsname = fruit_jsname;
-  fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
-
-  window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
-  window.mute_default_innerHTML = [window.mute_divs[0].innerHTML, window.mute_divs[1].innerHTML]
-  window.mute_speed_element = document.createElement('img');
-  window.mute_speed_element.classList.add('EFcTud')
-  window.mute_speed_element.src = "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png"
-  window.mute_speed_element.style.padding = '0px';
-  window.mute_speed_copy = window.mute_speed_element.cloneNode(true);
-
-  window.control_mute_img = function control_mute_img(TopBar, SpeedSrc) {
-    if (TopBar) {
-      for (let index = 0; index < window.mute_divs.length; index++) {
-        const element = window.mute_divs[index];
-        element.innerHTML = ''
-      }
-      window.mute_speed_element.src = SpeedSrc
-      window.mute_speed_copy.src = SpeedSrc
-      window.mute_divs[0].appendChild(window.mute_speed_element)
-      window.mute_divs[1].appendChild(window.mute_speed_copy)
-      return;
-    }
-    for (let index = 0; index < window.mute_divs.length; index++) {
-      const element = window.mute_divs[index];
-      element.innerHTML = window.mute_default_innerHTML[index]
-    }
-  }
-
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
-
-  set_on_reset = `;
-  if (window.pudding_settings.TopBar && !window.daily_challenge) {
-    ${fruit_src} = window.count_img_arr[${count_var}]
-  }
-  window.control_mute_img(window.pudding_settings.TopBar, window.speed_img_arr[${speed_var}])
-  if(window.daily_challenge){
-    window.control_mute_img(false, window.speed_img_arr[${speed_var}])
-  }
-  $&`
-  code = code.assertReplace(reset_regex, set_on_reset)
-
-  window.set_ref = {};
-  eval(speed_var + `=0`)
-  eval(count_var + `=0`)
-  eval(size_var + `=0`)
-
-  window.apply_topbar_icons();
-
-  return code;
 }
 window.ResetKey = {}
 
@@ -3435,11 +3547,29 @@ window.ResetKey.make = function (){
 }
 
 window.ResetKey.alterCode = function(code){
+  if (window.SpeedrunMod) {
+    code = code.assertReplace(
+      /([a-zA-Z0-9_$]{1,8})\s*\(\s*a\s*\)\s*\{\s*if\s*\(\s*!this\.closed\s*\)\s*\{/,
+      "$1=window.stuffKeys=function(a){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;if(!this.closed){"
+    );
+  }
+
+  function isTypingInField() {
+    const ae = document.activeElement;
+    return !!(
+      ae &&
+      (ae.tagName === "INPUT" ||
+        ae.tagName === "TEXTAREA" ||
+        ae.tagName === "SELECT" ||
+        ae.isContentEditable)
+    );
+  }
+
   document.addEventListener('keydown', function(e){
     let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
     let resetButton = document.getElementById('ResetKeybind');
     let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
-    if(!(isSettingKeybind || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
+    if(!(isSettingKeybind || isTypingInField() || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
         if(e.key === keybinds["resetKey"]){
             const keydownEvent = new KeyboardEvent('keydown', {
                 keyCode: 27
@@ -3544,8 +3674,8 @@ window.SpeedrunMod.runCodeBefore = function () {
     "SpeedrunCss",
     "ModeRegistry",
     "TimeKeeper",
-    "SpeedInfo",
     "TopBar",
+    "SpeedInfo",
     "ResetKey",
   ];
   console.log("Enabling Speedrun Mod");

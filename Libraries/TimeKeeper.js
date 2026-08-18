@@ -743,6 +743,14 @@ window.TimeKeeper.make = function () {
         dialog.appendChild(buildRow(buildTimedCell("100"), buildTimedCell("ALL")));
         dialog.appendChild(buildRow(buildHighscoreCell(), buildAttemptsCell()));
 
+        if (window.SpeedrunMod && typeof window.buildSpeedInfoTrackingControls === "function") {
+            const trackingControls = window.buildSpeedInfoTrackingControls();
+            dialog.appendChild(trackingControls);
+            if (typeof window.wireSpeedInfoTrackingControls === "function") {
+                window.wireSpeedInfoTrackingControls(trackingControls);
+            }
+        }
+
         const buttonClose = document.createElement("button");
         buttonClose.appendChild(document.createTextNode("Close"));
         buttonClose.addEventListener("click", function () {

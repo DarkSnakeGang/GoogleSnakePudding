@@ -6,8 +6,8 @@ LIB_ORDER = [
     "SpeedrunCss",
     "ModeRegistry",
     "TimeKeeper",
-    "SpeedInfo",
     "TopBar",
+    "SpeedInfo",
     "ResetKey",
 ]
 OUTPUT = "SpeedrunMod.js"

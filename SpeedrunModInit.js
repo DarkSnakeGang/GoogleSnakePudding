@@ -93,8 +93,8 @@ window.SpeedrunMod.runCodeBefore = function () {
     "SpeedrunCss",
     "ModeRegistry",
     "TimeKeeper",
-    "SpeedInfo",
     "TopBar",
+    "SpeedInfo",
     "ResetKey",
   ];
   console.log("Enabling Speedrun Mod");

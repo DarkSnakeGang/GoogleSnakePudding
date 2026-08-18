@@ -20,8 +20,8 @@ const LIBS = [
   "SpeedrunCss",
   "ModeRegistry",
   "TimeKeeper",
-  "SpeedInfo",
   "TopBar",
+  "SpeedInfo",
   "ResetKey",
 ];
 

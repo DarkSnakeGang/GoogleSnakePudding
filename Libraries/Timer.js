@@ -349,69 +349,9 @@ window.Timer = {
         document.body.appendChild(editBox)
         document.getElementById('close-box').addEventListener('click', closeEditBox)
 
-        const wrholders_checkbox = document.getElementById('ShowWrHolders')
-        const tracked_input = document.getElementById('TrackedPlayerInput')
-        const trackedSetBtn = document.getElementById('TrackedPlayerSet')
-        const trackedClearBtn = document.getElementById('TrackedPlayerClear')
-
-        function syncSpeedInfoExclusiveUi() {
-          const tracking = !!(window.pudding_settings.TrackedPlayerName || '').trim()
-          if (tracking) {
-            wrholders_checkbox.checked = false
-            wrholders_checkbox.disabled = true
-            wrholders_checkbox.title = 'Clear tracked player to show WR holders'
-          } else {
-            wrholders_checkbox.disabled = false
-            wrholders_checkbox.title = ''
-            wrholders_checkbox.checked = !!window.pudding_settings.ShowWrHolders
-          }
-          tracked_input.value = window.pudding_settings.TrackedPlayerName || ''
+        if (typeof window.wireSpeedInfoTrackingControls === "function") {
+          window.wireSpeedInfoTrackingControls(editBox)
         }
-
-        function refreshSrcAfterSpeedInfoChange() {
-          if (typeof window.refreshTrackedPlayerUi === 'function') {
-            window.refreshTrackedPlayerUi()
-          }
-          if (typeof window.getAllSrc === 'function') {
-            window.getAllSrc().catch(e => console.error('getAllSrc error:', e))
-          }
-        }
-
-        syncSpeedInfoExclusiveUi()
-        if (typeof window.fillTrackedPlayerSuggestions === 'function') {
-          window.fillTrackedPlayerSuggestions()
-        }
-
-        wrholders_checkbox.addEventListener('change', function () {
-          if (wrholders_checkbox.disabled) return
-          if (wrholders_checkbox.checked) {
-            window.pudding_settings.TrackedPlayerName = ''
-            tracked_input.value = ''
-          }
-          window.pudding_settings.ShowWrHolders = !!wrholders_checkbox.checked
-          if (typeof window.saveSettings === 'function') window.saveSettings()
-          syncSpeedInfoExclusiveUi()
-          refreshSrcAfterSpeedInfoChange()
-        })
-
-        trackedSetBtn.addEventListener('click', function () {
-          const name = (tracked_input.value || '').trim()
-          window.pudding_settings.TrackedPlayerName = name
-          if (name) {
-            window.pudding_settings.ShowWrHolders = false
-          }
-          if (typeof window.saveSettings === 'function') window.saveSettings()
-          syncSpeedInfoExclusiveUi()
-          refreshSrcAfterSpeedInfoChange()
-        })
-
-        trackedClearBtn.addEventListener('click', function () {
-          tracked_input.value = ''
-          window.pudding_settings.TrackedPlayerName = ''
-          if (typeof window.saveSettings === 'function') window.saveSettings()
-          syncSpeedInfoExclusiveUi()
-          refreshSrcAfterSpeedInfoChange()
-        })
 
         const toggleDelta = document.getElementById('edit-delta')
         toggleDelta.checked = +_showDelta
