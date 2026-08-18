@@ -7069,21 +7069,91 @@ window.CustomBowl.make = function () {
     }
 
     // Types currently visible on the board (type < 0 = slot being reassigned, not showing).
-    function typesOnBoard(appleManager) {
+    function typesOnBoard(appleManager, ctx) {
         const showing = new Set();
         const apples = getAppleList(appleManager);
         if (!apples) return showing;
+        ctx = ctx || {};
         for (const apple of apples) {
             if (!apple) continue;
             const t = Number(apple.type);
-            if (!isNaN(t) && t >= 0) showing.add(t);
+            if (isNaN(t) || t < 0) continue;
+            if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
+            if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
+            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+            showing.add(t);
         }
         return showing;
     }
 
+    function pendingApple(appleManager) {
+        const apples = getAppleList(appleManager);
+        if (!apples) return null;
+        for (const apple of apples) {
+            if (!apple) continue;
+            const t = Number(apple.type);
+            if (isNaN(t) || t < 0) return apple;
+        }
+        return null;
+    }
+
+    function assignContext(appleManager, opts) {
+        opts = opts || {};
+        const settings = appleManager && appleManager.settings;
+        const pending = pendingApple(appleManager);
+        const ctx = {};
+        if (opts.pairOka) {
+            ctx.pairOka = opts.pairOka;
+        } else if (pending && pending.Oka !== undefined &&
+            window.__bowlIsMode && window.__bowlIsMode(settings, 10)) {
+            ctx.oka = !!pending.Oka;
+        }
+        if (opts.lh !== undefined) {
+            ctx.lh = !!opts.lh;
+        } else if (pending && window.__bowlIsMode && window.__bowlIsMode(settings, 9)) {
+            ctx.lh = !!pending.Lh;
+        }
+        return ctx;
+    }
+
+    function pickMatchesCtx(entry, ctx) {
+        if (entry.lh !== undefined && ctx.lh !== undefined && entry.lh !== ctx.lh) return false;
+        if (entry.oka !== undefined && ctx.oka !== undefined && entry.oka !== ctx.oka) return false;
+        if (entry.pairOka && ctx.pairOka) {
+            for (let i = 0; i < entry.pairOka.length; i++) {
+                if (ctx.pairOka.indexOf(entry.pairOka[i]) >= 0) return true;
+            }
+            return false;
+        }
+        if (entry.pairOka && ctx.oka !== undefined) {
+            return entry.pairOka.indexOf(ctx.oka) >= 0;
+        }
+        return true;
+    }
+
+    function mergeUniquePicks(showing, ctx) {
+        if (!window.__bowlUniquePicks) return;
+        window.__bowlUniquePicks.forEach(function (entry) {
+            if (pickMatchesCtx(entry, ctx)) showing.add(entry.type);
+        });
+    }
+
+    // Dimension pairs alternate Oka; assign before type picks when unique needs it.
+    window.ensureCustomBowlDimensionOka = function (appleManager) {
+        if (!appleManager || !window.__bowlIsMode || !window.__bowlIsMode(appleManager.settings, 10)) return;
+        const apples = getAppleList(appleManager);
+        if (!apples || apples.length < 2) return;
+        for (let b = 0; b + 1 < apples.length; b += 2) {
+            const c = Math.random() < 0.5;
+            apples[b].Oka = c;
+            apples[b + 1].Oka = !c;
+        }
+    };
+
     // When every pool type still looks "on board", pick the least-used ones
     // (the eaten slot, once cleared to -1, is the only 0-count type at minimum).
-    function rarestPoolTypes(appleManager, pool) {
+    function rarestPoolTypes(appleManager, pool, ctx) {
+        ctx = ctx || {};
         const counts = new Map();
         for (let i = 0; i < pool.length; i++) counts.set(pool[i], 0);
         const apples = getAppleList(appleManager);
@@ -7091,7 +7161,11 @@ window.CustomBowl.make = function () {
             for (const apple of apples) {
                 if (!apple) continue;
                 const t = Number(apple.type);
-                if (counts.has(t)) counts.set(t, counts.get(t) + 1);
+                if (!counts.has(t)) continue;
+                if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
+                if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
+                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+                counts.set(t, counts.get(t) + 1);
             }
         }
         let best = Infinity;
@@ -7111,13 +7185,19 @@ window.CustomBowl.make = function () {
         }
     }
 
-    function rememberUniquePick(type) {
-        if (!window.__bowlUniquePicks) window.__bowlUniquePicks = new Set();
-        window.__bowlUniquePicks.add(type);
+    function rememberUniquePick(type, ctx) {
+        if (!window.__bowlUniquePicks) window.__bowlUniquePicks = [];
+        const entry = { type: type };
+        if (ctx) {
+            if (ctx.lh !== undefined) entry.lh = ctx.lh;
+            if (ctx.oka !== undefined) entry.oka = ctx.oka;
+            if (ctx.pairOka) entry.pairOka = ctx.pairOka.slice();
+        }
+        window.__bowlUniquePicks.push(entry);
         if (!window.__bowlUniquePicksClear) {
             window.__bowlUniquePicksClear = true;
             setTimeout(function () {
-                window.__bowlUniquePicks = new Set();
+                window.__bowlUniquePicks = [];
                 window.__bowlUniquePicksClear = false;
             }, 0);
         }
@@ -7129,7 +7209,7 @@ window.CustomBowl.make = function () {
      * Other modes use General store; unique iff AlwaysUniqueFruit.
      * Simultaneous 3a/5a picks in one turn share __bowlUniquePicks.
      */
-    window.pickCustomPortalType = function (appleManager, isPortal) {
+    window.pickCustomPortalType = function (appleManager, isPortal, opts) {
         syncCountOverride(appleManager && appleManager.settings);
         try {
             const kind = isPortal ? "portal" : "general";
@@ -7140,14 +7220,13 @@ window.CustomBowl.make = function () {
             if (!useUnique) {
                 return pool[Math.floor(Math.random() * pool.length)];
             }
-            const showing = typesOnBoard(appleManager);
-            if (window.__bowlUniquePicks) {
-                window.__bowlUniquePicks.forEach(function (t) { showing.add(t); });
-            }
+            const ctx = assignContext(appleManager, opts || {});
+            const showing = typesOnBoard(appleManager, ctx);
+            mergeUniquePicks(showing, ctx);
             const available = pool.filter((t) => !showing.has(t));
-            const source = available.length > 0 ? available : rarestPoolTypes(appleManager, pool);
+            const source = available.length > 0 ? available : rarestPoolTypes(appleManager, pool, ctx);
             const picked = source[Math.floor(Math.random() * source.length)];
-            rememberUniquePick(picked);
+            rememberUniquePick(picked, ctx);
             return picked;
         } finally {
             window.__customBowlCountOverride = null;
@@ -7160,10 +7239,20 @@ window.CustomBowl.make = function () {
         const apples = getAppleList(appleManager);
         if (!apples || apples.length < 2) return false;
 
+        window.ensureCustomBowlDimensionOka(appleManager);
+
         for (let i = 0; i < apples.length; i++) apples[i].type = -1;
 
         for (let i = 0; i < apples.length; i += 2) {
-            const t = window.pickCustomPortalType(appleManager, true);
+            const a0 = apples[i];
+            const a1 = apples[i + 1];
+            const opts = {};
+            if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 10)) {
+                opts.pairOka = [!!a0.Oka, a1 ? !!a1.Oka : !!a0.Oka];
+            } else if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
+                opts.lh = !!a0.Lh;
+            }
+            const t = window.pickCustomPortalType(appleManager, true, opts);
             apples[i].type = t;
             if (apples[i + 1]) apples[i + 1].type = t;
         }
@@ -7173,6 +7262,8 @@ window.CustomBowl.make = function () {
     // Portal-only safety: if two pairs share a type, re-roll with showing-list rules.
     window.enforceUniquePortalFruitTypes = function (appleManager) {
         if (!appleManager || !isCustomBowlActive(appleManager.settings)) return;
+        // assignCustomPortalPairTypes already enforces per-dimension uniqueness.
+        if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 10)) return;
         const apples = getAppleList(appleManager);
         if (!apples || apples.length < 2) return;
 
@@ -7184,7 +7275,11 @@ window.CustomBowl.make = function () {
             if (isNaN(t) || t < 0 || seen.has(t)) {
                 if (a0) a0.type = -1;
                 if (a1) a1.type = -1;
-                t = window.pickCustomPortalType(appleManager, true);
+                const opts = {};
+                if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
+                    opts.lh = !!a0.Lh;
+                }
+                t = window.pickCustomPortalType(appleManager, true, opts);
                 if (a0) a0.type = t;
                 if (a1) a1.type = t;
             } else if (a1 && Number(a1.type) !== t) {
@@ -7536,7 +7631,7 @@ window.CustomBowl.alterCode = function (code) {
     // Portal init: clear + roll from (pool − showing) pair by pair.
     code = code.assertReplace(
         baf_regex,
-        `${baf_name}=function(a){` +
+        `${baf_name}=function(a){window.__bowlIsMode=${portal_check};` +
         `if(${portal_check}(a.settings,2)&&window.assignCustomPortalPairTypes&&window.assignCustomPortalPairTypes(a))return;` +
         `if(${portal_check}(a.settings,2)){var b=Math.floor(48/a.${apple_array}.length);`
     );
@@ -7581,7 +7676,9 @@ window.CustomBowl.alterCode = function (code) {
     catchError(classic_fill_regex, code);
     code = code.assertReplace(
         classic_fill_regex,
-        `else{for(var $1 of this.${apple_array})$1.type=-1;for($1 of this.${apple_array})$1.type=${aaf_name}(this)}`
+        `else{for(var $1 of this.${apple_array})$1.type=-1;` +
+        `window.ensureCustomBowlDimensionOka&&window.ensureCustomBowlDimensionOka(this);` +
+        `for($1 of this.${apple_array})$1.type=${aaf_name}(this)}`
     );
 
     const refill_regex = new RegExp(
