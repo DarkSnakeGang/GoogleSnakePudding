@@ -255,31 +255,45 @@ window.Counter.alterCode = function (code) {
     }
     
 
+    // Matches https://darksnakegang.github.io/GoogleSnakeWallSolver/ sizes
+    // (Normal/Standard 17×15, Small 10×9, Large 24×21).
+    window.WALL_SOLVER_SIZES = {
+        0: { width: 17, height: 15, cells: 255 }, // Normal / Standard
+        1: { width: 10, height: 9, cells: 90 },   // Small
+        2: { width: 24, height: 21, cells: 504 }, // Large
+    };
+    window.WALL_SOLVER_URL = "https://darksnakegang.github.io/GoogleSnakeWallSolver/";
+
+    /** Canonical 0/1 bits for the Wall Solver (1 = wall, 0 = empty). */
     window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
-        if(window.timeKeeper.getCurrentSetting("size") != 1)
-            return false;
+        const sizeIdx = window.timeKeeper && typeof window.timeKeeper.getCurrentSetting === "function"
+            ? window.timeKeeper.getCurrentSetting("size")
+            : -1;
+        const dims = window.WALL_SOLVER_SIZES[sizeIdx];
+        if (!dims) return false;
 
-        // Initialize an array of 90 tiles, all initialized to '1' (empty)
-        let board = Array(90).fill('1');
-
-        // Set '2' (wall) for each coordinate in the list
-        coordinates.forEach(coord => {
-            let [x, y] = coord;
-            let index = y * 10 + x; // Calculate the index in the 1D array
-            board[index] = '2'; // Set '2' at the calculated index
+        const board = Array(dims.cells).fill("0");
+        (coordinates || []).forEach(function (coord) {
+            const x = coord[0];
+            const y = coord[1];
+            if (x < 0 || y < 0 || x >= dims.width || y >= dims.height) return;
+            board[y * dims.width + x] = "1";
         });
+        return board.join("");
+    };
 
-        // Join the array into a single string of 90 characters
-        return board.join('');
-    }
+    window.openWallSolverForPattern = function openWallSolverForPattern(coordinates) {
+        const bits = window.coordinatesToBoardString(coordinates);
+        if (!bits) return false;
+        const url = window.WALL_SOLVER_URL + "?board=" + encodeURIComponent(bits) + "&solve=1";
+        window.open(url, "_blank", "noopener,noreferrer");
+        return true;
+    };
 
     let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
 
     death_wall_icon.addEventListener("click", function () {
-        pattern_string = window.coordinatesToBoardString(window.wallCoords)
-        if(pattern_string){
-            navigator.clipboard.writeText("pattern " + pattern_string);
-        }
+        window.openWallSolverForPattern(window.wallCoords);
     });
     
 
