@@ -72,7 +72,7 @@ window.SpeedrunMod.runCodeBefore = function () {
       settings = {};
     }
     if (typeof settings.TopBar !== "boolean") settings.TopBar = true;
-    if (typeof settings.SpeedInfo !== "boolean") settings.SpeedInfo = false;
+    if (typeof settings.SpeedInfo !== "boolean") settings.SpeedInfo = true;
     if (typeof settings.ShowWrHolders !== "boolean") settings.ShowWrHolders = true;
     if (typeof settings.TrackedPlayerName !== "string") settings.TrackedPlayerName = "";
     return settings;

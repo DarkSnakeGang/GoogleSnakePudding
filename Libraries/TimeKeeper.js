@@ -313,7 +313,8 @@ window.TimeKeeper.make = function () {
             };
         } else if (
             score > storage[name].high ||
-            (score == storage[name].high && time < storage[name].time)
+            (score == storage[name].high &&
+                window.timeKeeper.lastAppleTime < storage[name].time)
         ) {
             storage[name].high = score;
             storage[name].time = window.timeKeeper.lastAppleTime;
@@ -873,5 +874,13 @@ window.TimeKeeper.alterCode = function (code) {
             "$1=function(a,b,c,d){window.timeKeeper.gotApple(Math.floor(c*d),b);if(b===25||b===50||b===100)"
         );
     }
+
+    // Count attempts / clear runStarted on reset (SpeedrunMod has no Counter.js hook).
+    // Safe to call twice: second addAttempt no-ops when runStarted is already false.
+    code = code.assertReplace(
+        /;this\.reset\(\)\}\}/,
+        `;window.timeKeeper.addAttempt();this.reset()}}`
+    );
+
     return code;
 };

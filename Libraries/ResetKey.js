@@ -1,15 +1,24 @@
 window.ResetKey = {}
 
 window.ResetKey.make = function (){
-  keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
+  // Persist Shift default so alterCode keydown matches UI / docs
+  let keybinds = {};
+  try {
+    keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+  } catch (e) {
+    keybinds = {};
+  }
+  if (!keybinds.resetKey) {
+    keybinds.resetKey = "Shift";
+    localStorage.setItem("keybinds", JSON.stringify(keybinds));
+  }
 
-  // Code for reset key
-  let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
   function setupKeybindPicker(buttonId, keybindType) {
       const button = document.getElementById(buttonId);
       if (!button) return;
       if(!keybinds[keybindType]){
           keybinds[keybindType] = "Shift";
+          localStorage.setItem("keybinds", JSON.stringify(keybinds));
       }
       button.textContent = `Reset Key: ${keybinds[keybindType]}`;
 
@@ -50,16 +59,24 @@ window.ResetKey.alterCode = function(code){
   }
 
   document.addEventListener('keydown', function(e){
-    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    let keybinds = {};
+    try {
+      keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    } catch (err) {
+      keybinds = {};
+    }
+    const resetKey = keybinds.resetKey || "Shift";
     let resetButton = document.getElementById('ResetKeybind');
     let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
-    if(!(isSettingKeybind || isTypingInField() || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
-        if(e.key === keybinds["resetKey"]){
+    const dialogActive = window.timeKeeper && window.timeKeeper.dialogActive;
+    if(!(isSettingKeybind || isTypingInField() || dialogActive || document.getElementById('edit-box'))){
+        if(e.key === resetKey){
             const keydownEvent = new KeyboardEvent('keydown', {
                 keyCode: 27
             });
             document.dispatchEvent(keydownEvent);
-            document.querySelector('[jsname="NSjDf"]').click();
+            const playBtn = document.querySelector('[jsname="NSjDf"]');
+            if (playBtn) playBtn.click();
         }
     }
   });

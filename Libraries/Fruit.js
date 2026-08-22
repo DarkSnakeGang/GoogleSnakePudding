@@ -241,7 +241,8 @@ window.Fruit.alterCode = function (code) {
         }
                 
         ${fruit_image} = window.current_fruit_img;
-        document.querySelector('[jsname="Jesp7b"]').src = window.current_fruit_img;
+        const __fruitHud = document.querySelector('[jsname="Jesp7b"]');
+        if (__fruitHud) __fruitHud.src = window.current_fruit_img;
     }
     `
     
@@ -249,16 +250,21 @@ window.Fruit.alterCode = function (code) {
     code = code.assertReplace(rude_insert, "trophy_\${b}\.png`}`\); " + `${new_realism_code}` + " }");
 
     deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
-    code.match(deathscreen_fruit).forEach(element => {
-        code.assertReplace(element, element + new_realism_code);
+    const deathscreenMatches = code.match(deathscreen_fruit) || [];
+    deathscreenMatches.forEach(element => {
+        code = code.assertReplace(element, element + new_realism_code);
     });
     
     image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
     code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
 
     // Derive fruit ctor + image-cache prop (v11: S6/oa, v12: c7/ka — this.oa is the fruit array on v12)
-    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
+    get_apple_make_func = new RegExp(/for\(a=0;a<\d+;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
     apple_make_match = code.match(get_apple_make_func)
+    if (!apple_make_match) {
+        console.error("Fruit: could not find apple make loop");
+        return code;
+    }
     func_name = apple_make_match[1]
     image_cache_name = apple_make_match[2]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)

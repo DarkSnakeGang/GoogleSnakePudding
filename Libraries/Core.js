@@ -20,34 +20,36 @@ window.Core.make = function () {
     window.graphics_selected = 0;
 
     daily_button = document.querySelector('[jsname="Prvkrf"]');
-    window.daily_challenge = false
+    window.daily_challenge = false;
 
-    // Options for the Intersection Observer
-    var options = {
-        root: null, // Use the viewport as the root
-        threshold: 0.5 // Trigger when 50% of the element is visible
-    };
+    if (daily_button) {
+        // Options for the Intersection Observer
+        var options = {
+            root: null, // Use the viewport as the root
+            threshold: 0.5 // Trigger when 50% of the element is visible
+        };
 
-    // Callback function to handle intersection changes
-    function handleIntersection(entries, observer) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // The element is now visible
-                window.daily_challenge = false;
-            }
+        // Callback function to handle intersection changes
+        function handleIntersection(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // The element is now visible on classic menu
+                    window.daily_challenge = false;
+                }
+            });
+        }
+
+        // Create an Intersection Observer
+        var observer = new IntersectionObserver(handleIntersection, options);
+
+        // Start observing the button
+        observer.observe(daily_button);
+
+        daily_button.addEventListener("click", function() {
+            window.daily_challenge = true;
+            window.first_time_call = true;
         });
     }
-
-    // Create an Intersection Observer
-    var observer = new IntersectionObserver(handleIntersection, options);
-
-    // Start observing the button
-    observer.observe(daily_button);
-
-    daily_button.addEventListener("click", function() {
-        window.daily_challenge = true;
-        window.first_time_call = true;
-      });
 
 }
 

@@ -130,7 +130,10 @@ window.TopBar.alterCode = function (code) {
   fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
 
   window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
-  window.mute_default_innerHTML = [window.mute_divs[0].innerHTML, window.mute_divs[1].innerHTML]
+  window.mute_default_innerHTML = [];
+  for (let i = 0; i < window.mute_divs.length; i++) {
+    window.mute_default_innerHTML[i] = window.mute_divs[i].innerHTML;
+  }
   window.mute_speed_element = document.createElement('img');
   window.mute_speed_element.classList.add('EFcTud')
   window.mute_speed_element.src = "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png"
@@ -138,6 +141,7 @@ window.TopBar.alterCode = function (code) {
   window.mute_speed_copy = window.mute_speed_element.cloneNode(true);
 
   window.control_mute_img = function control_mute_img(TopBar, SpeedSrc) {
+    if (!window.mute_divs || !window.mute_divs.length) return;
     if (TopBar) {
       for (let index = 0; index < window.mute_divs.length; index++) {
         const element = window.mute_divs[index];
@@ -146,7 +150,9 @@ window.TopBar.alterCode = function (code) {
       window.mute_speed_element.src = SpeedSrc
       window.mute_speed_copy.src = SpeedSrc
       window.mute_divs[0].appendChild(window.mute_speed_element)
-      window.mute_divs[1].appendChild(window.mute_speed_copy)
+      if (window.mute_divs[1]) {
+        window.mute_divs[1].appendChild(window.mute_speed_copy)
+      }
       return;
     }
     for (let index = 0; index < window.mute_divs.length; index++) {

@@ -22,34 +22,36 @@ window.Core.make = function () {
     window.graphics_selected = 0;
 
     daily_button = document.querySelector('[jsname="Prvkrf"]');
-    window.daily_challenge = false
+    window.daily_challenge = false;
 
-    // Options for the Intersection Observer
-    var options = {
-        root: null, // Use the viewport as the root
-        threshold: 0.5 // Trigger when 50% of the element is visible
-    };
+    if (daily_button) {
+        // Options for the Intersection Observer
+        var options = {
+            root: null, // Use the viewport as the root
+            threshold: 0.5 // Trigger when 50% of the element is visible
+        };
 
-    // Callback function to handle intersection changes
-    function handleIntersection(entries, observer) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                // The element is now visible
-                window.daily_challenge = false;
-            }
+        // Callback function to handle intersection changes
+        function handleIntersection(entries, observer) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // The element is now visible on classic menu
+                    window.daily_challenge = false;
+                }
+            });
+        }
+
+        // Create an Intersection Observer
+        var observer = new IntersectionObserver(handleIntersection, options);
+
+        // Start observing the button
+        observer.observe(daily_button);
+
+        daily_button.addEventListener("click", function() {
+            window.daily_challenge = true;
+            window.first_time_call = true;
         });
     }
-
-    // Create an Intersection Observer
-    var observer = new IntersectionObserver(handleIntersection, options);
-
-    // Start observing the button
-    observer.observe(daily_button);
-
-    daily_button.addEventListener("click", function() {
-        window.daily_challenge = true;
-        window.first_time_call = true;
-      });
 
 }
 
@@ -907,11 +909,11 @@ window.Counter.alterCode = function (code) {
     };
 
     let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
-
-    death_wall_icon.addEventListener("click", function () {
-        window.openWallSolverForPattern(window.wallCoords);
-    });
-    
+    if (death_wall_icon) {
+        death_wall_icon.addEventListener("click", function () {
+            window.openWallSolverForPattern(window.wallCoords);
+        });
+    }
 
     return code;
 }
@@ -1446,7 +1448,8 @@ window.TimeKeeper.make = function () {
             };
         } else if (
             score > storage[name].high ||
-            (score == storage[name].high && time < storage[name].time)
+            (score == storage[name].high &&
+                window.timeKeeper.lastAppleTime < storage[name].time)
         ) {
             storage[name].high = score;
             storage[name].time = window.timeKeeper.lastAppleTime;
@@ -2006,6 +2009,14 @@ window.TimeKeeper.alterCode = function (code) {
             "$1=function(a,b,c,d){window.timeKeeper.gotApple(Math.floor(c*d),b);if(b===25||b===50||b===100)"
         );
     }
+
+    // Count attempts / clear runStarted on reset (SpeedrunMod has no Counter.js hook).
+    // Safe to call twice: second addAttempt no-ops when runStarted is already false.
+    code = code.assertReplace(
+        /;this\.reset\(\)\}\}/,
+        `;window.timeKeeper.addAttempt();this.reset()}}`
+    );
+
     return code;
 };
 window.Fruit = {};
@@ -2251,7 +2262,8 @@ window.Fruit.alterCode = function (code) {
         }
                 
         ${fruit_image} = window.current_fruit_img;
-        document.querySelector('[jsname="Jesp7b"]').src = window.current_fruit_img;
+        const __fruitHud = document.querySelector('[jsname="Jesp7b"]');
+        if (__fruitHud) __fruitHud.src = window.current_fruit_img;
     }
     `
     
@@ -2259,16 +2271,21 @@ window.Fruit.alterCode = function (code) {
     code = code.assertReplace(rude_insert, "trophy_\${b}\.png`}`\); " + `${new_realism_code}` + " }");
 
     deathscreen_fruit = new RegExp(`\\(a.[a-zA-Z0-9_$]{1,8},${fruit_image}\\);`, 'g')
-    code.match(deathscreen_fruit).forEach(element => {
-        code.assertReplace(element, element + new_realism_code);
+    const deathscreenMatches = code.match(deathscreen_fruit) || [];
+    deathscreenMatches.forEach(element => {
+        code = code.assertReplace(element, element + new_realism_code);
     });
     
     image_check = new RegExp(/b!==a\.src&&\(a\.src=b\)/gm)
     code = code.assertReplace(image_check, code.match(image_check)[0] + new_realism_code.replace(`${fruit_image} = window.current_fruit_img;`, ''))
 
     // Derive fruit ctor + image-cache prop (v11: S6/oa, v12: c7/ka — this.oa is the fruit array on v12)
-    get_apple_make_func = new RegExp(/for\(a=0;a<24;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
+    get_apple_make_func = new RegExp(/for\(a=0;a<\d+;a\+\+\)b=new ([a-zA-Z0-9_$]{1,8})\(this\.[a-zA-Z0-9_$]{1,8},[\s\S]*?,1,this\.([a-zA-Z0-9_$]{1,8}),/)
     apple_make_match = code.match(get_apple_make_func)
+    if (!apple_make_match) {
+        console.error("Fruit: could not find apple make loop");
+        return code;
+    }
     func_name = apple_make_match[1]
     image_cache_name = apple_make_match[2]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
@@ -2573,7 +2590,10 @@ window.TopBar.alterCode = function (code) {
   fruit_src = `document.querySelector('[jsname="${fruit_jsname}"]').src `
 
   window.mute_divs = document.querySelectorAll('[aria-label="Mute"]');
-  window.mute_default_innerHTML = [window.mute_divs[0].innerHTML, window.mute_divs[1].innerHTML]
+  window.mute_default_innerHTML = [];
+  for (let i = 0; i < window.mute_divs.length; i++) {
+    window.mute_default_innerHTML[i] = window.mute_divs[i].innerHTML;
+  }
   window.mute_speed_element = document.createElement('img');
   window.mute_speed_element.classList.add('EFcTud')
   window.mute_speed_element.src = "https://www.google.com/logos/fnbx/snake_arcade/v3/speed_00.png"
@@ -2581,6 +2601,7 @@ window.TopBar.alterCode = function (code) {
   window.mute_speed_copy = window.mute_speed_element.cloneNode(true);
 
   window.control_mute_img = function control_mute_img(TopBar, SpeedSrc) {
+    if (!window.mute_divs || !window.mute_divs.length) return;
     if (TopBar) {
       for (let index = 0; index < window.mute_divs.length; index++) {
         const element = window.mute_divs[index];
@@ -2589,7 +2610,9 @@ window.TopBar.alterCode = function (code) {
       window.mute_speed_element.src = SpeedSrc
       window.mute_speed_copy.src = SpeedSrc
       window.mute_divs[0].appendChild(window.mute_speed_element)
-      window.mute_divs[1].appendChild(window.mute_speed_copy)
+      if (window.mute_divs[1]) {
+        window.mute_divs[1].appendChild(window.mute_speed_copy)
+      }
       return;
     }
     for (let index = 0; index < window.mute_divs.length; index++) {
@@ -3154,10 +3177,6 @@ window.SettingsSaver.make = function () {
         return pudding_settings;
     }
     window.pudding_settings = window.loadSettings();
-    if (window._puddingSettingsNeedsPersist && typeof window.saveSettings === "function") {
-        window.saveSettings();
-        window._puddingSettingsNeedsPersist = false;
-    }
 
     window.saveSettings = function () {
         const s = window.pudding_settings;
@@ -3175,6 +3194,11 @@ window.SettingsSaver.make = function () {
         }
     }
 
+    if (window._puddingSettingsNeedsPersist) {
+        window.saveSettings();
+        window._puddingSettingsNeedsPersist = false;
+    }
+
     // Read selected child index for a Google Snake selector row
     window.readGameSettingIndex = function (selectorId) {
         const root = document.getElementById(selectorId);
@@ -3183,9 +3207,9 @@ window.SettingsSaver.make = function () {
         // Selected icon uses tuJOWd (optionally with other classes)
         for (let i = 0; i < root.children.length; i++) {
             const el = root.children[i];
-            const cls = el.className || "";
-            if (cls === "tuJOWd" || cls === "DqMRee tuJOWd" || cls === "DqMRee") return i;
             if (el.classList && el.classList.contains("tuJOWd")) return i;
+            const cls = el.className || "";
+            if (cls === "tuJOWd" || cls === "DqMRee tuJOWd") return i;
         }
 
         // Odd-class-out (trophy / count style)
@@ -4633,7 +4657,11 @@ window.SpeedInfo.make = function () {
             return;
         }
 
-        highscore = parseInt(response["data"]["runs"][0]["run"]["times"]["primary"].toString().split('.')[1]).toString();
+        highscore = wrHighscoreFromRun(response["data"]["runs"][0]["run"]);
+        if (highscore == null) {
+            document.getElementById('Hsrc').innerHTML = `Highscore: None`
+            return;
+        }
         world_record = highscore + " Apples";
         const playerName = response["data"]["runs"][0].playerName || "";
 
@@ -4650,8 +4678,10 @@ window.SpeedInfo.make = function () {
 
     // This shit was generated by ChatGPT
     function convertTime(duration) {
+        if (!duration) return "None";
         const regex = /PT(?:(\d+)H)?(?:(\d+)M)?([\d.]+)S/;
-        const matches = duration.match(regex);
+        const matches = String(duration).match(regex);
+        if (!matches) return "None";
 
         let convertedTime = '';
 
@@ -4704,20 +4734,28 @@ window.SpeedInfo.make = function () {
 
     window.SpeedInfoShow = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
+        if (!speedinfoBox) return;
         speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'visible';
         window.pudding_settings.SpeedInfo = true;
+        const speedInfoToggle = document.getElementById("AlwaysOnTimeKeeper") ||
+            document.getElementById("SpeedrunSpeedInfo");
+        if (speedInfoToggle) speedInfoToggle.checked = true;
+        if (typeof window.saveSettings === "function") window.saveSettings();
 
         window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     }
 
     window.SpeedInfoHide = function () {
         const speedinfoBox = document.getElementById('speedinfo-popup-pudding');
+        if (!speedinfoBox) return;
         speedinfoBox.style.display = 'flex';
         speedinfoBox.style.visibility = 'hidden';
         window.pudding_settings.SpeedInfo = false;
-        const speedInfoToggle = document.getElementById("AlwaysOnTimeKeeper");
+        const speedInfoToggle = document.getElementById("AlwaysOnTimeKeeper") ||
+            document.getElementById("SpeedrunSpeedInfo");
         if (speedInfoToggle) speedInfoToggle.checked = false;
+        if (typeof window.saveSettings === "function") window.saveSettings();
     }
 
     window.SpeedInfoSetup = function () {
@@ -4782,6 +4820,10 @@ window.SpeedInfo.make = function () {
 
         <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:6px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
         <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSpeedInfo">
+        <label class="form-check-label" for="SpeedrunSpeedInfo" style="${siLabel}">Show Speed Info</label>
+        </div>
+        <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
         <label class="form-check-label" data-speedrun-topbar-label style="${siLabel}">Top Bar Icons</label>
         </div>
@@ -4806,6 +4848,11 @@ window.SpeedInfo.make = function () {
             if (speedrunTopbarLabel) speedrunTopbarLabel.setAttribute("for", "TopBarIcons");
             if (typeof window.setup_topbar_checkbox === "function") {
                 window.setup_topbar_checkbox();
+            }
+            const speedInfoCb = document.getElementById("SpeedrunSpeedInfo");
+            if (speedInfoCb) {
+                speedInfoCb.checked = !!window.pudding_settings.SpeedInfo;
+                speedInfoCb.addEventListener("change", window.ToggleSpeedInfo);
             }
         }
 
@@ -4840,6 +4887,7 @@ window.SpeedInfo.make = function () {
             // Hide it
             window.SpeedInfoHide();
         }
+        if (typeof window.saveSettings === "function") window.saveSettings();
     }
 
     //Listeners to hide/show speedinfo box
@@ -6970,15 +7018,24 @@ window.BootstrapMenu.alterCode = function (code) {
 window.ResetKey = {}
 
 window.ResetKey.make = function (){
-  keybind_settings = document.getElementById("ResetKeybind"); // keybind changer
+  // Persist Shift default so alterCode keydown matches UI / docs
+  let keybinds = {};
+  try {
+    keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+  } catch (e) {
+    keybinds = {};
+  }
+  if (!keybinds.resetKey) {
+    keybinds.resetKey = "Shift";
+    localStorage.setItem("keybinds", JSON.stringify(keybinds));
+  }
 
-  // Code for reset key
-  let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
   function setupKeybindPicker(buttonId, keybindType) {
       const button = document.getElementById(buttonId);
       if (!button) return;
       if(!keybinds[keybindType]){
           keybinds[keybindType] = "Shift";
+          localStorage.setItem("keybinds", JSON.stringify(keybinds));
       }
       button.textContent = `Reset Key: ${keybinds[keybindType]}`;
 
@@ -7019,16 +7076,24 @@ window.ResetKey.alterCode = function(code){
   }
 
   document.addEventListener('keydown', function(e){
-    let keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    let keybinds = {};
+    try {
+      keybinds = JSON.parse(localStorage.getItem("keybinds")) || {};
+    } catch (err) {
+      keybinds = {};
+    }
+    const resetKey = keybinds.resetKey || "Shift";
     let resetButton = document.getElementById('ResetKeybind');
     let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
-    if(!(isSettingKeybind || isTypingInField() || window.timeKeeper.dialogActive || document.getElementById('edit-box'))){
-        if(e.key === keybinds["resetKey"]){
+    const dialogActive = window.timeKeeper && window.timeKeeper.dialogActive;
+    if(!(isSettingKeybind || isTypingInField() || dialogActive || document.getElementById('edit-box'))){
+        if(e.key === resetKey){
             const keydownEvent = new KeyboardEvent('keydown', {
                 keyCode: 27
             });
             document.dispatchEvent(keydownEvent);
-            document.querySelector('[jsname="NSjDf"]').click();
+            const playBtn = document.querySelector('[jsname="NSjDf"]');
+            if (playBtn) playBtn.click();
         }
     }
   });

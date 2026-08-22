@@ -291,11 +291,11 @@ window.Counter.alterCode = function (code) {
     };
 
     let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
-
-    death_wall_icon.addEventListener("click", function () {
-        window.openWallSolverForPattern(window.wallCoords);
-    });
-    
+    if (death_wall_icon) {
+        death_wall_icon.addEventListener("click", function () {
+            window.openWallSolverForPattern(window.wallCoords);
+        });
+    }
 
     return code;
 }

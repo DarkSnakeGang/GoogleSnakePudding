@@ -248,10 +248,6 @@ window.SettingsSaver.make = function () {
         return pudding_settings;
     }
     window.pudding_settings = window.loadSettings();
-    if (window._puddingSettingsNeedsPersist && typeof window.saveSettings === "function") {
-        window.saveSettings();
-        window._puddingSettingsNeedsPersist = false;
-    }
 
     window.saveSettings = function () {
         const s = window.pudding_settings;
@@ -269,6 +265,11 @@ window.SettingsSaver.make = function () {
         }
     }
 
+    if (window._puddingSettingsNeedsPersist) {
+        window.saveSettings();
+        window._puddingSettingsNeedsPersist = false;
+    }
+
     // Read selected child index for a Google Snake selector row
     window.readGameSettingIndex = function (selectorId) {
         const root = document.getElementById(selectorId);
@@ -277,9 +278,9 @@ window.SettingsSaver.make = function () {
         // Selected icon uses tuJOWd (optionally with other classes)
         for (let i = 0; i < root.children.length; i++) {
             const el = root.children[i];
-            const cls = el.className || "";
-            if (cls === "tuJOWd" || cls === "DqMRee tuJOWd" || cls === "DqMRee") return i;
             if (el.classList && el.classList.contains("tuJOWd")) return i;
+            const cls = el.className || "";
+            if (cls === "tuJOWd" || cls === "DqMRee tuJOWd") return i;
         }
 
         // Odd-class-out (trophy / count style)
