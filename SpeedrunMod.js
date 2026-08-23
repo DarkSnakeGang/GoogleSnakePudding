@@ -3599,23 +3599,7 @@ window.SpeedInfo.make = function () {
         </div>
         </div>
 
-        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:8px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
-        <div class="form-check form-switch" style="margin:0 0 4px;">
-        <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSpeedInfo">
-        <label class="form-check-label" for="SpeedrunSpeedInfo" style="${siLabel}">Show Speed Info</label>
-        </div>
-        <div class="form-check form-switch" style="margin:0 0 6px;">
-        <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
-        <label class="form-check-label" data-speedrun-topbar-label style="${siLabel}">Top Bar Icons</label>
-        </div>
-        <button class="btn" style="display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:5px 8px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;" id="ResetKeybind">Reset Key: Shift</button>
-        <button class="btn" style="display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:5px 8px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;" id="ExportBackup">Export backup</button>
-        <div style="display:flex;gap:4px;margin:0 0 2px;">
-        <button class="btn" style="flex:1;margin:0;padding:5px 6px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:11px;" id="ImportMergeBackup">Import merge</button>
-        <button class="btn" style="flex:1;margin:0;padding:5px 6px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:11px;" id="ImportReplaceBackup">Import replace</button>
-        </div>
-        <input type="file" id="PuddingBackupFile" accept="application/json,.json" style="display:none;">
-        </div>
+        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:8px 3px 0;border-top:1px solid rgba(255,255,255,0.22);"></div>
 
         <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
 
@@ -3628,7 +3612,28 @@ window.SpeedInfo.make = function () {
 
         if (window.SpeedrunMod) {
             const speedrunControls = document.getElementById("speedrun-controls-section");
-            if (speedrunControls) speedrunControls.style.display = "block";
+            if (speedrunControls) {
+                const btnStyle = "display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:5px 8px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;";
+                const halfBtn = "flex:1;margin:0;padding:5px 6px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:11px;";
+                speedrunControls.innerHTML = `
+        <div class="form-check form-switch" style="margin:0 0 4px;">
+        <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSpeedInfo">
+        <label class="form-check-label" for="SpeedrunSpeedInfo" style="${siLabel}">Show Speed Info</label>
+        </div>
+        <div class="form-check form-switch" style="margin:0 0 6px;">
+        <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
+        <label class="form-check-label" data-speedrun-topbar-label style="${siLabel}">Top Bar Icons</label>
+        </div>
+        <button class="btn" style="${btnStyle}" id="ResetKeybind">Reset Key: Shift</button>
+        <button class="btn" style="${btnStyle}" id="ExportBackup">Export backup</button>
+        <div style="display:flex;gap:4px;margin:0 0 2px;">
+        <button class="btn" style="${halfBtn}" id="ImportMergeBackup">Import merge</button>
+        <button class="btn" style="${halfBtn}" id="ImportReplaceBackup">Import replace</button>
+        </div>
+        <input type="file" id="PuddingBackupFile" accept="application/json,.json" style="display:none;">
+                `;
+                speedrunControls.style.display = "block";
+            }
             const speedrunTopbar = speedinfoBox.querySelector("[data-speedrun-topbar]");
             if (speedrunTopbar) speedrunTopbar.id = "TopBarIcons";
             const speedrunTopbarLabel = speedinfoBox.querySelector("[data-speedrun-topbar-label]");
@@ -3992,21 +3997,28 @@ window.ResetKey.make = function (){
   }
 
   function setupKeybindPicker(buttonId, keybindType) {
-      const button = document.getElementById(buttonId);
-      if (!button) return;
-      if(!keybinds[keybindType]){
+      const buttons = document.querySelectorAll("#" + buttonId);
+      if (!buttons.length) return;
+      if (!keybinds[keybindType]) {
           keybinds[keybindType] = "Shift";
           localStorage.setItem("keybinds", JSON.stringify(keybinds));
       }
-      button.textContent = `Reset Key: ${keybinds[keybindType]}`;
-
-      button.addEventListener("click", () => {
-          button.textContent = "Press any key...";
-          document.addEventListener("keydown", function handler(e) {
-          keybinds[keybindType] = e.key;
-          button.textContent = `Reset Key: ${e.key}`;
-          localStorage.setItem("keybinds", JSON.stringify(keybinds));
-          document.removeEventListener("keydown", handler);
+      const label = `Reset Key: ${keybinds[keybindType]}`;
+      buttons.forEach(function (button) {
+          button.textContent = label;
+          button.addEventListener("click", function () {
+              buttons.forEach(function (b) {
+                  b.textContent = "Press any key...";
+              });
+              document.addEventListener("keydown", function handler(e) {
+                  keybinds[keybindType] = e.key;
+                  const next = `Reset Key: ${e.key}`;
+                  buttons.forEach(function (b) {
+                      b.textContent = next;
+                  });
+                  localStorage.setItem("keybinds", JSON.stringify(keybinds));
+                  document.removeEventListener("keydown", handler);
+              });
           });
       });
   }
@@ -4044,8 +4056,11 @@ window.ResetKey.alterCode = function(code){
       keybinds = {};
     }
     const resetKey = keybinds.resetKey || "Shift";
-    let resetButton = document.getElementById('ResetKeybind');
-    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
+    const resetButtons = document.querySelectorAll("#ResetKeybind");
+    let isSettingKeybind = false;
+    resetButtons.forEach(function (btn) {
+      if (btn.textContent === "Press any key...") isSettingKeybind = true;
+    });
     const dialogActive = window.timeKeeper && window.timeKeeper.dialogActive;
     if(!(isSettingKeybind || isTypingInField() || dialogActive || document.getElementById('edit-box'))){
         if(e.key === resetKey){

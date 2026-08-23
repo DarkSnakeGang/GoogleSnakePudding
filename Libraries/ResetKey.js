@@ -14,21 +14,28 @@ window.ResetKey.make = function (){
   }
 
   function setupKeybindPicker(buttonId, keybindType) {
-      const button = document.getElementById(buttonId);
-      if (!button) return;
-      if(!keybinds[keybindType]){
+      const buttons = document.querySelectorAll("#" + buttonId);
+      if (!buttons.length) return;
+      if (!keybinds[keybindType]) {
           keybinds[keybindType] = "Shift";
           localStorage.setItem("keybinds", JSON.stringify(keybinds));
       }
-      button.textContent = `Reset Key: ${keybinds[keybindType]}`;
-
-      button.addEventListener("click", () => {
-          button.textContent = "Press any key...";
-          document.addEventListener("keydown", function handler(e) {
-          keybinds[keybindType] = e.key;
-          button.textContent = `Reset Key: ${e.key}`;
-          localStorage.setItem("keybinds", JSON.stringify(keybinds));
-          document.removeEventListener("keydown", handler);
+      const label = `Reset Key: ${keybinds[keybindType]}`;
+      buttons.forEach(function (button) {
+          button.textContent = label;
+          button.addEventListener("click", function () {
+              buttons.forEach(function (b) {
+                  b.textContent = "Press any key...";
+              });
+              document.addEventListener("keydown", function handler(e) {
+                  keybinds[keybindType] = e.key;
+                  const next = `Reset Key: ${e.key}`;
+                  buttons.forEach(function (b) {
+                      b.textContent = next;
+                  });
+                  localStorage.setItem("keybinds", JSON.stringify(keybinds));
+                  document.removeEventListener("keydown", handler);
+              });
           });
       });
   }
@@ -66,8 +73,11 @@ window.ResetKey.alterCode = function(code){
       keybinds = {};
     }
     const resetKey = keybinds.resetKey || "Shift";
-    let resetButton = document.getElementById('ResetKeybind');
-    let isSettingKeybind = resetButton && resetButton.textContent === "Press any key...";
+    const resetButtons = document.querySelectorAll("#ResetKeybind");
+    let isSettingKeybind = false;
+    resetButtons.forEach(function (btn) {
+      if (btn.textContent === "Press any key...") isSettingKeybind = true;
+    });
     const dialogActive = window.timeKeeper && window.timeKeeper.dialogActive;
     if(!(isSettingKeybind || isTypingInField() || dialogActive || document.getElementById('edit-box'))){
         if(e.key === resetKey){
