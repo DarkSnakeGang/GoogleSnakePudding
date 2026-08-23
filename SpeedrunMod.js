@@ -3556,79 +3556,125 @@ window.SpeedInfo.make = function () {
         speedinfoBox.style.flexDirection = 'column';
         speedinfoBox.style.boxSizing = 'border-box';
         window.speedinfoInput = speedinfoBox;
-        const siSection =
-            "margin:0 0 6px;padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.22);";
-        const siLabel =
-            "margin:3px;color:white;font-family:Roboto,Arial,sans-serif;";
-        const siTitle =
-            "font-weight:bold;color:white;font-family:Roboto,Arial,sans-serif;";
         speedinfoBox.innerHTML = `
+<style>
+#speedinfo-popup-pudding .si-header {
+  display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 0 8px;
+}
+#speedinfo-popup-pudding .si-header-title {
+  color:white;font-family:Roboto,Arial,sans-serif;font-weight:600;letter-spacing:0.04em;font-size:13px;
+}
+#speedinfo-popup-pudding .si-section {
+  margin:0 0 8px;padding:0 0 8px;border-bottom:1px solid rgba(255,255,255,0.18);
+}
+#speedinfo-popup-pudding .si-section:last-child { border-bottom:none;margin-bottom:0;padding-bottom:0; }
+#speedinfo-popup-pudding .si-section-title {
+  display:block;color:rgba(255,255,255,0.75);font-family:Roboto,Arial,sans-serif;font-size:11px;
+  font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin:0 0 6px;
+}
+#speedinfo-popup-pudding .si-stack {
+  display:flex;flex-direction:column;gap:2px;
+}
+#speedinfo-popup-pudding .si-stack .form-check-label {
+  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.3;
+}
+#speedinfo-popup-pudding .si-btn {
+  box-sizing:border-box;margin:0;padding:4px 8px;color:white;background-color:#1155CC;border:none;
+  border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.3;cursor:pointer;
+}
+#speedinfo-popup-pudding .si-btn-block {
+  display:block;width:100%;margin:0 0 4px;padding:5px 8px;
+}
+#speedinfo-popup-pudding .si-btn-row { display:flex;gap:4px;margin:0 0 2px; }
+#speedinfo-popup-pudding .si-btn-row .si-btn { flex:1;margin:0;padding:5px 6px;font-size:11px; }
+#speedinfo-popup-pudding .form-check.form-switch {
+  display:flex;align-items:center;gap:6px;margin:0 0 4px;min-height:0;padding-left:0;
+}
+#speedinfo-popup-pudding .form-check.form-switch .form-check-input { margin:0;float:none;flex-shrink:0; }
+#speedinfo-popup-pudding .form-check.form-switch .form-check-label {
+  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.25;
+}
+#speedinfo-popup-pudding #si-main { flex:1;min-height:0;overflow-x:hidden;overflow-y:auto; }
+#speedinfo-popup-pudding #speedrun-controls-section {
+  flex-shrink:0;margin-top:auto;padding:8px 0 0;border-top:1px solid rgba(255,255,255,0.18);
+}
+#speedinfo-popup-pudding #input-display-section {
+  flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;
+  padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.18);justify-content:center;align-items:flex-end;
+}
+</style>
 
-        <div id="si-main" style="flex:1;min-height:0;overflow:hidden;">
-        <div id="si-personal" style="${siSection}">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 3px;">
-        <span style="${siTitle}">Speed Info</span>
-        <button class="btn" style="margin:0;padding:2px 8px;font-size:12px;line-height:1.2;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="time-keeper" jsname="time-keeper">Details</button>
-        </div>
-        <label id="mode-selected" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="mode-selected2" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="25" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="50" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="100" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="ALL" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="H" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="att" class="form-check-label" style="${siLabel}"></label><br>
-        </div>
+<div id="si-main">
+  <div class="si-header">
+    <span class="si-header-title">Speed Info</span>
+    <button type="button" class="btn si-btn" id="time-keeper" jsname="time-keeper">Details</button>
+  </div>
 
-        <div id="src-section" style="${siSection}">
-        <span style="${siTitle}display:flex;justify-content:center;align-items:center;text-align:center;">SRC World Records</span>
-        <label id="25src" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="50src" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="100src" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="Allsrc" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="Hsrc" class="form-check-label" style="${siLabel}"></label><br>
-        </div>
+  <div id="si-personal" class="si-section">
+    <span class="si-section-title">Personal</span>
+    <div class="si-stack">
+      <label id="mode-selected" class="form-check-label"></label>
+      <label id="mode-selected2" class="form-check-label"></label>
+      <label id="25" class="form-check-label"></label>
+      <label id="50" class="form-check-label"></label>
+      <label id="100" class="form-check-label"></label>
+      <label id="ALL" class="form-check-label"></label>
+      <label id="H" class="form-check-label"></label>
+      <label id="att" class="form-check-label"></label>
+    </div>
+  </div>
 
-        <div id="tracking-section" style="display:none;${siSection}">
-        <span id="tracking-label" style="${siTitle}display:flex;justify-content:center;align-items:center;text-align:center;">Tracking</span>
-        <label id="25track" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="50track" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="100track" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="Alltrack" class="form-check-label" style="${siLabel}"></label><br>
-        <label id="Htrack" class="form-check-label" style="${siLabel}"></label><br>
-        </div>
-        </div>
+  <div id="src-section" class="si-section">
+    <span class="si-section-title">SRC World Records</span>
+    <div class="si-stack">
+      <label id="25src" class="form-check-label"></label>
+      <label id="50src" class="form-check-label"></label>
+      <label id="100src" class="form-check-label"></label>
+      <label id="Allsrc" class="form-check-label"></label>
+      <label id="Hsrc" class="form-check-label"></label>
+    </div>
+  </div>
 
-        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:8px 3px 0;border-top:1px solid rgba(255,255,255,0.22);"></div>
+  <div id="tracking-section" class="si-section" style="display:none;">
+    <span id="tracking-label" class="si-section-title">Tracking</span>
+    <div class="si-stack">
+      <label id="25track" class="form-check-label"></label>
+      <label id="50track" class="form-check-label"></label>
+      <label id="100track" class="form-check-label"></label>
+      <label id="Alltrack" class="form-check-label"></label>
+      <label id="Htrack" class="form-check-label"></label>
+    </div>
+  </div>
+</div>
 
-        <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
+<div id="speedrun-controls-section" style="display:none;"></div>
 
-  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
+<div id="input-display-section" style="display:none;"></div>
 
-  `;
+<button type="button" class="btn si-btn" style="display:none;" id="speedinfo-close" jsname="speedinfo-close">Close</button>
+`;
 
-  document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
+        document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
         updateTrackingSectionVisibility();
 
         if (window.SpeedrunMod) {
             const speedrunControls = document.getElementById("speedrun-controls-section");
             if (speedrunControls) {
-                const btnStyle = "display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:5px 8px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;";
-                const halfBtn = "flex:1;margin:0;padding:5px 6px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:11px;";
                 speedrunControls.innerHTML = `
-        <div class="form-check form-switch" style="margin:0 0 4px;">
+        <span class="si-section-title">Controls</span>
+        <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSpeedInfo">
-        <label class="form-check-label" for="SpeedrunSpeedInfo" style="${siLabel}">Show Speed Info</label>
+        <label class="form-check-label" for="SpeedrunSpeedInfo">Show Speed Info</label>
         </div>
-        <div class="form-check form-switch" style="margin:0 0 6px;">
+        <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
-        <label class="form-check-label" data-speedrun-topbar-label style="${siLabel}">Top Bar Icons</label>
+        <label class="form-check-label" data-speedrun-topbar-label>Top Bar Icons</label>
         </div>
-        <button class="btn" style="${btnStyle}" id="ResetKeybind">Reset Key: Shift</button>
-        <button class="btn" style="${btnStyle}" id="ExportBackup">Export backup</button>
-        <div style="display:flex;gap:4px;margin:0 0 2px;">
-        <button class="btn" style="${halfBtn}" id="ImportMergeBackup">Import merge</button>
-        <button class="btn" style="${halfBtn}" id="ImportReplaceBackup">Import replace</button>
+        <button type="button" class="btn si-btn si-btn-block" id="ResetKeybind">Reset Key: Shift</button>
+        <button type="button" class="btn si-btn si-btn-block" id="ExportBackup">Export backup</button>
+        <div class="si-btn-row">
+        <button type="button" class="btn si-btn" id="ImportMergeBackup">Import merge</button>
+        <button type="button" class="btn si-btn" id="ImportReplaceBackup">Import replace</button>
         </div>
         <input type="file" id="PuddingBackupFile" accept="application/json,.json" style="display:none;">
                 `;
