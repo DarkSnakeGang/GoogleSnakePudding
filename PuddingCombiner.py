@@ -26,6 +26,7 @@ lib_list = [
     "InputDisplay",
     "Timer",
     "SplitPanel",
+    "Backup",
     "BootstrapMenu",
     "ResetKey",
     "RenderDelayFix",

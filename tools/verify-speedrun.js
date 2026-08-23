@@ -21,6 +21,7 @@ const LIBS = [
   "ModeRegistry",
   "TimeKeeper",
   "TopBar",
+  "Backup",
   "SpeedInfo",
   "ResetKey",
 ];

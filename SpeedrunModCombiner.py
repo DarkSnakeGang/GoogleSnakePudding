@@ -7,6 +7,7 @@ LIB_ORDER = [
     "ModeRegistry",
     "TimeKeeper",
     "TopBar",
+    "Backup",
     "SpeedInfo",
     "ResetKey",
 ]

@@ -123,80 +123,190 @@ window.BootstrapMenu.make = function () {
         settingsBox.style.display = 'none';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
+<style>
+#settings-popup-pudding .pudding-settings-header {
+  color: white;
+  font-family: Roboto, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+#settings-popup-pudding .pudding-settings-section {
+  margin: 0 0 8px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+}
+#settings-popup-pudding .pudding-settings-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+#settings-popup-pudding .pudding-settings-section-title {
+  display: block;
+  color: rgba(255,255,255,0.75);
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+#settings-popup-pudding .pudding-settings-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 4px;
+  padding: 5px 8px;
+  color: white;
+  background-color: #1155CC;
+  border: none;
+  border-radius: 4px;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+}
+#settings-popup-pudding .pudding-settings-btn-row {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 4px;
+}
+#settings-popup-pudding .pudding-settings-btn-row .pudding-settings-btn {
+  flex: 1;
+  margin: 0;
+}
+#settings-popup-pudding #stat-chooser {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 4px;
+  padding: 4px 6px;
+  background-color: #1155CC;
+  color: white;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+#settings-popup-pudding .form-check.form-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  min-height: 0;
+  padding-left: 0;
+}
+#settings-popup-pudding .form-check.form-switch .form-check-input {
+  margin: 0;
+  float: none;
+  flex-shrink: 0;
+}
+#settings-popup-pudding .form-check-label {
+  margin: 0;
+  color: white;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.25;
+}
+</style>
 
-        <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<span class="pudding-settings-header">Pudding Mod Settings</span>
 
-        <span style="color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Pudding Mod Settings</span>
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Counter</span>
+  <select id="stat-chooser" class="form-control">
+    <option value="inputGame">Count game inputs</option>
+    <option value="inputSession">Count session inputs</option>
+    <option value="inputLifetime">Count lifetime inputs</option>
+    <option value="playsSession">Count session resets</option>
+    <option value="playsLifetime">Count lifetime resets</option>
+    <option value="applesSession">Count fruit session</option>
+    <option value="applesLifetime">Count fruit lifetime</option>
+    <option value="wallsGame">Count walls</option>
+    <option value="hideCount">Hide counter</option>
+  </select>
+  <div class="pudding-settings-btn-row">
+    <button type="button" class="btn pudding-settings-btn" id="edit-stat">Edit stat</button>
+    <button type="button" class="btn pudding-settings-btn" id="reset-stats">Reset stats</button>
+  </div>
+</div>
 
-    <select style="margin-top:3px;margin-bottom:3px;margin-left: auto; margin-right: auto;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center; align:center;" id="stat-chooser" class="form-control">
-        <option value="inputGame">Count game inputs</option>
-        <option value="inputSession">Count session inputs</option>
-        <option value="inputLifetime">Count lifetime inputs</option>
-        <option value="playsSession">Count session resets</option>
-        <option value="playsLifetime">Count lifetime resets</option>
-        <option value="applesSession">Count fruit session</option>
-        <option value="applesLifetime">Count fruit lifetime</option>
-        <option value="wallsGame">Count walls</option>
-        <option value="hideCount">Hide counter</option>
-    </select>
-
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat</button>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset stats</button><br>
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
-    <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
-    <label class="form-check-label" for="DistinctSokoGoals" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Distinct Soko Goals</label>
-    </div>
-    <div class="form-check form-check-inline">
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Display</span>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="InputDisplay">
-    <label class="form-check-label" for="InputDisplay" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Input Display</label>
-    </div>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="InputDisplay">Input Display</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
-    <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
-    </div>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="TopBarIcons">Top Bar Icons</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Speed Info</label>
-    </div>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="AlwaysOnTimeKeeper">Show Speed Info</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
-    <label class="form-check-label" for="ShowSplitPanel" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Split Panel</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
-    <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
-    <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
-    </div>
-    <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
-    <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="EatThemeRandomizer2">"Dragon Fruit"</label>
-    </div>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
-  <button type="button" class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="CustomBowlFruits" onclick="window.TogglePortalPairsPanel&&window.TogglePortalPairsPanel()">Custom Bowl Fruits</button><br>
-    </div>
+    <label class="form-check-label" for="EatThemeRandomizer" id="EatThemeRandomizer2">"Dragon Fruit"</label>
+  </div>
+</div>
 
-<select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Gameplay</span>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
+    <label class="form-check-label" for="SkullPoisonFruit">Skull Poison Fruit</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
+    <label class="form-check-label" for="DistinctSokoGoals">Distinct Soko Goals</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
+    <label class="form-check-label" for="DisableRandom">Disable Randomizer</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
+    <label class="form-check-label" for="SaveGameSettings">Save Game Settings</label>
+  </div>
+</div>
+
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Tools</span>
+  <button type="button" class="btn pudding-settings-btn" id="TimerSettings">Timer settings</button>
+  <button type="button" class="btn pudding-settings-btn" id="ResetKeybind">Reset Key: Shift</button>
+  <button type="button" class="btn pudding-settings-btn" id="CustomBowlFruits" onclick="window.TogglePortalPairsPanel&&window.TogglePortalPairsPanel()">Custom Bowl Fruits</button>
+</div>
+
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Backup</span>
+  <button type="button" class="btn pudding-settings-btn" id="ExportBackup">Export backup</button>
+  <div class="pudding-settings-btn-row">
+    <button type="button" class="btn pudding-settings-btn" id="ImportMergeBackup">Import merge</button>
+    <button type="button" class="btn pudding-settings-btn" id="ImportReplaceBackup">Import replace</button>
+  </div>
+  <input type="file" id="PuddingBackupFile" accept="application/json,.json" style="display:none;">
+</div>
+
+<select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;align-items:center;text-align:center;" id="snakePride" class="form-control flex-row">
   <option value="0">Default Rainbow</option>
 </select>
 
-  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
+<button class="btn pudding-settings-btn" style="display:none;" id="settings-close" jsname="settings-close">Close</button>
+<button class="btn pudding-settings-btn" style="display:none;" id="ScrollLeftBtn">Scroll Left</button>
+`;
 
-  <br>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeftBtn">Scroll Left</button><br>
-
-  `;
-
-  document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
+        document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
 
         timer_settings = document.getElementById("TimerSettings");
         timer_settings.addEventListener("click", window.editTimer);
@@ -340,6 +450,15 @@ window.BootstrapMenu.make = function () {
 
         document.getElementById('edit-stat').addEventListener('click', promptToEditStatCount);
         document.getElementById('reset-stats').addEventListener('click', promptToResetStats);
+
+        if (typeof window.wirePuddingBackupButtons === "function") {
+            window.wirePuddingBackupButtons({
+                exportBtn: document.getElementById("ExportBackup"),
+                mergeBtn: document.getElementById("ImportMergeBackup"),
+                replaceBtn: document.getElementById("ImportReplaceBackup"),
+                fileInput: document.getElementById("PuddingBackupFile"),
+            });
+        }
     }
 
     window.BootstrapSetup();

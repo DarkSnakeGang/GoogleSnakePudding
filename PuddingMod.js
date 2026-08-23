@@ -73,8 +73,8 @@ window.Theme = {};
 window.Theme.make = function () {
 
   // style for all pudding sidebar overlays
-  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
-  window.puddingSidebarStyleLeft = 'position:absolute;right:100%;left:auto;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;overflow:hidden;';
+  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:584px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
+  window.puddingSidebarStyleLeft = 'position:absolute;right:100%;left:auto;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:584px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
 
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
@@ -4818,16 +4818,22 @@ window.SpeedInfo.make = function () {
         </div>
         </div>
 
-        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:6px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
-        <div class="form-check form-switch">
+        <div id="speedrun-controls-section" style="display:none;flex-shrink:0;margin-top:auto;padding:8px 3px 0;border-top:1px solid rgba(255,255,255,0.22);">
+        <div class="form-check form-switch" style="margin:0 0 4px;">
         <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSpeedInfo">
         <label class="form-check-label" for="SpeedrunSpeedInfo" style="${siLabel}">Show Speed Info</label>
         </div>
-        <div class="form-check form-switch">
+        <div class="form-check form-switch" style="margin:0 0 6px;">
         <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
         <label class="form-check-label" data-speedrun-topbar-label style="${siLabel}">Top Bar Icons</label>
         </div>
-        <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button>
+        <button class="btn" style="display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:5px 8px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;" id="ResetKeybind">Reset Key: Shift</button>
+        <button class="btn" style="display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:5px 8px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:12px;" id="ExportBackup">Export backup</button>
+        <div style="display:flex;gap:4px;margin:0 0 2px;">
+        <button class="btn" style="flex:1;margin:0;padding:5px 6px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:11px;" id="ImportMergeBackup">Import merge</button>
+        <button class="btn" style="flex:1;margin:0;padding:5px 6px;color:white;background-color:#1155CC;border:none;border-radius:4px;font-family:Roboto,Arial,sans-serif;font-size:11px;" id="ImportReplaceBackup">Import replace</button>
+        </div>
+        <input type="file" id="PuddingBackupFile" accept="application/json,.json" style="display:none;">
         </div>
 
         <div id="input-display-section" style="display:none;flex-shrink:0;margin-top:auto;margin-bottom:0;width:100%;min-height:104px;box-sizing:border-box;padding:6px 0 0;border-top:1px solid rgba(255,255,255,0.22);justify-content:center;align-items:flex-end;"></div>
@@ -4853,6 +4859,14 @@ window.SpeedInfo.make = function () {
             if (speedInfoCb) {
                 speedInfoCb.checked = !!window.pudding_settings.SpeedInfo;
                 speedInfoCb.addEventListener("change", window.ToggleSpeedInfo);
+            }
+            if (typeof window.wirePuddingBackupButtons === "function") {
+                window.wirePuddingBackupButtons({
+                    exportBtn: document.getElementById("ExportBackup"),
+                    mergeBtn: document.getElementById("ImportMergeBackup"),
+                    replaceBtn: document.getElementById("ImportReplaceBackup"),
+                    fileInput: document.getElementById("PuddingBackupFile"),
+                });
             }
         }
 
@@ -6599,6 +6613,392 @@ window.SplitPanel.make = function () {
 window.SplitPanel.alterCode = function (code) {
     return code;
 };
+window.Backup = {};
+
+window.Backup.make = function () {
+  const BACKUP_FORMAT = "puddingmod-backup";
+  const BACKUP_VERSION = 1;
+
+  const WHITELIST = [
+    "snake_timeKeeper",
+    "inputCounterMod",
+    "PuddingSettings",
+    "keybinds",
+    "_snake_pb",
+    "_snake_timer_format",
+    "_snake_show_delta",
+    "_snake_null_split",
+    "_snake_aheadg",
+    "_snake_aheadl",
+    "_snake_behindg",
+    "_snake_behindl",
+    "_snake_pb_bridge_migrated",
+    "snakeAdvancedSettings",
+  ];
+
+  const SETTINGS_KEYS = new Set([
+    "PuddingSettings",
+    "keybinds",
+    "_snake_timer_format",
+    "_snake_show_delta",
+    "_snake_null_split",
+    "_snake_aheadg",
+    "_snake_aheadl",
+    "_snake_behindg",
+    "_snake_behindl",
+    "_snake_pb_bridge_migrated",
+    "snakeAdvancedSettings",
+  ]);
+
+  function parseMaybeJson(raw) {
+    if (raw == null) return undefined;
+    try {
+      return JSON.parse(raw);
+    } catch (e) {
+      return raw;
+    }
+  }
+
+  function readLocalJson(key) {
+    const raw = localStorage.getItem(key);
+    if (raw == null) return undefined;
+    return parseMaybeJson(raw);
+  }
+
+  function writeValue(key, value) {
+    if (value === undefined) return;
+    if (value === null) {
+      localStorage.removeItem(key);
+      return;
+    }
+    if (typeof value === "object") {
+      localStorage.setItem(key, JSON.stringify(value));
+    } else {
+      localStorage.setItem(key, String(value));
+    }
+  }
+
+  function isPbRow(key) {
+    return /^(25|50|100|ALL)-/.test(key);
+  }
+
+  function isHighscoreKey(key) {
+    return key.slice(0, 2) === "H-";
+  }
+
+  function isAttemptKey(key) {
+    return key.slice(0, 4) === "att-";
+  }
+
+  function num(v, fallback) {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : fallback;
+  }
+
+  function mergePbEntry(local, imported) {
+    if (!local) return imported;
+    if (!imported) return local;
+    const localTime = num(local.time, Infinity);
+    const importedTime = num(imported.time, Infinity);
+    const better = importedTime < localTime ? imported : local;
+    return {
+      time: better.time,
+      date: better.date,
+      att: Math.max(num(local.att, 0), num(imported.att, 0)),
+      sum: Math.max(num(local.sum, 0), num(imported.sum, 0)),
+    };
+  }
+
+  function mergeHighscoreEntry(local, imported) {
+    if (!local) return imported;
+    if (!imported) return local;
+    const lHigh = num(local.high, -Infinity);
+    const iHigh = num(imported.high, -Infinity);
+    if (iHigh > lHigh) return imported;
+    if (iHigh < lHigh) return local;
+    const lTime = num(local.time, Infinity);
+    const iTime = num(imported.time, Infinity);
+    return iTime < lTime ? imported : local;
+  }
+
+  function mergeAttemptEntry(local, imported) {
+    if (!local) {
+      const rec = Object.assign({}, imported);
+      if (typeof rec.session !== "number") rec.session = 0;
+      return rec;
+    }
+    if (!imported) return local;
+    return {
+      total: Math.max(num(local.total, 0), num(imported.total, 0)),
+      session: typeof local.session === "number" ? local.session : 0,
+      lastSession: Math.max(
+        num(local.lastSession, 0),
+        num(imported.lastSession, 0)
+      ),
+    };
+  }
+
+  function mergeTimeKeeper(local, imported) {
+    const out =
+      local && typeof local === "object" ? Object.assign({}, local) : {};
+    const src =
+      imported && typeof imported === "object" ? imported : {};
+    for (const key of Object.keys(src)) {
+      if (key === "version") continue;
+      const a = out[key];
+      const b = src[key];
+      if (isPbKey(key)) {
+        out[key] = mergePbEntry(a, b);
+      } else if (isHighscoreKey(key)) {
+        out[key] = mergeHighscoreEntry(a, b);
+      } else if (isAttemptKey(key)) {
+        out[key] = mergeAttemptEntry(a, b);
+      } else if (a === undefined) {
+        out[key] = b;
+      }
+    }
+    out.version = 4;
+    return out;
+  }
+
+  function mergeCounter(local, imported) {
+    const base =
+      local && typeof local === "object"
+        ? JSON.parse(JSON.stringify(local))
+        : {
+            visible: true,
+            statShown: "inputs",
+            statDurationShown: "game",
+            inputs: { game: 0, session: 0, lifetime: 0 },
+            plays: { session: 0, lifetime: 0 },
+            apples: { session: 0, lifetime: 0 },
+          };
+    const src = imported && typeof imported === "object" ? imported : {};
+
+    function ensureBucket(obj, name, fields) {
+      if (!obj[name] || typeof obj[name] !== "object") obj[name] = {};
+      for (const f of fields) {
+        if (typeof obj[name][f] !== "number") obj[name][f] = 0;
+      }
+    }
+
+    ensureBucket(base, "inputs", ["game", "session", "lifetime"]);
+    ensureBucket(base, "plays", ["session", "lifetime"]);
+    ensureBucket(base, "apples", ["session", "lifetime"]);
+
+    if (src.inputs && typeof src.inputs === "object") {
+      base.inputs.lifetime = Math.max(
+        num(base.inputs.lifetime, 0),
+        num(src.inputs.lifetime, 0)
+      );
+    }
+    if (src.plays && typeof src.plays === "object") {
+      base.plays.lifetime = Math.max(
+        num(base.plays.lifetime, 0),
+        num(src.plays.lifetime, 0)
+      );
+    }
+    if (src.apples && typeof src.apples === "object") {
+      base.apples.lifetime = Math.max(
+        num(base.apples.lifetime, 0),
+        num(src.apples.lifetime, 0)
+      );
+    }
+
+    if (typeof src.statShown === "string") base.statShown = src.statShown;
+    if (typeof src.statDurationShown === "string") {
+      base.statDurationShown = src.statDurationShown;
+    }
+    if (typeof src.visible === "boolean") base.visible = src.visible;
+
+    return base;
+  }
+
+  function mergeSnakePb(local, imported) {
+    if (imported == null) return local;
+    if (local == null) return imported;
+    if (typeof imported === "number" && typeof local === "number") {
+      return imported < local ? imported : local;
+    }
+    if (typeof imported !== "object" || typeof local !== "object") {
+      return imported;
+    }
+    const out = Array.isArray(local) ? local.slice() : Object.assign({}, local);
+    for (const key of Object.keys(imported)) {
+      out[key] = mergeSnakePb(out[key], imported[key]);
+    }
+    return out;
+  }
+
+  function collectExportData() {
+    if (typeof window.flushSnakePb === "function") {
+      window.flushSnakePb();
+    }
+    if (typeof window.timeKeeper !== "undefined" &&
+        typeof window.timeKeeper.flushStorage === "function") {
+      window.timeKeeper.flushStorage();
+    }
+    if (typeof window.saveSettings === "function") {
+      window.saveSettings();
+    }
+    if (typeof window.saveStatistics === "function") {
+      window.saveStatistics();
+    }
+
+    const data = {};
+    for (const key of WHITELIST) {
+      const value = readLocalJson(key);
+      if (value !== undefined) data[key] = value;
+    }
+    return data;
+  }
+
+  function applyReplace(data) {
+    for (const key of WHITELIST) {
+      if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
+      writeValue(key, data[key]);
+    }
+  }
+
+  function applyMerge(data) {
+    for (const key of WHITELIST) {
+      if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
+      const imported = data[key];
+
+      if (key === "snake_timeKeeper") {
+        writeValue(key, mergeTimeKeeper(readLocalJson(key), imported));
+        continue;
+      }
+      if (key === "inputCounterMod") {
+        writeValue(key, mergeCounter(readLocalJson(key), imported));
+        continue;
+      }
+      if (key === "_snake_pb") {
+        writeValue(key, mergeSnakePb(readLocalJson(key), imported));
+        continue;
+      }
+      if (SETTINGS_KEYS.has(key)) {
+        writeValue(key, imported);
+      }
+    }
+  }
+
+  window.exportPuddingBackup = function () {
+    const payload = {
+      format: BACKUP_FORMAT,
+      version: BACKUP_VERSION,
+      exportedAt: new Date().toISOString(),
+      data: collectExportData(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const day = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = "puddingmod-backup-" + day + ".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () {
+      URL.revokeObjectURL(url);
+    }, 1000);
+  };
+
+  window.importPuddingBackup = function (file, mode) {
+    if (!file) return;
+    if (mode !== "merge" && mode !== "replace") {
+      alert("Invalid import mode");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function () {
+      let parsed;
+      try {
+        parsed = JSON.parse(reader.result);
+      } catch (e) {
+        alert("Invalid backup file (not JSON)");
+        return;
+      }
+      if (
+        !parsed ||
+        parsed.format !== BACKUP_FORMAT ||
+        !parsed.data ||
+        typeof parsed.data !== "object"
+      ) {
+        alert("Invalid backup file (wrong format)");
+        return;
+      }
+
+      const confirmMsg =
+        mode === "merge"
+          ? "Merge this backup into your Pudding Mod data? Better PBs and higher lifetime counts are kept; settings from the file are applied. The page will reload."
+          : "Replace Pudding Mod data with this backup for all keys in the file? Existing values for those keys will be overwritten. The page will reload.";
+
+      if (!confirm(confirmMsg)) return;
+
+      try {
+        if (mode === "merge") applyMerge(parsed.data);
+        else applyReplace(parsed.data);
+      } catch (e) {
+        console.error(e);
+        alert("Import failed");
+        return;
+      }
+      location.reload();
+    };
+    reader.onerror = function () {
+      alert("Could not read backup file");
+    };
+    reader.readAsText(file);
+  };
+
+  window.wirePuddingBackupButtons = function (opts) {
+    if (!opts) return;
+    const exportBtn = opts.exportBtn;
+    const mergeBtn = opts.mergeBtn;
+    const replaceBtn = opts.replaceBtn;
+    const fileInput = opts.fileInput;
+    if (!fileInput) return;
+
+    let pendingMode = "merge";
+
+    if (exportBtn) {
+      exportBtn.addEventListener("click", function () {
+        window.exportPuddingBackup();
+      });
+    }
+
+    function openPicker(mode) {
+      pendingMode = mode;
+      fileInput.value = "";
+      fileInput.click();
+    }
+
+    if (mergeBtn) {
+      mergeBtn.addEventListener("click", function () {
+        openPicker("merge");
+      });
+    }
+    if (replaceBtn) {
+      replaceBtn.addEventListener("click", function () {
+        openPicker("replace");
+      });
+    }
+
+    fileInput.addEventListener("change", function () {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) return;
+      window.importPuddingBackup(file, pendingMode);
+    });
+  };
+};
+
+window.Backup.alterCode = function (code) {
+  return code;
+};
 window.BootstrapMenu = {};
 
 window.BootstrapMenu.make = function () {
@@ -6724,80 +7124,190 @@ window.BootstrapMenu.make = function () {
         settingsBox.style.display = 'none';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
+<style>
+#settings-popup-pudding .pudding-settings-header {
+  color: white;
+  font-family: Roboto, Arial, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+#settings-popup-pudding .pudding-settings-section {
+  margin: 0 0 8px;
+  padding: 0 0 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+}
+#settings-popup-pudding .pudding-settings-section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+#settings-popup-pudding .pudding-settings-section-title {
+  display: block;
+  color: rgba(255,255,255,0.75);
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 6px;
+}
+#settings-popup-pudding .pudding-settings-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 4px;
+  padding: 5px 8px;
+  color: white;
+  background-color: #1155CC;
+  border: none;
+  border-radius: 4px;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  text-align: center;
+  cursor: pointer;
+}
+#settings-popup-pudding .pudding-settings-btn-row {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 4px;
+}
+#settings-popup-pudding .pudding-settings-btn-row .pudding-settings-btn {
+  flex: 1;
+  margin: 0;
+}
+#settings-popup-pudding #stat-chooser {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 4px;
+  padding: 4px 6px;
+  background-color: #1155CC;
+  color: white;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  text-align: center;
+}
+#settings-popup-pudding .form-check.form-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  min-height: 0;
+  padding-left: 0;
+}
+#settings-popup-pudding .form-check.form-switch .form-check-input {
+  margin: 0;
+  float: none;
+  flex-shrink: 0;
+}
+#settings-popup-pudding .form-check-label {
+  margin: 0;
+  color: white;
+  font-family: Roboto, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.25;
+}
+</style>
 
-        <script src="https://code.jquery.com/jquery-3.7.0.slim.js" integrity="sha256-7GO+jepT9gJe9LB4XFf8snVOjX3iYNb0FHYr5LI1N5c=" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+<span class="pudding-settings-header">Pudding Mod Settings</span>
 
-        <span style="color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center;">Pudding Mod Settings</span>
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Counter</span>
+  <select id="stat-chooser" class="form-control">
+    <option value="inputGame">Count game inputs</option>
+    <option value="inputSession">Count session inputs</option>
+    <option value="inputLifetime">Count lifetime inputs</option>
+    <option value="playsSession">Count session resets</option>
+    <option value="playsLifetime">Count lifetime resets</option>
+    <option value="applesSession">Count fruit session</option>
+    <option value="applesLifetime">Count fruit lifetime</option>
+    <option value="wallsGame">Count walls</option>
+    <option value="hideCount">Hide counter</option>
+  </select>
+  <div class="pudding-settings-btn-row">
+    <button type="button" class="btn pudding-settings-btn" id="edit-stat">Edit stat</button>
+    <button type="button" class="btn pudding-settings-btn" id="reset-stats">Reset stats</button>
+  </div>
+</div>
 
-    <select style="margin-top:3px;margin-bottom:3px;margin-left: auto; margin-right: auto;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;display:flex; justify-content: center; align-items: center; text-align: center; align:center;" id="stat-chooser" class="form-control">
-        <option value="inputGame">Count game inputs</option>
-        <option value="inputSession">Count session inputs</option>
-        <option value="inputLifetime">Count lifetime inputs</option>
-        <option value="playsSession">Count session resets</option>
-        <option value="playsLifetime">Count lifetime resets</option>
-        <option value="applesSession">Count fruit session</option>
-        <option value="applesLifetime">Count fruit lifetime</option>
-        <option value="wallsGame">Count walls</option>
-        <option value="hideCount">Hide counter</option>
-    </select>
-
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="edit-stat">Edit stat</button>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="reset-stats">Reset stats</button><br>
-  <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
-    <label class="form-check-label" for="SkullPoisonFruit" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Skull Poison Fruit</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
-    <label class="form-check-label" for="DistinctSokoGoals" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Distinct Soko Goals</label>
-    </div>
-    <div class="form-check form-check-inline">
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Display</span>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="InputDisplay">
-    <label class="form-check-label" for="InputDisplay" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Input Display</label>
-    </div>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="InputDisplay">Input Display</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="TopBarIcons">
-    <label class="form-check-label" for="TopBarIcons" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Top Bar Icons</label>
-    </div>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="TopBarIcons">Top Bar Icons</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="AlwaysOnTimeKeeper">
-    <label class="form-check-label" for="AlwaysOnTimeKeeper" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Speed Info</label>
-    </div>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="AlwaysOnTimeKeeper">Show Speed Info</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
-    <label class="form-check-label" for="ShowSplitPanel" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Show Split Panel</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
-    <label class="form-check-label" for="DisableRandom" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Disable Randomizer</label>
-    </div>
-    <div class="form-check form-check-inline">
-    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
-    <label class="form-check-label" for="SaveGameSettings" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;">Save Game Settings</label>
-    </div>
-    <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="TimerSettings">Timer settings</button><br>
-    <div class="form-check form-check-inline">
+    <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
-    <label class="form-check-label" for="EatThemeRandomizer" style="margin:3px;color:white;font-family:Roboto,Arial,sans-serif;" id="EatThemeRandomizer2">"Dragon Fruit"</label>
-    </div>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ResetKeybind">Reset Key: Shift</button><br>
-  <button type="button" class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="CustomBowlFruits" onclick="window.TogglePortalPairsPanel&&window.TogglePortalPairsPanel()">Custom Bowl Fruits</button><br>
-    </div>
+    <label class="form-check-label" for="EatThemeRandomizer" id="EatThemeRandomizer2">"Dragon Fruit"</label>
+  </div>
+</div>
 
-<select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif; align-items: center; text-align: center;" id="snakePride" class="form-control flex-row">
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Gameplay</span>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="SkullPoisonFruit">
+    <label class="form-check-label" for="SkullPoisonFruit">Skull Poison Fruit</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="DistinctSokoGoals">
+    <label class="form-check-label" for="DistinctSokoGoals">Distinct Soko Goals</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="DisableRandom">
+    <label class="form-check-label" for="DisableRandom">Disable Randomizer</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="SaveGameSettings">
+    <label class="form-check-label" for="SaveGameSettings">Save Game Settings</label>
+  </div>
+</div>
+
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Tools</span>
+  <button type="button" class="btn pudding-settings-btn" id="TimerSettings">Timer settings</button>
+  <button type="button" class="btn pudding-settings-btn" id="ResetKeybind">Reset Key: Shift</button>
+  <button type="button" class="btn pudding-settings-btn" id="CustomBowlFruits" onclick="window.TogglePortalPairsPanel&&window.TogglePortalPairsPanel()">Custom Bowl Fruits</button>
+</div>
+
+<div class="pudding-settings-section">
+  <span class="pudding-settings-section-title">Backup</span>
+  <button type="button" class="btn pudding-settings-btn" id="ExportBackup">Export backup</button>
+  <div class="pudding-settings-btn-row">
+    <button type="button" class="btn pudding-settings-btn" id="ImportMergeBackup">Import merge</button>
+    <button type="button" class="btn pudding-settings-btn" id="ImportReplaceBackup">Import replace</button>
+  </div>
+  <input type="file" id="PuddingBackupFile" accept="application/json,.json" style="display:none;">
+</div>
+
+<select style="display:none;margin:3px;background-color:#1155CC;color:white;font-family:Roboto,Arial,sans-serif;align-items:center;text-align:center;" id="snakePride" class="form-control flex-row">
   <option value="0">Default Rainbow</option>
 </select>
 
-  <button class="btn" style="display:none;margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="settings-close" jsname="settings-close">Close</button>
+<button class="btn pudding-settings-btn" style="display:none;" id="settings-close" jsname="settings-close">Close</button>
+<button class="btn pudding-settings-btn" style="display:none;" id="ScrollLeftBtn">Scroll Left</button>
+`;
 
-  <br>
-  <button class="btn" style="margin:3px;color:white;background-color:#1155CC;font-family:Roboto,Arial,sans-serif;" id="ScrollLeftBtn">Scroll Left</button><br>
-
-  `;
-
-  document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
+        document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
 
         timer_settings = document.getElementById("TimerSettings");
         timer_settings.addEventListener("click", window.editTimer);
@@ -6941,6 +7451,15 @@ window.BootstrapMenu.make = function () {
 
         document.getElementById('edit-stat').addEventListener('click', promptToEditStatCount);
         document.getElementById('reset-stats').addEventListener('click', promptToResetStats);
+
+        if (typeof window.wirePuddingBackupButtons === "function") {
+            window.wirePuddingBackupButtons({
+                exportBtn: document.getElementById("ExportBackup"),
+                mergeBtn: document.getElementById("ImportMergeBackup"),
+                replaceBtn: document.getElementById("ImportReplaceBackup"),
+                fileInput: document.getElementById("PuddingBackupFile"),
+            });
+        }
     }
 
     window.BootstrapSetup();
@@ -8076,6 +8595,7 @@ window.PuddingMod.runCodeBefore = function () {
     "InputDisplay",
     "Timer",
     "SplitPanel",
+    "Backup",
     "BootstrapMenu",
     "ResetKey",
     "RenderDelayFix",

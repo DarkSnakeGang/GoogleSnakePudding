@@ -94,6 +94,7 @@ window.SpeedrunMod.runCodeBefore = function () {
     "ModeRegistry",
     "TimeKeeper",
     "TopBar",
+    "Backup",
     "SpeedInfo",
     "ResetKey",
   ];

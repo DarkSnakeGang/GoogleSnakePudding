@@ -31,6 +31,7 @@ const LIBS = [
   "InputDisplay",
   "Timer",
   "SplitPanel",
+  "Backup",
   "BootstrapMenu",
   "ResetKey",
   "RenderDelayFix",
