@@ -984,6 +984,9 @@ window.TimeKeeper.make = function () {
         window.timeKeeper.count = ctx.count;
         window.timeKeeper.speed = ctx.speed;
         window.timeKeeper.size = ctx.size;
+        if (typeof window.freezeRunSelectors === "function") {
+            window.freezeRunSelectors();
+        }
     };
 
     // get the current setting, name = 'count', 'speed', 'size' or 'trophy'
@@ -3670,6 +3673,41 @@ window.SpeedInfo.make = function () {
 `;
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
+        window.cacheSpeedInfoElements = function () {
+            const ids = [
+                "mode-selected",
+                "mode-selected2",
+                "att",
+                "25",
+                "50",
+                "100",
+                "ALL",
+                "H",
+                "25src",
+                "50src",
+                "100src",
+                "Allsrc",
+                "Hsrc",
+                "25track",
+                "50track",
+                "100track",
+                "Alltrack",
+                "Htrack",
+            ];
+            window._speedInfoEls = window._speedInfoEls || {};
+            for (let i = 0; i < ids.length; i++) {
+                window._speedInfoEls[ids[i]] = document.getElementById(ids[i]);
+            }
+        };
+        window.siEl = function (id) {
+            if (!window._speedInfoEls) window.cacheSpeedInfoElements();
+            const cached = window._speedInfoEls && window._speedInfoEls[id];
+            if (cached && cached.isConnected) return cached;
+            const el = document.getElementById(id);
+            if (window._speedInfoEls) window._speedInfoEls[id] = el;
+            return el;
+        };
+        window.cacheSpeedInfoElements();
         updateTrackingSectionVisibility();
 
         if (window.SpeedrunMod) {
@@ -3826,7 +3864,9 @@ window.SpeedInfo.make = function () {
         }
 
         const scoreKey = String(score);
-        const bold = document.getElementById(scoreKey === "ALL" ? "ALL" : scoreKey);
+        const bold = typeof window.siEl === "function"
+            ? window.siEl(scoreKey === "ALL" ? "ALL" : scoreKey)
+            : document.getElementById(scoreKey === "ALL" ? "ALL" : scoreKey);
         if (!bold) return;
 
         const name = scoreKey + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
@@ -3855,6 +3895,22 @@ window.SpeedInfo.make = function () {
 
         const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
 
+        function queueGoldJob(scoreId, labelPrefix, displayText, pb, gKey) {
+            if (typeof window._speedInfoGoldCache[gKey] === "boolean") return;
+            setTimeout(function () {
+                if (gen !== window._speedInfoUpdateGen) return;
+                shouldGoldPb(scoreId, mode, count, speed, size, pb, modeKey).then(function (gold) {
+                    if (gen !== window._speedInfoUpdateGen) return;
+                    window._speedInfoGoldCache[gKey] = !!gold;
+                    const el = siEl(scoreId);
+                    if (!el) return;
+                    el.innerHTML =
+                        labelPrefix +
+                        pbValueHtml(displayText, scoreId, mode, count, speed, size, !!gold);
+                });
+            }, 0);
+        }
+
         if (scoreKey === "H") {
             if (typeof storage[name] != "undefined" && storage[name].high != null) {
                 const highText = String(storage[name].high) + " Apples";
@@ -3864,23 +3920,10 @@ window.SpeedInfo.make = function () {
                     "Highscore: " +
                     pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
                 if (canShowSrcHighscore(mode, count)) {
-                    setTimeout(function () {
-                        if (gen !== window._speedInfoUpdateGen) return;
-                        shouldGoldPb("H", mode, count, speed, size, storage[name], modeKey).then(
-                            function (gold) {
-                                if (gen !== window._speedInfoUpdateGen) return;
-                                window._speedInfoGoldCache[gKey] = !!gold;
-                                const el = document.getElementById("H");
-                                if (!el) return;
-                                el.innerHTML =
-                                    "Highscore: " +
-                                    pbValueHtml(highText, "H", mode, count, speed, size, !!gold);
-                            }
-                        );
-                    }, 0);
+                    queueGoldJob("H", "Highscore: ", highText, storage[name], gKey);
                 }
-            } else {
-                bold.innerHTML = "Highscore: None";
+            } else if (bold.textContent !== "Highscore: None") {
+                bold.textContent = "Highscore: None";
             }
             return;
         }
@@ -3894,23 +3937,10 @@ window.SpeedInfo.make = function () {
                 label +
                 ": " +
                 pbValueHtml(displayText, scoreKey, mode, count, speed, size, !!knownGold);
-            setTimeout(function () {
-                if (gen !== window._speedInfoUpdateGen) return;
-                shouldGoldPb(scoreKey, mode, count, speed, size, storage[name], modeKey).then(
-                    function (gold) {
-                        if (gen !== window._speedInfoUpdateGen) return;
-                        window._speedInfoGoldCache[gKey] = !!gold;
-                        const el = document.getElementById(scoreKey);
-                        if (!el) return;
-                        el.innerHTML =
-                            label +
-                            ": " +
-                            pbValueHtml(displayText, scoreKey, mode, count, speed, size, !!gold);
-                    }
-                );
-            }, 0);
+            queueGoldJob(scoreKey, label + ": ", displayText, storage[name], gKey);
         } else {
-            bold.innerHTML = label + ": None";
+            const noneText = label + ": None";
+            if (bold.textContent !== noneText) bold.textContent = noneText;
         }
     };
 
@@ -3960,15 +3990,21 @@ window.SpeedInfo.make = function () {
             ? window.ModeRegistry.labelModeKey(modeKey)
             : modeKey;
 
-        mode_label = document.getElementById("mode-selected");
-        mode_label2 = document.getElementById("mode-selected2");
+        mode_label = typeof window.siEl === "function"
+            ? window.siEl("mode-selected")
+            : document.getElementById("mode-selected");
+        mode_label2 = typeof window.siEl === "function"
+            ? window.siEl("mode-selected2")
+            : document.getElementById("mode-selected2");
 
         if (window.daily_challenge) {
-            mode_label.innerHTML = "Daily Challenge";
-            mode_label2.innerHTML = "(TimeKeeper disabled)";
+            if (mode_label) mode_label.textContent = "Daily Challenge";
+            if (mode_label2) mode_label2.textContent = "(TimeKeeper disabled)";
             for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
-                const el = document.getElementById(score);
-                if (el) el.innerHTML = "";
+                const el = typeof window.siEl === "function"
+                    ? window.siEl(score)
+                    : document.getElementById(score);
+                if (el) el.textContent = "";
             }
             updateSrcAndTrackingVisibility();
             return;
@@ -3976,11 +4012,15 @@ window.SpeedInfo.make = function () {
 
         updateSrcAndTrackingVisibility();
 
-        mode_label.innerHTML =
-            gamemode +
-            ", " +
-            window.HandleCount(count).substring(0, window.HandleCount(count).lastIndexOf(","));
-        mode_label2.innerHTML = window.HandleSpeed(speed) + window.HandleSize(size);
+        if (mode_label) {
+            mode_label.textContent =
+                gamemode +
+                ", " +
+                window.HandleCount(count).substring(0, window.HandleCount(count).lastIndexOf(","));
+        }
+        if (mode_label2) {
+            mode_label2.textContent = window.HandleSpeed(speed) + window.HandleSize(size);
+        }
 
         const fmt = window.timeKeeper.formatTimeSrcStyle
             ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
@@ -3992,7 +4032,9 @@ window.SpeedInfo.make = function () {
 
         for (const score of ["att", "25", "50", "100", "ALL", "H"]) {
             const name = score + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
-            const bold = document.getElementById(score);
+            const bold = typeof window.siEl === "function"
+                ? window.siEl(score)
+                : document.getElementById(score);
             if (!bold) continue;
 
             if (score == "att") {
@@ -4002,13 +4044,14 @@ window.SpeedInfo.make = function () {
                         : typeof storage[name] === "number"
                           ? storage[name]
                           : 0;
-                bold.innerHTML = "Total Attempts: " + totalAttempts;
+                const next = "Total Attempts: " + totalAttempts;
+                if (bold.textContent !== next) bold.textContent = next;
                 continue;
             }
 
             // Match SRC visibility (100/YY50); Highscore always shown locally
             if (!shouldShowCategory(score === "ALL" ? "All" : score, size, mode)) {
-                bold.innerHTML = "";
+                if (bold.textContent !== "") bold.textContent = "";
                 continue;
             }
 
@@ -4020,7 +4063,7 @@ window.SpeedInfo.make = function () {
                     bold.innerHTML =
                         "Highscore: " +
                         pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
-                    if (canShowSrcHighscore(mode, count)) {
+                    if (canShowSrcHighscore(mode, count) && typeof knownGold !== "boolean") {
                         goldJobs.push({
                             score: "H",
                             elId: "H",
@@ -4030,8 +4073,8 @@ window.SpeedInfo.make = function () {
                             gKey: gKey,
                         });
                     }
-                } else {
-                    bold.innerHTML = "Highscore: None";
+                } else if (bold.textContent !== "Highscore: None") {
+                    bold.textContent = "Highscore: None";
                 }
                 continue;
             }
@@ -4045,16 +4088,19 @@ window.SpeedInfo.make = function () {
                     label +
                     ": " +
                     pbValueHtml(displayText, score, mode, count, speed, size, !!knownGold);
-                goldJobs.push({
-                    score: score,
-                    elId: score,
-                    labelPrefix: label + ": ",
-                    displayText: displayText,
-                    pb: storage[name],
-                    gKey: gKey,
-                });
+                if (typeof knownGold !== "boolean") {
+                    goldJobs.push({
+                        score: score,
+                        elId: score,
+                        labelPrefix: label + ": ",
+                        displayText: displayText,
+                        pb: storage[name],
+                        gKey: gKey,
+                    });
+                }
             } else {
-                bold.innerHTML = label + ": None";
+                const noneText = label + ": None";
+                if (bold.textContent !== noneText) bold.textContent = noneText;
             }
         }
 
@@ -4087,7 +4133,9 @@ window.SpeedInfo.make = function () {
                     for (let i = 0; i < results.length; i++) {
                         const r = results[i];
                         window._speedInfoGoldCache[r.job.gKey] = !!r.gold;
-                        const el = document.getElementById(r.job.elId);
+                        const el = typeof window.siEl === "function"
+                            ? window.siEl(r.job.elId)
+                            : document.getElementById(r.job.elId);
                         if (!el) continue;
                         el.innerHTML =
                             r.job.labelPrefix +

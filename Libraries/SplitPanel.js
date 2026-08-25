@@ -40,10 +40,26 @@ window.SplitPanel.make = function () {
     }
 
     function currentBucket() {
-        const _mode = selectedIndex("#trophy");
-        const _count = selectedIndex("#count");
-        const _speed = selectedIndex("#speed");
-        const _size = selectedIndex("#size");
+        let _mode;
+        let _count;
+        let _speed;
+        let _size;
+        if (
+            typeof window.getRunSelectors === "function" &&
+            window.timeKeeper &&
+            (window.timeKeeper.runStarted || window.timeKeeper.playing)
+        ) {
+            const sel = window.getRunSelectors();
+            _mode = sel.mode;
+            _count = sel.count;
+            _speed = sel.speed;
+            _size = sel.size;
+        } else {
+            _mode = selectedIndex("#trophy");
+            _count = selectedIndex("#count");
+            _speed = selectedIndex("#speed");
+            _size = selectedIndex("#size");
+        }
         const _cat = window._cat != null ? window._cat : 3;
         const path = [_mode, _count, _speed, _size, _cat];
         return {
@@ -103,16 +119,34 @@ window.SplitPanel.make = function () {
         if (delta == null || !isFinite(delta) || delta === 0) {
             return { text: "—", color: "white" };
         }
+        if (!window._splitDeltaColors) {
+            window._splitDeltaColors = {
+                aheadg: localStorage._snake_aheadg || "#008010",
+                aheadl: localStorage._snake_aheadl || "#53dd87",
+                behindg: localStorage._snake_behindg || "#dd3333",
+                behindl: localStorage._snake_behindl || "#a00000",
+            };
+        }
+        const colors = window._splitDeltaColors;
         const abs = typeof Math.abs(delta).timeFormat === "function"
             ? Math.abs(delta).timeFormat()
             : String(Math.abs(delta));
         const last = window._lastDelta || 0;
-        const storageKey = delta > 0
-            ? (delta > last ? "_snake_behindl" : "_snake_behindg")
-            : (delta > last ? "_snake_aheadl" : "_snake_aheadg");
-        const color = localStorage[storageKey] || (delta < 0 ? "#008010" : "#dd3333");
+        const color = delta > 0
+            ? (delta > last ? colors.behindl : colors.behindg)
+            : (delta > last ? colors.aheadl : colors.aheadg);
         return { text: (delta < 0 ? "-" : "+") + abs, color: color };
     }
+
+    // Refresh cached colors when Timer settings change them
+    window.refreshSplitDeltaColors = function () {
+        window._splitDeltaColors = {
+            aheadg: localStorage._snake_aheadg || "#008010",
+            aheadl: localStorage._snake_aheadl || "#53dd87",
+            behindg: localStorage._snake_behindg || "#dd3333",
+            behindl: localStorage._snake_behindl || "#a00000",
+        };
+    };
 
     function rowStyle(active) {
         return "display:flex;align-items:center;justify-content:space-between;gap:4px;padding:3px 4px;margin:0;border-radius:3px;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.25;color:white;"

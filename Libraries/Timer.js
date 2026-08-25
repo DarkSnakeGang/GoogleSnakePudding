@@ -36,6 +36,51 @@ window.Timer = {
       )[1]
     }
 
+    // Freeze menu indices once per run; split/win paths read these instead of scraping DOM
+    window.freezeRunSelectors = function () {
+      if (typeof getSelected !== "function") return;
+      try {
+        window._runTrophy = getSelected("#trophy");
+        window._runCount = getSelected("#count");
+        window._runSpeed = getSelected("#speed");
+        window._runSize = getSelected("#size");
+      } catch (e) { /* menu may be missing early */ }
+    };
+
+    window.getRunSelectors = function () {
+      const midRun =
+        window.timeKeeper &&
+        (window.timeKeeper.runStarted || window.timeKeeper.playing) &&
+        typeof window._runTrophy === "number" &&
+        typeof window._runCount === "number" &&
+        typeof window._runSpeed === "number" &&
+        typeof window._runSize === "number";
+      if (midRun) {
+        return {
+          mode: window._runTrophy,
+          count: window._runCount,
+          speed: window._runSpeed,
+          size: window._runSize,
+        };
+      }
+      if (typeof getSelected === "function") {
+        try {
+          return {
+            mode: getSelected("#trophy"),
+            count: getSelected("#count"),
+            speed: getSelected("#speed"),
+            size: getSelected("#size"),
+          };
+        } catch (e) { /* fall through */ }
+      }
+      return {
+        mode: window._runTrophy || 0,
+        count: window._runCount || 0,
+        speed: window._runSpeed || 0,
+        size: window._runSize || 0,
+      };
+    };
+
     String.prototype.color = function(c) { return `<span style="color:${c}">${this.toString()}</span>` }
 
     Number.prototype.timeFormat = function() {
@@ -736,6 +781,9 @@ window.Timer = {
           el.value = localStorage[`_snake_${subid}`]
           el.addEventListener('change', function() {
             localStorage[`_snake_${subid}`] = el.value
+            if (typeof window.refreshSplitDeltaColors === "function") {
+              window.refreshSplitDeltaColors()
+            }
           })
         }
 
@@ -780,11 +828,12 @@ window.Timer = {
         'reset(){',
         `reset(){this.xdddd=[];
           if (typeof window.flushSnakePb === "function") window.flushSnakePb();
+          if (typeof window.freezeRunSelectors === "function") window.freezeRunSelectors();
 
-          const _mode  = getSelected('#trophy')
-          const _count = getSelected('#count')
-          const _speed = getSelected('#speed')
-          const _size  = getSelected('#size')
+          const _mode  = window._runTrophy
+          const _count = window._runCount
+          const _speed = window._runSpeed
+          const _size  = window._runSize
 
           window._run = {}
           window._run[_mode] = {}
@@ -914,10 +963,13 @@ window.Timer = {
       if([25, 50, 100].includes(${score}) || window._splits.includes(${score})) {
         const deltaDiv = window._timerDeltaEl || document.getElementById('timerDelta')
         window._timerDeltaEl = deltaDiv
-        const _mode  = getSelected('#trophy')
-        const _count = getSelected('#count')
-        const _speed = getSelected('#speed')
-        const _size  = getSelected('#size')
+        const _sel = typeof window.getRunSelectors === "function"
+          ? window.getRunSelectors()
+          : { mode: getSelected('#trophy'), count: getSelected('#count'), speed: getSelected('#speed'), size: getSelected('#size') }
+        const _mode  = _sel.mode
+        const _count = _sel.count
+        const _speed = _sel.speed
+        const _size  = _sel.size
 
         const _split = ${ticks} * ${dt} * 1e-3
 
@@ -991,10 +1043,13 @@ window.Timer = {
       ${winStuff}
       const deltaDiv = window._timerDeltaEl || document.getElementById('timerDelta')
       window._timerDeltaEl = deltaDiv
-      const _mode  = getSelected('#trophy')
-      const _count = getSelected('#count')
-      const _speed = getSelected('#speed')
-      const _size  = getSelected('#size')
+      const _sel = typeof window.getRunSelectors === "function"
+        ? window.getRunSelectors()
+        : { mode: getSelected('#trophy'), count: getSelected('#count'), speed: getSelected('#speed'), size: getSelected('#size') }
+      const _mode  = _sel.mode
+      const _count = _sel.count
+      const _speed = _sel.speed
+      const _size  = _sel.size
 
       const _time = ${winTicks} * ${winDt} * 1e-3
 

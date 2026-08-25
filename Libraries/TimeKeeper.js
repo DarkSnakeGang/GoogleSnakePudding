@@ -217,6 +217,9 @@ window.TimeKeeper.make = function () {
         window.timeKeeper.count = ctx.count;
         window.timeKeeper.speed = ctx.speed;
         window.timeKeeper.size = ctx.size;
+        if (typeof window.freezeRunSelectors === "function") {
+            window.freezeRunSelectors();
+        }
     };
 
     // get the current setting, name = 'count', 'speed', 'size' or 'trophy'
