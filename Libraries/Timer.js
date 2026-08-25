@@ -122,7 +122,17 @@ window.Timer = {
     const timerSplitDiv = document.getElementsByClassName('Jc72He rc48Qb')[0]
     const deltaDiv = document.createElement('div')
     deltaDiv.id = 'timerDelta'
-    deltaDiv.innerHTML = '-'.color('white')
+    window._timerDeltaEl = deltaDiv
+    window.setTimerDeltaDisplay = function (el, text, color) {
+      const node = el || window._timerDeltaEl || document.getElementById('timerDelta')
+      if (!node) return
+      window._timerDeltaEl = node
+      const next = text == null ? '-' : String(text)
+      const nextColor = color || 'white'
+      if (node.textContent !== next) node.textContent = next
+      if (node.style.color !== nextColor) node.style.color = nextColor
+    }
+    window.setTimerDeltaDisplay(deltaDiv, '-', 'white')
     timerSplitDiv.appendChild(deltaDiv)
     if(!_showDelta) deltaDiv.style.display = 'none'
 
@@ -804,8 +814,9 @@ window.Timer = {
           }
 
 
-          const deltaDiv = document.getElementById('timerDelta')
-          deltaDiv.innerHTML = '-'.color('white')
+          const deltaDiv = window._timerDeltaEl || document.getElementById('timerDelta')
+          if (typeof window.setTimerDeltaDisplay === "function") window.setTimerDeltaDisplay(deltaDiv, '-', 'white')
+          else if (deltaDiv) deltaDiv.textContent = '-'
 
           window._lastDelta = 0
           if (typeof window.SplitPanelOnReset === "function") window.SplitPanelOnReset()
@@ -901,7 +912,8 @@ window.Timer = {
       splitStuff,
       `
       if([25, 50, 100].includes(${score}) || window._splits.includes(${score})) {
-        const deltaDiv = document.getElementById('timerDelta')
+        const deltaDiv = window._timerDeltaEl || document.getElementById('timerDelta')
+        window._timerDeltaEl = deltaDiv
         const _mode  = getSelected('#trophy')
         const _count = getSelected('#count')
         const _speed = getSelected('#speed')
@@ -915,21 +927,28 @@ window.Timer = {
         if(window._pb[_mode][_count][_speed][_size][_cat][${score}]) {
           _delta = _split - window._pb[_mode][_count][_speed][_size][_cat][${score}]
           const _absDeltaString = Math.abs(_delta).timeFormat()
-          if(_delta !== 0)
-            deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
-              localStorage[
-                _delta > 0 ?
-                  _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
-                :
-                  _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
-              ]
-            )
-          else
+          if(_delta !== 0) {
+            const _dColor = localStorage[
+              _delta > 0 ?
+                _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
+              :
+                _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
+            ]
+            if (typeof window.setTimerDeltaDisplay === "function")
+              window.setTimerDeltaDisplay(deltaDiv, (_delta < 0 ? '-' : '+') + _absDeltaString, _dColor)
+            else
+              deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(_dColor)
+          } else if (typeof window.setTimerDeltaDisplay === "function") {
+            window.setTimerDeltaDisplay(deltaDiv, '-', 'white')
+          } else {
             deltaDiv.innerHTML = '-'.color('white')
+          }
 
 
 
           window._lastDelta = _delta
+        } else if (typeof window.setTimerDeltaDisplay === "function") {
+          window.setTimerDeltaDisplay(deltaDiv, '-', 'white')
         } else {
           deltaDiv.innerHTML = '-'.color('white')
         }
@@ -970,7 +989,8 @@ window.Timer = {
       winStuff,
       `
       ${winStuff}
-      const deltaDiv = document.getElementById('timerDelta')
+      const deltaDiv = window._timerDeltaEl || document.getElementById('timerDelta')
+      window._timerDeltaEl = deltaDiv
       const _mode  = getSelected('#trophy')
       const _count = getSelected('#count')
       const _speed = getSelected('#speed')
@@ -984,17 +1004,24 @@ window.Timer = {
       if(window._pb[_mode][_count][_speed][_size][_cat]['ALL']) {
         _delta = _time - window._pb[_mode][_count][_speed][_size][_cat]['ALL']
         const _absDeltaString = Math.abs(_delta).timeFormat()
-        if(_delta !== 0)
-          deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(
-            localStorage[
-              _delta > 0 ?
-                _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
-              :
-                _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
-            ]
-          )
-        else
+        if(_delta !== 0) {
+          const _dColor = localStorage[
+            _delta > 0 ?
+              _delta > _lastDelta ? '_snake_behindl' : '_snake_behindg'
+            :
+              _delta > _lastDelta ? '_snake_aheadl'  : '_snake_aheadg'
+          ]
+          if (typeof window.setTimerDeltaDisplay === "function")
+            window.setTimerDeltaDisplay(deltaDiv, (_delta < 0 ? '-' : '+') + _absDeltaString, _dColor)
+          else
+            deltaDiv.innerHTML = ((_delta < 0 ? '-' : '+') + _absDeltaString).color(_dColor)
+        } else if (typeof window.setTimerDeltaDisplay === "function") {
+          window.setTimerDeltaDisplay(deltaDiv, '-', 'white')
+        } else {
           deltaDiv.innerHTML = '-'.color('white')
+        }
+      } else if (typeof window.setTimerDeltaDisplay === "function") {
+        window.setTimerDeltaDisplay(deltaDiv, '-', 'white')
       } else {
         deltaDiv.innerHTML = '-'.color('white')
       }

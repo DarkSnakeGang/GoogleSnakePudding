@@ -24,6 +24,15 @@ window.TimeKeeper.make = function () {
         }
     };
 
+    // Mid-run: paint one personal row (or mark dirty if Speed Info is hidden)
+    window.timeKeeper.paintSpeedInfoRow = function (score) {
+        if (typeof window.SpeedInfoPaintPersonalRow === "function") {
+            window.SpeedInfoPaintPersonalRow(score);
+            return;
+        }
+        window.timeKeeper.refreshSpeedInfo();
+    };
+
     // Prefer frozen run settings (no #trophy walk) once a run has started.
     window.timeKeeper.shouldTrack = function (ctx) {
         if (window.daily_challenge) return false;
@@ -246,7 +255,7 @@ window.TimeKeeper.make = function () {
         window.timeKeeper._liveRefreshQueued = true;
         queueMicrotask(function () {
             window.timeKeeper._liveRefreshQueued = false;
-            window.timeKeeper.refreshSpeedInfo();
+            window.timeKeeper.paintSpeedInfoRow("H");
         });
     };
 
@@ -354,9 +363,9 @@ window.TimeKeeper.make = function () {
                 };
             }
         }
-        // Mid-run (25/50/100) or pre-flush ALL: keep in memory only
+        // Mid-run (25/50/100) or pre-flush ALL: keep in memory only; paint one row
         window.timeKeeper.markStorageDirty();
-        window.timeKeeper.refreshSpeedInfo();
+        window.timeKeeper.paintSpeedInfoRow(score);
     };
 
     // Only count if a run had actually started (not play→esc→play)

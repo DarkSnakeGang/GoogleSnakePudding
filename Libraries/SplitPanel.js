@@ -217,6 +217,9 @@ window.SplitPanel.make = function () {
     };
 
     window.SplitPanelOnSplit = function (score, splitTime, delta) {
+        const box = document.getElementById("split-panel-pudding");
+        if (!box || box.style.visibility === "hidden" || !window.splitPanelVisible) return;
+
         const key = score === "ALL" || score === "all" ? "ALL" : score;
         const rec = window._splitPanelRows && window._splitPanelRows[String(key)];
         if (!rec) {

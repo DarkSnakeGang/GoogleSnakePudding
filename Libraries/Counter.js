@@ -70,7 +70,10 @@ window.Counter.make = function () {
         }
     }
     window.updateCounterDisplay = function () {
-        divList.innerHTML = stats[stats.statShown][stats.statDurationShown];
+        if (typeof divList === "undefined" || !divList) return;
+        const next = String(stats[stats.statShown][stats.statDurationShown]);
+        if (divList.textContent === next) return;
+        divList.textContent = next;
     }
     window.promptToResetStats = function () {
         let userResponse = prompt('Type DELETE to reset all stats. Cannot be undone');

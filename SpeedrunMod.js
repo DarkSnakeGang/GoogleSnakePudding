@@ -791,6 +791,15 @@ window.TimeKeeper.make = function () {
         }
     };
 
+    // Mid-run: paint one personal row (or mark dirty if Speed Info is hidden)
+    window.timeKeeper.paintSpeedInfoRow = function (score) {
+        if (typeof window.SpeedInfoPaintPersonalRow === "function") {
+            window.SpeedInfoPaintPersonalRow(score);
+            return;
+        }
+        window.timeKeeper.refreshSpeedInfo();
+    };
+
     // Prefer frozen run settings (no #trophy walk) once a run has started.
     window.timeKeeper.shouldTrack = function (ctx) {
         if (window.daily_challenge) return false;
@@ -1013,7 +1022,7 @@ window.TimeKeeper.make = function () {
         window.timeKeeper._liveRefreshQueued = true;
         queueMicrotask(function () {
             window.timeKeeper._liveRefreshQueued = false;
-            window.timeKeeper.refreshSpeedInfo();
+            window.timeKeeper.paintSpeedInfoRow("H");
         });
     };
 
@@ -1121,9 +1130,9 @@ window.TimeKeeper.make = function () {
                 };
             }
         }
-        // Mid-run (25/50/100) or pre-flush ALL: keep in memory only
+        // Mid-run (25/50/100) or pre-flush ALL: keep in memory only; paint one row
         window.timeKeeper.markStorageDirty();
-        window.timeKeeper.refreshSpeedInfo();
+        window.timeKeeper.paintSpeedInfoRow(score);
     };
 
     // Only count if a run had actually started (not play→esc→play)
@@ -3524,6 +3533,7 @@ window.SpeedInfo.make = function () {
         if (speedInfoToggle) speedInfoToggle.checked = true;
         if (typeof window.saveSettings === "function") window.saveSettings();
 
+        window._speedInfoNeedsRefresh = false;
         window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     }
 
@@ -3538,6 +3548,11 @@ window.SpeedInfo.make = function () {
         if (speedInfoToggle) speedInfoToggle.checked = false;
         if (typeof window.saveSettings === "function") window.saveSettings();
     }
+
+    window.SpeedInfoIsVisible = function () {
+        const box = document.getElementById("speedinfo-popup-pudding");
+        return !!(box && box.style.visibility !== "hidden");
+    };
 
     window.SpeedInfoSetup = function () {
 
@@ -3748,6 +3763,10 @@ window.SpeedInfo.make = function () {
     });
 
     window.SpeedInfoUpdate = function () {
+        if (typeof window.SpeedInfoIsVisible === "function" && !window.SpeedInfoIsVisible()) {
+            window._speedInfoNeedsRefresh = true;
+            return Promise.resolve();
+        }
         // Coalesce death/reset/addAttempt bursts into one paint
         if (window._speedInfoUpdateTimer) {
             return window._speedInfoUpdatePromise || Promise.resolve();
@@ -3763,6 +3782,136 @@ window.SpeedInfo.make = function () {
             }, 0);
         });
         return window._speedInfoUpdatePromise;
+    };
+
+    // Mid-run: update one personal PB/HS row without rebuilding SRC / mode labels
+    window.SpeedInfoPaintPersonalRow = function (score) {
+        if (typeof window.SpeedInfoIsVisible === "function" && !window.SpeedInfoIsVisible()) {
+            window._speedInfoNeedsRefresh = true;
+            return;
+        }
+        if (!window.timeKeeper || window.daily_challenge) return;
+        if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
+
+        const midRun =
+            (window.timeKeeper.runStarted || window.timeKeeper.playing) &&
+            typeof window.timeKeeper.mode === "string" &&
+            typeof window.timeKeeper.count === "number";
+
+        let modeKey;
+        let count;
+        let speed;
+        let size;
+        let mode = window.CurrentModeNum;
+        if (midRun) {
+            modeKey = window.timeKeeper.mode;
+            count = window.timeKeeper.count;
+            speed = window.timeKeeper.speed;
+            size = window.timeKeeper.size;
+        } else {
+            count = window.timeKeeper.getCurrentSetting("count");
+            speed = window.timeKeeper.getCurrentSetting("speed");
+            size = window.timeKeeper.getCurrentSetting("size");
+            modeKey = window.timeKeeper.getCurrentMode();
+        }
+
+        let storage = {};
+        try {
+            storage =
+                typeof window.timeKeeper.getStorage === "function"
+                    ? window.timeKeeper.getStorage()
+                    : JSON.parse(localStorage["snake_timeKeeper"] || "{}");
+        } catch (e) {
+            storage = {};
+        }
+
+        const scoreKey = String(score);
+        const bold = document.getElementById(scoreKey === "ALL" ? "ALL" : scoreKey);
+        if (!bold) return;
+
+        const name = scoreKey + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
+        const fmt = window.timeKeeper.formatTimeSrcStyle
+            ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
+            : function (ms) {
+                  return String(ms);
+              };
+
+        if (scoreKey === "att") {
+            const totalAttempts =
+                typeof window.timeKeeper.getAttemptTotal === "function"
+                    ? window.timeKeeper.getAttemptTotal(storage[name])
+                    : typeof storage[name] === "number"
+                      ? storage[name]
+                      : 0;
+            const next = "Total Attempts: " + totalAttempts;
+            if (bold.textContent !== next) bold.textContent = next;
+            return;
+        }
+
+        if (scoreKey !== "H" && !shouldShowCategory(scoreKey === "ALL" ? "All" : scoreKey, size, mode)) {
+            if (bold.innerHTML !== "") bold.innerHTML = "";
+            return;
+        }
+
+        const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
+
+        if (scoreKey === "H") {
+            if (typeof storage[name] != "undefined" && storage[name].high != null) {
+                const highText = String(storage[name].high) + " Apples";
+                const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
+                const knownGold = window._speedInfoGoldCache[gKey];
+                bold.innerHTML =
+                    "Highscore: " +
+                    pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
+                if (canShowSrcHighscore(mode, count)) {
+                    setTimeout(function () {
+                        if (gen !== window._speedInfoUpdateGen) return;
+                        shouldGoldPb("H", mode, count, speed, size, storage[name], modeKey).then(
+                            function (gold) {
+                                if (gen !== window._speedInfoUpdateGen) return;
+                                window._speedInfoGoldCache[gKey] = !!gold;
+                                const el = document.getElementById("H");
+                                if (!el) return;
+                                el.innerHTML =
+                                    "Highscore: " +
+                                    pbValueHtml(highText, "H", mode, count, speed, size, !!gold);
+                            }
+                        );
+                    }, 0);
+                }
+            } else {
+                bold.innerHTML = "Highscore: None";
+            }
+            return;
+        }
+
+        const label = scoreKey === "ALL" ? "All Apples" : scoreKey + " Apples";
+        if (typeof storage[name] != "undefined" && storage[name].time != null) {
+            const displayText = fmt(storage[name].time);
+            const gKey = goldCacheKey(modeKey, count, speed, size, scoreKey, displayText);
+            const knownGold = window._speedInfoGoldCache[gKey];
+            bold.innerHTML =
+                label +
+                ": " +
+                pbValueHtml(displayText, scoreKey, mode, count, speed, size, !!knownGold);
+            setTimeout(function () {
+                if (gen !== window._speedInfoUpdateGen) return;
+                shouldGoldPb(scoreKey, mode, count, speed, size, storage[name], modeKey).then(
+                    function (gold) {
+                        if (gen !== window._speedInfoUpdateGen) return;
+                        window._speedInfoGoldCache[gKey] = !!gold;
+                        const el = document.getElementById(scoreKey);
+                        if (!el) return;
+                        el.innerHTML =
+                            label +
+                            ": " +
+                            pbValueHtml(displayText, scoreKey, mode, count, speed, size, !!gold);
+                    }
+                );
+            }, 0);
+        } else {
+            bold.innerHTML = label + ": None";
+        }
     };
 
     async function runSpeedInfoUpdate() {
