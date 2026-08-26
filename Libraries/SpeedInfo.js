@@ -1358,7 +1358,16 @@ window.SpeedInfo.make = function () {
   display:flex;flex-direction:column;gap:2px;
 }
 #speedinfo-popup-pudding .si-stack .form-check-label {
-  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.3;
+  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.3;
+}
+#speedinfo-popup-pudding.pudding-text-compact .si-stack .form-check-label {
+  font-size:12px;
+}
+#speedinfo-popup-pudding .form-check.form-switch .form-check-label {
+  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.25;
+}
+#speedinfo-popup-pudding.pudding-text-compact .form-check.form-switch .form-check-label {
+  font-size:12px;
 }
 #speedinfo-popup-pudding .si-btn {
   box-sizing:border-box;margin:0;padding:4px 8px;color:white;background-color:#1155CC;border:none;
@@ -1373,9 +1382,6 @@ window.SpeedInfo.make = function () {
   display:flex;align-items:center;gap:6px;margin:0 0 4px;min-height:0;padding-left:0;
 }
 #speedinfo-popup-pudding .form-check.form-switch .form-check-input { margin:0;float:none;flex-shrink:0; }
-#speedinfo-popup-pudding .form-check.form-switch .form-check-label {
-  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.25;
-}
 #speedinfo-popup-pudding #si-main { flex:1;min-height:0;overflow-x:hidden;overflow-y:auto; }
 #speedinfo-popup-pudding #speedrun-controls-section {
   flex-shrink:0;margin-top:auto;padding:8px 0 0;border-top:1px solid rgba(255,255,255,0.18);
@@ -1437,6 +1443,9 @@ window.SpeedInfo.make = function () {
 `;
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
+        if (typeof window.applyPuddingPanelTextSize === "function") {
+            window.applyPuddingPanelTextSize();
+        }
         window.cacheSpeedInfoElements = function () {
             const ids = [
                 "mode-selected",

@@ -204,6 +204,7 @@ window.SettingsSaver.make = function () {
                 SaveGameSettings: true,
                 SavedGameSettings: null,
                 SplitPanel: false,
+                BigPanelText: true,
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
@@ -232,6 +233,9 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.SplitPanel !== 'boolean') {
                 pudding_settings.SplitPanel = false;
+            }
+            if (typeof pudding_settings.BigPanelText !== 'boolean') {
+                pudding_settings.BigPanelText = true;
             }
             if (
                 pudding_settings.SavedGameSettings !== null &&

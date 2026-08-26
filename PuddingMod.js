@@ -72,9 +72,25 @@ window.Theme = {};
 
 window.Theme.make = function () {
 
-  // style for all pudding sidebar overlays
-  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:584px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
+  // Compact matches the board; large-text mode uses a taller fixed panel (no resize sync).
+  window.PUDDING_SIDEBAR_HEIGHT_COMPACT = 584;
+  window.PUDDING_SIDEBAR_HEIGHT_BIG = 800;
+  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:800px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
   window.puddingSidebarStyleLeft = 'position:absolute;right:100%;left:auto;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:584px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
+
+  // Big (default) vs compact redesign text + matching fixed height for settings / Speed Info
+  window.applyPuddingPanelTextSize = function () {
+    const big = !(window.pudding_settings && window.pudding_settings.BigPanelText === false);
+    const height = (big ? window.PUDDING_SIDEBAR_HEIGHT_BIG : window.PUDDING_SIDEBAR_HEIGHT_COMPACT) + "px";
+    const ids = ["settings-popup-pudding", "speedinfo-popup-pudding"];
+    for (let i = 0; i < ids.length; i++) {
+      const el = document.getElementById(ids[i]);
+      if (!el) continue;
+      el.classList.toggle("pudding-text-big", big);
+      el.classList.toggle("pudding-text-compact", !big);
+      el.style.height = height;
+    }
+  };
 
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
@@ -3148,6 +3164,7 @@ window.SettingsSaver.make = function () {
                 SaveGameSettings: true,
                 SavedGameSettings: null,
                 SplitPanel: false,
+                BigPanelText: true,
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
@@ -3176,6 +3193,9 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.SplitPanel !== 'boolean') {
                 pudding_settings.SplitPanel = false;
+            }
+            if (typeof pudding_settings.BigPanelText !== 'boolean') {
+                pudding_settings.BigPanelText = true;
             }
             if (
                 pudding_settings.SavedGameSettings !== null &&
@@ -4816,7 +4836,16 @@ window.SpeedInfo.make = function () {
   display:flex;flex-direction:column;gap:2px;
 }
 #speedinfo-popup-pudding .si-stack .form-check-label {
-  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.3;
+  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.3;
+}
+#speedinfo-popup-pudding.pudding-text-compact .si-stack .form-check-label {
+  font-size:12px;
+}
+#speedinfo-popup-pudding .form-check.form-switch .form-check-label {
+  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:16px;line-height:1.25;
+}
+#speedinfo-popup-pudding.pudding-text-compact .form-check.form-switch .form-check-label {
+  font-size:12px;
 }
 #speedinfo-popup-pudding .si-btn {
   box-sizing:border-box;margin:0;padding:4px 8px;color:white;background-color:#1155CC;border:none;
@@ -4831,9 +4860,6 @@ window.SpeedInfo.make = function () {
   display:flex;align-items:center;gap:6px;margin:0 0 4px;min-height:0;padding-left:0;
 }
 #speedinfo-popup-pudding .form-check.form-switch .form-check-input { margin:0;float:none;flex-shrink:0; }
-#speedinfo-popup-pudding .form-check.form-switch .form-check-label {
-  margin:0;color:white;font-family:Roboto,Arial,sans-serif;font-size:12px;line-height:1.25;
-}
 #speedinfo-popup-pudding #si-main { flex:1;min-height:0;overflow-x:hidden;overflow-y:auto; }
 #speedinfo-popup-pudding #speedrun-controls-section {
   flex-shrink:0;margin-top:auto;padding:8px 0 0;border-top:1px solid rgba(255,255,255,0.18);
@@ -4895,6 +4921,9 @@ window.SpeedInfo.make = function () {
 `;
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(speedinfoBox);
+        if (typeof window.applyPuddingPanelTextSize === "function") {
+            window.applyPuddingPanelTextSize();
+        }
         window.cacheSpeedInfoElements = function () {
             const ids = [
                 "mode-selected",
@@ -7587,7 +7616,7 @@ window.BootstrapMenu.make = function () {
   border: none;
   border-radius: 4px;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.3;
   text-align: center;
   cursor: pointer;
@@ -7609,7 +7638,7 @@ window.BootstrapMenu.make = function () {
   background-color: #1155CC;
   color: white;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   border: none;
   border-radius: 4px;
   text-align: center;
@@ -7631,8 +7660,13 @@ window.BootstrapMenu.make = function () {
   margin: 0;
   color: white;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.25;
+}
+#settings-popup-pudding.pudding-text-compact .form-check-label,
+#settings-popup-pudding.pudding-text-compact .pudding-settings-btn,
+#settings-popup-pudding.pudding-text-compact #stat-chooser {
+  font-size: 12px;
 }
 </style>
 
@@ -7674,6 +7708,10 @@ window.BootstrapMenu.make = function () {
   <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
     <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="BigPanelText">
+    <label class="form-check-label" for="BigPanelText">Large panel text</label>
   </div>
   <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
@@ -7727,6 +7765,9 @@ window.BootstrapMenu.make = function () {
 `;
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
+        if (typeof window.applyPuddingPanelTextSize === "function") {
+          window.applyPuddingPanelTextSize();
+        }
 
         timer_settings = document.getElementById("TimerSettings");
         timer_settings.addEventListener("click", window.editTimer);
@@ -7741,6 +7782,17 @@ window.BootstrapMenu.make = function () {
             window.pudding_settings.randomizeThemeApple = !window.pudding_settings.randomizeThemeApple;
         });
 
+        const bigPanelTextCheckbox = document.getElementById("BigPanelText");
+        if (bigPanelTextCheckbox) {
+            bigPanelTextCheckbox.checked = window.pudding_settings.BigPanelText !== false;
+            bigPanelTextCheckbox.addEventListener("change", function () {
+                window.pudding_settings.BigPanelText = !!bigPanelTextCheckbox.checked;
+                if (typeof window.applyPuddingPanelTextSize === "function") {
+                    window.applyPuddingPanelTextSize();
+                }
+                if (typeof window.saveSettings === "function") window.saveSettings();
+            });
+        }
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;

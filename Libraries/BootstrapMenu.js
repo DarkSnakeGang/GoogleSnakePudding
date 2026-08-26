@@ -167,7 +167,7 @@ window.BootstrapMenu.make = function () {
   border: none;
   border-radius: 4px;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.3;
   text-align: center;
   cursor: pointer;
@@ -189,7 +189,7 @@ window.BootstrapMenu.make = function () {
   background-color: #1155CC;
   color: white;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   border: none;
   border-radius: 4px;
   text-align: center;
@@ -211,8 +211,13 @@ window.BootstrapMenu.make = function () {
   margin: 0;
   color: white;
   font-family: Roboto, Arial, sans-serif;
-  font-size: 12px;
+  font-size: 16px;
   line-height: 1.25;
+}
+#settings-popup-pudding.pudding-text-compact .form-check-label,
+#settings-popup-pudding.pudding-text-compact .pudding-settings-btn,
+#settings-popup-pudding.pudding-text-compact #stat-chooser {
+  font-size: 12px;
 }
 </style>
 
@@ -254,6 +259,10 @@ window.BootstrapMenu.make = function () {
   <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
     <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
+  </div>
+  <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="BigPanelText">
+    <label class="form-check-label" for="BigPanelText">Large panel text</label>
   </div>
   <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
@@ -307,6 +316,9 @@ window.BootstrapMenu.make = function () {
 `;
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(settingsBox);
+        if (typeof window.applyPuddingPanelTextSize === "function") {
+          window.applyPuddingPanelTextSize();
+        }
 
         timer_settings = document.getElementById("TimerSettings");
         timer_settings.addEventListener("click", window.editTimer);
@@ -321,6 +333,17 @@ window.BootstrapMenu.make = function () {
             window.pudding_settings.randomizeThemeApple = !window.pudding_settings.randomizeThemeApple;
         });
 
+        const bigPanelTextCheckbox = document.getElementById("BigPanelText");
+        if (bigPanelTextCheckbox) {
+            bigPanelTextCheckbox.checked = window.pudding_settings.BigPanelText !== false;
+            bigPanelTextCheckbox.addEventListener("change", function () {
+                window.pudding_settings.BigPanelText = !!bigPanelTextCheckbox.checked;
+                if (typeof window.applyPuddingPanelTextSize === "function") {
+                    window.applyPuddingPanelTextSize();
+                }
+                if (typeof window.saveSettings === "function") window.saveSettings();
+            });
+        }
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");
         skull_checkbox.checked = window.pudding_settings.Skull;
