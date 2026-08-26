@@ -74,8 +74,8 @@ window.Theme.make = function () {
 
   // Compact matches the board; large-text mode uses a taller fixed panel (no resize sync).
   window.PUDDING_SIDEBAR_HEIGHT_COMPACT = 584;
-  window.PUDDING_SIDEBAR_HEIGHT_BIG = 800;
-  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:800px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
+  window.PUDDING_SIDEBAR_HEIGHT_BIG = 740;
+  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:740px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
   window.puddingSidebarStyleLeft = 'position:absolute;right:100%;left:auto;z-index:10000;background-color:#4a752c;padding:10px 8px;display:block;border-radius:3px;width:248px;height:584px;top:0px;overflow-x:hidden;overflow-y:auto;box-sizing:border-box;';
 
   // Big (default) vs compact redesign text + matching fixed height for settings / Speed Info
