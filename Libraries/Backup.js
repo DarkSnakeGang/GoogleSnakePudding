@@ -106,16 +106,32 @@ window.Backup.make = function () {
     return iTime < lTime ? imported : local;
   }
 
+  function attemptTotal(raw) {
+    if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+    if (raw && typeof raw === "object" && typeof raw.total === "number") {
+      return raw.total;
+    }
+    return 0;
+  }
+
   function mergeAttemptEntry(local, imported) {
+    if (!local && imported == null) return imported;
+    // Legacy att-* values are plain numbers (v10/v11); current are objects
+    if (typeof local === "number" || typeof imported === "number") {
+      return Math.max(attemptTotal(local), attemptTotal(imported));
+    }
     if (!local) {
       const rec = Object.assign({}, imported);
       if (typeof rec.session !== "number") rec.session = 0;
+      if (typeof rec.total !== "number") rec.total = attemptTotal(imported);
       return rec;
     }
     if (!imported) return local;
     return {
-      total: Math.max(num(local.total, 0), num(imported.total, 0)),
+      total: Math.max(attemptTotal(local), attemptTotal(imported)),
       session: typeof local.session === "number" ? local.session : 0,
+      lastAttempt:
+        local.lastAttempt != null ? local.lastAttempt : imported.lastAttempt,
       lastSession: Math.max(
         num(local.lastSession, 0),
         num(imported.lastSession, 0)
