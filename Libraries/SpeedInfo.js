@@ -188,6 +188,13 @@ window.SpeedInfo.make = function () {
         return false;
     }
 
+    // Personal HS may gold only when SRC/CE has an HS category for this combo
+    function canGoldHighscore(mode, count, speed, size) {
+        if (!canSubmitHighscore(mode, count)) return false;
+        if (size > 2 || count > 6 || speed > 2) return false;
+        return true;
+    }
+
     function srcVarPair(varId, valueId) {
         return varId + "." + valueId;
     }
@@ -269,9 +276,12 @@ window.SpeedInfo.make = function () {
         return window.modeToTxt[mode] && window.modeToTxt[mode].name;
     }
 
-    // Timed: lower ms wins. Highscore: higher apples wins (only when HS board applies). Unheld → gold.
+    // Timed: lower ms wins. Highscore: higher apples wins (only when SRC has an HS board). Unheld → gold.
     async function shouldGoldPb(score, mode, count, speed, size, pb, modeKey) {
-        if (score === "H" && !canShowSrcHighscore(mode, count)) return false;
+        if (score === "H") {
+            // Must match a real SRC/CE HS category (not merely FSS display rules)
+            if (!canGoldHighscore(mode, count, speed, size)) return false;
+        }
 
         const modeName = fssModeName(mode, modeKey);
         const countName = window.countToTxt[count] && window.countToTxt[count].name;
@@ -1688,11 +1698,12 @@ window.SpeedInfo.make = function () {
             if (typeof storage[name] != "undefined" && storage[name].high != null) {
                 const highText = String(storage[name].high) + " Apples";
                 const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
-                const knownGold = window._speedInfoGoldCache[gKey];
+                const allowGold = canGoldHighscore(mode, count, speed, size);
+                const knownGold = allowGold && window._speedInfoGoldCache[gKey];
                 bold.innerHTML =
                     "Highscore: " +
                     pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
-                if (canShowSrcHighscore(mode, count)) {
+                if (allowGold) {
                     queueGoldJob("H", "Highscore: ", highText, storage[name], gKey);
                 }
             } else if (bold.textContent !== "Highscore: None") {
@@ -1832,11 +1843,12 @@ window.SpeedInfo.make = function () {
                 if (typeof storage[name] != "undefined" && storage[name].high != null) {
                     const highText = String(storage[name].high) + " Apples";
                     const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
-                    const knownGold = window._speedInfoGoldCache[gKey];
+                    const allowGold = canGoldHighscore(mode, count, speed, size);
+                    const knownGold = allowGold && window._speedInfoGoldCache[gKey];
                     bold.innerHTML =
                         "Highscore: " +
                         pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
-                    if (canShowSrcHighscore(mode, count) && typeof knownGold !== "boolean") {
+                    if (allowGold && typeof window._speedInfoGoldCache[gKey] !== "boolean") {
                         goldJobs.push({
                             score: "H",
                             elId: "H",
