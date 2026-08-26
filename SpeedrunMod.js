@@ -628,6 +628,38 @@ window.ModeRegistry.bitstringV3ToModeKey = function (bits) {
     return ids.slice().sort().join("+");
 };
 
+// Reverse of bitstringV3ToModeKey — 21-char string for v11 / Bridge-era scrapers
+window.ModeRegistry.modeKeyToBitstringV3 = function (modeKey) {
+    const bits = new Array(21).fill("0");
+    if (!modeKey || modeKey === "classic") return bits.join("");
+    const ids = String(modeKey).split("+");
+    const idToBit = Object.create(null);
+    for (const bit of Object.keys(window.ModeRegistry._byBitV3)) {
+        idToBit[window.ModeRegistry._byBitV3[bit]] = Number(bit);
+    }
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        if (id === "classic" || id === "blender") continue;
+        const bit = idToBit[id];
+        if (typeof bit === "number" && bit >= 0 && bit < 21) bits[bit] = "1";
+    }
+    return bits.join("");
+};
+
+// Drop Bridge bit (index 19) so Peaceful stays last — 20-char string for v10
+window.ModeRegistry.bitstringV3ToV2 = function (bits21) {
+    if (!bits21 || typeof bits21 !== "string") return "00000000000000000000";
+    if (bits21.length < 21) {
+        const s = (bits21 + "00000000000000000000").slice(0, 20);
+        return s;
+    }
+    return bits21.slice(0, 19) + bits21.slice(20);
+};
+
+window.ModeRegistry.isBitstringModePart = function (modePart) {
+    return typeof modePart === "string" && /^[01]{20,21}$/.test(modePart);
+};
+
 window.ModeRegistry._blenderSelectedIds = function (modes) {
     // Blender UI: find random.png row and read which mode toggles are selected
     let element = null;
@@ -1716,6 +1748,9 @@ window.TimeKeeper.make = function () {
 
     // Persist immediately (settings edits, attempt count, end-of-run flush helpers)
     window.timeKeeper.setStorage = function (storage) {
+        if (typeof window.timeKeeper.syncLegacyTimeKeeperMirrors === "function") {
+            window.timeKeeper.syncLegacyTimeKeeperMirrors(storage);
+        }
         window.timeKeeper._storageCache = storage;
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));
         window.timeKeeper._storageDirty = false;
@@ -1728,11 +1763,82 @@ window.TimeKeeper.make = function () {
 
     window.timeKeeper.flushStorage = function () {
         if (!window.timeKeeper._storageDirty || !window.timeKeeper._storageCache) return;
+        if (typeof window.timeKeeper.syncLegacyTimeKeeperMirrors === "function") {
+            window.timeKeeper.syncLegacyTimeKeeperMirrors(window.timeKeeper._storageCache);
+        }
         localStorage.setItem(
             "snake_timeKeeper",
             JSON.stringify(window.timeKeeper._storageCache)
         );
         window.timeKeeper._storageDirty = false;
+    };
+
+    window.timeKeeper._isBitstringStorageKey = function (key) {
+        if (!key || key === "version") return false;
+        const parts = key.split("-");
+        return (
+            parts.length >= 5 &&
+            window.ModeRegistry &&
+            typeof window.ModeRegistry.isBitstringModePart === "function" &&
+            window.ModeRegistry.isBitstringModePart(parts[1])
+        );
+    };
+
+    window.timeKeeper._cloneStorageValue = function (value) {
+        if (value == null || typeof value !== "object") return value;
+        try {
+            return JSON.parse(JSON.stringify(value));
+        } catch (e) {
+            return value;
+        }
+    };
+
+    // Keep v10 (20-bit) / v11 (21-bit) keys in sync with modeKey rows for downgrade
+    window.timeKeeper.syncLegacyTimeKeeperMirrors = function (storage) {
+        if (!storage || typeof storage !== "object") return storage;
+        if (
+            !window.ModeRegistry ||
+            typeof window.ModeRegistry.modeKeyToBitstringV3 !== "function" ||
+            typeof window.ModeRegistry.bitstringV3ToV2 !== "function"
+        ) {
+            return storage;
+        }
+        const keys = Object.keys(storage);
+        for (let i = 0; i < keys.length; i++) {
+            const key = keys[i];
+            if (key === "version") continue;
+            if (window.timeKeeper._isBitstringStorageKey(key)) continue;
+            const parts = key.split("-");
+            if (parts.length < 5) continue;
+            const prefix = parts[0];
+            if (
+                prefix !== "25" &&
+                prefix !== "50" &&
+                prefix !== "100" &&
+                prefix !== "ALL" &&
+                prefix !== "H" &&
+                prefix !== "att"
+            ) {
+                continue;
+            }
+            const modeKey = parts[1];
+            if (!modeKey || /^[01]+$/.test(modeKey)) continue;
+            const suffix = parts.slice(2).join("-");
+            const bits21 = window.ModeRegistry.modeKeyToBitstringV3(modeKey);
+            const bits20 = window.ModeRegistry.bitstringV3ToV2(bits21);
+            const key21 = prefix + "-" + bits21 + "-" + suffix;
+            const key20 = prefix + "-" + bits20 + "-" + suffix;
+            const raw = storage[key];
+            if (prefix === "att") {
+                const total = window.timeKeeper.getAttemptTotal(raw);
+                storage[key21] = total;
+                storage[key20] = total;
+            } else {
+                storage[key21] = window.timeKeeper._cloneStorageValue(raw);
+                storage[key20] = window.timeKeeper._cloneStorageValue(raw);
+            }
+        }
+        return storage;
     };
 
     // Compat: callers expecting mode "string" now get stable modeKey
@@ -2138,8 +2244,20 @@ window.TimeKeeper.make = function () {
                 const parts = key.split("-");
                 if (parts.length >= 5 && /^[01]{21}$/.test(parts[1])) {
                     const modeKey = window.ModeRegistry.bitstringV3ToModeKey(parts[1]);
-                    migrated[parts[0] + "-" + modeKey + "-" + parts.slice(2).join("-")] =
-                        storage[key];
+                    const modeKeyName =
+                        parts[0] + "-" + modeKey + "-" + parts.slice(2).join("-");
+                    if (typeof migrated[modeKeyName] === "undefined") {
+                        migrated[modeKeyName] = storage[key];
+                    }
+                    migrated[key] = storage[key];
+                    if (typeof window.ModeRegistry.bitstringV3ToV2 === "function") {
+                        const bits20 = window.ModeRegistry.bitstringV3ToV2(parts[1]);
+                        const key20 =
+                            parts[0] + "-" + bits20 + "-" + parts.slice(2).join("-");
+                        if (typeof migrated[key20] === "undefined") {
+                            migrated[key20] = storage[key];
+                        }
+                    }
                 } else {
                     migrated[key] = storage[key];
                 }
@@ -2152,19 +2270,30 @@ window.TimeKeeper.make = function () {
             storage.version = 4;
         }
 
-        // Strip unused highscore average fields (sum/att) from H-* rows
+        // Strip unused highscore average fields (sum/att) from modeKey H-* rows only
         for (const key of Object.keys(storage)) {
             if (key === "version" || key.slice(0, 2) !== "H-") continue;
+            if (window.timeKeeper._isBitstringStorageKey(key)) continue;
             const rec = storage[key];
             if (!rec || typeof rec !== "object") continue;
             delete rec.sum;
             delete rec.att;
         }
 
-        // Migrate att-* numbers → objects; roll previous page session into last/best
+        // Migrate modeKey att-* numbers → objects; leave bitstring att-* as numbers for v11
         for (const key of Object.keys(storage)) {
             if (key === "version" || key.slice(0, 4) !== "att-") continue;
+            if (window.timeKeeper._isBitstringStorageKey(key)) {
+                if (typeof storage[key] === "object") {
+                    storage[key] = window.timeKeeper.getAttemptTotal(storage[key]);
+                }
+                continue;
+            }
             storage[key] = window.timeKeeper.rollAttemptSession(storage[key]);
+        }
+
+        if (typeof window.timeKeeper.syncLegacyTimeKeeperMirrors === "function") {
+            window.timeKeeper.syncLegacyTimeKeeperMirrors(storage);
         }
 
         localStorage.setItem("snake_timeKeeper", JSON.stringify(storage));

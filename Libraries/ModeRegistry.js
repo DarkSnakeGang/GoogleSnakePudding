@@ -130,6 +130,38 @@ window.ModeRegistry.bitstringV3ToModeKey = function (bits) {
     return ids.slice().sort().join("+");
 };
 
+// Reverse of bitstringV3ToModeKey — 21-char string for v11 / Bridge-era scrapers
+window.ModeRegistry.modeKeyToBitstringV3 = function (modeKey) {
+    const bits = new Array(21).fill("0");
+    if (!modeKey || modeKey === "classic") return bits.join("");
+    const ids = String(modeKey).split("+");
+    const idToBit = Object.create(null);
+    for (const bit of Object.keys(window.ModeRegistry._byBitV3)) {
+        idToBit[window.ModeRegistry._byBitV3[bit]] = Number(bit);
+    }
+    for (let i = 0; i < ids.length; i++) {
+        const id = ids[i];
+        if (id === "classic" || id === "blender") continue;
+        const bit = idToBit[id];
+        if (typeof bit === "number" && bit >= 0 && bit < 21) bits[bit] = "1";
+    }
+    return bits.join("");
+};
+
+// Drop Bridge bit (index 19) so Peaceful stays last — 20-char string for v10
+window.ModeRegistry.bitstringV3ToV2 = function (bits21) {
+    if (!bits21 || typeof bits21 !== "string") return "00000000000000000000";
+    if (bits21.length < 21) {
+        const s = (bits21 + "00000000000000000000").slice(0, 20);
+        return s;
+    }
+    return bits21.slice(0, 19) + bits21.slice(20);
+};
+
+window.ModeRegistry.isBitstringModePart = function (modePart) {
+    return typeof modePart === "string" && /^[01]{20,21}$/.test(modePart);
+};
+
 window.ModeRegistry._blenderSelectedIds = function (modes) {
     // Blender UI: find random.png row and read which mode toggles are selected
     let element = null;
