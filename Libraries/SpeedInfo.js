@@ -267,21 +267,35 @@ window.SpeedInfo.make = function () {
         }
 
         level_IDs = speed != SLOW ? window.SpeedrunLevelsJson : window.SpeedrunLevelsJsonCE;
+        let level_ID = null;
+        let category_ID = null;
 
-        for (let index = 0; index < level_IDs["data"].length; index++) {
-            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
-                level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
-                level_ID = level_IDs["data"][index].id;
-                break;
+        if (level_IDs && level_IDs["data"]) {
+            for (let index = 0; index < level_IDs["data"].length; index++) {
+                if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
+                    level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
+                    level_ID = level_IDs["data"][index].id;
+                    break;
+                }
             }
         }
 
         for (let index = 0; index < category_IDs["data"].length; index++) {
             if (category_IDs["data"][index].name.includes(level + " Apples")) {
-
                 category_ID = category_IDs["data"][index].id;
                 break;
             }
+        }
+
+        if (!level_ID || !category_ID) {
+            switch (level) {
+                case "25": Handle25("Empty"); break;
+                case "50": Handle50("Empty"); break;
+                case "100": Handle100("Empty"); break;
+                case "All": HandleAll("Empty"); break;
+                default: break;
+            }
+            return;
         }
 
         src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
