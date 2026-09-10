@@ -1,6 +1,27 @@
 window.Counter = {};
 
 window.Counter.make = function () {
+    window.defaultGoldenFruitStats = function () {
+        return {
+            apple: 0,
+            cherry: 0,
+            strawberry: 0,
+            carrot: 0,
+            watermelon: 0,
+        };
+    };
+
+    window.ensureGoldenFruitStats = function (s) {
+        if (!s.goldenFruit || typeof s.goldenFruit !== "object") {
+            s.goldenFruit = window.defaultGoldenFruitStats();
+        }
+        const keys = ["apple", "cherry", "strawberry", "carrot", "watermelon"];
+        for (let i = 0; i < keys.length; i++) {
+            if (typeof s.goldenFruit[keys[i]] !== "number") s.goldenFruit[keys[i]] = 0;
+        }
+        return s;
+    };
+
     window.loadStatistics = function () {
         let stats = localStorage.getItem('inputCounterMod');
         if (stats === null) {
@@ -20,7 +41,8 @@ window.Counter.make = function () {
                 apples: {
                     session: 0,
                     lifetime: 0
-                }
+                },
+                goldenFruit: window.defaultGoldenFruitStats(),
             };
         } else {
             stats = JSON.parse(stats);
@@ -32,6 +54,8 @@ window.Counter.make = function () {
                 lifetime: 0
             }
         }
+
+        window.ensureGoldenFruitStats(stats);
 
         //Make sure these get reset
         stats.inputs.game = 0;
@@ -66,15 +90,70 @@ window.Counter.make = function () {
             typeof stats.apples.lifetime !== 'undefined' &&
             typeof stats.visible !== 'undefined'
         ) {
+            window.ensureGoldenFruitStats(stats);
             localStorage.setItem('inputCounterMod', JSON.stringify(stats));
         }
     }
+
+    window.renderGoldenFruitCounter = function () {
+        if (typeof divList === "undefined" || !divList) return;
+        window.ensureGoldenFruitStats(stats);
+        const meta = window.GOLDEN_FRUIT_META || [];
+        let html = '<span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">';
+        for (let i = 0; i < meta.length; i++) {
+            const key = meta[i].key;
+            const icon = meta[i].icon;
+            const n = stats.goldenFruit[key] || 0;
+            // Always show golden apple; hide other golds at 0
+            if (n === 0 && key !== "apple") continue;
+            html +=
+                '<span style="display:inline-flex;align-items:center;gap:2px;">' +
+                '<img src="' + icon + '" width="18" height="18" style="image-rendering:auto;vertical-align:middle;" alt="">' +
+                '<span>' + n + "</span></span>";
+        }
+        html += "</span>";
+        return html;
+    };
+
+    window.renderPlainCounter = function () {
+        const iconSrc = typeof getStatIconImageSrc === "function"
+            ? getStatIconImageSrc()
+            : "";
+        const next = String(stats[stats.statShown][stats.statDurationShown]);
+        return (
+            '<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">' +
+            '<img src="' + iconSrc + '" width="18" height="18" style="image-rendering:auto;vertical-align:middle;" alt="">' +
+            "<span>" + next + "</span></span>"
+        );
+    };
+
     window.updateCounterDisplay = function () {
         if (typeof divList === "undefined" || !divList) return;
-        const next = String(stats[stats.statShown][stats.statDurationShown]);
-        if (divList.textContent === next) return;
-        divList.textContent = next;
-    }
+        const html =
+            stats.statShown === "goldenFruit"
+                ? window.renderGoldenFruitCounter()
+                : window.renderPlainCounter();
+        if (divList.dataset.counterHtml === html) return;
+        divList.dataset.counterHtml = html;
+        divList.innerHTML = html;
+        // Same layout for every counter mode (matches golden-fruit placement)
+        divList.style.width = "auto";
+        divList.style.minWidth = "25px";
+        const icon = document.getElementById("stat-icon");
+        if (icon) icon.style.display = "none";
+    };
+
+    window.recordGoldenFruit = function (offset) {
+        if (typeof stats === "undefined") return;
+        window.ensureGoldenFruitStats(stats);
+        const meta = window.GOLDEN_FRUIT_META || [];
+        const entry = meta[offset];
+        if (!entry) return;
+        stats.goldenFruit[entry.key] = (stats.goldenFruit[entry.key] || 0) + 1;
+        saveStatistics();
+        if (stats.statShown === "goldenFruit") updateCounterDisplay();
+    };
+
     window.promptToResetStats = function () {
         let userResponse = prompt('Type DELETE to reset all stats. Cannot be undone');
         if (userResponse === 'DELETE') {
@@ -95,8 +174,11 @@ window.Counter.make = function () {
                 apples: {
                     session: 0,
                     lifetime: 0
-                }
+                },
+                goldenFruit: window.defaultGoldenFruitStats(),
             };
+            stats.walls = { game: 0 };
+            stats.hide = { count: "" };
             saveStatistics();
             updateCounterDisplay();
             alert('All stats have been reset');
@@ -106,8 +188,8 @@ window.Counter.make = function () {
     }
 
     window.promptToEditStatCount = function () {
-        if (stats.statShown === 'hide' || stats.statShown === 'walls') {
-            alert(`Not changing stat for "hide" or "walls"`)
+        if (stats.statShown === 'hide' || stats.statShown === 'walls' || stats.statShown === 'goldenFruit') {
+            alert(`Not changing stat for "hide", "walls", or "golden fruit"`)
             return;
         }
         let userResponse = prompt(`Change the stat count for "${stats.statShown} - ${stats.statDurationShown}"? This won't change any of the other stats. Current value: ${stats[stats.statShown][stats.statDurationShown]}`, stats[stats.statShown][stats.statDurationShown]);
@@ -132,6 +214,8 @@ window.Counter.make = function () {
                 return "https://www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"
             case 'plays':
                 return "https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png"
+            case 'goldenFruit':
+                return "https://i.postimg.cc/tJqR4tT6/gold-apple.png"
             default:
                 return "https://www.google.com/logos/fnbx/snake_arcade/keys.svg"
         }
@@ -139,15 +223,15 @@ window.Counter.make = function () {
 
     window.setCounter = function () {
         //stats.visible = !stats.visible;
+        const icon = document.getElementById('stat-icon');
+        const num = document.getElementById('counter-num');
+        // Icon lives inside #counter-num for consistent placement across all modes
+        if (icon) icon.style.display = 'none';
         if (stats.visible) {
-            document.getElementById('stat-icon').style.display = 'inline';
-            document.getElementById('counter-num').style.display = 'inherit';
-            //document.getElementById('toggle-counter').innerHTML = 'Hide counter';
+            if (num) num.style.display = 'inherit';
         }
         else {
-            document.getElementById('stat-icon').style.display = 'none';
-            document.getElementById('counter-num').style.display = 'none';
-            //document.getElementById('toggle-counter').innerHTML = 'Show counter';
+            if (num) num.style.display = 'none';
         }
         saveStatistics();
     }

@@ -233,6 +233,7 @@ window.BootstrapMenu.make = function () {
     <option value="playsLifetime">Count lifetime resets</option>
     <option value="applesSession">Count fruit session</option>
     <option value="applesLifetime">Count fruit lifetime</option>
+    <option value="goldenFruitCount">Count golden fruit</option>
     <option value="wallsGame">Count walls</option>
     <option value="hideCount">Hide counter</option>
   </select>
@@ -439,6 +440,9 @@ window.BootstrapMenu.make = function () {
                 session: 'applesSession',
                 lifetime: 'applesLifetime'
             },
+            goldenFruit: {
+                lifetime: 'goldenFruitCount'
+            },
             walls: {
                 game: 'wallsGame'
             },
@@ -455,11 +459,18 @@ window.BootstrapMenu.make = function () {
             playsLifetime: { stat: 'plays', duration: 'lifetime' },
             applesSession: { stat: 'apples', duration: 'session' },
             applesLifetime: { stat: 'apples', duration: 'lifetime' },
+            goldenFruitCount: { stat: 'goldenFruit', duration: 'lifetime' },
             wallsGame: { stat: 'walls', duration: 'game' },
             hideCount: { stat: 'hide', duration: 'count' },
         }
 
-        document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
+        const chosenValue =
+            settingsToValues[stats.statShown] &&
+            settingsToValues[stats.statShown][stats.statDurationShown];
+        const chosenOpt = chosenValue
+            ? document.querySelector(`#stat-chooser option[value=${chosenValue}]`)
+            : null;
+        if (chosenOpt) chosenOpt.selected = true;
 
         const settingsCloseElements = document.getElementById('settings-close');
         settingsCloseElements.addEventListener('click', window.BootstrapHide);
@@ -467,7 +478,7 @@ window.BootstrapMenu.make = function () {
         document.getElementById('stat-chooser').onchange = function () {
             stats.statShown = valuesToSettings[this.value].stat;
             stats.statDurationShown = valuesToSettings[this.value].duration;
-            document.getElementById('stat-icon').src = getStatIconImageSrc();
+            if (typeof window.setCounter === "function") window.setCounter();
             updateCounterDisplay();
         }
 

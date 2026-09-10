@@ -196,6 +196,15 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#93ef13\',\'#909090\',20',
     });
 
+    // Icons + keys for Counter "Count golden fruit" (order matches goldenIndex offsets)
+    window.GOLDEN_FRUIT_META = [
+        { key: "apple", icon: "https://i.postimg.cc/tJqR4tT6/gold-apple.png" },
+        { key: "cherry", icon: "https://i.postimg.cc/sXDXkRP7/gold-cherry.png" },
+        { key: "strawberry", icon: "https://i.postimg.cc/CxLDtZkB/golden-strawberry.png" },
+        { key: "carrot", icon: "https://i.postimg.cc/g0Kjt0hv/gold-carrot.png" },
+        { key: "watermelon", icon: "https://i.postimg.cc/0NCjXNSc/gold-watermelon-1.png" },
+    ];
+
     // Only used for Distinct Poison Skulls
 
     new_fruit.push({ // Skull
@@ -328,12 +337,14 @@ window.Fruit.alterCode = function (code) {
     apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
 
     // goldenIndex = Apple; +1 Cherry; +2 Strawberry; +3 Carrot; +4 Watermelon
+    // Rolls run later→rarer so rarer overwrites; count only the final golden type
     set_gold = `if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
     if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
     if(Math.floor((Math.random() ${cherry_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 1;}
     if(Math.floor((Math.random() ${super_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 2;}
     if(Math.floor((Math.random() ${carrot_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 3;}
     if(Math.floor((Math.random() ${melon_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 4;}
+    if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4 && typeof window.recordGoldenFruit==="function"){window.recordGoldenFruit(a.${get_ka}[b].type - ${golden_index});}
     $&`
     code = code.assertReplace(apple_info_regex, set_gold)
 

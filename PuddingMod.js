@@ -635,6 +635,27 @@ window.DistinctVisual.alterCode = function (code) {
 window.Counter = {};
 
 window.Counter.make = function () {
+    window.defaultGoldenFruitStats = function () {
+        return {
+            apple: 0,
+            cherry: 0,
+            strawberry: 0,
+            carrot: 0,
+            watermelon: 0,
+        };
+    };
+
+    window.ensureGoldenFruitStats = function (s) {
+        if (!s.goldenFruit || typeof s.goldenFruit !== "object") {
+            s.goldenFruit = window.defaultGoldenFruitStats();
+        }
+        const keys = ["apple", "cherry", "strawberry", "carrot", "watermelon"];
+        for (let i = 0; i < keys.length; i++) {
+            if (typeof s.goldenFruit[keys[i]] !== "number") s.goldenFruit[keys[i]] = 0;
+        }
+        return s;
+    };
+
     window.loadStatistics = function () {
         let stats = localStorage.getItem('inputCounterMod');
         if (stats === null) {
@@ -654,7 +675,8 @@ window.Counter.make = function () {
                 apples: {
                     session: 0,
                     lifetime: 0
-                }
+                },
+                goldenFruit: window.defaultGoldenFruitStats(),
             };
         } else {
             stats = JSON.parse(stats);
@@ -666,6 +688,8 @@ window.Counter.make = function () {
                 lifetime: 0
             }
         }
+
+        window.ensureGoldenFruitStats(stats);
 
         //Make sure these get reset
         stats.inputs.game = 0;
@@ -700,15 +724,70 @@ window.Counter.make = function () {
             typeof stats.apples.lifetime !== 'undefined' &&
             typeof stats.visible !== 'undefined'
         ) {
+            window.ensureGoldenFruitStats(stats);
             localStorage.setItem('inputCounterMod', JSON.stringify(stats));
         }
     }
+
+    window.renderGoldenFruitCounter = function () {
+        if (typeof divList === "undefined" || !divList) return;
+        window.ensureGoldenFruitStats(stats);
+        const meta = window.GOLDEN_FRUIT_META || [];
+        let html = '<span style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap;">';
+        for (let i = 0; i < meta.length; i++) {
+            const key = meta[i].key;
+            const icon = meta[i].icon;
+            const n = stats.goldenFruit[key] || 0;
+            // Always show golden apple; hide other golds at 0
+            if (n === 0 && key !== "apple") continue;
+            html +=
+                '<span style="display:inline-flex;align-items:center;gap:2px;">' +
+                '<img src="' + icon + '" width="18" height="18" style="image-rendering:auto;vertical-align:middle;" alt="">' +
+                '<span>' + n + "</span></span>";
+        }
+        html += "</span>";
+        return html;
+    };
+
+    window.renderPlainCounter = function () {
+        const iconSrc = typeof getStatIconImageSrc === "function"
+            ? getStatIconImageSrc()
+            : "";
+        const next = String(stats[stats.statShown][stats.statDurationShown]);
+        return (
+            '<span style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap;">' +
+            '<img src="' + iconSrc + '" width="18" height="18" style="image-rendering:auto;vertical-align:middle;" alt="">' +
+            "<span>" + next + "</span></span>"
+        );
+    };
+
     window.updateCounterDisplay = function () {
         if (typeof divList === "undefined" || !divList) return;
-        const next = String(stats[stats.statShown][stats.statDurationShown]);
-        if (divList.textContent === next) return;
-        divList.textContent = next;
-    }
+        const html =
+            stats.statShown === "goldenFruit"
+                ? window.renderGoldenFruitCounter()
+                : window.renderPlainCounter();
+        if (divList.dataset.counterHtml === html) return;
+        divList.dataset.counterHtml = html;
+        divList.innerHTML = html;
+        // Same layout for every counter mode (matches golden-fruit placement)
+        divList.style.width = "auto";
+        divList.style.minWidth = "25px";
+        const icon = document.getElementById("stat-icon");
+        if (icon) icon.style.display = "none";
+    };
+
+    window.recordGoldenFruit = function (offset) {
+        if (typeof stats === "undefined") return;
+        window.ensureGoldenFruitStats(stats);
+        const meta = window.GOLDEN_FRUIT_META || [];
+        const entry = meta[offset];
+        if (!entry) return;
+        stats.goldenFruit[entry.key] = (stats.goldenFruit[entry.key] || 0) + 1;
+        saveStatistics();
+        if (stats.statShown === "goldenFruit") updateCounterDisplay();
+    };
+
     window.promptToResetStats = function () {
         let userResponse = prompt('Type DELETE to reset all stats. Cannot be undone');
         if (userResponse === 'DELETE') {
@@ -729,8 +808,11 @@ window.Counter.make = function () {
                 apples: {
                     session: 0,
                     lifetime: 0
-                }
+                },
+                goldenFruit: window.defaultGoldenFruitStats(),
             };
+            stats.walls = { game: 0 };
+            stats.hide = { count: "" };
             saveStatistics();
             updateCounterDisplay();
             alert('All stats have been reset');
@@ -740,8 +822,8 @@ window.Counter.make = function () {
     }
 
     window.promptToEditStatCount = function () {
-        if (stats.statShown === 'hide' || stats.statShown === 'walls') {
-            alert(`Not changing stat for "hide" or "walls"`)
+        if (stats.statShown === 'hide' || stats.statShown === 'walls' || stats.statShown === 'goldenFruit') {
+            alert(`Not changing stat for "hide", "walls", or "golden fruit"`)
             return;
         }
         let userResponse = prompt(`Change the stat count for "${stats.statShown} - ${stats.statDurationShown}"? This won't change any of the other stats. Current value: ${stats[stats.statShown][stats.statDurationShown]}`, stats[stats.statShown][stats.statDurationShown]);
@@ -766,6 +848,8 @@ window.Counter.make = function () {
                 return "https://www.google.com/logos/fnbx/snake_arcade/v3/apple_00.png"
             case 'plays':
                 return "https://fonts.gstatic.com/s/i/googlematerialicons/play_arrow/v6/white-24dp/2x/gm_play_arrow_white_24dp.png"
+            case 'goldenFruit':
+                return "https://i.postimg.cc/tJqR4tT6/gold-apple.png"
             default:
                 return "https://www.google.com/logos/fnbx/snake_arcade/keys.svg"
         }
@@ -773,15 +857,15 @@ window.Counter.make = function () {
 
     window.setCounter = function () {
         //stats.visible = !stats.visible;
+        const icon = document.getElementById('stat-icon');
+        const num = document.getElementById('counter-num');
+        // Icon lives inside #counter-num for consistent placement across all modes
+        if (icon) icon.style.display = 'none';
         if (stats.visible) {
-            document.getElementById('stat-icon').style.display = 'inline';
-            document.getElementById('counter-num').style.display = 'inherit';
-            //document.getElementById('toggle-counter').innerHTML = 'Hide counter';
+            if (num) num.style.display = 'inherit';
         }
         else {
-            document.getElementById('stat-icon').style.display = 'none';
-            document.getElementById('counter-num').style.display = 'none';
-            //document.getElementById('toggle-counter').innerHTML = 'Show counter';
+            if (num) num.style.display = 'none';
         }
         saveStatistics();
     }
@@ -2381,6 +2465,15 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#93ef13\',\'#909090\',20',
     });
 
+    // Icons + keys for Counter "Count golden fruit" (order matches goldenIndex offsets)
+    window.GOLDEN_FRUIT_META = [
+        { key: "apple", icon: "https://i.postimg.cc/tJqR4tT6/gold-apple.png" },
+        { key: "cherry", icon: "https://i.postimg.cc/sXDXkRP7/gold-cherry.png" },
+        { key: "strawberry", icon: "https://i.postimg.cc/CxLDtZkB/golden-strawberry.png" },
+        { key: "carrot", icon: "https://i.postimg.cc/g0Kjt0hv/gold-carrot.png" },
+        { key: "watermelon", icon: "https://i.postimg.cc/0NCjXNSc/gold-watermelon-1.png" },
+    ];
+
     // Only used for Distinct Poison Skulls
 
     new_fruit.push({ // Skull
@@ -2513,12 +2606,14 @@ window.Fruit.alterCode = function (code) {
     apple_info_regex = new RegExp(`a\.${get_ka}\\\[b\\\]\.${get_pos}`)
 
     // goldenIndex = Apple; +1 Cherry; +2 Strawberry; +3 Carrot; +4 Watermelon
+    // Rolls run later→rarer so rarer overwrites; count only the final golden type
     set_gold = `if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4){a.${get_ka}[b].type = a.${get_ka}[b].old_type;}
     if(Math.floor((Math.random() ${gold_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index};}
     if(Math.floor((Math.random() ${cherry_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 1;}
     if(Math.floor((Math.random() ${super_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 2;}
     if(Math.floor((Math.random() ${carrot_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 3;}
     if(Math.floor((Math.random() ${melon_chance}{a.${get_ka}[b].old_type = a.${get_ka}[b].type; a.${get_ka}[b].type = ${golden_index} + 4;}
+    if(a.${get_ka}[b].type >= ${golden_index} && a.${get_ka}[b].type <= ${golden_index} + 4 && typeof window.recordGoldenFruit==="function"){window.recordGoldenFruit(a.${get_ka}[b].type - ${golden_index});}
     $&`
     code = code.assertReplace(apple_info_regex, set_gold)
 
@@ -7394,6 +7489,13 @@ window.Backup.make = function () {
     ensureBucket(base, "inputs", ["game", "session", "lifetime"]);
     ensureBucket(base, "plays", ["session", "lifetime"]);
     ensureBucket(base, "apples", ["session", "lifetime"]);
+    ensureBucket(base, "goldenFruit", [
+      "apple",
+      "cherry",
+      "strawberry",
+      "carrot",
+      "watermelon",
+    ]);
 
     if (src.inputs && typeof src.inputs === "object") {
       base.inputs.lifetime = Math.max(
@@ -7412,6 +7514,20 @@ window.Backup.make = function () {
         num(base.apples.lifetime, 0),
         num(src.apples.lifetime, 0)
       );
+    }
+    if (src.goldenFruit && typeof src.goldenFruit === "object") {
+      for (const k of [
+        "apple",
+        "cherry",
+        "strawberry",
+        "carrot",
+        "watermelon",
+      ]) {
+        base.goldenFruit[k] = Math.max(
+          num(base.goldenFruit[k], 0),
+          num(src.goldenFruit[k], 0)
+        );
+      }
     }
 
     if (typeof src.statShown === "string") base.statShown = src.statShown;
@@ -7843,6 +7959,7 @@ window.BootstrapMenu.make = function () {
     <option value="playsLifetime">Count lifetime resets</option>
     <option value="applesSession">Count fruit session</option>
     <option value="applesLifetime">Count fruit lifetime</option>
+    <option value="goldenFruitCount">Count golden fruit</option>
     <option value="wallsGame">Count walls</option>
     <option value="hideCount">Hide counter</option>
   </select>
@@ -8049,6 +8166,9 @@ window.BootstrapMenu.make = function () {
                 session: 'applesSession',
                 lifetime: 'applesLifetime'
             },
+            goldenFruit: {
+                lifetime: 'goldenFruitCount'
+            },
             walls: {
                 game: 'wallsGame'
             },
@@ -8065,11 +8185,18 @@ window.BootstrapMenu.make = function () {
             playsLifetime: { stat: 'plays', duration: 'lifetime' },
             applesSession: { stat: 'apples', duration: 'session' },
             applesLifetime: { stat: 'apples', duration: 'lifetime' },
+            goldenFruitCount: { stat: 'goldenFruit', duration: 'lifetime' },
             wallsGame: { stat: 'walls', duration: 'game' },
             hideCount: { stat: 'hide', duration: 'count' },
         }
 
-        document.querySelector(`#stat-chooser option[value=${settingsToValues[stats.statShown][stats.statDurationShown]}]`).selected = true;
+        const chosenValue =
+            settingsToValues[stats.statShown] &&
+            settingsToValues[stats.statShown][stats.statDurationShown];
+        const chosenOpt = chosenValue
+            ? document.querySelector(`#stat-chooser option[value=${chosenValue}]`)
+            : null;
+        if (chosenOpt) chosenOpt.selected = true;
 
         const settingsCloseElements = document.getElementById('settings-close');
         settingsCloseElements.addEventListener('click', window.BootstrapHide);
@@ -8077,7 +8204,7 @@ window.BootstrapMenu.make = function () {
         document.getElementById('stat-chooser').onchange = function () {
             stats.statShown = valuesToSettings[this.value].stat;
             stats.statDurationShown = valuesToSettings[this.value].duration;
-            document.getElementById('stat-icon').src = getStatIconImageSrc();
+            if (typeof window.setCounter === "function") window.setCounter();
             updateCounterDisplay();
         }
 

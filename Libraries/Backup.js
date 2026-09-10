@@ -186,6 +186,13 @@ window.Backup.make = function () {
     ensureBucket(base, "inputs", ["game", "session", "lifetime"]);
     ensureBucket(base, "plays", ["session", "lifetime"]);
     ensureBucket(base, "apples", ["session", "lifetime"]);
+    ensureBucket(base, "goldenFruit", [
+      "apple",
+      "cherry",
+      "strawberry",
+      "carrot",
+      "watermelon",
+    ]);
 
     if (src.inputs && typeof src.inputs === "object") {
       base.inputs.lifetime = Math.max(
@@ -204,6 +211,20 @@ window.Backup.make = function () {
         num(base.apples.lifetime, 0),
         num(src.apples.lifetime, 0)
       );
+    }
+    if (src.goldenFruit && typeof src.goldenFruit === "object") {
+      for (const k of [
+        "apple",
+        "cherry",
+        "strawberry",
+        "carrot",
+        "watermelon",
+      ]) {
+        base.goldenFruit[k] = Math.max(
+          num(base.goldenFruit[k], 0),
+          num(src.goldenFruit[k], 0)
+        );
+      }
     }
 
     if (typeof src.statShown === "string") base.statShown = src.statShown;
