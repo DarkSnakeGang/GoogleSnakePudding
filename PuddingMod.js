@@ -4221,7 +4221,8 @@ window.SpeedInfo.make = function () {
         return runsBoardPromises[cacheKey];
     }
 
-    function findBestTrackedRun(boardData, playerName, categoryKey) {
+    // Timed: lower timeT wins. High Score encodes apples as duration (0.072 → 72), so higher wins.
+    function findBestTrackedRun(boardData, playerName, categoryKey, preferHigher) {
         if (!boardData || !boardData.runs) return null;
         const target = playerName.toLowerCase();
         let best = null;
@@ -4230,7 +4231,11 @@ window.SpeedInfo.make = function () {
             if (String(run.playerName).toLowerCase() !== target) continue;
             if (run.category !== categoryKey) continue;
             if (typeof run.timeT !== "number") continue;
-            if (!best || run.timeT < best.timeT) best = run;
+            if (!best) {
+                best = run;
+                continue;
+            }
+            if (preferHigher ? run.timeT > best.timeT : run.timeT < best.timeT) best = run;
         }
         return best;
     }
@@ -4772,15 +4777,14 @@ window.SpeedInfo.make = function () {
         try {
             const board = await loadRunsBoard(modeName, level);
             if (queryId !== srcQueryId) return;
-            const best = findBestTrackedRun(board, playerName, categoryKey);
+            const best = findBestTrackedRun(board, playerName, categoryKey, level === "H");
             if (!best) {
                 el.innerHTML = `${labels[level]}: None`;
                 return;
             }
             if (level === "H") {
-                const primary = best.time || ("PT" + best.timeT + "S");
-                const highscore = parseInt(String(primary).split(".")[1]).toString();
-                const text = (isNaN(parseInt(highscore, 10)) ? String(Math.round(best.timeT * 1000)) : highscore) + " Apples";
+                const highscore = Math.round(best.timeT * 1000 + 1e-6);
+                const text = highscore + " Apples";
                 el.innerHTML = formatTrackRow(labels[level], text, best.weblink);
             } else {
                 const text = best.time ? convertTime(best.time) : formatTimeTSeconds(best.timeT);
