@@ -64,5 +64,11 @@ window.Core.alterCode = function (code) {
         window.loaded_code = false;
       }
 
+    // Snake recoloring uses getImageData on offscreen canvases; avoid Chrome's readback warning.
+    code = code.assertReplaceAll(
+        '.getContext("2d")',
+        '.getContext("2d",{willReadFrequently:!0})'
+    );
+
     return code;
 }

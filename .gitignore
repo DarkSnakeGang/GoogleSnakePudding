@@ -7,5 +7,6 @@ MouseMod.js
 VisibilityMod.js
 ChimeraMod.js
 Libraries/fruit-icons/
+tools/postimg-cache/
 tools/.broken-*.js
 node_modules/
