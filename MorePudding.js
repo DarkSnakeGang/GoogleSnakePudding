@@ -67,10 +67,13 @@ window.Core.alterCode = function (code) {
       }
 
     // Snake recoloring uses getImageData on offscreen canvases; avoid Chrome's readback warning.
+    // This causes lag, so we'd rather have the readback warning than the lag.
+    /*
     code = code.assertReplaceAll(
         '.getContext("2d")',
         '.getContext("2d",{willReadFrequently:!0})'
     );
+    */
 
     return code;
 }
