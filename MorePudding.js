@@ -68,9 +68,6 @@ window.Theme = {};
 
 window.Theme.make = function () {
 
-  // style for all pudding sidebar overlays
-  window.puddingSidebarStyle = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:220px;height:584px;top:0px;';
-
   let advancedSettings = JSON.parse(localStorage.getItem('snakeAdvancedSettings')) ?? {};
 
   window.themes = [
@@ -1378,7 +1375,6 @@ window.TimeKeeper.make = function () {
 
     //generate and show the dialog
     window.timeKeeper.showDialog = function () {
-
         //make dialog
         window.timeKeeper.dialogActive = true;
         document.getElementById('time-keeper').innerHTML = 'Hide Details';
@@ -1500,65 +1496,40 @@ window.TimeKeeper.make = function () {
                 if (score == "att")
                     continue;
 
-                hours = Math.floor(storage[name].time / 3600000);
-                minutes = String(Math.floor((storage[name].time-hours*3600000) / 60000)).padStart(2, "0");
-                seconds = String(Math.floor((storage[name].time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                if(hours==0){
-                    if (score != "H") {
-                        dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    else {
-                        dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    if (storage[name].att != undefined && storage[name].sum != undefined) {
-                        let time = Math.floor(storage[name].sum / storage[name].att);
-                        hours = Math.floor(storage[name].time / 3600000)
-                        minutes = String(Math.floor((time - hours * 3600000) / 60000)).padStart(2, "0");
-                        seconds = String(Math.floor((time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                        mseconds = String(time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                    }
+                minutes = Math.floor(storage[name].time / 60000);
+                seconds = Math.floor((storage[name].time - minutes * 60000) / 1000);
+                mseconds = storage[name].time - minutes * 60000 - seconds * 1000;
+                if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
+                if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
+                while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
+                if (score != "H") {
+                    dialog.appendChild(document.createTextNode("Best Time: " + minutes + ":" + seconds + ":" + mseconds));
                     dialog.appendChild(document.createElement("br"));
-                }else{
-                    if (score != "H") {
-                        dialog.appendChild(document.createTextNode("Best Time: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    else {
-                        dialog.appendChild(document.createTextNode("Duration: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
-                        dialog.appendChild(document.createElement("br"));
-                    }
-                    if (storage[name].att != undefined && storage[name].sum != undefined) {
-                        let time = Math.floor(storage[name].sum / storage[name].att);
-                        hours = Math.floor(storage[name].time / 3600000)
-                        minutes = String(Math.floor((time - hours * 3600000) / 60000)).padStart(2, "0");
-                        seconds = String(Math.floor((time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                        mseconds = String(time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
-                        dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
-                        dialog.appendChild(document.createElement("br"));
-                        dialog.appendChild(document.createTextNode("Average: " + hours + ":" + minutes + ":" + seconds + ":" + mseconds));
-                        dialog.appendChild(document.createElement("br"));
-                    }
+                    dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
                     dialog.appendChild(document.createElement("br"));
                 }
+                else {
+                    dialog.appendChild(document.createTextNode("Duration: " + minutes + ":" + seconds + ":" + mseconds));
+                    dialog.appendChild(document.createElement("br"));
+                    dialog.appendChild(document.createTextNode("Achieved on: " + new Date(storage[name].date).toString()));
+                    dialog.appendChild(document.createElement("br"));
+                    dialog.appendChild(document.createTextNode("Average score: " + (Math.round(100 * (storage[name].sum / totalAttempts)) / 100).toString()));
+                    dialog.appendChild(document.createElement("br"));
+                }
+                if (storage[name].att != undefined && storage[name].sum != undefined) {
+                    let time = Math.floor(storage[name].sum / storage[name].att);
+                    minutes = Math.floor(time / 60000);
+                    seconds = Math.floor((time - minutes * 60000) / 1000);
+                    mseconds = time - minutes * 60000 - seconds * 1000;
+                    if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
+                    if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
+                    while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
+                    dialog.appendChild(document.createTextNode("Attempts to this point: " + storage[name].att));
+                    dialog.appendChild(document.createElement("br"));
+                    dialog.appendChild(document.createTextNode("Average: " + minutes + ":" + seconds + ":" + mseconds));
+                    dialog.appendChild(document.createElement("br"));
+                }
+                dialog.appendChild(document.createElement("br"));
             }
         }
 
@@ -3157,7 +3128,7 @@ window.SpeedInfo.make = function () {
             const wholeSeconds = Math.floor(seconds);
             convertedTime += wholeSeconds + 's';
 
-            const milliseconds = String(Math.round((seconds - wholeSeconds) * 1000)).padStart(3, "0");
+            const milliseconds = Math.round((seconds - wholeSeconds) * 1000);
 
             if (milliseconds > 0) {
                 convertedTime += milliseconds + 'ms';
@@ -3213,7 +3184,7 @@ window.SpeedInfo.make = function () {
 
 
         const speedinfoBox = document.createElement('div');
-        speedinfoBox.style = window.puddingSidebarStyle;
+        speedinfoBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:block;border-radius:3px;width:208px;height:584px;top:0px;';
         speedinfoBox.id = 'speedinfo-popup-pudding';
         speedinfoBox.style.visibility = 'hidden';
         window.speedinfoInput = speedinfoBox;
@@ -3362,16 +3333,14 @@ window.SpeedInfo.make = function () {
                     continue;
                 }
 
-                hours = Math.floor(storage[name].time / 3600000);
-                minutes = String(Math.floor((storage[name].time / 60000)-hours*60)).padStart(2, "0");
-                seconds = String(Math.floor((storage[name].time - minutes * 60000-hours*3600000) / 1000)).padStart(2, "0");
-                mseconds = String(storage[name].time - minutes * 60000 - seconds * 1000-hours*3600000).padStart(3, "0");
+                minutes = Math.floor(storage[name].time / 60000);
+                seconds = Math.floor((storage[name].time - minutes * 60000) / 1000);
+                mseconds = storage[name].time - minutes * 60000 - seconds * 1000;
+                if (minutes.toString().length < 2) { minutes = "0" + minutes.toString() }
+                if (seconds.toString().length < 2) { seconds = "0" + seconds.toString() }
+                while (mseconds.toString().length < 3) { mseconds = "0" + mseconds.toString() }
                 score_label = "ALL" === score ? "All" : score;
-                if(hours==0){
-                    bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
-                }else{
-                    bold.innerHTML = score_label + " Apples: " + hours + "h" + minutes + "m" + seconds + "s" + mseconds + "ms";
-                }
+                bold.innerHTML = score_label + " Apples: " + minutes + "m" + seconds + "s" + mseconds + "ms";
 
             }
             else {
@@ -3458,18 +3427,16 @@ window.InputDisplay = {};
 
 window.InputDisplay.make = function () {
 
-  let displayPosition = parseInt((window.puddingSidebarStyle.split(';').find(style => style.trim().startsWith('width')) ? window.puddingSidebarStyle.split(';').find(style => style.trim().startsWith('width')).split(':')[1].trim() : null),10);
-
   // Code that runs before anything else here, loading variables, etc.
   // Recommended to use "window." for things
   const e = document.createElement('div');
   e.id = 'input-display-container';
-  e.style = `position:absolute;left:${(-553+displayPosition/2)}px;top:530px;z-index:10001;display:block;line-height:normal;`;
+  e.style = 'position:absolute;left:-447px;top:530px;z-index:10001;display:block;line-height:normal;';
   window.speedinfoInput.appendChild(e);
 
   const f = document.createElement('div');
   f.id = 'input-display-container2';
-  f.style = `position:absolute;left:${(-553+displayPosition/2)}px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;`;
+  f.style = 'position:absolute;left:-447px;top:460px;z-index:10001;display:block;line-height:normal;width: 0;height: 0;';
   window.speedinfoInput.appendChild(f);
 
   const InpBox = document.querySelector('#input-display-container');
@@ -4597,8 +4564,7 @@ window.BootstrapMenu.make = function () {
         xhr.send();
 
         const settingsBox = document.createElement('div');
-        settingsBox.style = window.puddingSidebarStyle;
-        settingsBox.style.display = 'none';
+        settingsBox.style = 'position:absolute;left:100%;z-index:10000;background-color:#4a752c;padding:8px;display:none;border-radius:3px;width:208px;height:584px;top:0px;';
         settingsBox.id = 'settings-popup-pudding';
         settingsBox.innerHTML = `
 
@@ -4946,35 +4912,29 @@ window.BootstrapMenu.alterCode = function (code) {
 window.RenderDelayFix = {};
 
 window.RenderDelayFix.make = function () {
-  window.lastFrameTime = 0;
-  window.resetTime = 0;
-  window.oldResetTime = 0;
-  window.delayedKeyStorage = false;
-  window.keyObject = false;
-  window.stuffKeys = ()=>{};
+  function keydownHandler(e){
+    console.log("something worked");
+    if(e.code === "KeyQ"){
+      window.pauseGame = !window.pauseGame;
+      if(window.pauseGame){
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.visibility = "visible";
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.opacity = 1;
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd > div").style.visibility = "hidden";
+      } else {
+        setTimeout(()=>{if(!window.pauseGame){document.querySelector("body > div.Czus3 > div > div.wjOYOd > div").style.visibility = "visible";}},500);
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.visibility = "hidden";
+        document.querySelector("body > div.Czus3 > div > div.wjOYOd").style.opacity = 0;
+      }
+    }
+  }
+  window.document.addEventListener('keydown', keydownHandler);
 }
 
 window.RenderDelayFix.alterCode = function (code) {
   code = assertReplace(
     code,
-    /render\s*\(\s*a\s*,\s*b\s*\)\s*\{\s*this\.Db\.Uj\s*&&/,
-    "render(a,b){window.lastFrameTime=Date.now();if(window.resetTime!=window.oldResetTime){window.oldResetTime=window.resetTime;}this.Db.Uj&&"
-  );
-  // intercepts the game's reset function for when you click play
-  code = assertReplace(
-    code,
-    /reset\s*\(\s*\)\s*\{\s*this\.Db\.oa\.oa\s*=\s*0\s*;/,
-    "reset(){window.resetTime=Date.now();setTimeout(()=>{if(delayedKeyStorage){stuffKeys.call(keyObject,delayedKeyStorage);delayedKeyStorage=false;keyObject=false}},20);this.Db.oa.oa=0;"
-  );
-  code = assertReplace(
-    code,
-    /J8\s*\(\s*a\s*\)\s*\{\s*if\s*\(\s*!this\.closed\s*\)\s*\{/,
-    "J8=window.stuffKeys=function(a){if(!this.closed){if(window.resetTime<window.lastFrameTime){"
-  );
-  code = assertReplace(
-    code,
-    /a\.preventDefault\s*\(\s*\)\s*\}\s*\}\}/,
-    "a.preventDefault()}}else{delayedKeyStorage=a;keyObject=this}}};"
+    /\(this\.Aa\.direction!=="NONE"\|\|CUD\(this\.Aa\)\)/,
+    "((this.Aa.direction!==\"NONE\"||CUD(this.Aa))&&!window.pauseGame)"
   );
   return code;
 }
@@ -5188,7 +5148,7 @@ window.moreMenu = {
   },
   alterSnakeCode: code => {
     const resetFunction = code.match(
-      /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?!1\n?\)\n?}/
+      /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?pos\n?\)\n?}/
     )[0]
   
     const selectedAppleCount = resetFunction.match(
@@ -5212,10 +5172,10 @@ window.moreMenu = {
       resetFunction.assertReplace(
         'if(a)',
         `
-        if(${selectedAppleCount} > 6) {
+        if(${selectedAppleCount} > 5) {
 
           if(!${checkBadMode}(this.settings)) {
-            if(${selectedAppleCount} === 7) {
+            if(${selectedAppleCount} === 6) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} -1, +2))
               ${applePlacementStem} -3, +2))
@@ -5229,7 +5189,7 @@ window.moreMenu = {
               ${applePlacementStem} +1, -2))
               ${applePlacementStem} -1, -2))
               ${applePlacementStem} -3, -2))
-            } else if(${selectedAppleCount} === 8) {
+            } else if(${selectedAppleCount} === 7) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} +0, +2))
               ${applePlacementStem} -1, +2))
@@ -5255,7 +5215,7 @@ window.moreMenu = {
               ${applePlacementStem} -1, -2))
               ${applePlacementStem} -2, -2))
               ${applePlacementStem} -3, -2))
-            } else if(${selectedAppleCount} === 9) {
+            } else if(${selectedAppleCount} === 8) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} +0, +2))
               ${applePlacementStem} -1, +2))
@@ -5296,14 +5256,14 @@ window.moreMenu = {
               ${applePlacementStem} -1, +3))
               ${applePlacementStem} -2, +3))
               ${applePlacementStem} -3, +3))
-            } else if(${selectedAppleCount} === 10) {
+            } else if(${selectedAppleCount} === 9) {
               for(let dy = -4; dy <= 4; dy++)
                 for(let dx = -7; dx <= 2; dx++)
                   ${applePlacementStem} dx, dy))
-            } else if(${selectedAppleCount} === 11) {
+            } else if(${selectedAppleCount} === 10) {
               for(let i = 0; i < 200; i++)
                 ${applePlacementStem} -1, +0))
-            } else if(${selectedAppleCount} === 12) {
+            } else if(${selectedAppleCount} === 11) {
               for(let i = 0; i < 10000; i++)
                 ${applePlacementStem} -1, +0))
             } else
@@ -5311,7 +5271,7 @@ window.moreMenu = {
   
           } else {
 
-            if(${selectedAppleCount} < 12) {
+            if(${selectedAppleCount} < 11) {
               const count = (
                 ${selectedAppleCount} === 6
                   ? 13
@@ -5336,9 +5296,9 @@ window.moreMenu = {
         } else if(a)
         `
       ).assertReplace(
-        /!1\n?\)\n?}/,
-        `!1)
-          if(${isModeSelected}(this.settings, 2) && ${selectedAppleCount} > 7) {
+        'pos)}',
+        `pos)
+          if(${isModeSelected}(this.settings, 2) && ${selectedAppleCount} > 6) {
             for(let __i___ = 0; __i___ < ${appleArray}.length; __i___ += 2) {
               ${appleArray}[__i___].type = ${appleArray}[__i___ + 1].type = Math.floor(Math.random() * 24)
             }
@@ -5359,7 +5319,7 @@ window.moreMenu = {
     )[0].replace('d', 'this.settings')
   
     const tickFunction = code.match(
-      /tick\n?\(\n?\)\n?{\n?[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?keys\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}\n?}\n?}/
+      /tick\n?\(\n?\)\n?{\n?[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?keys\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}\n?}\n?}/
     )[0]
     const replacePoint = tickFunction.match(
       /\.5\n?:\n?1\.25\n?\);\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\+\+;/
@@ -5485,8 +5445,8 @@ window.moreMenu = {
       /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?var b\n?=\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?===\n?1\n?;\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?clearRect\n?\(\n?0\n?,\n?0\n?,\n?[^]*?\n?0\n?\)\n?,\n?0\n?,\n?c\n?,\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}/
     )[0]
     const canvWidth = speedIconFunction.match(
-      /var c\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?width/
-    )[0].assertReplace(/var c\n?=/, '')
+      /const c\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?width/
+    )[0].assertReplace(/const c\n?=/, '')
     const canv = speedIconFunction.match(
       /a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?render/g
     )[1].assertReplace(/.\n?render/, '')
@@ -5643,7 +5603,7 @@ window.moreMenu = {
   
   
     const pixelIssueFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?\)\n?{\n?var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?;\n?if[^]*?10\n?}\n?}\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?\)\n?{\n?var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?;\n?if[^]*?9\n?\)\n?}\n?}/
     )[0]
     const pixelIssueB = pixelIssueFunction.match(
       /var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}/
@@ -5681,58 +5641,16 @@ window.moreMenu = {
       RegExp(`for\\n?\\(\\n?a\\n?=\\n?${appleTypeChosen}\\n?;\\n?c\\.has\\n?\\(\\n?a\\n?\\)\\n?;\\n?\\)`),
       `for(a = ${appleTypeChosen}, __i = 0; c.has(a) && __i < 24; __i++)`
     )
-
-    // pause mod code
-    const pauseCondition = code.match(
-      /\(\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?direction\n?!==\n?"NONE"\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?\)/
-    )[0]
-
-    code = code.assertReplace(
-      pauseCondition,
-      `(${pauseCondition} && !window.pauseGame)`
-    )
   
   
     return code
   },
   runCodeAfter: () => {
-    const modIndicator = document.createElement('div')
-    modIndicator.style = `
-      position: absolute;
-      font-family: Roboto, Arial, sans-serif;
-      color: white;
-      font-size: 14px;
-      padding-top: 4px;
-      padding-left: 30px;
-      user-select: none;
-    `
+    const modIndicator = document.createElement('div');
+    modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;'
     modIndicator.textContent = 'More Menu Mod'
     const canvasNode = document.getElementsByClassName('jNB0Ic')[0]
     document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode)
-
-    // pause mod code
-    document.addEventListener('keydown', evt => {
-      if(evt.code === 'KeyQ') {
-        window.pauseGame = !window.pauseGame
-
-        const pausedDarkOverlayDiv = document.getElementsByClassName('wjOYOd')[0]
-        const menuDiv = pausedDarkOverlayDiv.children[0]
-
-        if(window.pauseGame) {
-          pausedDarkOverlayDiv.style.visibility = "visible"
-          pausedDarkOverlayDiv.style.opacity = 1
-          menuDiv.style.visibility = "hidden"
-        } else {
-          setTimeout(() => {
-            if(!window.pauseGame) {
-              menuDiv.style.visibility = "visible"
-            }
-          }, 500)
-          pausedDarkOverlayDiv.style.visibility = "hidden"
-          pausedDarkOverlayDiv.style.opacity = 0
-        }
-      }
-    })
   }
 }
 window.VisibilityModCode = {};
@@ -5779,88 +5697,12 @@ window.VisibilityModCode.runCodeBefore = function () {
   console.log("Enabling Visibility Mod");
 
   window.checkboxes = {
-    checkboxStatuses: {
-      leftEye: true, rightEye: true, body: true, snoot: true, nose: true,
-      lightTiles: true, darkTiles: true, eatAnimation: true, fruit: true, poison: true, shadow: true,
-      border: true, die: true, lumps: true, portals: true, flashSnake: false, shadowIncluded: true,
-      keys: true, walls: true, locks: true, hotdogWalls: true, sokobanBox: true, sokobanGoal: true,
-      mines: true, statue: true, brokenStatue: true, mineRadius: true, tongue: true,
-      bridges: true, arrows: true, gates: true, shields: true,
-      lightSnake: true, lightFruit: true,
-    },
-  };
-
-  // The game builds the shadow as a silhouette of the sprite layer partway through a frame, so
-  // anything we skip drawing would lose its shadow too. When Shadow Included is off, that part of
-  // the frame runs twice: once with every silhouette gate forced open (what the shadow is taken
-  // from), then the sprite layer is rewound and drawn again honouring the checkboxes. When it is
-  // on, hidden parts simply are not drawn and their shadows go with them.
-  window.visiFullPass = false;
-  window.visiShadowScratch = null;
-  window.visiShadowPassKeys = ['body', 'fruit', 'poison', 'lumps', 'leftEye', 'rightEye', 'snoot', 'nose',
-    'eatAnimation', 'tongue', 'die', 'keys', 'sokobanBox'];
-
-  window.visiBeginShadowPass = function visiBeginShadowPass(renderer, isInfinity) {
-    window.visiFullPass = false;
-
-    //Infinity mode composites the shadow from wrapped copies further down the frame, so the rewind
-    //point here would land in the wrong place.
-    let statuses = window.checkboxes.checkboxStatuses;
-    if (isInfinity || !statuses.shadow || statuses.shadowIncluded) { return; }
-
-    let anyHidden = false;
-    for (let i = 0; i < window.visiShadowPassKeys.length; i++) {
-      if (!statuses[window.visiShadowPassKeys[i]]) { anyHidden = true; break; }
-    }
-    if (!anyHidden) { return; }
-
-    let source = renderer.ka.canvas;
-    let scratch = window.visiShadowScratch;
-    if (!scratch) {
-      scratch = window.visiShadowScratch = document.createElement('canvas').getContext('2d');
-    }
-    if (scratch.canvas.width !== source.width || scratch.canvas.height !== source.height) {
-      scratch.canvas.width = source.width;
-      scratch.canvas.height = source.height;
-    }
-    scratch.setTransform(1, 0, 0, 1, 0, 0);
-    scratch.globalAlpha = 1;
-    scratch.globalCompositeOperation = 'copy';
-    scratch.drawImage(source, 0, 0);
-    scratch.globalCompositeOperation = 'source-over';
-
-    window.visiFullPass = true;
-  };
-
-  window.visiEndShadowPass = function visiEndShadowPass(renderer) {
-    if (!window.visiFullPass) { return false; }
-    window.visiFullPass = false;
-
-    let ctx = renderer.ka;
-    ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'copy';
-    ctx.drawImage(window.visiShadowScratch.canvas, 0, 0);
-    ctx.restore();
-    return true;
-  };
-
-  // Border is also painted as CSS background-color on the canvas chrome; keep handles so the
-  // checkbox can toggle it live without restarting.
-  window.visiBorderEls = [];
-  window.visiBorderColor = "";
-  window.applyVisiBorder = function applyVisiBorder() {
-    let color = window.checkboxes.checkboxStatuses.border ? (window.visiBorderColor || "") : "transparent";
-    for (let i = 0; i < window.visiBorderEls.length; i++) {
-      let el = window.visiBorderEls[i];
-      if (el && el.style) { el.style.backgroundColor = color; }
-    }
+    checkboxStatuses: { leftEye: true, rightEye: true, body: true, snoot: true, lightTiles: true, darkTiles: true, eatAnimation: true, fruit: true, shadow: true, border: true, die: true, lumps: true, portals: true, flashSnake: false, allButShadow: true, keys: true, walls: true, sokobanBox: true, sokobanGoal: true, mines: true, statue: true, brokenStatue: true, mineRadius: true },
   };
 
   window.flashSnakeStatus = { flashCount: 0, currentlyFlashingSnake: false, durationMillisecond: 1000 };
 
-  window.dragHandler = {
+  window.window.dragHandler = {
     dragItem: null,
     dragContainer: null,
     dragObject: null,
@@ -5945,10 +5787,6 @@ window.VisibilityModCode.runCodeBefore = function () {
       window.checkboxes.checkboxStatuses.snoot = this.checked;
     }
 
-    document.getElementById('nose').onchange = function () {
-      window.checkboxes.checkboxStatuses.nose = this.checked;
-    }
-
     document.getElementById('light-tiles').onchange = function () {
       window.checkboxes.checkboxStatuses.lightTiles = this.checked;
     }
@@ -5967,15 +5805,11 @@ window.VisibilityModCode.runCodeBefore = function () {
     document.getElementById('fruit').onchange = function () {
       window.checkboxes.checkboxStatuses.fruit = this.checked;
     }
-    document.getElementById('poison').onchange = function () {
-      window.checkboxes.checkboxStatuses.poison = this.checked;
-    }
     document.getElementById('shadow').onchange = function () {
       window.checkboxes.checkboxStatuses.shadow = this.checked;
     }
     document.getElementById('border').onchange = function () {
       window.checkboxes.checkboxStatuses.border = this.checked;
-      window.applyVisiBorder();
     }
     document.getElementById('die').onchange = function () {
       window.checkboxes.checkboxStatuses.die = this.checked;
@@ -5993,20 +5827,14 @@ window.VisibilityModCode.runCodeBefore = function () {
     document.getElementById('flash-snake-timing').onchange = function () {
       window.flashSnakeStatus.durationMillisecond = this.value;
     }
-    document.getElementById('shadow-included').onchange = function () {
-      window.checkboxes.checkboxStatuses.shadowIncluded = this.checked;
+    document.getElementById('all-but-shadow').onchange = function () {
+      window.checkboxes.checkboxStatuses.allButShadow = this.checked;
     }
     document.getElementById('keys').onchange = function () {
       window.checkboxes.checkboxStatuses.keys = this.checked;
     }
     document.getElementById('walls').onchange = function () {
       window.checkboxes.checkboxStatuses.walls = this.checked;
-    }
-    document.getElementById('locks').onchange = function () {
-      window.checkboxes.checkboxStatuses.locks = this.checked;
-    }
-    document.getElementById('hotdog-walls').onchange = function () {
-      window.checkboxes.checkboxStatuses.hotdogWalls = this.checked;
     }
     document.getElementById('sokoban-box').onchange = function () {
       window.checkboxes.checkboxStatuses.sokobanBox = this.checked;
@@ -6032,33 +5860,15 @@ window.VisibilityModCode.runCodeBefore = function () {
     document.getElementById('statue').onchange = function () {
       window.checkboxes.checkboxStatuses.statue = this.checked;
     }
-    document.getElementById('bridges').onchange = function () {
-      window.checkboxes.checkboxStatuses.bridges = this.checked;
-    }
-    document.getElementById('arrows').onchange = function () {
-      window.checkboxes.checkboxStatuses.arrows = this.checked;
-    }
-    document.getElementById('gates').onchange = function () {
-      window.checkboxes.checkboxStatuses.gates = this.checked;
-    }
-    document.getElementById('shields').onchange = function () {
-      window.checkboxes.checkboxStatuses.shields = this.checked;
-    }
-    document.getElementById('light-snake').onchange = function () {
-      window.checkboxes.checkboxStatuses.lightSnake = this.checked;
-    }
-    document.getElementById('light-fruit').onchange = function () {
-      window.checkboxes.checkboxStatuses.lightFruit = this.checked;
-    }
     document.getElementById('spin').onchange = spinHandler;
   }
 
   function injectInitialHtml() {
     let initialHtml =
       `<div id="delete-stuff-popup" style="margin:0px;position:fixed;z-index:9001;width:100%;">
-  <div id="delete-stuff-draggable" style="width: 370px; background-color: rgb(87, 138, 52); z-index: 9002; border-color: rgb(87, 138, 52); border-style: solid; border-width: 4px; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 10px; position: fixed; left: 5px; top: 5px;border-width: 0px;">
+  <div id="delete-stuff-draggable" style="width: 320px; background-color: rgb(87, 138, 52); z-index: 9002; border-color: rgb(87, 138, 52); border-style: solid; border-width: 4px; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 10px; position: fixed; left: 5px; top: 5px;border-width: 0px;">
     <div id="drag-handle" style="width: 22px; height: 22px; background-color: rgb(77, 193, 249); position: absolute; border-top-left-radius: 10px; border-bottom-right-radius: 18px; border-right: 3px solid rgb(87, 138, 52); border-bottom: 3px solid rgb(87, 138, 52); cursor: move; border-top-color: rgb(87, 138, 52); border-left-color: rgb(87, 138, 52);"></div>
-    <div style="padding:10px;width:350px;margin:0;">
+    <div style="padding:10px;width:300px;margin:0;">
       <div id="visi-title" class="form-check-label" style="text-align: center; padding: 5px; background-color: rgb(74, 117, 44); color: white; font-size: 20px;">Visibility Mod</div>
       <div id="visi-boxes" style="background-color: rgb(74, 117, 44); margin-top: 5px; padding: 0px 0px 10px;">
         <!--Begin test area-->
@@ -6073,9 +5883,6 @@ window.VisibilityModCode.runCodeBefore = function () {
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="snoot" type="checkbox" checked>Snoot</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="nose" type="checkbox" checked>Nostrils</label>
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="snake-body" type="checkbox" checked>Body</label>
@@ -6100,7 +5907,7 @@ window.VisibilityModCode.runCodeBefore = function () {
               <label class="form-check-label"><input class="form-check-input" id="shadow" type="checkbox" checked>Shadow</label>
             </li>
             <li>
-              <label class="form-check-label"><input class="form-check-input" id="shadow-included" type="checkbox" checked>Shadow Included</label>
+              <label class="form-check-label"><input class="form-check-input" id="all-but-shadow" type="checkbox" checked>Not Shadow</label>
             </li>
           </ul>
         </div>
@@ -6134,9 +5941,6 @@ window.VisibilityModCode.runCodeBefore = function () {
               <label class="form-check-label"><input class="form-check-input" id="fruit" type="checkbox" checked>Fruit</label>
             </li>
             <li>
-              <label class="form-check-label"><input class="form-check-input" id="poison" type="checkbox" checked>Poison</label>
-            </li>
-            <li>
               <label class="form-check-label"><input class="form-check-input" id="portals" type="checkbox" checked>Portals</label>
             </li>
             <li>
@@ -6153,10 +5957,7 @@ window.VisibilityModCode.runCodeBefore = function () {
         <div style="box-sizing: border-box;padding:5px;margin: 0px;width: 55%;display:inline-block;float:right;">
           <ul style="list-style-type: none;padding:5px;margin-top:0;margin-bottom:0">
             <li>
-              <label class="form-check-label"><input class="form-check-input" id="walls" type="checkbox" checked>Walls</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="locks" type="checkbox" checked>Locks</label>
+              <label class="form-check-label"><input class="form-check-input" id="walls" type="checkbox" checked>Walls/Locks</label>
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="sokoban-box" type="checkbox" checked>Sokobox</label>
@@ -6169,37 +5970,6 @@ window.VisibilityModCode.runCodeBefore = function () {
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="mine-radius" type="checkbox" checked>Mine Radius</label>
-            </li>
-          </ul>
-        </div>
-        <hr style="clear:both;width:90%;margin-bottom:0">
-        <!--Newer modes Section-->
-        <div style="box-sizing: border-box;padding:5px;margin: 0px;width: 45%;display:inline-block;float:left">
-          <ul style="list-style-type: none;padding:5px;margin-top:0;margin-bottom:0">
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="bridges" type="checkbox" checked>Bridges</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="arrows" type="checkbox" checked>Arrows</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="gates" type="checkbox" checked>Gates</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="shields" type="checkbox" checked>Shields</label>
-            </li>
-          </ul>
-        </div>
-        <div style="box-sizing: border-box;padding:5px;margin: 0px;width: 55%;display:inline-block;float:right;">
-          <ul style="list-style-type: none;padding:5px;margin-top:0;margin-bottom:0">
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="hotdog-walls" type="checkbox" checked>Hotdog Walls</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="light-snake" type="checkbox" checked>Light Snake</label>
-            </li>
-            <li>
-              <label class="form-check-label"><input class="form-check-input" id="light-fruit" type="checkbox" checked>Light Fruit</label>
             </li>
           </ul>
         </div>
@@ -6275,25 +6045,21 @@ window.VisibilityModCode.runCodeBefore = function () {
     let tooltipText = {
       'left-eye': "Left eye of snake. Looks towards the nearest fruit.",
       'right-eye': "Right eye of snake. Looks towards the nearest fruit.",
-      'snoot': "Filled circle at the tip of the snake's head.",
-      'nose': "The small nostril dots under the eyes.",
+      'snoot': "Nose of snake.",
       'snake-body': "The lines and curves that make up the snake's body.",
       'lumps': "The swallowed fruit that pass through the snake.",
-      'eat-animation': "The snake's mouth animation when eating fruit.",
+      'eat-animation': "The snake's mouth when eating. Also the snake's nostrils.",
       'tongue': "Animation when the snake sticks out it's tongue.",
       'die': "Animation when the snake dies. Also used in sokoban mode.",
-      'shadow': "Toggles the snake/fruit/key shadow layer. Off = no shadows at all. Default colour is dark green.",
-      'shadow-included': "When on (default), hiding something also removes that part's shadow. When off, hiding something still keeps its shadow.",
+      'shadow': "Used to hide the shadow for the snake and fruit. Hiding parts of the snake also hides the corresponding bit of shadow. The shadow's default colour is dark green.",
+      'all-but-shadow': "Used if you want to only show the shadow for the snake/fruit.",
       'light-tiles': "The light tiles used for the background. You may need to restart (press esc and then play) for this to take effect. This is actually just a big rectangle that the dark tiles get drawn on top of. Has a glitchy visual effect when removed.",
       'dark-tiles': "The dark tiles used for the background. You may need to restart (press esc and then play) for this to take effect. These are individually drawn squares that get drawn on top of the light tile background.",
-      'border': "The dark green border around the board (canvas fill and chrome background).",
-      'fruit': "Regular fruit. Poison fruit is controlled separately.",
-      'poison': "Poison fruit in poison mode.",
+      'border': "The dark green border wall. You may need to restart (press esc and then play) for this to take effect. This is one big rectangle that gets drawn behind the light and dark tiles. Has a glitchy visual effect when removed in infinity mode.",
+      'fruit': "The fruit, including poison fruit.",
       'portals': "The portals that can be found in portal mode.",
       'keys': "The keys that can be found in key mode.",
-      'walls': "The walls that can be found in wall mode.",
-      'locks': "The locks that can be found in key mode (wall blocks with lock icons).",
-      'hotdog-walls': "The side walls that spawn along the snake in hotdog mode.",
+      'walls': "The walls that can be found in wall mode, and also the locks that can be found in key mode.",
       'sokoban-box': "The box that can be found in the mode where you push around a box into a goal.",
       'sokoban-goal': "The goal that can be found in the mode where you push around a box into a goal.",
       'flash-snake': "When this setting is turned on, the snake will briefly show whenever a fruit is eaten. The amount of time it shows for is controlled by the Flash Time setting. This only has a noticable effect if parts of the snake are hidden to begin with.",
@@ -6302,12 +6068,6 @@ window.VisibilityModCode.runCodeBefore = function () {
       'broken-statue': "The broken statues in statue mode.",
       'spin': "Spin the entire board.",
       'mine-radius': "The mine's radius in minesweeper mode. Dashed lines. Also includes confetti from explosion.",
-      'bridges': "Bridge tiles and the dashed bridge path in bridge mode.",
-      'arrows': "Direction arrows painted on the board in arrow mode.",
-      'gates': "Dashed gate rectangles in gate mode.",
-      'shields': "Directional shield bars drawn on fruit in shield mode.",
-      'light-snake': "The glow around the snake's head in light mode.",
-      'light-fruit': "The glow around apples in light mode.",
     };
 
     for (let inputElementId in tooltipText) {
@@ -6350,6 +6110,7 @@ window.VisibilityModCode.runCodeBefore = function () {
 window.VisibilityModCode.alterSnakeCode = function (code) {
 
   //code = window.PuddingMod.alterSnakeCode(code);
+
   let deleteModDebug = false;
   if (localStorage.getItem('snakeChosenMod') === "customUrl") {
     console.log("Detected customUrl - enabling debug mode and printing initial code")
@@ -6476,99 +6237,58 @@ Same as replace, but throws an error if nothing is changed
     rightEyeRegex,
     deleteModDebug);
 
-  //Die anim. The dying face is die.png, which the sprite class instantiates three times:
-  //normal, mirrored, and a recoloured copy used while the snake is fading. Gate all of them.
-  let dieSpriteProps = [];
-  code.replace(/this\.([$a-zA-Z0-9_]{1,6})=new [$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,20},\n?"[^"]*die\.png"/g,
-    function (whole, prop) {
-      if (dieSpriteProps.indexOf(prop) === -1) { dieSpriteProps.push(prop); }
-      return whole;
-    });
-  if (dieSpriteProps.length === 0) {
-    throw new Error('Visibility mod: could not find the die.png sprite properties');
-  }
+  //Right Eye - this is Die Anim now?!
+  funcWithBodyParts = assertReplace(funcWithBodyParts, rightEyeRegex,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.die) && $1 * window.snakeScale.eyes $2');
 
-  let dieGateCount = 0;
-  funcWithBodyParts = funcWithBodyParts.replace(
-    /(?:\([$a-zA-Z0-9_]{1,6}\?[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}):[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6})\)|[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}))\.render\(/g,
-    function (whole, ternaryLeft, ternaryRight, plain) {
-      let usesDieSprite = [ternaryLeft, ternaryRight, plain].some(function (prop) {
-        return prop && dieSpriteProps.indexOf(prop) !== -1;
-      });
-      if (!usesDieSprite) { return whole; }
-      dieGateCount++;
-      return '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.die || window.visiFullPass) && ' + whole;
-    });
-  if (dieGateCount === 0) {
-    throw new Error('Visibility mod: could not gate any die.png renders');
-  }
-
-  //Left/Right Eye. Both eyes come from the same sprite, drawn back to back in one comma expression
-  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\(([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6})\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\)),(\(\2\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\))/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.leftEye || window.visiFullPass) && $1 * window.snakeScale.eyes $3,' +
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.rightEye || window.visiFullPass) && $4 * window.snakeScale.eyes $5');
+  //Left Eye
+  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\)\);)/,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.leftEye) && $1 * window.snakeScale.eyes $2');
 
   //Eye offsets
   funcWithBodyParts = assertReplaceAll(funcWithBodyParts, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\+=\n?Math\.(?:cos|sin)\([$a-zA-Z0-9_]{0,6}[+-][$a-zA-Z0-9_]{0,6}\)\*[$a-zA-Z0-9_]{0,6}/g,
     '$& * window.snakeScale.eyes');
 
-  //Eat / Nostrils share eat.png. Resting frame (d3===0) is nostrils; any other frame is the mouth.
-  let eatSpriteProps = [];
-  code.replace(/this\.([$a-zA-Z0-9_]{1,6})=new [$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,20},\n?"[^"]*eat\.png"/g,
-    function (whole, prop) {
-      if (eatSpriteProps.indexOf(prop) === -1) { eatSpriteProps.push(prop); }
-      return whole;
-    });
-  if (eatSpriteProps.length === 0) {
-    throw new Error('Visibility mod: could not find the eat.png sprite properties');
-  }
-
-  let eatGateCount = 0;
-  funcWithBodyParts = funcWithBodyParts.replace(
-    /(?:\([$a-zA-Z0-9_]{1,6}\?[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}):[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6})\)|[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}))\.render\(Math\.floor\(([$a-zA-Z0-9_.]{1,12})\)/g,
-    function (whole, ternaryLeft, ternaryRight, plain, frameExpr) {
-      let usesEatSprite = [ternaryLeft, ternaryRight, plain].some(function (prop) {
-        return prop && eatSpriteProps.indexOf(prop) !== -1;
-      });
-      if (!usesEatSprite) { return whole; }
-      eatGateCount++;
-      return '(window.flashSnakeStatus.currentlyFlashingSnake||window.visiFullPass||(Math.floor(' + frameExpr + ')===0?window.checkboxes.checkboxStatuses.nose:window.checkboxes.checkboxStatuses.eatAnimation))&&' + whole;
-    });
-  if (eatGateCount === 0) {
-    throw new Error('Visibility mod: could not gate any eat.png renders');
-  }
+  //Eat anim
+  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\(Math\.floor\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\),\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_*]{0,6})(\);)/,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.eatAnimation) && $1 * window.snakeScale.face $2');
 
   //Tongue
-  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6})(\)\))/,
-    '(window.checkboxes.checkboxStatuses.tongue || window.visiFullPass) && $1 * window.snakeScale.face $2');
+  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6})(\)\)})/,
+    'window.checkboxes.checkboxStatuses.tongue && $1 * window.snakeScale.face $2');
+
+  //Die anim - this is Right Eye now?!
+  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\),)/,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.rightEye) && $1 * window.snakeScale.face $2');
 
   //Snoot
   funcWithBodyParts = assertReplace(funcWithBodyParts, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fill\(\)/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.snoot || window.visiFullPass) && $&');
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.snoot) && $&');
 
   //Snoot scale
   funcWithBodyParts = assertReplace(funcWithBodyParts, /\.4/, 'window.snakeScale.face * 0.4');
 
   //eval(funcWithBodyParts);
 
-  //Function for fruit (ES6 class method render(a,b) on v12+)
-  let fruitRegex = /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-[$a-zA-Z0-9_]{0,6}\/2,-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/;
+  //Function for fruit
+  let fruitRegex = /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.x-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/;
 
-  let funcWithFruit_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+  let funcWithFruit_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
     fruitRegex,
     deleteModDebug);
 
-  let funcWithFruit = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+  let funcWithFruit = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
     fruitRegex,
     deleteModDebug);
 
-  //Regular fruit vs poison fruit. `nla` was the v12 poison marker; `Oka` is the v13 one.
+  //Fruit
   funcWithFruit = assertReplace(funcWithFruit, fruitRegex,
-    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
+    'window.checkboxes.checkboxStatuses.fruit && $&');
 
-  //Mirrored copy (in twin/infinity layouts), using the same poison marker.
-  funcWithFruit = assertReplace(funcWithFruit, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-\([$a-zA-Z0-9_]{0,6}\/2\),-\([$a-zA-Z0-9_]{0,6}\/2\),[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
+ // Poison mode fruit is broken
+  //Poison mode fruit disappearing animation
+  funcWithFruit = assertReplace(funcWithFruit, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z],\n?0,\n?0,\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-\([a-z]\/2\),\n?-\([a-z]\/2\),[a-z],[a-z]\)/,
+    'window.checkboxes.checkboxStatuses.fruit && $&');
 
   //For compatitibilty, also change this code for animatedSnakeColours
   /*
@@ -6579,48 +6299,46 @@ Same as replace, but throws an error if nothing is changed
   //eval(funcWithFruit);
 
 
-  // Walls / locks (ES6 class render(a) over Ca.Aa values)
-  let wallInsideRegex = /this\.[$a-zA-Z0-9_]{0,6}\.Ca\.Aa\.values\(\)/;
-
-  let funcWithRenderWall_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
-    wallInsideRegex,
+  let funcWithRenderWall_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6}\.x-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
     deleteModDebug);
 
-  let funcWithRenderWall = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
-    wallInsideRegex,
+  let funcWithRenderWall = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6}\.x-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
     deleteModDebug);
 
-  //for walls / locks / hotdog walls (same renderer; v12 uses ez/XNa, v13 uses ty/yNa)
-  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '((k.ez||k.ty)?window.checkboxes.checkboxStatuses.hotdogWalls:(((k.XNa!==void 0&&k.XNa>=0)||(k.yNa!==void 0&&k.yNa>=0))?window.checkboxes.checkboxStatuses.locks:window.checkboxes.checkboxStatuses.walls))&&$&');
+  //for walls/locks
+  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6}\.x-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    'window.checkboxes.checkboxStatuses.walls && $&');
 
-  //lock icon on wall
-  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    'window.checkboxes.checkboxStatuses.locks && $&');
+  //lock icon
+
+  //funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\),\n?128\*[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\)\)/,
+  //  'window.checkboxes.checkboxStatuses.walls && $&');
+  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z]\.[$a-zA-Z0-9_]{0,6},0,128,128,[a-z]\.[a-z]-[a-z]\/2,[a-z]\.[a-z]-[a-z]\/2,[a-z],[a-z]\)\)/,
+    'window.checkboxes.checkboxStatuses.walls && $&');
 
 
-  //Sokoban box (TaF-style helper)
-  let sokobanInsideRegex = /[$a-zA-Z0-9_]{0,6}\([a-z]\.settings,7\)&&![a-z]\)\{[a-z]=new/;
-
-  let funcWithSokoban_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
-    sokobanInsideRegex,
+  //Sokoban box
+  let funcWithSokoban_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+    /[$a-zA-Z0-9_]{0,6}\([a-z]\.settings,7\)&&![a-z]&&\([a-z]=new [$a-zA-Z0-9_.]{0,6}\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.width\*\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[a-z]\.x,[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.height\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-\n?[a-z]\.y\),/,
     deleteModDebug);
 
-  let funcWithSokoban = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
-    sokobanInsideRegex,
+  let funcWithSokoban = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+    /[$a-zA-Z0-9_]{0,6}\([a-z]\.settings,7\)&&![a-z]&&\([a-z]=new [$a-zA-Z0-9_.]{0,6}\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.width\*\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[a-z]\.x,[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.height\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-\n?[a-z]\.y\),/,
     deleteModDebug);
 
-  //Sokoban mirrored
-  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '(window.checkboxes.checkboxStatuses.sokobanBox || window.visiFullPass) && $&');
+  //Sokoban
+  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128,0,128,\n?128,[$a-zA-Z0-9_]{0,6}\.x-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    'window.checkboxes.checkboxStatuses.sokobanBox && $&');
 
-  //Sokoban normal
-  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,0,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '(window.checkboxes.checkboxStatuses.sokobanBox || window.visiFullPass) && $&');
+  //Sokoban
+  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?0,0,128,128,[$a-zA-Z0-9_]{0,6}\.x-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6}\)/,
+    'window.checkboxes.checkboxStatuses.sokobanBox && $&');
 
   //  eval(funcWithSokoban);
 
-  SokoGoalRegex = /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,[$a-zA-Z0-9_]{0,6}\*128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/
+  SokoGoalRegex = /[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z],0,128,128,[a-z]\.x-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[a-z],[a-z]\.y-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\+\n?[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/
 
   //Sokoban goal func
   let funcWithSokobanGoal_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e\)$/,
@@ -6649,14 +6367,14 @@ Same as replace, but throws an error if nothing is changed
   //Normal background (i.e not on infinity)
 
   let funcWithBackground_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a\)$/,
-    /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);for/,
+    /0\);[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
     deleteModDebug);
 
   let funcWithBackground = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a\)$/,
-    /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);for/,
+    /0\);[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
     deleteModDebug);
 
-  funcWithBackground = assertReplace(funcWithBackground, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
+  funcWithBackground = assertReplace(funcWithBackground, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
     'if(window.checkboxes.checkboxStatuses.lightTiles){$&}');
 
   funcWithBackground = assertReplace(funcWithBackground, /[a-z]\.[$a-zA-Z0-9_]{0,6}\.fillRect\([a-z]\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[a-z]\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/,
@@ -6664,101 +6382,79 @@ Same as replace, but throws an error if nothing is changed
 
   //eval(funcWithBackground);
 
-  let funcWithMiscRendering_Origin = findFunctionInCode(code, /render\(a,b\)$/,
-    /this\.context\.fillRect\(0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\);/,
+  let funcWithMiscRendering_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype.render=function\(a,b\)$/,
+    /(?<=0\);)[$a-zA-Z0-9_]{0,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.height\);/,
     deleteModDebug);
 
-  let funcWithMiscRendering = findFunctionInCode(code, /render\(a,b\)$/,
-    /this\.context\.fillRect\(0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\);/,
+  let funcWithMiscRendering = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype.render=function\(a,b\)$/,
+    /(?<=0\);)[$a-zA-Z0-9_]{0,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.height\);/,
     deleteModDebug);
 
   //Background for infinity is also contained in funcWithFruit
-  //For outer wall. This is the full canvas fill that everything else is drawn on top of
+  //For outer wall
   funcWithMiscRendering = assertReplace(funcWithMiscRendering, /this\.context\.fillRect\(0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\);/,
     'window.checkboxes.checkboxStatuses.border && $&');
 
-  //Border strips drawn around the board on mobile layouts
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /this\.context\.fillRect\((?!0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\))[^)]*\)/g,
-    'window.checkboxes.checkboxStatuses.border && $&');
-
-  //For light tiles (infinity). The infinity board renders through a local alias rather than `this`
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(?<![$a-zA-Z0-9_.])(?!this\.)[$a-zA-Z0-9_]{1,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{1,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{1,6}\.context\.canvas\.height\);/,
+  //For light tiles (infinity)
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(?<=0\);)[$a-zA-Z0-9_]{0,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.height\);/,
     'window.checkboxes.checkboxStatuses.lightTiles && $&');
 
   //For dark tiles (infinity)
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /[$a-zA-Z0-9_]{1,6}\.context\.fillRect\([$a-zA-Z0-9_]{1,6}\*[$a-zA-Z0-9_.]{1,24}-[$a-zA-Z0-9_]{1,6}\.x\+[$a-zA-Z0-9_]{1,6}\.x,[$a-zA-Z0-9_]{1,6}\*[$a-zA-Z0-9_.]{1,24}-[$a-zA-Z0-9_]{1,6}\.y\+[$a-zA-Z0-9_]{1,6}\.y,[$a-zA-Z0-9_.]{1,24},[$a-zA-Z0-9_.]{1,24}\)/,
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /[$a-zA-Z0-9_]{0,6}\.context\.fillRect\([$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.x\+[$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.y\+[$a-zA-Z0-9_]{0,6}\.y,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);/,
     'window.checkboxes.checkboxStatuses.darkTiles && $&');
 
-  //Light mode: snake-head glow helper renamed between builds (TbF on v12, N5E-like on v13)
-  let lightSnakeCallRegex = /(?:TbF\(|[$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_]{1,6},[$a-zA-Z0-9_.]{1,24},[$a-zA-Z0-9_.]{1,24},Math\.max\(2,)/g;
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, lightSnakeCallRegex,
-    'window.checkboxes.checkboxStatuses.lightSnake&&$&');
+  //Also has a canvas that we can delete to hide all but shadow
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.canvas,\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\);if/,
+    'window.checkboxes.checkboxStatuses.allButShadow && $&');
 
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_]{1,6}\.wb\.wa\.ka\)\{)/,
-    'if(window.checkboxes.checkboxStatuses.lightFruit)$1');
-
-  //Inline active bridges/gates drawn in the compositor (not only via helper functions)
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,20\)/g,
-    '$&&&window.checkboxes.checkboxStatuses.bridges');
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,19\)/g,
-    '$&&&window.checkboxes.checkboxStatuses.gates');
-
-  //Snake, fruit, keys and boxes are drawn into the sprite layer, and the shadow is taken straight
-  //off that layer's silhouette. When Shadow Included is off and something is hidden, duplicating
-  //that stretch keeps a complete silhouette for the shadow while the visible pass honours the
-  //checkboxes. Everything in the stretch only paints the sprite layer, so running it twice has no
-  //other effect.
-  let shadowFnName = funcWithShadow_Origin.match(/^([$a-zA-Z0-9_]{1,6})=function/)[1];
-  let sceneRegionRegex = new RegExp(
-    '(this\\.[$a-zA-Z0-9_]{1,6}\\.render\\(a,b,[$a-zA-Z0-9_]{1,6}\\(this\\)\\);[\\s\\S]*?)' +
-    '([ef]7\\(this\\.settings,4\\)\\|\\|' + shadowFnName.replace(/\$/g, '\\$') + '\\(this\\);)');
-
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, sceneRegionRegex,
-    'window.visiBeginShadowPass(this,this.ka.canvas.width!==this.context.canvas.width||this.ka.canvas.height!==this.context.canvas.height);$1$2if(window.visiEndShadowPass(this)){$1}');
+  //all but shadow, but only for infinity
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /this\.context\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.canvas,\n?[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\)}else/,
+    'window.checkboxes.checkboxStatuses.allButShadow && $&');
 
   //eval(funcWithMiscRendering);
 
-  let funcWithLockRendering_Origin = findFunctionInCode(code, /render\(\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.hb\.particles/,
+  let funcWithLockRendering_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}.save\(\),this\.[$a-zA-Z0-9_]{0,6}\.translate\([a-z],[a-z]\),this\.[$a-zA-Z0-9_]{0,6}\.rotate\([a-z]\),/,
     false);
 
-  let funcWithLockRendering = findFunctionInCode(code, /render\(\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.hb\.particles/,
+  let funcWithLockRendering = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}.save\(\),this\.[$a-zA-Z0-9_]{0,6}\.translate\([a-z],[a-z]\),this\.[$a-zA-Z0-9_]{0,6}\.rotate\([a-z]\),/,
     false);
 
   //background for falling lock piece
-  funcWithLockRendering = assertReplace(funcWithLockRendering, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\(-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\)\*[$a-zA-Z0-9_]{0,6},-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\)\*[$a-zA-Z0-9_]{0,6},this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6},this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6}\)/,
-    'window.checkboxes.checkboxStatuses.locks && $&');
+  funcWithLockRendering = assertReplace(funcWithLockRendering, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\(-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\)\*[$a-zA-Z0-9_]{0,6},-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\)\*[$a-zA-Z0-9_]{0,6},this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6},\n?this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*\n?[$a-zA-Z0-9_]{0,6}\)\)/,
+    'window.checkboxes.checkboxStatuses.walls && $&');
 
   //lock icon and sokoban icon falling
-  funcWithLockRendering = assertReplace(funcWithLockRendering, /(drawImage\()([a-z]\.type===\n?0\?)([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas):([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas)/,
-    '$1$2(window.checkboxes.checkboxStatuses.locks ? $3 : new Image()) : (window.checkboxes.checkboxStatuses.sokobanBox ? $4 : new Image())');
+
+  funcWithLockRendering = assertReplace(funcWithLockRendering, /(drawImage\(0===[a-z]\.type\?)([$a-zA-Z0-9_]{0,6}\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}):\n?([$a-zA-Z0-9_]{0,6}\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6})/,
+    '$1 (window.checkboxes.checkboxStatuses.walls ? $2 : new Image()) : (window.checkboxes.checkboxStatuses.sokobanBox ? $3 : new Image())');
 
   //eval(funcWithLockRendering);
 
-  let funcWithKeyRendering_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,/,
+  let funcWithKeyRendering_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),\n?128\*[a-z]\.type,0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\);/,
     deleteModDebug);
 
-  let funcWithKeyRendering = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,/,
+  let funcWithKeyRendering = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),\n?128\*[a-z]\.type,0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\);/,
     deleteModDebug);
 
   //keys
-  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,[a-z]\.[a-z]-[a-z]\/2,[a-z]\.[a-z]-[a-z]\/2,[a-z],[a-z]\)/,
-    '(window.checkboxes.checkboxStatuses.keys || window.visiFullPass) && $&');
+  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),\n?128\*[a-z]\.type,0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\)/,
+    'window.checkboxes.checkboxStatuses.keys && $&');
 
   //keys upside down
-  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,-\([a-z]\/2\),-\([a-z]\/2\),[a-z],[a-z]\)/,
-    '(window.checkboxes.checkboxStatuses.keys || window.visiFullPass) && $&');
+  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,-\([a-z]\/2\),-\([a-z]\/2\),[a-z],[a-z]\),/,
+    'window.checkboxes.checkboxStatuses.keys && $&');
 
 
   //eval(funcWithKeyRendering);
 
-  let funcWithBodyLines_Origin = findFunctionInCode(code, /render\(a,b,c\)$/,
+  let funcWithBodyLines_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a,b,c\)$/,
     /quadraticCurveTo/,
     deleteModDebug);
-  let funcWithBodyLines = findFunctionInCode(code, /render\(a,b,c\)$/,
+  let funcWithBodyLines = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a,b,c\)$/,
     /quadraticCurveTo/,
     deleteModDebug);
 
@@ -6766,22 +6462,14 @@ if(window.NepDebug){
   console.log(funcWithBodyLines)
 }
 
-  //Lumps get drawn two different ways depending on the mode: normally as a circle wider than
-  //the body stroke, and in modes that skip those circles as a bulge in the stroke width.
+  funcWithBodyLines = assertReplace(funcWithBodyLines, /this\.[$a-zA-Z0-9_]{0,6}\.fill\(\)\)/,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.lumps) && $&');
 
-  //Circle version, the only arc that gets its own fillStyle before being filled
-  funcWithBodyLines = assertReplace(funcWithBodyLines, /(this\.[$a-zA-Z0-9_]{0,6}\.beginPath\(\),this\.[$a-zA-Z0-9_]{0,6}\.arc\([$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\.y,[$a-zA-Z0-9_]{0,6},0,2\*Math\.PI\),)(this\.[$a-zA-Z0-9_]{0,6}\.fill\(\))/,
-    '$1(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.lumps || window.visiFullPass) && $2');
+  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.lineTo\([$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y\)/g,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body) && $&');
 
-  //Stroke width version, the only place the body line width is scaled after being set
-  funcWithBodyLines = assertReplace(funcWithBodyLines, /(this\.[$a-zA-Z0-9_]{0,6}\.lineWidth\*=[$a-zA-Z0-9_]{1,6};)/,
-    'if(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.lumps || window.visiFullPass){$1}');
-
-  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.lineTo\(\n?[$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y\)/g,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body || window.visiFullPass) && $&');
-
-  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.quadraticCurveTo\(\n?[$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y,\n?[$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y\)/g,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body || window.visiFullPass) && $&');
+  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.quadraticCurveTo\([$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\.y,[$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\.y\)/g,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body) && $&');
 
   //Body scale
   //funcWithBodyLines = assertReplace(funcWithBodyLines, /\.8/, '(window.snakeScale.tailStart * 0.8)');
@@ -6791,14 +6479,12 @@ if(window.NepDebug){
   //eval(funcWithBodyLines);
 
   //Portals
-  let portalInsideRegex = /Math\.cos\([$a-zA-Z0-9_]{0,6}\*2\*Math\.PI\)/;
-
-  let funcWithPortals_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
-    portalInsideRegex,
+  let funcWithPortals_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
+    /[$a-zA-Z0-9_]{0,6}=new [$a-zA-Z0-9_.]{0,6}\([$a-zA-Z0-9_]{0,6}\*Math\.cos\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\),[$a-zA-Z0-9_]{0,6}\*Math\.sin\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\)\);/,
     deleteModDebug);
 
-  let funcWithPortals = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
-    portalInsideRegex,
+  let funcWithPortals = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
+    /[$a-zA-Z0-9_]{0,6}=new [$a-zA-Z0-9_.]{0,6}\([$a-zA-Z0-9_]{0,6}\*Math\.cos\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\),[$a-zA-Z0-9_]{0,6}\*Math\.sin\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\)\);/,
     deleteModDebug);
 
   funcWithPortals = assertReplaceAll(funcWithPortals, /[$a-zA-Z0-9_]{0,6}\.fill\(\)/g,
@@ -6806,68 +6492,22 @@ if(window.NepDebug){
 
   //eval(funcWithPortals);
 
+  //let mainClass = code.match(/([$a-zA-Z0-9_]{0,6})=function\(a,b,c\){this\.settings=[a-z];this\.menu=[a-z];this\.header=[a-z];/)[1];
+
   //For flashing snake body when we eat an apple
-  let eatInsideRegex = /[a-z]\&&\([a-z]\.[$a-zA-Z0-9_]{0,6}=!1,[a-z]\.[$a-zA-Z0-9_]{0,6}=!0,[a-z]\.[$a-zA-Z0-9_]{0,6}=10\)/;
-  code = assertReplace(code, eatInsideRegex,
-    '$&;window.checkboxes.checkboxStatuses.flashSnake&&window.brieflyShowSnake()');
-
-  //Mine radius: the dashed red circle plus its fading blast preview. Both are helper calls
-  //shaped `helper(renderer, centre, offsetX, offsetY, radius)`, once for the board and once per
-  //wrapped copy in infinity mode.
-  let mineRadiusInsideRegex = /strokeStyle="#f23606"/;
-
-  let funcWithMineRadius_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
-    mineRadiusInsideRegex,
+  let funcWithEat_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.tick=function\(\)$/,
+    /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){var [$a-zA-Z0-9_]{0,6}=\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6};[$a-zA-Z0-9_]{0,6}\|\|\([$a-zA-Z0-9_]{0,6}=\n?!0,[$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.play\(\)/,
     deleteModDebug);
 
-  let funcWithMineRadius = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
-    mineRadiusInsideRegex,
+  let funcWithEat = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.tick=function\(\)$/,
+    /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){var [$a-zA-Z0-9_]{0,6}=\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6};[$a-zA-Z0-9_]{0,6}\|\|\([$a-zA-Z0-9_]{0,6}=\n?!0,[$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.play\(\)/,
     deleteModDebug);
 
-  funcWithMineRadius = assertReplaceAll(funcWithMineRadius, /[$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_]{1,6},[$a-zA-Z0-9_]{1,6},(?:0,0|[$a-zA-Z0-9_]{1,6}\.x,[$a-zA-Z0-9_]{1,6}\.y),[$a-zA-Z0-9_]{1,6}\)/g,
-    'window.checkboxes.checkboxStatuses.mineRadius && $&');
+  funcWithEat = assertReplace(funcWithEat, /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){/,
+    '$& window.checkboxes.checkboxStatuses.flashSnake && window.brieflyShowSnake();');
 
-  //Arrows (mode 16): triangle/stroke tiles (zaF)
-  let arrowsFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{[$a-zA-Z0-9_.]{1,6}\.ka\.save\(\)/);
-  if (!arrowsFnMatch) {
-    throw new Error('Visibility mod: could not find arrow tile drawer (zaF)');
-  }
-  let arrowsFnName = arrowsFnMatch[1];
-  code = assertReplace(code, new RegExp(arrowsFnName + '=function\\(([$a-zA-Z0-9_,]+)\\)\\{'),
-    arrowsFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.arrows)return;');
-
-  //Shields (mode 15): directional bars on fruit via S$E
-  let shieldsFnMatch = code.match(/([$a-zA-Z0-9_$]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})=!1\)\{var [$a-zA-Z0-9_]{1,6}=Math\.round\([$a-zA-Z0-9_.]{1,20}\/5\)/);
-  if (!shieldsFnMatch) {
-    throw new Error('Visibility mod: could not find shield drawer (S$E)');
-  }
-  let shieldsFnName = shieldsFnMatch[1];
-  code = assertReplace(code, new RegExp(shieldsFnName.replace(/\$/g, '\\$') + '=function\\(([$a-zA-Z0-9_=!,]+)\\)\\{'),
-    shieldsFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.shields)return;');
-
-  //Gates (mode 19): BbF dashed rectangles
-  let gatesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_.]{1,20}\.(?:Yfa|pfa)\)/);
-  if (!gatesFnMatch) {
-    throw new Error('Visibility mod: could not find gate drawer (BbF)');
-  }
-  let gatesFnName = gatesFnMatch[1];
-  code = assertReplace(code, new RegExp(gatesFnName + '=function\\(([$a-zA-Z0-9_,]+)\\)\\{'),
-    gatesFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.gates)return;');
-
-  //Bridges (mode 20): obF static tiles
-  let bridgesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{[$a-zA-Z0-9_]{1,6}\.ka\.save\(\);[$a-zA-Z0-9_]{1,6}===0&&[$a-zA-Z0-9_]{1,6}===0\|\|/);
-  if (!bridgesFnMatch) {
-    throw new Error('Visibility mod: could not find bridge drawer (obF)');
-  }
-  let bridgesFnName = bridgesFnMatch[1];
-  code = assertReplace(code, new RegExp(bridgesFnName + '=function\\(([$a-zA-Z0-9_,]+)\\)\\{'),
-    bridgesFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.bridges)return;');
-
-  //Border chrome CSS background-color (same palette index as the canvas border fill)
-  code = assertReplaceAll(code,
-    /_\.(?:on|pn)\(([$a-zA-Z0-9_.()]{1,40}),"background-color",([$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,30},[$a-zA-Z0-9_.]{1,30},3\))\)/g,
-    '($1&&window.visiBorderEls.push($1),window.visiBorderColor=$2,_.pn($1,"background-color",window.checkboxes.checkboxStatuses.border?$2:"transparent"))'
-  );
+  //funcWithEat = swapInMainClassPrototype(mainClass, funcWithEat);
+  //eval(funcWithEat);
 
     // Mines
     /*
@@ -6883,11 +6523,9 @@ if(window.NepDebug){
     'window.checkboxes.checkboxStatuses.mines && $&');
 */
 
-    // Statue Cracks (best-effort — pattern may be absent on some builds)
-  if (!window.catchError(/[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),[a-z]\.[$a-zA-Z0-9_]{0,6}\*[a-z],0,[a-z],[a-z],-[a-z]\/2,-[a-z]\/2,[a-z],[a-z]\),[a-z]\.[$a-zA-Z0-9_]{0,6}\.globalAlpha=[a-z]\)/g, code)) {
-  code = code.assertReplace(/[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),[a-z]\.[$a-zA-Z0-9_]{0,6}\*[a-z],0,[a-z],[a-z],-[a-z]\/2,-[a-z]\/2,[a-z],[a-z]\),[a-z]\.[$a-zA-Z0-9_]{0,6}\.globalAlpha=[a-z]\)/g,
+    // Statue Cracks
+  code = code.assertReplace(/[a-z].[$a-zA-Z0-9_]{0,6}.drawImage\([a-z]\.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),[a-z]\.[$a-zA-Z0-9_]{0,6}\*[a-z],0,[a-z],[a-z],-[a-z]\/2,-[a-z]\/2,[a-z],[a-z]\),[a-z]\.[$a-zA-Z0-9_]{0,6}\.globalAlpha=[a-z]\)/g,
      'window.checkboxes.checkboxStatuses.brokenStatue && $&')
-  }
 
      // Statue (including cracks)
   code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\(this,[a-z],[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.angle,[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g,
@@ -6918,12 +6556,18 @@ if(window.NepDebug){
   }
   `
   */
+// Mine Radius
+
+code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\([a-z],d,0,0,[a-z]\);if\([$a-zA-Z0-9_]{0,6}\([a-z].[$a-zA-Z0-9_]{0,8},4\)\)for\(var/g,
+`window.checkboxes.checkboxStatuses.mineRadius && $&`)
+  //code = code.assertReplace(/[a-z]\.[$a-zA-Z0-9_]{0,6}\.setLineDash\(\[[a-z].[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/4,[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/4\]\)/g,
+   // `window.checkboxes.checkboxStatuses.mineRadius && $&`)
+
   //code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\(this,[a-z],[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.angle,[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g,
   //   `window.checkboxes.checkboxStatuses.mines && $&`)
 
   //code = code.assertReplace(mineRadiusWidth_Origin, mineRadiusWidth_Code)
   code = code.assertReplace(minesDefinition_Origin, minesDefinition_NewCode)
-  code = code.assertReplace(funcWithMineRadius_Origin, funcWithMineRadius)
   code = code.assertReplace(funcWithFruit_Origin, funcWithFruit)
   code = code.assertReplace(funcWithBodyParts_Origin, funcWithBodyParts)
   code = code.assertReplace(funcWithRenderWall_Origin, funcWithRenderWall)
@@ -6936,18 +6580,15 @@ if(window.NepDebug){
   code = code.assertReplace(funcWithKeyRendering_Origin, funcWithKeyRendering)
   code = code.assertReplace(funcWithBodyLines_Origin, funcWithBodyLines)
   code = code.assertReplace(funcWithPortals_Origin, funcWithPortals)
+  code = code.assertReplace(funcWithEat_Origin, funcWithEat)
 
   // Disables statue break animation
-  if (!window.catchError(/[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6},[a-z],new _\.[$a-zA-Z0-9_]{0,6}\([a-z],[a-z]\),[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g, code)) {
   code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6},[a-z],new _\.[$a-zA-Z0-9_]{0,6}\([a-z],[a-z]\),[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g,
      `window.checkboxes.checkboxStatuses.statue && $&`)
-  }
 
   // Disable minesweeper break animation
-  if (!window.catchError(/[a-z]=_\.[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);for\([a-z]=a\.next\(\);/, code)) {
-  code = code.assertReplace(/[a-z]=_\.[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);for\([a-z]=a\.next\(\);/,
+  code = code.assertReplace(/[a-z]=_\.[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);for\([a-z]=a.next\(\);/,
   `$& window.checkboxes.checkboxStatuses.mineRadius &&`)
-  }
 
   //console.log(code)
   window.isVisi = true;
