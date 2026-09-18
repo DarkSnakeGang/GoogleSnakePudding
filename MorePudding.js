@@ -247,8 +247,8 @@ window.Theme.make = function () {
     },
     {
       name: 'Pacman',
-      light_tiles: '#010101',
-      dark_tiles: '#000000',
+      light_tiles: '#1D1D1D',
+      dark_tiles: '#161616',
       shadow: '#000000',
       border: '#0805c6',
       key_block_sign_color: '#000000',
@@ -528,6 +528,7 @@ window.DistinctVisual.make = function () {
 }
 
 window.DistinctVisual.alterCode = function (code) {
+
     // Attempt to get info on which mode it is
     spawn_func_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?2\)\)[a-zA-Z0-9_$]{1,8}=!0;else if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},\n?10\)&&[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=\n?!1;else{var [a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},6\)\|\|[a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},7\);[a-zA-Z0-9_$]{1,8}=this\.[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8},![a-zA-Z0-9_$]{1,8},null\)}/)
 
@@ -541,11 +542,11 @@ window.DistinctVisual.alterCode = function (code) {
     //console.log("Adding poison trophy as poison apple (click on the trophy at the top bar to toggle)")
     ////console.log(code)
 
-    realism_draw = new RegExp(/switch\(void.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
     realism_switch = code.match(realism_draw)[0];
     //actual_canvas_regexp = new RegExp(/a.[a-zA-Z0-9_$]{1,8}.canvas,/);
     //actual_canvas = code.match(actual_canvas_regexp)[0]
-    realism_path = new RegExp(/switch\(void.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
     get_graphics = realism_switch.split(':')[1].split(')')[0];
@@ -572,7 +573,7 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
 
     get_apple_code = `
     if(window.pudding_settings.Skull){
-        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[2].split('?')[0]} - 1 : b.type;
+        b.type = ${poison_default.split('?')[1].split('=')[1]} ? ${poison_default.split('<')[1].split('?')[0]} - 1 : b.type;
     }
     ${poison_default}
     `
@@ -616,9 +617,9 @@ nothing =` if(window.pudding_settings.SokoGoals && a.${last_path}.path.includes(
      `*/
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/null==\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[3]
+    real_grey_path = real_grey.split(')')[0].split('=')[1]
 
     new_grey_code = `
     if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
@@ -905,9 +906,11 @@ window.Counter.make = function () {
 window.Counter.alterCode = function (code) {
 
     reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    window.wallCoords = [];
 
     counter_reset_code = `;stats.inputs.game = 0;
     stats.walls.game = 0;
+    window.wallCoords = [];
     window.timeKeeper.playing = false;
     window.BootstrapHide();
     stats.plays.session++;
@@ -915,7 +918,7 @@ window.Counter.alterCode = function (code) {
     window.timeKeeper.addAttempt(window.timeKeeper.mode, window.timeKeeper.count, window.timeKeeper.speed, window.timeKeeper.size);
     saveStatistics();
     stats.visible = true;
-    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 17) && stats.statShown == "walls"){
+    if((window.CurrentModeNum != 1 && window.CurrentModeNum != 19) && stats.statShown == "walls"){
         stats.visible = false;
     }
     window.setCounter();
@@ -976,15 +979,43 @@ window.Counter.alterCode = function (code) {
     catchError(wall_spawn_regex, code)
     wall_pos = code.match(wall_spawn_regex)[0].split('=')[0].split(' ')[1]
 
-
     wall_counter_code = `${code.match(wall_spawn_regex)[0]}
-    if(${wall_pos}){stats.walls.game++;updateCounterDisplay();}
+    if(${wall_pos}){stats.walls.game++;
+    window.wallCoords.push([${wall_pos}.x, ${wall_pos}.y]);
+    updateCounterDisplay();}
     `
     if (window.NepDebug) {
         console.log("Wall thing: " + wall_pos)
         console.log("Wall thing 2: " + wall_counter_code)
     }
     code = code.assertReplace(wall_spawn_regex, wall_counter_code);
+
+    window.coordinatesToBoardString = function coordinatesToBoardString(coordinates) {
+        if(window.timeKeeper.getCurrentSetting("size") != 1)
+            return false;
+
+        // Initialize an array of 90 tiles, all initialized to '1' (empty)
+        let board = Array(90).fill('1');
+
+        // Set '2' (wall) for each coordinate in the list
+        coordinates.forEach(coord => {
+            let [x, y] = coord;
+            let index = y * 10 + x; // Calculate the index in the 1D array
+            board[index] = '2'; // Set '2' at the calculated index
+        });
+
+        // Join the array into a single string of 90 characters
+        return board.join('');
+    }
+
+    let death_wall_icon = document.querySelector('[jsname="LpoWPe"]');
+
+    death_wall_icon.addEventListener("click", function () {
+        pattern_string = window.coordinatesToBoardString(window.wallCoords)
+        if(pattern_string){
+            navigator.clipboard.writeText("pattern " + pattern_string);
+        }
+    });
 
     return code;
 }
@@ -1093,7 +1124,7 @@ window.TimeKeeper.make = function () {
         let mode = window.timeKeeper.getCurrentSetting("trophy");
         if (mode != document.getElementById("trophy").children.length - 1) {	//not on blender mode
             modeStr = "";
-            for (t = 1; t <= 17; t++) {
+            for (t = 1; t <= 18; t++) {
                 if (t == mode) {
                     modeStr += "1";
                 }
@@ -1306,8 +1337,8 @@ window.TimeKeeper.make = function () {
             if (old_pbs != null) {
                 old_pbs = JSON.parse(old_pbs);
                 //console.log("Converting local storage to new storage type");
-                for (mode = 0; mode < 17; mode++) {
-                    modeStr = "00000000000000000".split("");
+                for (mode = 0; mode < 18; mode++) {
+                    modeStr = "000000000000000000".split("");
                     if (mode != 0) {
                         modeStr[mode - 1] = '1';
                     }
@@ -1381,7 +1412,8 @@ window.TimeKeeper.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -1571,9 +1603,9 @@ window.TimeKeeper.alterCode = function (code) {
     // TimeKeeper stuff start
     //change stepfunction to run gotApple(), gotAll() and death()
 
-    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[\s\S]*?=function/)
+    func_regex = new RegExp(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)
     window.catchError(func_regex, code)
-    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,1000}RIGHT":0[\s\S]*?=function/)[0];
+    let func = code.match(/[a-zA-Z0-9_$.]{1,40}=function\(\)[^\\]{1,2000}light=Math.max[\s\S]*?=function/)[0];
     StartOfNext = func.substring(func.lastIndexOf(";"), func.length);
     func = func.substring(0, func.lastIndexOf(";"));
     if (window.NepDebug) {
@@ -1585,7 +1617,7 @@ window.TimeKeeper.alterCode = function (code) {
     //modeFunc = modeFunc.substring(modeFunc.indexOf("(") + 1, modeFunc.lastIndexOf("("));
     //modeFunc = modeFunc.split('(')[0];
     //scoreFunc = func.match(/25\!\=\=this.[a-zA-Z0-9$]{1,4}/)[0]; // Need to figure this out
-    scoreFuncVar = func.match(/25\=\=\=\n?[a-zA-Z0-9$]{1,4}/)[0].split('=')[3]; // Assuming he wanted just the "this.score"
+    scoreFuncVar = func.match(/[a-zA-Z0-9$]{1,4}\=\=\=\n?25/)[0].split('=')[0]; // Assuming he wanted just the "this.score"
     scoreFunc = func.match(`${window.escapeRegex(scoreFuncVar.replace('\n', ''))}=\n?this.[a-zA-Z0-9$]{1,6}`)[0].split('=')[1]
     ////console.log(scoreFunc)
     //scoreFunc = scoreFunc.substring(scoreFunc.indexOf("this."),scoreFunc.size);
@@ -1602,7 +1634,7 @@ window.TimeKeeper.alterCode = function (code) {
     //ownFuncIndex = func.indexOf(func.match(/!1}\);\([^%]{0,10}/)[0])+5; // No idea how this ever worked
     ownFunc = "window.timeKeeper.gotApple(Math.floor(" + timeFunc + ")," + scoreFunc + ");"
     //func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex); // Cool but no, just going to insert before the if 25 50 100 instead
-    if25_regex = new RegExp(/if\(25===/)
+    if25_regex = new RegExp(/if\([a-zA-Z0-9$]{1,4}\=\=\=\n?25/)
     ownFuncIndex = func.indexOf(func.match(if25_regex)[0]);
     func = func.slice(0, ownFuncIndex) + ownFunc + func.slice(ownFuncIndex);
     ////console.log(func);
@@ -1680,12 +1712,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/LXFmtS7M/lime-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',70',
     });
-    new_fruit.push({ // Blackberries
-        "Normal": 'https://i.postimg.cc/hPTVGdNX/blackberries.png',
-        "Pixel": 'https://i.postimg.cc/RZTf7zS9/px-blackberries.png',
-        "Real": "https://i.postimg.cc/RVgCjj3c/blackberries-real.png",
-        "Poison_values": 'b,\'#000044\',\'#909090\',50',
-    });
     new_fruit.push({ // Green Grapes
         "Normal": 'https://i.postimg.cc/dQ78zXBm/green-grapes.png',
         "Pixel": 'https://i.postimg.cc/J79bmqYw/px-green-grapes.png',
@@ -1711,8 +1737,8 @@ window.Fruit.make = function () {
         "Poison_values": 'b,\'#ffc107\',\'#909090\',30',
     });
     new_fruit.push({ // Hotdog
-        "Normal": 'https://i.postimg.cc/BbQf4Vgs/hotdog.png',
-        "Pixel": 'https://i.postimg.cc/xTcnz1kL/px-hotdog.png',
+        "Normal": 'https://i.postimg.cc/bwYq44f1/hotdog.png',
+        "Pixel": 'https://i.postimg.cc/zXFJt86J/px-trophy-17.png',
         "Real": "https://i.postimg.cc/Y0RcM953/hotdog-real.png",
         "Poison_values": 'b,\'#9b441c\',\'#909090\',30',
     });
@@ -1720,18 +1746,6 @@ window.Fruit.make = function () {
         "Normal": 'https://i.postimg.cc/rwDXKnPj/pizza.png',
         "Pixel": 'https://i.postimg.cc/1tY1RKYq/pixil-frame-0-5.png',
         "Real": "https://i.postimg.cc/D0vyKmjv/pizza-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
-    new_fruit.push({ // Pacman Ghost
-        "Normal": 'https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png',
-        "Pixel": 'https://i.postimg.cc/BvtK8fxb/px-pacman-ghost.png',
-        "Real": "https://i.postimg.cc/3Nc4x2Ch/ghost-real.png",
-        "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
-    });
-    new_fruit.push({ // Sonic Rings
-        "Normal": 'https://i.postimg.cc/pX1xYGp9/sonic-ring.png',
-        "Pixel": 'https://i.postimg.cc/BvzJqWhs/ring-1.png',
-        "Real": "https://i.postimg.cc/W3WrCR8H/ring-real.png",
         "Poison_values": 'b,\'#FFCF86\',\'#909090\',30',
     });
     new_fruit.push({ // Steak
@@ -1758,18 +1772,6 @@ window.Fruit.make = function () {
         "Real": "https://i.postimg.cc/ncX0G22k/egg-real.png",
         "Poison_values": 'b,\'#e7dfa4\',\'#909090\',50',
     });
-    new_fruit.push({ // Mango
-        "Normal": 'https://i.postimg.cc/R0NbYNSH/Mango.png',
-        "Pixel": 'https://i.postimg.cc/bNny7wv4/mango-px.png',
-        "Real": "https://i.postimg.cc/Hsb6V2tP/mango-real.png",
-        "Poison_values": 'b,\'#fc8824\',\'#909090\',50',
-    });
-    new_fruit.push({ // Melon
-        "Normal": 'https://i.postimg.cc/8knkL3WN/melon.png',
-        "Pixel": 'https://i.postimg.cc/Qt8NqZ0x/pixel-melon.png',
-        "Real": "https://i.postimg.cc/kG6h1PKn/melon-real.png",
-        "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
     new_fruit.push({ // Musa Banana
         "Normal": 'https://i.postimg.cc/3JsKcvnq/musa-banana.png',
         "Pixel": 'https://i.postimg.cc/bwSh0wPR/pixel-musa-banana.png',
@@ -1781,12 +1783,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/RZp3PRWz/pixel-pear.png',
         "Real": "https://i.postimg.cc/63dDtXTY/pear-real.png",
         "Poison_values": 'b,\'#93ef13\',\'#909090\',50',
-    });
-    new_fruit.push({ // Soccer Ball
-        "Normal": 'https://i.postimg.cc/C1yT8vjL/soccer-ball.png',
-        "Pixel": 'https://i.postimg.cc/kGDnkN00/pixel-soccer-ball.png',
-        "Real": "https://i.postimg.cc/J7cnn0n8/soccer-real.png",
-        "Poison_values": 'b,\'#ffffff\',\'#909090\',100',
     });
     new_fruit.push({ // Jacko
         "Normal": 'https://i.postimg.cc/rwMX5hbg/true-jacko.png',
@@ -1805,24 +1801,6 @@ window.Fruit.make = function () {
         "Pixel": 'https://i.postimg.cc/C5rrFjzV/red-pudding-px.png',
         "Real": "https://i.postimg.cc/pTCF6hCJ/redpudding-real.png",
         "Poison_values": 'b,\'#ff3f3f\',\'#909090\',20',
-    });
-    new_fruit.push({ // Dirt Block
-        "Normal": 'https://i.postimg.cc/9FwzBRY4/mc-dirt.png',
-        "Pixel": 'https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png',
-        "Real": "https://i.postimg.cc/Z5rR1Gg4/mc-dirt-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Bread
-        "Normal": 'https://i.postimg.cc/YSMVtPr1/bread.png',
-        "Pixel": 'https://i.postimg.cc/265KZBBy/bread-px.png',
-        "Real": "https://i.postimg.cc/sgpqdzrj/bread-real.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
-    });
-    new_fruit.push({ // Santa
-        "Normal": 'https://i.postimg.cc/kgV7FKDL/santa.png',
-        "Pixel": 'https://i.postimg.cc/SN1yMDQW/santa-px.png',
-        "Real": "https://i.postimg.cc/FsHrz2vr/santa-rtx.png",
-        "Poison_values": 'b,\'#ff3f3f\',\'#909090\',100',
     });
     new_fruit.push({ // Cabbage
         "Normal": 'https://i.postimg.cc/j59z8v1m/cabbage.png',
@@ -1874,10 +1852,10 @@ window.Fruit.alterCode = function (code) {
     // Code to alter snake code here
 
     // Regex for a function that sets the src for count (I think)
-    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){""!==[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
-    settings_var = code.match(settings_src_regex)[0].split('.')[0].split('=')[3] // This is usually "a", the variable the function gets, which has settings in it
+    settings_src_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}=function\([a-zA-Z0-9_$]{1,8}\){[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}!==""&&\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.src=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{0,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    settings_var = code.match(settings_src_regex)[0].split('.')[0].split('{')[1] // This is usually "a", the variable the function gets, which has settings in it
     settings_itself = code.match(settings_src_regex)[0].split('.')[1] // This is either the word "settings" or whatever google replaced it with that's obfuscated
-    settings_src = code.match(settings_src_regex)[0].split('.')[2].split('&')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
+    settings_src = code.match(settings_src_regex)[0].split('.')[2].split('!')[0] // This is the [] part in a.settings.[] - which has an src link to an image in it
     // ${settings_itself}
 
     get_graphics = new RegExp(/case "graphics":/);
@@ -1954,7 +1932,7 @@ window.Fruit.alterCode = function (code) {
 */
 
     //ip_grabber = new RegExp(/=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{0,8},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"/)
-    get_apple_make_func = new RegExp(/for\(a=0;22>a;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
+    get_apple_make_func = new RegExp(/for\(a=0;a<22;a\+\+\)b=new [a-zA-Z0-9_$]{0,8}/)
     //func_name = code.match(ip_grabber)[0].replace("=new ", "").replace(`\(this.${settings_itself},\"snake_arcade\/[a-zA-Z0-9_$]{1,8}\/apple_\"`, "")
     func_name = code.match(get_apple_make_func)[0].split(' ')[1]
     ip_grabber2 = new RegExp(/[a-zA-Z0-9_$]{1,8}\(b,c.[a-zA-Z0-9_$]{1,8},c.target,c.threshold\)/)
@@ -2379,11 +2357,11 @@ window.SnakeColor.alterCode = function (code) {
     code = code.assertReplace(rainbow_usage_regex, rainbow_code)
 
     // https://www.google.com/logos/fnbx/snake_arcade/v5/color_10.png
-
-    snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
+debugger
+    snake_face_regex = new RegExp(/[a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,6}=?=?=?1?0?\?\([a-zA-Z0-9_$]{1,6}\.[a-zA-Z0-9_$]{1,6}=[a-zA-Z0-9_$]{1,6}\[0\]\[0\]/)
     catchError(snake_face_regex, code)
     snake_face_code = code.match(snake_face_regex)[0]
-    snake_face_code = `${code.match(snake_face_regex)[0].split('=')[0]}=10===${code.match(snake_face_regex)[0].split('?')[0]}? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].split('=')[1]}`
+    snake_face_code = `window.isRainbow ? ${code.match(snake_face_regex)[0].split('?')[1].split('=')[0]}= window.isRainbow ? window.rainbowAlts[window.snakeRainbowOverride].set[0] : ${code.match(snake_face_regex)[0].replace("===10","").split('?')[1].split('=')[1]}`
 
     //console.log(snake_face_code)
     code = code.assertReplace(snake_face_regex, snake_face_code)
@@ -2395,18 +2373,18 @@ window.SnakeColor.alterCode = function (code) {
     //code = code.assertReplace(/0===a\.settings\.Aa\|\|/, "")
     //code = code.assertReplace(/\["#4E7CF6","#17439F"\]/, `["#FFFFFF","#FFFFFF"]`)
 
-    snake_face2_reg = new RegExp(/\|\|10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
+    snake_face2_reg = new RegExp(/\|\|1?0?=?=?=?[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}=?=?=?=1?0?\)[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8},[a-zA-Z0-9_$]{1,8}\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/gm)
     snakeface2code = '&&!window.randomColor&&!window.isRainbow)' + code.match(snake_face2_reg)[0].split(')')[1]
     code = code.assertReplace(snake_face2_reg, snakeface2code)
 
-    rainbow_bool_regex = new RegExp(/10===[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}/g)
+    rainbow_bool_regex = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}===10/g)
     catchError(rainbow_bool_regex, code)
 
     is_rainbow_matches = code.match(rainbow_bool_regex).length;
     for (let index = 0; index < is_rainbow_matches; index++) {
         const element = code.match(rainbow_bool_regex)[0];
-        snake_color_num = element.split('=')[3]
-        make_me_different = `10==` + element.split('=')[3]
+        snake_color_num = element.split('=')[0]
+        make_me_different = element.split('=')[0] + `==10`
         new_rainbow_bool = make_me_different + `||window.isRainbow`
         code = code.assertReplace(element, new_rainbow_bool)
 
@@ -2608,8 +2586,9 @@ window.SpeedInfo.make = function () {
         14: { name: "Light" },
         15: { name: "Shield" },
         16: { name: "Arrow" },
-        17: { name: "Peaceful" },
-        18: { name: "Blender" },
+        17: { name: "Hotdog" },
+        18: { name: "Peaceful" },
+        19: { name: "Blender" },
     }
 
     window.countToTxt = {
@@ -2678,8 +2657,9 @@ window.SpeedInfo.make = function () {
         LIGHT = 14
         SHIELD = 15
         ARROW = 16
-        PEACEFUL = 17
-        BLENDER = 18
+        HOTDOG = 17
+        PEACEFUL = 18
+        BLENDER = 19
 
         // Speed list
         DEFAULT_SPEED = 0
@@ -2699,7 +2679,7 @@ window.SpeedInfo.make = function () {
         let mode = window.CurrentModeNum;
         // Implement new method of getting mod that excludes blender
 
-        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD];
+        const highscore_modes = [WALL, PORTAL, KEY, SOKO, POISON, MINESWEEPER, STATUE, SHIELD, HOTDOG];
 
         if (size > 2 || count > 3) {
             EmptyAll();
@@ -2788,21 +2768,35 @@ window.SpeedInfo.make = function () {
         }
 
         level_IDs = speed != SLOW ? window.SpeedrunLevelsJson : window.SpeedrunLevelsJsonCE;
+        let level_ID = null;
+        let category_ID = null;
 
-        for (let index = 0; index < level_IDs["data"].length; index++) {
-            if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
-                level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
-                level_ID = level_IDs["data"][index].id;
-                break;
+        if (level_IDs && level_IDs["data"]) {
+            for (let index = 0; index < level_IDs["data"].length; index++) {
+                if (level_IDs["data"][index].name.includes(window.modeToTxt[mode].name) &&
+                    level_IDs["data"][index].name.includes(window.speedToTxt[speed].name)) {
+                    level_ID = level_IDs["data"][index].id;
+                    break;
+                }
             }
         }
 
         for (let index = 0; index < category_IDs["data"].length; index++) {
             if (category_IDs["data"][index].name.includes(level + " Apples")) {
-
                 category_ID = category_IDs["data"][index].id;
                 break;
             }
+        }
+
+        if (!level_ID || !category_ID) {
+            switch (level) {
+                case "25": Handle25("Empty"); break;
+                case "50": Handle50("Empty"); break;
+                case "100": Handle100("Empty"); break;
+                case "All": HandleAll("Empty"); break;
+                default: break;
+            }
+            return;
         }
 
         src_link_stuff = "https://www.speedrun.com/api/v1/leaderboards/" + gameID + "/level/"
@@ -3121,7 +3115,8 @@ window.SpeedInfo.make = function () {
                     case 13: gamemode += "Light, "; break;
                     case 14: gamemode += "Shield, "; break;
                     case 15: gamemode += "Arrow, "; break;
-                    case 16: gamemode += "Peaceful, "; break;
+                    case 16: gamemode += "Hotdog, "; break;
+                    case 17: gamemode += "Peaceful, "; break;
                     default: gamemode += "Unknown, "; break;
                 }
             }
@@ -3547,6 +3542,7 @@ window.Timer = {
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_14.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v17/trophy_15.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v18/trophy_16.png" />
+  <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v19/trophy_17.png" />
   <img class="uns" style="cursor: pointer; border: 0.5vh ridge #00000000; border-radius: 1vh; width: 3.5vh; height: 3.5vh;" src="https://www.google.com/logos/fnbx/snake_arcade/v16/trophy_15.png" />
 </div>
 <br/>
@@ -3982,6 +3978,7 @@ window.Timer = {
       /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];\n?var a\n?=\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?settings[^]*?\)\}\;/
     )[0]
 
+    /*
     const modeKey = resetFunction.match(
       /0===this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('0===this.settings.', '')
@@ -3994,6 +3991,7 @@ window.Timer = {
     const sizeKey = resetFunction.match(
       /1!==this\.settings\.[a-zA-Z0-9_$]{1,8}/
     )[0].replace('1!==this.settings.', '')
+*/
 
     code = code.replace(resetFunction,
       resetFunction.replace(
@@ -4044,7 +4042,7 @@ window.Timer = {
 
 
     const timeFormatFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(0>=a\)return[^]*?3,"0"\)}/
+      /[a-zA-Z0-9_$]{1,8}=function\(a\){a=Math\.floor\(a\);if\(a<=0\)return[^]*?3,"0"\)}/
     )[0]
 
 
@@ -4094,7 +4092,7 @@ window.Timer = {
 
 
     const splitStuff = code.match(
-      /if\(25===\n?[a-zA-Z0-9_$]{1,8}\|\|50===[a-zA-Z0-9_$]{1,8}\|\|100===[a-zA-Z0-9_$]{1,8}\)/
+      /if\(2?5?=?=?=?\n?[a-zA-Z0-9_$]{1,8}=?=?=?2?5?\|\|5?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?5?0?\|\|1?0?0?=?=?=?[a-zA-Z0-9_$]{1,8}=?=?=?1?0?0?\)/
     )[0]
 
     code = code.replace(
@@ -4274,7 +4272,6 @@ window.BootstrapMenu.make = function () {
         a.id = 'stat-icon';
         a.width = a.height = 25;
         a.style = 'position:relative;left:200px;top:70px;';
-
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
         divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
@@ -4698,32 +4695,23 @@ window.CustomPortalPairs.make = function () {
         24: { name: "Blue Berries", image: "https://i.postimg.cc/8cmVPfGd/blueberries.png" },
         25: { name: "Red Pepper", image: "https://i.postimg.cc/BQqHMbDc/redpepper.png" },
         26: { name: "Lime", image: "https://i.postimg.cc/k5kWcyFB/lime.png" },
-        27: { name: "Black Berries", image: "https://i.postimg.cc/hPTVGdNX/blackberries.png" },
-        28: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
-        29: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
-        30: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
-        31: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
-        32: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
-        33: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
-        34: { name: "Pacman Ghost", image: "https://i.postimg.cc/TP7ZGZGf/pacman-ghost.png" },
-        35: { name: "Sonic Ring", image: "https://i.postimg.cc/pX1xYGp9/sonic-ring.png" },
-        36: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
-        37: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
-        38: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
-        39: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
-        40: { name: "Mango", image: "https://i.postimg.cc/R0NbYNSH/Mango.png" },
-        41: { name: "Melon", image: "https://i.postimg.cc/8knkL3WN/melon.png" },
-        42: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
-        43: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
-        44: { name: "Soccer Ball", image: "https://i.postimg.cc/C1yT8vjL/soccer-ball.png" },
-        45: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
-        46: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
-        47: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
-        48: { name: "Dirt Block", image: "https://i.postimg.cc/7ZvhtHKK/mc-dirt-px.png" },
-        49: { name: "Bread", image: "https://i.postimg.cc/YSMVtPr1/bread.png" },
-        50: { name: "Santa", image: "https://i.postimg.cc/kgV7FKDL/santa.png" },
-        51: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
-        52: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
+        27: { name: "Green Grapes", image: "https://i.postimg.cc/dQ78zXBm/green-grapes.png" },
+        28: { name: "Burger", image: "https://i.postimg.cc/13m2Cr16/burger.png" },
+        29: { name: "Cheese", image: "https://i.postimg.cc/zXD1z9d6/trophy-03.png" },
+        30: { name: "Fries", image: "https://i.postimg.cc/YCMFFP1Q/french-fries.png" },
+        31: { name: "Hotdog", image: "https://i.postimg.cc/BbQf4Vgs/hotdog.png" },
+        32: { name: "Pizza", image: "https://i.postimg.cc/rwDXKnPj/pizza.png" },
+        33: { name: "Steak", image: "https://i.postimg.cc/XYjC4zzf/steak.png" },
+        34: { name: "Coconut", image: "https://i.postimg.cc/1XbSVygZ/coconut.png" },
+        35: { name: "Poop", image: "https://i.postimg.cc/66719KfJ/poop.png" },
+        36: { name: "Egg", image: "https://i.postimg.cc/ZRg1jkrg/egg.png" },
+        37: { name: "Red Banana", image: "https://i.postimg.cc/3JsKcvnq/musa-banana.png" },
+        38: { name: "Pear", image: "https://i.postimg.cc/L6Y9DTBf/pear.png" },
+        39: { name: "Jackolantern", image: "https://i.postimg.cc/rwMX5hbg/true-jacko.png" },
+        40: { name: "Ice", image: "https://i.postimg.cc/mrL8PJmK/ice.png" },
+        41: { name: "Red Pudding", image: "https://i.postimg.cc/15kNH2Y5/pudding-red.png" },
+        42: { name: "Cabbage", image: "https://i.postimg.cc/j59z8v1m/cabbage.png" },
+        43: { name: "Heart", image: "https://i.postimg.cc/8PGLRXCb/heart.png" }
 
     };
 
@@ -4919,10 +4907,10 @@ window.CustomPortalPairs.alterCode = function (code) {
         //console.log(code)
     }
 
-    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{/)
+    portal_dice_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0?<?[a-zA-Z0-9_$]{1,8}\.length>?0?\)\{/)
     catchError(portal_dice_regex, code)
-    apple_dice_array = code.match(portal_dice_regex)[0].split('<')[1].split('.')[0];
-    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0<[a-zA-Z0-9_$]{1,8}\.length\)\{[^]*type}/gm)
+    apple_dice_array = code.match(portal_dice_regex)[0].replace("0<", "").split('&')[2].split('.')[0];
+    portal_dice_full_regex = new RegExp(/if\([a-zA-Z0-9_$]{1,8}\(this\.[a-zA-Z0-9_$]{1,8},2\)&&0?<?[a-zA-Z0-9_$]{1,8}\.length>?0?\)\{[^]*type}/gm)
     catchError(portal_dice_full_regex, code)
     portal_pairs_dice_code = code.match(portal_dice_full_regex)[0]
 
@@ -5082,7 +5070,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
 window.PuddingMod.runCodeAfter = function () {
   let modIndicator = document.createElement('div');
   modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'Pudding Mod';
+  modIndicator.textContent = 'Pudding Mod v6';
   if (window.loaded_code) {
     modIndicator.textContent = 'Pudding Mod - Google Test Version';
   }
@@ -5101,7 +5089,7 @@ window.moreMenu = {
       return img
     }
 
-
+  
     for(let src of [
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Micro.png?raw=true',
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Tiny.png?raw=true',
@@ -5112,7 +5100,7 @@ window.moreMenu = {
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Too%20Big.png?raw=true',
       'https://github.com/carlgustavh/GoogleSnakeCustomMenuStuffImages/blob/main/Way%20Too%20Big.png?raw=true'
     ]) document.querySelector('#size').appendChild(uiImage(src))
-
+  
     for(let src of [
       'https://i.postimg.cc/bNYJfjyZ/Turtle-Bunny.png',
       'https://i.postimg.cc/GtdppWvS/Lightning.png',
@@ -5126,7 +5114,7 @@ window.moreMenu = {
       'https://i.postimg.cc/fL4LGtys/Eternal.png',
       'https://i.postimg.cc/LXzX29g1/Fire-Bunny.png'
     ]) document.querySelector('#speed').appendChild(uiImage(src))
-
+  
     for(let src of [
       'https://i.postimg.cc/cJx1Lt2W/13-cr.png',
       'https://i.postimg.cc/HWq26Bdv/25.png',
@@ -5138,34 +5126,34 @@ window.moreMenu = {
   },
   alterSnakeCode: code => {
     const resetFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\n?\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?pos\n?\)\n?}/
+      /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?!1\n?\)\n?}/
     )[0]
-
+  
     const selectedAppleCount = resetFunction.match(
-      /0\n?!==\n?this\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/
-    )[0].replace(/0\n?!==/, '').replace(/\n/g, '')
-
+      /this\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?!==\n?0/
+    )[0].replace(/!==\n?0/, '').replace(/\n/g, '')
+  
     const applePlacementStem = resetFunction.match(
       /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?push\n?\(\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?,/
     )[0]
     const appleArray = applePlacementStem.match(/this\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0]
-
+  
     const checkBadMode = code.match(
       /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?return [a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?2\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(a\n?,\n?8\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?9\n?\)\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?a\n?,\n?10\n?\)\n?}/
     )[0].match(/[a-zA-Z0-9_$]{1,8}/)[0]
     const isModeSelected = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?,\n?b\n?\)\n?{\n?return a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.has\(b\):18\n?===\n?a[^]*?===\n?b\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?,\n?b\n?\)\n?{\n?return a\.[a-zA-Z0-9_$]{1,8}\?a\.[a-zA-Z0-9_$]{1,8}\.has\(b\):[^]*?===\n?b\n?}/
     )[0].match(/[a-zA-Z0-9_$]{1,8}/)[0]
-
-
+  
+  
     code = code.assertReplace(resetFunction,
       resetFunction.assertReplace(
         'if(a)',
         `
-        if(${selectedAppleCount} > 3) {
+        if(${selectedAppleCount} > 6) {
 
           if(!${checkBadMode}(this.settings)) {
-            if(${selectedAppleCount} === 4) {
+            if(${selectedAppleCount} === 7) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} -1, +2))
               ${applePlacementStem} -3, +2))
@@ -5179,7 +5167,7 @@ window.moreMenu = {
               ${applePlacementStem} +1, -2))
               ${applePlacementStem} -1, -2))
               ${applePlacementStem} -3, -2))
-            } else if(${selectedAppleCount} === 5) {
+            } else if(${selectedAppleCount} === 8) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} +0, +2))
               ${applePlacementStem} -1, +2))
@@ -5205,7 +5193,7 @@ window.moreMenu = {
               ${applePlacementStem} -1, -2))
               ${applePlacementStem} -2, -2))
               ${applePlacementStem} -3, -2))
-            } else if(${selectedAppleCount} === 6) {
+            } else if(${selectedAppleCount} === 9) {
               ${applePlacementStem} +1, +2))
               ${applePlacementStem} +0, +2))
               ${applePlacementStem} -1, +2))
@@ -5246,32 +5234,32 @@ window.moreMenu = {
               ${applePlacementStem} -1, +3))
               ${applePlacementStem} -2, +3))
               ${applePlacementStem} -3, +3))
-            } else if(${selectedAppleCount} === 7) {
+            } else if(${selectedAppleCount} === 10) {
               for(let dy = -4; dy <= 4; dy++)
                 for(let dx = -7; dx <= 2; dx++)
                   ${applePlacementStem} dx, dy))
-            } else if(${selectedAppleCount} === 8) {
+            } else if(${selectedAppleCount} === 11) {
               for(let i = 0; i < 200; i++)
                 ${applePlacementStem} -1, +0))
-            } else if(${selectedAppleCount} === 9) {
+            } else if(${selectedAppleCount} === 12) {
               for(let i = 0; i < 10000; i++)
                 ${applePlacementStem} -1, +0))
             } else
               ${applePlacementStem} +100000, +1))
-
+  
           } else {
 
-            if(${selectedAppleCount} < 9) {
+            if(${selectedAppleCount} < 12) {
               const count = (
-                ${selectedAppleCount} === 4
+                ${selectedAppleCount} === 6
                   ? 13
-                : ${selectedAppleCount} === 5
-                  ? 25
-                : ${selectedAppleCount} === 6
-                  ? 40
                 : ${selectedAppleCount} === 7
-                  ? 87
+                  ? 25
                 : ${selectedAppleCount} === 8
+                  ? 40
+                : ${selectedAppleCount} === 9
+                  ? 87
+                : ${selectedAppleCount} === 10
                   ? 200
                 : 0
               )
@@ -5286,38 +5274,38 @@ window.moreMenu = {
         } else if(a)
         `
       ).assertReplace(
-        'pos)}',
-        `pos)
-          if(${isModeSelected}(this.settings, 2) && ${selectedAppleCount} > 4) {
+        /!1\n?\)\n?}/,
+        `!1)
+          if(${isModeSelected}(this.settings, 2) && ${selectedAppleCount} > 7) {
             for(let __i___ = 0; __i___ < ${appleArray}.length; __i___ += 2) {
-              ${appleArray}[__i___].type = ${appleArray}[__i___ + 1].type = Math.floor(Math.random() * 21)
+              ${appleArray}[__i___].type = ${appleArray}[__i___ + 1].type = Math.floor(Math.random() * 24)
             }
           }
-
+  
         }`
       )
     )
-
-
+  
+  
     const tileLengthSetLine = code.match(
-      /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\(\n?a\n?\.\n?isMobile\n?\?\n?175\n?:\n?135\n?\)\n?\*\n?b\n?;/
+      /this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\(\n?d\n?\.\n?isMobile\n?\?\n?175\n?:\n?135\n?\)\n?\*\n?a\n?;/
     )[0]
     const selectedSpeed = code.match(
-      /switch\n?\(\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case(\n? \n?|\n)1\n?:\n?b\n?=\n?\.66/
+      /switch\n?\(\n?d\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case(\n? \n?|\n)1\n?:\n?a\n?=\n?\.66/
     )[0].match(
-      /a\n?\.\n?[a-zA-Z0-9_$]{1,8}/
-    )[0].replace('a', 'this.settings')
-
+      /d\n?\.\n?[a-zA-Z0-9_$]{1,8}/
+    )[0].replace('d', 'this.settings')
+  
     const tickFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?tick\n?=\n?function\n?\(\)\n?{\n?[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?keys\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}\n?}\n?}/
+      /tick\n?\(\n?\)\n?{\n?[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?keys\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?,\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}\n?}\n?}/
     )[0]
     const replacePoint = tickFunction.match(
       /\.5\n?:\n?1\.25\n?\);\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\+\+;/
     )[0]
-
+  
     window.bunnyTurtleSpeed = 1.33
     window.lightningSnailSpeed = 1.85
-
+  
     code = code.assertReplace(tickFunction,
       tickFunction.replaceAll(
         '&&', ' && '
@@ -5372,67 +5360,67 @@ window.moreMenu = {
               speedMultiplier = 1
               break
           }
-          ${tileLengthSetLine.replace(/\*\n?b/, '* speedMultiplier').replace('a.isMobile', 'this.settings.isMobile')}
+          ${tileLengthSetLine.replace(/\*\n?a/, '* speedMultiplier').replace('d.isMobile', 'this.settings.isMobile')}
         `
       )
     )
-
+  
     const resetFunction1 = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?reset\n?=\n?function\n?\(\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
+      /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?null[^]*?\.66[^]*?!0\n?\)\n?\)\n?}/
     )[0]
-
+  
     code = code.assertReplace(resetFunction1,
       resetFunction1.assertReplace(
-        /{case 1:b=\.66[^}]*?1}/,
+        /{case 1:a=\.66[^}]*?1}/,
         `{
           case 1:
-            b = .66
+            a = .66
             break a
           case 2:
-            b = 1.33
+            a = 1.33                       
             break a
           case 3:
-            b = window.bunnyTurtleSpeed
+            a = window.bunnyTurtleSpeed    
             break a
           case 4:
-            b = .45
+            a = .45                        
             break a
           case 5:
-            b = 1.85
+            a = 1.85                       
             break a
           case 6:
-            b = window.lightningSnailSpeed
+            a = window.lightningSnailSpeed 
             break a
           case 7:
-            b = 18.5
+            a = 18.5                       
             break a
           case 8:
-            b = .35
+            a = .35                        
             break a
           case 9:
-            b = .25
+            a = .25                        
             break a
           case 10:
-            b = .15
+            a = .15                        
             break a
           case 11:
-            b = .05
+            a = .05                        
             break a
           case 12:
-            b = 26640
+            a = 26640                      
             break a
           case 13:
-            b = .00001
+            a = .00001                     
             break a
           default:
-            b = 1
+            a = 1                          
             break a
         }`
       )
     );
-
+  
     const speedIconFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?var b\n?=\n?1\n?===\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8};\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?clearRect\n?\(\n?0\n?,\n?0\n?,\n?[^]*?\n?0\n?\)\n?,\n?0\n?,\n?c\n?,\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(a\)\n?{\n?var b\n?=\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?===\n?1\n?;\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?clearRect\n?\(\n?0\n?,\n?0\n?,\n?[^]*?\n?0\n?\)\n?,\n?0\n?,\n?c\n?,\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}/
     )[0]
     const canvWidth = speedIconFunction.match(
       /var c\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?width/
@@ -5441,9 +5429,9 @@ window.moreMenu = {
       /a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?render/g
     )[1].assertReplace(/.\n?render/, '')
     const selectedSpeed1 = speedIconFunction.match(
-      /1\n?===\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/g
-    )[1].assertReplace(/1\n?===/, '')
-
+      /a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?===\n?1/g
+    )[1].assertReplace(/\n?===\n?1/, '')
+  
     code = code.assertReplace(speedIconFunction,
       speedIconFunction.assertReplace(
         '&&', '?'
@@ -5452,10 +5440,10 @@ window.moreMenu = {
         `)) : ${selectedSpeed1} !== 0 && (${canv}.context.drawImage(document.querySelector('#speed').children[${selectedSpeed1}], ${canvWidth} - 80, d.y - 80, 80, 80));`
       )
     )
-
-
+  
+  
     const sizeHandleFunction = code.match(
-      /_\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?\)\n?{\n?var(\n|\n? \n?)a\n?=\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\("JI3Aqc[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?\(\n?\)\n?{\n?var(\n|\n? \n?)a\n?=\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\("JI3Aqc[^]*?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?}\n?}/
     )[0]
     const selectedSize = sizeHandleFunction.match(
       /switch\n?\(\n?this\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?{\n?case 2\n?:/
@@ -5466,7 +5454,7 @@ window.moreMenu = {
     const sizeHolder = sizeHold.match(/[a-zA-Z0-9_$]\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0]
     const dim = sizeHold.match(/[a-zA-Z0-9_$]\n?\/\n?[a-zA-Z0-9_$]\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0].replace(/[a-zA-Z0-9_$]\n?\//, '')
     const e = sizeHandleFunction.match(/[a-zA-Z0-9_$]\n?=\n?512/)[0][0]
-
+  
     code = code.assertReplace(sizeHandleFunction,
       sizeHandleFunction
       .assertReplace(
@@ -5559,87 +5547,130 @@ window.moreMenu = {
         `
       )
     )
-
-
+    
+  
     const menuUpdateFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?\.\n?prototype\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\)\n?{\n?if\n?\(\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\)\n?\)\n?[^]*?"thso6e"\n?\)\n?}\n?}/
+      /[a-zA-Z0-9_$]{1,8}\n?\(\n?\)\n?{\n?if\n?\(\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\)\n?\)\n?[^]*?"thso6e"\n?\)\n?}\n?}/
     )[0]
     const selectedAppleCount1 = `([...document.querySelector('#count').children].indexOf(document.querySelector('#count').getElementsByClassName('tuJOWd')[0]))`
-
-
+  
+  
     code = code.assertReplace(
       menuUpdateFunction,
       menuUpdateFunction.assertReplace(
         '}}',
         `}
           const appleCountDisplay = document.body.getElementsByClassName('UJhXPd wSwbef EWyEF')[0]
-
+  
           // [...appleCountDisplay.children].forEach((e, i) => i > 1 && (appleCountDisplay.removeChild(appleCountDisplay.children[i])))
           for(let i = 2; i < appleCountDisplay.children.length; i++) {
             appleCountDisplay.removeChild(appleCountDisplay.children[i])
           }
 
-          if(${selectedAppleCount1} > 2) {
+          if(${selectedAppleCount1} > 3) {
             const __src = document.querySelector('#count').children[${selectedAppleCount1}].src
             const __img = window.uiImage(__src)
             __img.style.position = 'relative'
             __img.style.left = '50px'
             appleCountDisplay.appendChild(__img)
           }
-        }
+        } 
         `
       )
     )
-
-
+  
+  
     const pixelIssueFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}=function\(a\){var b=a\.[a-zA-Z0-9_$]{1,8};if[^]*?9\)}}/
+      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?\)\n?{\n?var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?;\n?if[^]*?10\n?}\n?}\n?}/
     )[0]
     const pixelIssueB = pixelIssueFunction.match(
-      /var b=a\.[a-zA-Z0-9_$]{1,8}/
-    )[0].replace('var b=', '')
+      /var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}/
+    )[0].replace(/var(\n| )b\n?=\n?/, '')
     const boardDimensions = pixelIssueFunction.match(
-      /b\.[a-zA-Z0-9_$]{1,8}\.height/
-    )[0].replace('b', pixelIssueB).replace('.height', '')
+      /b\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?height/
+    )[0].replace('b', pixelIssueB).replace(/\n?\.\n?height/, '')
     const boardThing = pixelIssueFunction.match(
-      /b\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\[e\.y\]\[e\.x\]/
-    )[0].replace('[e.y][e.x]', '')
+      /b\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\[\n?d\n?\.\n?y\n?\]\n?\[\n?d\n?\.\n?x\n?\]/
+    )[0].replace(/\n?\[\n?d\n?\.\n?y\n?\]\n?\[\n?d\n?\.\n?x\n?\]/, '')
     code = code.assertReplaceAll(
-      `${boardThing}[e.y][e.x]=d`,
-      `e.y >= 0 && e.y < ${boardDimensions}.height && e.x >= 0 && e.x < ${boardDimensions}.width && (${boardThing}[e.y][e.x] = d)`
+      RegExp(`${boardThing}\\n?\\[\\n?c\\n?\\.\\n?y\\n?\\]\\n?\\[\\n?c\\n?\\.\\n?x\\n?\\]\\n?=\\n?e`, 'g'),
+      `c.y >= 0 && c.y < ${boardDimensions}.height && c.x >= 0 && c.x < ${boardDimensions}.width && (${boardThing}[c.y][c.x] = e)`
     )
-
-
+  
+  
     code = code.assertReplace(
-      /switch\(\n?Math\.floor\(4\*Math\.random\(\)\)\){default:case[^}]*?}/,
-      'g = Math.floor(10 * Math.random());'
+      /switch\n?\(\n?Math\n?\.\n?floor\n?\(\n?Math\n?\.\n?random\n?\(\n?\)\n?\*\n?6\n?\)\n?\)\n?{\n?default\n?:\n?case[^}]*?}/,
+      'h = Math.floor(12 * Math.random());'
     ).assertReplace(
-      /e=\.25>Math.random\(\)\?\.25>Math\.random\(\)\?2:1:0/,
-      'e = Math.floor(14 * Math.random())'
+      /f\n?=\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?2\n?:\n?1\n?:\n?0/,
+      'f = Math.floor(14 * Math.random())'
     ).assertReplace(
-      /f=\.25>Math.random\(\)\?\.25>Math\.random\(\)\?2:1:0/,
-      'f = Math.floor(11 * Math.random())'
+      /g\n?=\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?Math\n?\.\n?random\n?\(\n?\)\n?<\n?\.25\n?\?\n?2\n?:\n?1\n?:\n?0/,
+      'g = Math.floor(11 * Math.random())'
     )
-
-
-
+  
+  
+  
     const appleTypeChosen = code.match(
-      /for\(a=a\.settings\.[a-zA-Z0-9_$]{1,8}/
-    )[0].match(/a\.settings\.[a-zA-Z0-9_$]{1,8}/)[0]
+      /for\n?\(\n?a\n?=\n?a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/
+    )[0].match(/a\n?\.\n?settings\n?\.\n?[a-zA-Z0-9_$]{1,8}/)[0]
+
     code = code.assertReplace(
-      RegExp(`for\\(a\\n?=\\n?${appleTypeChosen}\\n?;\\n?b\\.has\\n?\\(\\n?a\\n?\\)\\n?;\\n?\\)`),
-      `for(a = ${appleTypeChosen}, __i = 0; b.has(a) && __i < 23; __i++)`
+      RegExp(`for\\n?\\(\\n?a\\n?=\\n?${appleTypeChosen}\\n?;\\n?c\\.has\\n?\\(\\n?a\\n?\\)\\n?;\\n?\\)`),
+      `for(a = ${appleTypeChosen}, __i = 0; c.has(a) && __i < 24; __i++)`
     )
 
+    // pause mod code
+    const pauseCondition = code.match(
+      /\(\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?direction\n?!==\n?"NONE"\n?\|\|\n?[a-zA-Z0-9_$]{1,8}\n?\(\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\)\n?\)/
+    )[0]
 
+    code = code.assertReplace(
+      pauseCondition,
+      `(${pauseCondition} && !window.pauseGame)`
+    )
+  
+  
     return code
   },
   runCodeAfter: () => {
-    const modIndicator = document.createElement('div');
-    modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;'
+    const modIndicator = document.createElement('div')
+    modIndicator.style = `
+      position: absolute;
+      font-family: Roboto, Arial, sans-serif;
+      color: white;
+      font-size: 14px;
+      padding-top: 4px;
+      padding-left: 30px;
+      user-select: none;
+    `
     modIndicator.textContent = 'More Menu Mod'
     const canvasNode = document.getElementsByClassName('jNB0Ic')[0]
     document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode)
+
+    // pause mod code
+    document.addEventListener('keydown', evt => {
+      if(evt.code === 'KeyQ') {
+        window.pauseGame = !window.pauseGame
+
+        const pausedDarkOverlayDiv = document.getElementsByClassName('wjOYOd')[0]
+        const menuDiv = pausedDarkOverlayDiv.children[0]
+
+        if(window.pauseGame) {
+          pausedDarkOverlayDiv.style.visibility = "visible"
+          pausedDarkOverlayDiv.style.opacity = 1
+          menuDiv.style.visibility = "hidden"
+        } else {
+          setTimeout(() => {
+            if(!window.pauseGame) {
+              menuDiv.style.visibility = "visible"
+            }
+          }, 500)
+          pausedDarkOverlayDiv.style.visibility = "hidden"
+          pausedDarkOverlayDiv.style.opacity = 0
+        }
+      }
+    })
   }
 }
 window.VisibilityModCode = {};
@@ -5686,12 +5717,88 @@ window.VisibilityModCode.runCodeBefore = function () {
   console.log("Enabling Visibility Mod");
 
   window.checkboxes = {
-    checkboxStatuses: { leftEye: true, rightEye: true, body: true, snoot: true, lightTiles: true, darkTiles: true, eatAnimation: true, fruit: true, shadow: true, border: true, die: true, lumps: true, portals: true, flashSnake: false, allButShadow: true, keys: true, walls: true, sokobanBox: true, sokobanGoal: true, mines: true, statue: true, brokenStatue: true, mineRadius: true },
+    checkboxStatuses: {
+      leftEye: true, rightEye: true, body: true, snoot: true, nose: true,
+      lightTiles: true, darkTiles: true, eatAnimation: true, fruit: true, poison: true, shadow: true,
+      border: true, die: true, lumps: true, portals: true, flashSnake: false, shadowIncluded: true,
+      keys: true, walls: true, locks: true, hotdogWalls: true, sokobanBox: true, sokobanGoal: true,
+      mines: true, statue: true, brokenStatue: true, mineRadius: true, tongue: true,
+      bridges: true, arrows: true, gates: true, shields: true,
+      lightSnake: true, lightFruit: true,
+    },
+  };
+
+  // The game builds the shadow as a silhouette of the sprite layer partway through a frame, so
+  // anything we skip drawing would lose its shadow too. When Shadow Included is off, that part of
+  // the frame runs twice: once with every silhouette gate forced open (what the shadow is taken
+  // from), then the sprite layer is rewound and drawn again honouring the checkboxes. When it is
+  // on, hidden parts simply are not drawn and their shadows go with them.
+  window.visiFullPass = false;
+  window.visiShadowScratch = null;
+  window.visiShadowPassKeys = ['body', 'fruit', 'poison', 'lumps', 'leftEye', 'rightEye', 'snoot', 'nose',
+    'eatAnimation', 'tongue', 'die', 'keys', 'sokobanBox'];
+
+  window.visiBeginShadowPass = function visiBeginShadowPass(renderer, isInfinity) {
+    window.visiFullPass = false;
+
+    //Infinity mode composites the shadow from wrapped copies further down the frame, so the rewind
+    //point here would land in the wrong place.
+    let statuses = window.checkboxes.checkboxStatuses;
+    if (isInfinity || !statuses.shadow || statuses.shadowIncluded) { return; }
+
+    let anyHidden = false;
+    for (let i = 0; i < window.visiShadowPassKeys.length; i++) {
+      if (!statuses[window.visiShadowPassKeys[i]]) { anyHidden = true; break; }
+    }
+    if (!anyHidden) { return; }
+
+    let source = renderer.ka.canvas;
+    let scratch = window.visiShadowScratch;
+    if (!scratch) {
+      scratch = window.visiShadowScratch = document.createElement('canvas').getContext('2d');
+    }
+    if (scratch.canvas.width !== source.width || scratch.canvas.height !== source.height) {
+      scratch.canvas.width = source.width;
+      scratch.canvas.height = source.height;
+    }
+    scratch.setTransform(1, 0, 0, 1, 0, 0);
+    scratch.globalAlpha = 1;
+    scratch.globalCompositeOperation = 'copy';
+    scratch.drawImage(source, 0, 0);
+    scratch.globalCompositeOperation = 'source-over';
+
+    window.visiFullPass = true;
+  };
+
+  window.visiEndShadowPass = function visiEndShadowPass(renderer) {
+    if (!window.visiFullPass) { return false; }
+    window.visiFullPass = false;
+
+    let ctx = renderer.ka;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'copy';
+    ctx.drawImage(window.visiShadowScratch.canvas, 0, 0);
+    ctx.restore();
+    return true;
+  };
+
+  // Border is also painted as CSS background-color on the canvas chrome; keep handles so the
+  // checkbox can toggle it live without restarting.
+  window.visiBorderEls = [];
+  window.visiBorderColor = "";
+  window.applyVisiBorder = function applyVisiBorder() {
+    let color = window.checkboxes.checkboxStatuses.border ? (window.visiBorderColor || "") : "transparent";
+    for (let i = 0; i < window.visiBorderEls.length; i++) {
+      let el = window.visiBorderEls[i];
+      if (el && el.style) { el.style.backgroundColor = color; }
+    }
   };
 
   window.flashSnakeStatus = { flashCount: 0, currentlyFlashingSnake: false, durationMillisecond: 1000 };
 
-  window.window.dragHandler = {
+  window.dragHandler = {
     dragItem: null,
     dragContainer: null,
     dragObject: null,
@@ -5776,6 +5883,10 @@ window.VisibilityModCode.runCodeBefore = function () {
       window.checkboxes.checkboxStatuses.snoot = this.checked;
     }
 
+    document.getElementById('nose').onchange = function () {
+      window.checkboxes.checkboxStatuses.nose = this.checked;
+    }
+
     document.getElementById('light-tiles').onchange = function () {
       window.checkboxes.checkboxStatuses.lightTiles = this.checked;
     }
@@ -5794,11 +5905,15 @@ window.VisibilityModCode.runCodeBefore = function () {
     document.getElementById('fruit').onchange = function () {
       window.checkboxes.checkboxStatuses.fruit = this.checked;
     }
+    document.getElementById('poison').onchange = function () {
+      window.checkboxes.checkboxStatuses.poison = this.checked;
+    }
     document.getElementById('shadow').onchange = function () {
       window.checkboxes.checkboxStatuses.shadow = this.checked;
     }
     document.getElementById('border').onchange = function () {
       window.checkboxes.checkboxStatuses.border = this.checked;
+      window.applyVisiBorder();
     }
     document.getElementById('die').onchange = function () {
       window.checkboxes.checkboxStatuses.die = this.checked;
@@ -5816,14 +5931,20 @@ window.VisibilityModCode.runCodeBefore = function () {
     document.getElementById('flash-snake-timing').onchange = function () {
       window.flashSnakeStatus.durationMillisecond = this.value;
     }
-    document.getElementById('all-but-shadow').onchange = function () {
-      window.checkboxes.checkboxStatuses.allButShadow = this.checked;
+    document.getElementById('shadow-included').onchange = function () {
+      window.checkboxes.checkboxStatuses.shadowIncluded = this.checked;
     }
     document.getElementById('keys').onchange = function () {
       window.checkboxes.checkboxStatuses.keys = this.checked;
     }
     document.getElementById('walls').onchange = function () {
       window.checkboxes.checkboxStatuses.walls = this.checked;
+    }
+    document.getElementById('locks').onchange = function () {
+      window.checkboxes.checkboxStatuses.locks = this.checked;
+    }
+    document.getElementById('hotdog-walls').onchange = function () {
+      window.checkboxes.checkboxStatuses.hotdogWalls = this.checked;
     }
     document.getElementById('sokoban-box').onchange = function () {
       window.checkboxes.checkboxStatuses.sokobanBox = this.checked;
@@ -5849,15 +5970,33 @@ window.VisibilityModCode.runCodeBefore = function () {
     document.getElementById('statue').onchange = function () {
       window.checkboxes.checkboxStatuses.statue = this.checked;
     }
+    document.getElementById('bridges').onchange = function () {
+      window.checkboxes.checkboxStatuses.bridges = this.checked;
+    }
+    document.getElementById('arrows').onchange = function () {
+      window.checkboxes.checkboxStatuses.arrows = this.checked;
+    }
+    document.getElementById('gates').onchange = function () {
+      window.checkboxes.checkboxStatuses.gates = this.checked;
+    }
+    document.getElementById('shields').onchange = function () {
+      window.checkboxes.checkboxStatuses.shields = this.checked;
+    }
+    document.getElementById('light-snake').onchange = function () {
+      window.checkboxes.checkboxStatuses.lightSnake = this.checked;
+    }
+    document.getElementById('light-fruit').onchange = function () {
+      window.checkboxes.checkboxStatuses.lightFruit = this.checked;
+    }
     document.getElementById('spin').onchange = spinHandler;
   }
 
   function injectInitialHtml() {
     let initialHtml =
       `<div id="delete-stuff-popup" style="margin:0px;position:fixed;z-index:9001;width:100%;">
-  <div id="delete-stuff-draggable" style="width: 320px; background-color: rgb(87, 138, 52); z-index: 9002; border-color: rgb(87, 138, 52); border-style: solid; border-width: 4px; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 10px; position: fixed; left: 5px; top: 5px;border-width: 0px;">
+  <div id="delete-stuff-draggable" style="width: 370px; background-color: rgb(87, 138, 52); z-index: 9002; border-color: rgb(87, 138, 52); border-style: solid; border-width: 4px; border-radius: 10px; box-shadow: rgba(0, 0, 0, 0.4) 0px 3px 10px; position: fixed; left: 5px; top: 5px;border-width: 0px;">
     <div id="drag-handle" style="width: 22px; height: 22px; background-color: rgb(77, 193, 249); position: absolute; border-top-left-radius: 10px; border-bottom-right-radius: 18px; border-right: 3px solid rgb(87, 138, 52); border-bottom: 3px solid rgb(87, 138, 52); cursor: move; border-top-color: rgb(87, 138, 52); border-left-color: rgb(87, 138, 52);"></div>
-    <div style="padding:10px;width:300px;margin:0;">
+    <div style="padding:10px;width:350px;margin:0;">
       <div id="visi-title" class="form-check-label" style="text-align: center; padding: 5px; background-color: rgb(74, 117, 44); color: white; font-size: 20px;">Visibility Mod</div>
       <div id="visi-boxes" style="background-color: rgb(74, 117, 44); margin-top: 5px; padding: 0px 0px 10px;">
         <!--Begin test area-->
@@ -5872,6 +6011,9 @@ window.VisibilityModCode.runCodeBefore = function () {
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="snoot" type="checkbox" checked>Snoot</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="nose" type="checkbox" checked>Nostrils</label>
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="snake-body" type="checkbox" checked>Body</label>
@@ -5896,7 +6038,7 @@ window.VisibilityModCode.runCodeBefore = function () {
               <label class="form-check-label"><input class="form-check-input" id="shadow" type="checkbox" checked>Shadow</label>
             </li>
             <li>
-              <label class="form-check-label"><input class="form-check-input" id="all-but-shadow" type="checkbox" checked>Not Shadow</label>
+              <label class="form-check-label"><input class="form-check-input" id="shadow-included" type="checkbox" checked>Shadow Included</label>
             </li>
           </ul>
         </div>
@@ -5930,6 +6072,9 @@ window.VisibilityModCode.runCodeBefore = function () {
               <label class="form-check-label"><input class="form-check-input" id="fruit" type="checkbox" checked>Fruit</label>
             </li>
             <li>
+              <label class="form-check-label"><input class="form-check-input" id="poison" type="checkbox" checked>Poison</label>
+            </li>
+            <li>
               <label class="form-check-label"><input class="form-check-input" id="portals" type="checkbox" checked>Portals</label>
             </li>
             <li>
@@ -5946,7 +6091,10 @@ window.VisibilityModCode.runCodeBefore = function () {
         <div style="box-sizing: border-box;padding:5px;margin: 0px;width: 55%;display:inline-block;float:right;">
           <ul style="list-style-type: none;padding:5px;margin-top:0;margin-bottom:0">
             <li>
-              <label class="form-check-label"><input class="form-check-input" id="walls" type="checkbox" checked>Walls/Locks</label>
+              <label class="form-check-label"><input class="form-check-input" id="walls" type="checkbox" checked>Walls</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="locks" type="checkbox" checked>Locks</label>
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="sokoban-box" type="checkbox" checked>Sokobox</label>
@@ -5959,6 +6107,37 @@ window.VisibilityModCode.runCodeBefore = function () {
             </li>
             <li>
               <label class="form-check-label"><input class="form-check-input" id="mine-radius" type="checkbox" checked>Mine Radius</label>
+            </li>
+          </ul>
+        </div>
+        <hr style="clear:both;width:90%;margin-bottom:0">
+        <!--Newer modes Section-->
+        <div style="box-sizing: border-box;padding:5px;margin: 0px;width: 45%;display:inline-block;float:left">
+          <ul style="list-style-type: none;padding:5px;margin-top:0;margin-bottom:0">
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="bridges" type="checkbox" checked>Bridges</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="arrows" type="checkbox" checked>Arrows</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="gates" type="checkbox" checked>Gates</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="shields" type="checkbox" checked>Shields</label>
+            </li>
+          </ul>
+        </div>
+        <div style="box-sizing: border-box;padding:5px;margin: 0px;width: 55%;display:inline-block;float:right;">
+          <ul style="list-style-type: none;padding:5px;margin-top:0;margin-bottom:0">
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="hotdog-walls" type="checkbox" checked>Hotdog Walls</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="light-snake" type="checkbox" checked>Light Snake</label>
+            </li>
+            <li>
+              <label class="form-check-label"><input class="form-check-input" id="light-fruit" type="checkbox" checked>Light Fruit</label>
             </li>
           </ul>
         </div>
@@ -6034,21 +6213,25 @@ window.VisibilityModCode.runCodeBefore = function () {
     let tooltipText = {
       'left-eye': "Left eye of snake. Looks towards the nearest fruit.",
       'right-eye': "Right eye of snake. Looks towards the nearest fruit.",
-      'snoot': "Nose of snake.",
+      'snoot': "Filled circle at the tip of the snake's head.",
+      'nose': "The small nostril dots under the eyes.",
       'snake-body': "The lines and curves that make up the snake's body.",
       'lumps': "The swallowed fruit that pass through the snake.",
-      'eat-animation': "The snake's mouth when eating. Also the snake's nostrils.",
+      'eat-animation': "The snake's mouth animation when eating fruit.",
       'tongue': "Animation when the snake sticks out it's tongue.",
       'die': "Animation when the snake dies. Also used in sokoban mode.",
-      'shadow': "Used to hide the shadow for the snake and fruit. Hiding parts of the snake also hides the corresponding bit of shadow. The shadow's default colour is dark green.",
-      'all-but-shadow': "Used if you want to only show the shadow for the snake/fruit.",
+      'shadow': "Toggles the snake/fruit/key shadow layer. Off = no shadows at all. Default colour is dark green.",
+      'shadow-included': "When on (default), hiding something also removes that part's shadow. When off, hiding something still keeps its shadow.",
       'light-tiles': "The light tiles used for the background. You may need to restart (press esc and then play) for this to take effect. This is actually just a big rectangle that the dark tiles get drawn on top of. Has a glitchy visual effect when removed.",
       'dark-tiles': "The dark tiles used for the background. You may need to restart (press esc and then play) for this to take effect. These are individually drawn squares that get drawn on top of the light tile background.",
-      'border': "The dark green border wall. You may need to restart (press esc and then play) for this to take effect. This is one big rectangle that gets drawn behind the light and dark tiles. Has a glitchy visual effect when removed in infinity mode.",
-      'fruit': "The fruit, including poison fruit.",
+      'border': "The dark green border around the board (canvas fill and chrome background).",
+      'fruit': "Regular fruit. Poison fruit is controlled separately.",
+      'poison': "Poison fruit in poison mode.",
       'portals': "The portals that can be found in portal mode.",
       'keys': "The keys that can be found in key mode.",
-      'walls': "The walls that can be found in wall mode, and also the locks that can be found in key mode.",
+      'walls': "The walls that can be found in wall mode.",
+      'locks': "The locks that can be found in key mode (wall blocks with lock icons).",
+      'hotdog-walls': "The side walls that spawn along the snake in hotdog mode.",
       'sokoban-box': "The box that can be found in the mode where you push around a box into a goal.",
       'sokoban-goal': "The goal that can be found in the mode where you push around a box into a goal.",
       'flash-snake': "When this setting is turned on, the snake will briefly show whenever a fruit is eaten. The amount of time it shows for is controlled by the Flash Time setting. This only has a noticable effect if parts of the snake are hidden to begin with.",
@@ -6057,6 +6240,12 @@ window.VisibilityModCode.runCodeBefore = function () {
       'broken-statue': "The broken statues in statue mode.",
       'spin': "Spin the entire board.",
       'mine-radius': "The mine's radius in minesweeper mode. Dashed lines. Also includes confetti from explosion.",
+      'bridges': "Bridge tiles and the dashed bridge path in bridge mode.",
+      'arrows': "Direction arrows painted on the board in arrow mode.",
+      'gates': "Dashed gate rectangles in gate mode.",
+      'shields': "Directional shield bars drawn on fruit in shield mode.",
+      'light-snake': "The glow around the snake's head in light mode.",
+      'light-fruit': "The glow around apples in light mode.",
     };
 
     for (let inputElementId in tooltipText) {
@@ -6099,7 +6288,6 @@ window.VisibilityModCode.runCodeBefore = function () {
 window.VisibilityModCode.alterSnakeCode = function (code) {
 
   //code = window.PuddingMod.alterSnakeCode(code);
-
   let deleteModDebug = false;
   if (localStorage.getItem('snakeChosenMod') === "customUrl") {
     console.log("Detected customUrl - enabling debug mode and printing initial code")
@@ -6226,58 +6414,99 @@ Same as replace, but throws an error if nothing is changed
     rightEyeRegex,
     deleteModDebug);
 
-  //Right Eye - this is Die Anim now?!
-  funcWithBodyParts = assertReplace(funcWithBodyParts, rightEyeRegex,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.die) && $1 * window.snakeScale.eyes $2');
+  //Die anim. The dying face is die.png, which the sprite class instantiates three times:
+  //normal, mirrored, and a recoloured copy used while the snake is fading. Gate all of them.
+  let dieSpriteProps = [];
+  code.replace(/this\.([$a-zA-Z0-9_]{1,6})=new [$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,20},\n?"[^"]*die\.png"/g,
+    function (whole, prop) {
+      if (dieSpriteProps.indexOf(prop) === -1) { dieSpriteProps.push(prop); }
+      return whole;
+    });
+  if (dieSpriteProps.length === 0) {
+    throw new Error('Visibility mod: could not find the die.png sprite properties');
+  }
 
-  //Left Eye
-  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\)\);)/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.leftEye) && $1 * window.snakeScale.eyes $2');
+  let dieGateCount = 0;
+  funcWithBodyParts = funcWithBodyParts.replace(
+    /(?:\([$a-zA-Z0-9_]{1,6}\?[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}):[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6})\)|[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}))\.render\(/g,
+    function (whole, ternaryLeft, ternaryRight, plain) {
+      let usesDieSprite = [ternaryLeft, ternaryRight, plain].some(function (prop) {
+        return prop && dieSpriteProps.indexOf(prop) !== -1;
+      });
+      if (!usesDieSprite) { return whole; }
+      dieGateCount++;
+      return '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.die || window.visiFullPass) && ' + whole;
+    });
+  if (dieGateCount === 0) {
+    throw new Error('Visibility mod: could not gate any die.png renders');
+  }
+
+  //Left/Right Eye. Both eyes come from the same sprite, drawn back to back in one comma expression
+  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\(([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6})\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\)),(\(\2\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\))/,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.leftEye || window.visiFullPass) && $1 * window.snakeScale.eyes $3,' +
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.rightEye || window.visiFullPass) && $4 * window.snakeScale.eyes $5');
 
   //Eye offsets
   funcWithBodyParts = assertReplaceAll(funcWithBodyParts, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\+=\n?Math\.(?:cos|sin)\([$a-zA-Z0-9_]{0,6}[+-][$a-zA-Z0-9_]{0,6}\)\*[$a-zA-Z0-9_]{0,6}/g,
     '$& * window.snakeScale.eyes');
 
-  //Eat anim
-  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\(Math\.floor\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\),\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_*]{0,6})(\);)/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.eatAnimation) && $1 * window.snakeScale.face $2');
+  //Eat / Nostrils share eat.png. Resting frame (d3===0) is nostrils; any other frame is the mouth.
+  let eatSpriteProps = [];
+  code.replace(/this\.([$a-zA-Z0-9_]{1,6})=new [$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,20},\n?"[^"]*eat\.png"/g,
+    function (whole, prop) {
+      if (eatSpriteProps.indexOf(prop) === -1) { eatSpriteProps.push(prop); }
+      return whole;
+    });
+  if (eatSpriteProps.length === 0) {
+    throw new Error('Visibility mod: could not find the eat.png sprite properties');
+  }
+
+  let eatGateCount = 0;
+  funcWithBodyParts = funcWithBodyParts.replace(
+    /(?:\([$a-zA-Z0-9_]{1,6}\?[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}):[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6})\)|[$a-zA-Z0-9_]{1,6}\.([$a-zA-Z0-9_]{1,6}))\.render\(Math\.floor\(([$a-zA-Z0-9_.]{1,12})\)/g,
+    function (whole, ternaryLeft, ternaryRight, plain, frameExpr) {
+      let usesEatSprite = [ternaryLeft, ternaryRight, plain].some(function (prop) {
+        return prop && eatSpriteProps.indexOf(prop) !== -1;
+      });
+      if (!usesEatSprite) { return whole; }
+      eatGateCount++;
+      return '(window.flashSnakeStatus.currentlyFlashingSnake||window.visiFullPass||(Math.floor(' + frameExpr + ')===0?window.checkboxes.checkboxStatuses.nose:window.checkboxes.checkboxStatuses.eatAnimation))&&' + whole;
+    });
+  if (eatGateCount === 0) {
+    throw new Error('Visibility mod: could not gate any eat.png renders');
+  }
 
   //Tongue
-  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6})(\)\)})/,
-    'window.checkboxes.checkboxStatuses.tongue && $1 * window.snakeScale.face $2');
-
-  //Die anim - this is Right Eye now?!
-  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_*]{0,6})(\),)/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.rightEye) && $1 * window.snakeScale.face $2');
+  funcWithBodyParts = assertReplace(funcWithBodyParts, /(\([$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}:[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6})(\)\))/,
+    '(window.checkboxes.checkboxStatuses.tongue || window.visiFullPass) && $1 * window.snakeScale.face $2');
 
   //Snoot
   funcWithBodyParts = assertReplace(funcWithBodyParts, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fill\(\)/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.snoot) && $&');
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.snoot || window.visiFullPass) && $&');
 
   //Snoot scale
   funcWithBodyParts = assertReplace(funcWithBodyParts, /\.4/, 'window.snakeScale.face * 0.4');
 
   //eval(funcWithBodyParts);
 
-  //Function for fruit
-  let fruitRegex = /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.x-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/;
+  //Function for fruit (ES6 class method render(a,b) on v12+)
+  let fruitRegex = /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-[$a-zA-Z0-9_]{0,6}\/2,-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/;
 
-  let funcWithFruit_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+  let funcWithFruit_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
     fruitRegex,
     deleteModDebug);
 
-  let funcWithFruit = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+  let funcWithFruit = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
     fruitRegex,
     deleteModDebug);
 
-  //Fruit
+  //Regular fruit vs poison fruit. `nla` was the v12 poison marker; `Oka` is the v13 one.
   funcWithFruit = assertReplace(funcWithFruit, fruitRegex,
-    'window.checkboxes.checkboxStatuses.fruit && $&');
+    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
 
- // Poison mode fruit is broken
-  //Poison mode fruit disappearing animation
-  funcWithFruit = assertReplace(funcWithFruit, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z],\n?0,\n?0,\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-\([a-z]\/2\),\n?-\([a-z]\/2\),[a-z],[a-z]\)/,
-    'window.checkboxes.checkboxStatuses.fruit && $&');
+  //Mirrored copy (in twin/infinity layouts), using the same poison marker.
+  funcWithFruit = assertReplace(funcWithFruit, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-\([$a-zA-Z0-9_]{0,6}\/2\),-\([$a-zA-Z0-9_]{0,6}\/2\),[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
 
   //For compatitibilty, also change this code for animatedSnakeColours
   /*
@@ -6288,46 +6517,48 @@ Same as replace, but throws an error if nothing is changed
   //eval(funcWithFruit);
 
 
-  let funcWithRenderWall_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6}\.x-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+  // Walls / locks (ES6 class render(a) over Ca.Aa values)
+  let wallInsideRegex = /this\.[$a-zA-Z0-9_]{0,6}\.Ca\.Aa\.values\(\)/;
+
+  let funcWithRenderWall_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
+    wallInsideRegex,
     deleteModDebug);
 
-  let funcWithRenderWall = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6}\.x-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+  let funcWithRenderWall = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
+    wallInsideRegex,
     deleteModDebug);
 
-  //for walls/locks
-  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6}\.x-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    'window.checkboxes.checkboxStatuses.walls && $&');
+  //for walls / locks / hotdog walls (same renderer; v12 uses ez/XNa, v13 uses ty/yNa)
+  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    '((k.ez||k.ty)?window.checkboxes.checkboxStatuses.hotdogWalls:(((k.XNa!==void 0&&k.XNa>=0)||(k.yNa!==void 0&&k.yNa>=0))?window.checkboxes.checkboxStatuses.locks:window.checkboxes.checkboxStatuses.walls))&&$&');
 
-  //lock icon
-
-  //funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\),\n?128\*[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\)\)/,
-  //  'window.checkboxes.checkboxStatuses.walls && $&');
-  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z]\.[$a-zA-Z0-9_]{0,6},0,128,128,[a-z]\.[a-z]-[a-z]\/2,[a-z]\.[a-z]-[a-z]\/2,[a-z],[a-z]\)\)/,
-    'window.checkboxes.checkboxStatuses.walls && $&');
+  //lock icon on wall
+  funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    'window.checkboxes.checkboxStatuses.locks && $&');
 
 
-  //Sokoban box
-  let funcWithSokoban_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
-    /[$a-zA-Z0-9_]{0,6}\([a-z]\.settings,7\)&&![a-z]&&\([a-z]=new [$a-zA-Z0-9_.]{0,6}\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.width\*\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[a-z]\.x,[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.height\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-\n?[a-z]\.y\),/,
+  //Sokoban box (TaF-style helper)
+  let sokobanInsideRegex = /[$a-zA-Z0-9_]{0,6}\([a-z]\.settings,7\)&&![a-z]\)\{[a-z]=new/;
+
+  let funcWithSokoban_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+    sokobanInsideRegex,
     deleteModDebug);
 
-  let funcWithSokoban = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
-    /[$a-zA-Z0-9_]{0,6}\([a-z]\.settings,7\)&&![a-z]&&\([a-z]=new [$a-zA-Z0-9_.]{0,6}\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.width\*\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[a-z]\.x,[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.height\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-\n?[a-z]\.y\),/,
+  let funcWithSokoban = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+    sokobanInsideRegex,
     deleteModDebug);
 
-  //Sokoban
-  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128,0,128,\n?128,[$a-zA-Z0-9_]{0,6}\.x-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    'window.checkboxes.checkboxStatuses.sokobanBox && $&');
+  //Sokoban mirrored
+  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    '(window.checkboxes.checkboxStatuses.sokobanBox || window.visiFullPass) && $&');
 
-  //Sokoban
-  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?0,0,128,128,[$a-zA-Z0-9_]{0,6}\.x-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.y-\n?[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6}\)/,
-    'window.checkboxes.checkboxStatuses.sokobanBox && $&');
+  //Sokoban normal
+  funcWithSokoban = assertReplace(funcWithSokoban, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,0,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
+    '(window.checkboxes.checkboxStatuses.sokobanBox || window.visiFullPass) && $&');
 
   //  eval(funcWithSokoban);
 
-  SokoGoalRegex = /[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},128\*[a-z],0,128,128,[a-z]\.x-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[a-z],[a-z]\.y-[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\+\n?[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},\n?[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/
+  SokoGoalRegex = /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\([$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,[$a-zA-Z0-9_]{0,6}\*128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\+[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/
 
   //Sokoban goal func
   let funcWithSokobanGoal_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e\)$/,
@@ -6356,14 +6587,14 @@ Same as replace, but throws an error if nothing is changed
   //Normal background (i.e not on infinity)
 
   let funcWithBackground_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a\)$/,
-    /0\);[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
+    /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);for/,
     deleteModDebug);
 
   let funcWithBackground = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a\)$/,
-    /0\);[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
+    /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);for/,
     deleteModDebug);
 
-  funcWithBackground = assertReplace(funcWithBackground, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
+  funcWithBackground = assertReplace(funcWithBackground, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.canvas\.height\);/,
     'if(window.checkboxes.checkboxStatuses.lightTiles){$&}');
 
   funcWithBackground = assertReplace(funcWithBackground, /[a-z]\.[$a-zA-Z0-9_]{0,6}\.fillRect\([a-z]\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[a-z]\*[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)/,
@@ -6371,79 +6602,101 @@ Same as replace, but throws an error if nothing is changed
 
   //eval(funcWithBackground);
 
-  let funcWithMiscRendering_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype.render=function\(a,b\)$/,
-    /(?<=0\);)[$a-zA-Z0-9_]{0,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.height\);/,
+  let funcWithMiscRendering_Origin = findFunctionInCode(code, /render\(a,b\)$/,
+    /this\.context\.fillRect\(0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\);/,
     deleteModDebug);
 
-  let funcWithMiscRendering = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype.render=function\(a,b\)$/,
-    /(?<=0\);)[$a-zA-Z0-9_]{0,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.height\);/,
+  let funcWithMiscRendering = findFunctionInCode(code, /render\(a,b\)$/,
+    /this\.context\.fillRect\(0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\);/,
     deleteModDebug);
 
   //Background for infinity is also contained in funcWithFruit
-  //For outer wall
+  //For outer wall. This is the full canvas fill that everything else is drawn on top of
   funcWithMiscRendering = assertReplace(funcWithMiscRendering, /this\.context\.fillRect\(0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\);/,
     'window.checkboxes.checkboxStatuses.border && $&');
 
-  //For light tiles (infinity)
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(?<=0\);)[$a-zA-Z0-9_]{0,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{0,6}\.context\.canvas\.height\);/,
+  //Border strips drawn around the board on mobile layouts
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /this\.context\.fillRect\((?!0,0,this\.context\.canvas\.width,this\.context\.canvas\.height\))[^)]*\)/g,
+    'window.checkboxes.checkboxStatuses.border && $&');
+
+  //For light tiles (infinity). The infinity board renders through a local alias rather than `this`
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(?<![$a-zA-Z0-9_.])(?!this\.)[$a-zA-Z0-9_]{1,6}\.context\.fillRect\(0,0,[$a-zA-Z0-9_]{1,6}\.context\.canvas\.width,[$a-zA-Z0-9_]{1,6}\.context\.canvas\.height\);/,
     'window.checkboxes.checkboxStatuses.lightTiles && $&');
 
   //For dark tiles (infinity)
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /[$a-zA-Z0-9_]{0,6}\.context\.fillRect\([$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.x\+[$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\.y\+[$a-zA-Z0-9_]{0,6}\.y,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);/,
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /[$a-zA-Z0-9_]{1,6}\.context\.fillRect\([$a-zA-Z0-9_]{1,6}\*[$a-zA-Z0-9_.]{1,24}-[$a-zA-Z0-9_]{1,6}\.x\+[$a-zA-Z0-9_]{1,6}\.x,[$a-zA-Z0-9_]{1,6}\*[$a-zA-Z0-9_.]{1,24}-[$a-zA-Z0-9_]{1,6}\.y\+[$a-zA-Z0-9_]{1,6}\.y,[$a-zA-Z0-9_.]{1,24},[$a-zA-Z0-9_.]{1,24}\)/,
     'window.checkboxes.checkboxStatuses.darkTiles && $&');
 
-  //Also has a canvas that we can delete to hide all but shadow
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.canvas,\n?[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\);if/,
-    'window.checkboxes.checkboxStatuses.allButShadow && $&');
+  //Light mode: snake-head glow helper renamed between builds (TbF on v12, N5E-like on v13)
+  let lightSnakeCallRegex = /(?:TbF\(|[$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_]{1,6},[$a-zA-Z0-9_.]{1,24},[$a-zA-Z0-9_.]{1,24},Math\.max\(2,)/g;
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, lightSnakeCallRegex,
+    'window.checkboxes.checkboxStatuses.lightSnake&&$&');
 
-  //all but shadow, but only for infinity
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /this\.context\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.canvas,\n?[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6},\n?[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\)}else/,
-    'window.checkboxes.checkboxStatuses.allButShadow && $&');
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_]{1,6}\.wb\.wa\.ka\)\{)/,
+    'if(window.checkboxes.checkboxStatuses.lightFruit)$1');
+
+  //Inline active bridges/gates drawn in the compositor (not only via helper functions)
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,20\)/g,
+    '$&&&window.checkboxes.checkboxStatuses.bridges');
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,19\)/g,
+    '$&&&window.checkboxes.checkboxStatuses.gates');
+
+  //Snake, fruit, keys and boxes are drawn into the sprite layer, and the shadow is taken straight
+  //off that layer's silhouette. When Shadow Included is off and something is hidden, duplicating
+  //that stretch keeps a complete silhouette for the shadow while the visible pass honours the
+  //checkboxes. Everything in the stretch only paints the sprite layer, so running it twice has no
+  //other effect.
+  let shadowFnName = funcWithShadow_Origin.match(/^([$a-zA-Z0-9_]{1,6})=function/)[1];
+  let sceneRegionRegex = new RegExp(
+    '(this\\.[$a-zA-Z0-9_]{1,6}\\.render\\(a,b,[$a-zA-Z0-9_]{1,6}\\(this\\)\\);[\\s\\S]*?)' +
+    '([ef]7\\(this\\.settings,4\\)\\|\\|' + shadowFnName.replace(/\$/g, '\\$') + '\\(this\\);)');
+
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, sceneRegionRegex,
+    'window.visiBeginShadowPass(this,this.ka.canvas.width!==this.context.canvas.width||this.ka.canvas.height!==this.context.canvas.height);$1$2if(window.visiEndShadowPass(this)){$1}');
 
   //eval(funcWithMiscRendering);
 
-  let funcWithLockRendering_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}.save\(\),this\.[$a-zA-Z0-9_]{0,6}\.translate\([a-z],[a-z]\),this\.[$a-zA-Z0-9_]{0,6}\.rotate\([a-z]\),/,
+  let funcWithLockRendering_Origin = findFunctionInCode(code, /render\(\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.hb\.particles/,
     false);
 
-  let funcWithLockRendering = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}.save\(\),this\.[$a-zA-Z0-9_]{0,6}\.translate\([a-z],[a-z]\),this\.[$a-zA-Z0-9_]{0,6}\.rotate\([a-z]\),/,
+  let funcWithLockRendering = findFunctionInCode(code, /render\(\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.hb\.particles/,
     false);
 
   //background for falling lock piece
-  funcWithLockRendering = assertReplace(funcWithLockRendering, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\(-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\)\*[$a-zA-Z0-9_]{0,6},-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/\n?2\)\*[$a-zA-Z0-9_]{0,6},this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6},\n?this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*\n?[$a-zA-Z0-9_]{0,6}\)\)/,
-    'window.checkboxes.checkboxStatuses.walls && $&');
+  funcWithLockRendering = assertReplace(funcWithLockRendering, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\(-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\)\*[$a-zA-Z0-9_]{0,6},-\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/2\)\*[$a-zA-Z0-9_]{0,6},this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6},this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*[$a-zA-Z0-9_]{0,6}\)/,
+    'window.checkboxes.checkboxStatuses.locks && $&');
 
   //lock icon and sokoban icon falling
-
-  funcWithLockRendering = assertReplace(funcWithLockRendering, /(drawImage\(0===[a-z]\.type\?)([$a-zA-Z0-9_]{0,6}\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}):\n?([$a-zA-Z0-9_]{0,6}\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6})/,
-    '$1 (window.checkboxes.checkboxStatuses.walls ? $2 : new Image()) : (window.checkboxes.checkboxStatuses.sokobanBox ? $3 : new Image())');
+  funcWithLockRendering = assertReplace(funcWithLockRendering, /(drawImage\()([a-z]\.type===\n?0\?)([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas):([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas)/,
+    '$1$2(window.checkboxes.checkboxStatuses.locks ? $3 : new Image()) : (window.checkboxes.checkboxStatuses.sokobanBox ? $4 : new Image())');
 
   //eval(funcWithLockRendering);
 
-  let funcWithKeyRendering_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),\n?128\*[a-z]\.type,0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\);/,
+  let funcWithKeyRendering_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,/,
     deleteModDebug);
 
-  let funcWithKeyRendering = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),\n?128\*[a-z]\.type,0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\);/,
+  let funcWithKeyRendering = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,/,
     deleteModDebug);
 
   //keys
-  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),\n?128\*[a-z]\.type,0,128,128,[a-z]\.x-[a-z]\/2,[a-z]\.y-[a-z]\/2,[a-z],[a-z]\)/,
-    'window.checkboxes.checkboxStatuses.keys && $&');
+  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,[a-z]\.[a-z]-[a-z]\/2,[a-z]\.[a-z]-[a-z]\/2,[a-z],[a-z]\)/,
+    '(window.checkboxes.checkboxStatuses.keys || window.visiFullPass) && $&');
 
   //keys upside down
-  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,-\([a-z]\/2\),-\([a-z]\/2\),[a-z],[a-z]\),/,
-    'window.checkboxes.checkboxStatuses.keys && $&');
+  funcWithKeyRendering = assertReplace(funcWithKeyRendering, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),128\*[a-z]\.type,0,128,128,-\([a-z]\/2\),-\([a-z]\/2\),[a-z],[a-z]\)/,
+    '(window.checkboxes.checkboxStatuses.keys || window.visiFullPass) && $&');
 
 
   //eval(funcWithKeyRendering);
 
-  let funcWithBodyLines_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a,b,c\)$/,
+  let funcWithBodyLines_Origin = findFunctionInCode(code, /render\(a,b,c\)$/,
     /quadraticCurveTo/,
     deleteModDebug);
-  let funcWithBodyLines = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a,b,c\)$/,
+  let funcWithBodyLines = findFunctionInCode(code, /render\(a,b,c\)$/,
     /quadraticCurveTo/,
     deleteModDebug);
 
@@ -6451,14 +6704,22 @@ if(window.NepDebug){
   console.log(funcWithBodyLines)
 }
 
-  funcWithBodyLines = assertReplace(funcWithBodyLines, /this\.[$a-zA-Z0-9_]{0,6}\.fill\(\)\)/,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.lumps) && $&');
+  //Lumps get drawn two different ways depending on the mode: normally as a circle wider than
+  //the body stroke, and in modes that skip those circles as a bulge in the stroke width.
 
-  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.lineTo\([$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y\)/g,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body) && $&');
+  //Circle version, the only arc that gets its own fillStyle before being filled
+  funcWithBodyLines = assertReplace(funcWithBodyLines, /(this\.[$a-zA-Z0-9_]{0,6}\.beginPath\(\),this\.[$a-zA-Z0-9_]{0,6}\.arc\([$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\.y,[$a-zA-Z0-9_]{0,6},0,2\*Math\.PI\),)(this\.[$a-zA-Z0-9_]{0,6}\.fill\(\))/,
+    '$1(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.lumps || window.visiFullPass) && $2');
 
-  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.quadraticCurveTo\([$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\.y,[$a-zA-Z0-9_]{0,6}\.x,[$a-zA-Z0-9_]{0,6}\.y\)/g,
-    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body) && $&');
+  //Stroke width version, the only place the body line width is scaled after being set
+  funcWithBodyLines = assertReplace(funcWithBodyLines, /(this\.[$a-zA-Z0-9_]{0,6}\.lineWidth\*=[$a-zA-Z0-9_]{1,6};)/,
+    'if(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.lumps || window.visiFullPass){$1}');
+
+  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.lineTo\(\n?[$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y\)/g,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body || window.visiFullPass) && $&');
+
+  funcWithBodyLines = assertReplaceAll(funcWithBodyLines, /[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.quadraticCurveTo\(\n?[$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y,\n?[$a-zA-Z0-9_]{0,6}\.x,\n?[$a-zA-Z0-9_]{0,6}\.y\)/g,
+    '(window.flashSnakeStatus.currentlyFlashingSnake || window.checkboxes.checkboxStatuses.body || window.visiFullPass) && $&');
 
   //Body scale
   //funcWithBodyLines = assertReplace(funcWithBodyLines, /\.8/, '(window.snakeScale.tailStart * 0.8)');
@@ -6468,12 +6729,14 @@ if(window.NepDebug){
   //eval(funcWithBodyLines);
 
   //Portals
-  let funcWithPortals_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
-    /[$a-zA-Z0-9_]{0,6}=new [$a-zA-Z0-9_.]{0,6}\([$a-zA-Z0-9_]{0,6}\*Math\.cos\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\),[$a-zA-Z0-9_]{0,6}\*Math\.sin\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\)\);/,
+  let portalInsideRegex = /Math\.cos\([$a-zA-Z0-9_]{0,6}\*2\*Math\.PI\)/;
+
+  let funcWithPortals_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
+    portalInsideRegex,
     deleteModDebug);
 
-  let funcWithPortals = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.prototype\.render=function\(a\)$/,
-    /[$a-zA-Z0-9_]{0,6}=new [$a-zA-Z0-9_.]{0,6}\([$a-zA-Z0-9_]{0,6}\*Math\.cos\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\),[$a-zA-Z0-9_]{0,6}\*Math\.sin\(2\*[$a-zA-Z0-9_]{0,6}\*Math\.PI\)\);/,
+  let funcWithPortals = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
+    portalInsideRegex,
     deleteModDebug);
 
   funcWithPortals = assertReplaceAll(funcWithPortals, /[$a-zA-Z0-9_]{0,6}\.fill\(\)/g,
@@ -6481,22 +6744,68 @@ if(window.NepDebug){
 
   //eval(funcWithPortals);
 
-  //let mainClass = code.match(/([$a-zA-Z0-9_]{0,6})=function\(a,b,c\){this\.settings=[a-z];this\.menu=[a-z];this\.header=[a-z];/)[1];
-
   //For flashing snake body when we eat an apple
-  let funcWithEat_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.tick=function\(\)$/,
-    /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){var [$a-zA-Z0-9_]{0,6}=\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6};[$a-zA-Z0-9_]{0,6}\|\|\([$a-zA-Z0-9_]{0,6}=\n?!0,[$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.play\(\)/,
+  let eatInsideRegex = /[a-z]\&&\([a-z]\.[$a-zA-Z0-9_]{0,6}=!1,[a-z]\.[$a-zA-Z0-9_]{0,6}=!0,[a-z]\.[$a-zA-Z0-9_]{0,6}=10\)/;
+  code = assertReplace(code, eatInsideRegex,
+    '$&;window.checkboxes.checkboxStatuses.flashSnake&&window.brieflyShowSnake()');
+
+  //Mine radius: the dashed red circle plus its fading blast preview. Both are helper calls
+  //shaped `helper(renderer, centre, offsetX, offsetY, radius)`, once for the board and once per
+  //wrapped copy in infinity mode.
+  let mineRadiusInsideRegex = /strokeStyle="#f23606"/;
+
+  let funcWithMineRadius_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+    mineRadiusInsideRegex,
     deleteModDebug);
 
-  let funcWithEat = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}\.tick=function\(\)$/,
-    /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){var [$a-zA-Z0-9_]{0,6}=\n?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6};[$a-zA-Z0-9_]{0,6}\|\|\([$a-zA-Z0-9_]{0,6}=\n?!0,[$a-zA-Z0-9_]{0,6}\?[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.play\(\)/,
+  let funcWithMineRadius = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)$/,
+    mineRadiusInsideRegex,
     deleteModDebug);
 
-  funcWithEat = assertReplace(funcWithEat, /if\([$a-zA-Z0-9_]{0,6}\|\|[$a-zA-Z0-9_]{0,6}\){/,
-    '$& window.checkboxes.checkboxStatuses.flashSnake && window.brieflyShowSnake();');
+  funcWithMineRadius = assertReplaceAll(funcWithMineRadius, /[$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_]{1,6},[$a-zA-Z0-9_]{1,6},(?:0,0|[$a-zA-Z0-9_]{1,6}\.x,[$a-zA-Z0-9_]{1,6}\.y),[$a-zA-Z0-9_]{1,6}\)/g,
+    'window.checkboxes.checkboxStatuses.mineRadius && $&');
 
-  //funcWithEat = swapInMainClassPrototype(mainClass, funcWithEat);
-  //eval(funcWithEat);
+  //Arrows (mode 16): triangle/stroke tiles (zaF)
+  let arrowsFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{[$a-zA-Z0-9_.]{1,6}\.ka\.save\(\)/);
+  if (!arrowsFnMatch) {
+    throw new Error('Visibility mod: could not find arrow tile drawer (zaF)');
+  }
+  let arrowsFnName = arrowsFnMatch[1];
+  code = assertReplace(code, new RegExp(arrowsFnName + '=function\\(([$a-zA-Z0-9_,]+)\\)\\{'),
+    arrowsFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.arrows)return;');
+
+  //Shields (mode 15): directional bars on fruit via S$E
+  let shieldsFnMatch = code.match(/([$a-zA-Z0-9_$]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})=!1\)\{var [$a-zA-Z0-9_]{1,6}=Math\.round\([$a-zA-Z0-9_.]{1,20}\/5\)/);
+  if (!shieldsFnMatch) {
+    throw new Error('Visibility mod: could not find shield drawer (S$E)');
+  }
+  let shieldsFnName = shieldsFnMatch[1];
+  code = assertReplace(code, new RegExp(shieldsFnName.replace(/\$/g, '\\$') + '=function\\(([$a-zA-Z0-9_=!,]+)\\)\\{'),
+    shieldsFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.shields)return;');
+
+  //Gates (mode 19): BbF dashed rectangles
+  let gatesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_.]{1,20}\.(?:Yfa|pfa)\)/);
+  if (!gatesFnMatch) {
+    throw new Error('Visibility mod: could not find gate drawer (BbF)');
+  }
+  let gatesFnName = gatesFnMatch[1];
+  code = assertReplace(code, new RegExp(gatesFnName + '=function\\(([$a-zA-Z0-9_,]+)\\)\\{'),
+    gatesFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.gates)return;');
+
+  //Bridges (mode 20): obF static tiles
+  let bridgesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{[$a-zA-Z0-9_]{1,6}\.ka\.save\(\);[$a-zA-Z0-9_]{1,6}===0&&[$a-zA-Z0-9_]{1,6}===0\|\|/);
+  if (!bridgesFnMatch) {
+    throw new Error('Visibility mod: could not find bridge drawer (obF)');
+  }
+  let bridgesFnName = bridgesFnMatch[1];
+  code = assertReplace(code, new RegExp(bridgesFnName + '=function\\(([$a-zA-Z0-9_,]+)\\)\\{'),
+    bridgesFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.bridges)return;');
+
+  //Border chrome CSS background-color (same palette index as the canvas border fill)
+  code = assertReplaceAll(code,
+    /_\.(?:on|pn)\(([$a-zA-Z0-9_.()]{1,40}),"background-color",([$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,30},[$a-zA-Z0-9_.]{1,30},3\))\)/g,
+    '($1&&window.visiBorderEls.push($1),window.visiBorderColor=$2,_.pn($1,"background-color",window.checkboxes.checkboxStatuses.border?$2:"transparent"))'
+  );
 
     // Mines
     /*
@@ -6512,9 +6821,11 @@ if(window.NepDebug){
     'window.checkboxes.checkboxStatuses.mines && $&');
 */
 
-    // Statue Cracks
-  code = code.assertReplace(/[a-z].[$a-zA-Z0-9_]{0,6}.drawImage\([a-z]\.[$a-zA-Z0-9_]{0,6}.[$a-zA-Z0-9_]{0,6}\(\),[a-z]\.[$a-zA-Z0-9_]{0,6}\*[a-z],0,[a-z],[a-z],-[a-z]\/2,-[a-z]\/2,[a-z],[a-z]\),[a-z]\.[$a-zA-Z0-9_]{0,6}\.globalAlpha=[a-z]\)/g,
+    // Statue Cracks (best-effort — pattern may be absent on some builds)
+  if (!window.catchError(/[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),[a-z]\.[$a-zA-Z0-9_]{0,6}\*[a-z],0,[a-z],[a-z],-[a-z]\/2,-[a-z]\/2,[a-z],[a-z]\),[a-z]\.[$a-zA-Z0-9_]{0,6}\.globalAlpha=[a-z]\)/g, code)) {
+  code = code.assertReplace(/[a-z]\.[$a-zA-Z0-9_]{0,6}\.drawImage\([a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\(\),[a-z]\.[$a-zA-Z0-9_]{0,6}\*[a-z],0,[a-z],[a-z],-[a-z]\/2,-[a-z]\/2,[a-z],[a-z]\),[a-z]\.[$a-zA-Z0-9_]{0,6}\.globalAlpha=[a-z]\)/g,
      'window.checkboxes.checkboxStatuses.brokenStatue && $&')
+  }
 
      // Statue (including cracks)
   code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\(this,[a-z],[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.angle,[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g,
@@ -6545,18 +6856,12 @@ if(window.NepDebug){
   }
   `
   */
-// Mine Radius
-
-code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\([a-z],d,0,0,[a-z]\);if\([$a-zA-Z0-9_]{0,6}\([a-z].[$a-zA-Z0-9_]{0,8},4\)\)for\(var/g,
-`window.checkboxes.checkboxStatuses.mineRadius && $&`)
-  //code = code.assertReplace(/[a-z]\.[$a-zA-Z0-9_]{0,6}\.setLineDash\(\[[a-z].[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/4,[a-z]\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\/4\]\)/g,
-   // `window.checkboxes.checkboxStatuses.mineRadius && $&`)
-
   //code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\(this,[a-z],[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\.angle,[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g,
   //   `window.checkboxes.checkboxStatuses.mines && $&`)
 
   //code = code.assertReplace(mineRadiusWidth_Origin, mineRadiusWidth_Code)
   code = code.assertReplace(minesDefinition_Origin, minesDefinition_NewCode)
+  code = code.assertReplace(funcWithMineRadius_Origin, funcWithMineRadius)
   code = code.assertReplace(funcWithFruit_Origin, funcWithFruit)
   code = code.assertReplace(funcWithBodyParts_Origin, funcWithBodyParts)
   code = code.assertReplace(funcWithRenderWall_Origin, funcWithRenderWall)
@@ -6569,15 +6874,18 @@ code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\([a-z],d,0,0,[a-z]\);if\([$a-zA-Z0
   code = code.assertReplace(funcWithKeyRendering_Origin, funcWithKeyRendering)
   code = code.assertReplace(funcWithBodyLines_Origin, funcWithBodyLines)
   code = code.assertReplace(funcWithPortals_Origin, funcWithPortals)
-  code = code.assertReplace(funcWithEat_Origin, funcWithEat)
 
   // Disables statue break animation
+  if (!window.catchError(/[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6},[a-z],new _\.[$a-zA-Z0-9_]{0,6}\([a-z],[a-z]\),[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g, code)) {
   code = code.assertReplace(/[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6},[a-z],new _\.[$a-zA-Z0-9_]{0,6}\([a-z],[a-z]\),[a-z],[a-z]\.[$a-zA-Z0-9_]{0,6}\)/g,
      `window.checkboxes.checkboxStatuses.statue && $&`)
+  }
 
   // Disable minesweeper break animation
-  code = code.assertReplace(/[a-z]=_\.[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);for\([a-z]=a.next\(\);/,
+  if (!window.catchError(/[a-z]=_\.[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);for\([a-z]=a\.next\(\);/, code)) {
+  code = code.assertReplace(/[a-z]=_\.[$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\);for\([a-z]=a\.next\(\);/,
   `$& window.checkboxes.checkboxStatuses.mineRadius &&`)
+  }
 
   //console.log(code)
   window.isVisi = true;
@@ -6636,7 +6944,7 @@ window.MorePudding.runCodeAfter = function() {
   //window.moreMenu.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'More Pudding Mod';
+  modIndicator.textContent = 'More Pudding Mod v6';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
