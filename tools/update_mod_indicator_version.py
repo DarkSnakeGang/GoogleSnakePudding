@@ -7,7 +7,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path.cwd()
+if not (ROOT / ".git").exists():
+    # Fallback when invoked from tools/ inside the repo
+    candidate = Path(__file__).resolve().parents[1]
+    if (candidate / ".git").exists():
+        ROOT = candidate
+
 
 BRANCH_VERSION = {
     "dice_added_version": 1,
