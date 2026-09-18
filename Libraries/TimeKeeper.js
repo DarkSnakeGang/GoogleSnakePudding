@@ -583,6 +583,32 @@ window.TimeKeeper.make = function () {
         return out;
     };
 
+    // v10 Speed Info personal PB format: zero-padded 01m23s456ms (keeps ms when hours > 0)
+    window.timeKeeper.formatTimeV10Style = function (ms) {
+        ms = Math.floor(Number(ms) || 0);
+        const hours = Math.floor(ms / 3600000);
+        const minutes = String(Math.floor(ms / 60000 - hours * 60)).padStart(2, "0");
+        const seconds = String(
+            Math.floor((ms - minutes * 60000 - hours * 3600000) / 1000)
+        ).padStart(2, "0");
+        const mseconds = String(
+            ms - minutes * 60000 - seconds * 1000 - hours * 3600000
+        ).padStart(3, "0");
+        if (hours === 0) return minutes + "m" + seconds + "s" + mseconds + "ms";
+        return hours + "h" + minutes + "m" + seconds + "s" + mseconds + "ms";
+    };
+
+    // Speed Info PB times: current SRC style by default; v10 padded style when toggled
+    window.timeKeeper.formatDisplayTime = function (ms) {
+        if (
+            window.pudding_settings &&
+            window.pudding_settings.OldTimeKeeperFormat
+        ) {
+            return window.timeKeeper.formatTimeV10Style(ms);
+        }
+        return window.timeKeeper.formatTimeSrcStyle(ms);
+    };
+
     window.timeKeeper.makeStorage = function () {
         let storage = localStorage.getItem("snake_timeKeeper");
         if (storage == null) {

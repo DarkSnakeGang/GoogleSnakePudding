@@ -1863,6 +1863,32 @@ window.TimeKeeper.make = function () {
         return out;
     };
 
+    // v10 Speed Info personal PB format: zero-padded 01m23s456ms (keeps ms when hours > 0)
+    window.timeKeeper.formatTimeV10Style = function (ms) {
+        ms = Math.floor(Number(ms) || 0);
+        const hours = Math.floor(ms / 3600000);
+        const minutes = String(Math.floor(ms / 60000 - hours * 60)).padStart(2, "0");
+        const seconds = String(
+            Math.floor((ms - minutes * 60000 - hours * 3600000) / 1000)
+        ).padStart(2, "0");
+        const mseconds = String(
+            ms - minutes * 60000 - seconds * 1000 - hours * 3600000
+        ).padStart(3, "0");
+        if (hours === 0) return minutes + "m" + seconds + "s" + mseconds + "ms";
+        return hours + "h" + minutes + "m" + seconds + "s" + mseconds + "ms";
+    };
+
+    // Speed Info PB times: current SRC style by default; v10 padded style when toggled
+    window.timeKeeper.formatDisplayTime = function (ms) {
+        if (
+            window.pudding_settings &&
+            window.pudding_settings.OldTimeKeeperFormat
+        ) {
+            return window.timeKeeper.formatTimeV10Style(ms);
+        }
+        return window.timeKeeper.formatTimeSrcStyle(ms);
+    };
+
     window.timeKeeper.makeStorage = function () {
         let storage = localStorage.getItem("snake_timeKeeper");
         if (storage == null) {
@@ -3402,6 +3428,7 @@ window.SettingsSaver.make = function () {
                 SavedGameSettings: null,
                 SplitPanel: false,
                 BigPanelText: true,
+                OldTimeKeeperFormat: false,
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
@@ -3433,6 +3460,9 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.BigPanelText !== 'boolean') {
                 pudding_settings.BigPanelText = true;
+            }
+            if (typeof pudding_settings.OldTimeKeeperFormat !== 'boolean') {
+                pudding_settings.OldTimeKeeperFormat = false;
             }
             if (
                 pudding_settings.SavedGameSettings !== null &&
@@ -5372,11 +5402,13 @@ window.SpeedInfo.make = function () {
         if (!bold) return;
 
         const name = scoreKey + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
-        const fmt = window.timeKeeper.formatTimeSrcStyle
-            ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
-            : function (ms) {
-                  return String(ms);
-              };
+        const fmt = window.timeKeeper.formatDisplayTime
+            ? window.timeKeeper.formatDisplayTime.bind(window.timeKeeper)
+            : window.timeKeeper.formatTimeSrcStyle
+              ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
+              : function (ms) {
+                    return String(ms);
+                };
 
         if (scoreKey === "att") {
             const totalAttempts =
@@ -5525,11 +5557,13 @@ window.SpeedInfo.make = function () {
             mode_label2.textContent = window.HandleSpeed(speed) + window.HandleSize(size);
         }
 
-        const fmt = window.timeKeeper.formatTimeSrcStyle
-            ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
-            : function (ms) {
-                  return String(ms);
-              };
+        const fmt = window.timeKeeper.formatDisplayTime
+            ? window.timeKeeper.formatDisplayTime.bind(window.timeKeeper)
+            : window.timeKeeper.formatTimeSrcStyle
+              ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
+              : function (ms) {
+                    return String(ms);
+                };
 
         const goldJobs = [];
 
@@ -7806,7 +7840,8 @@ window.BootstrapMenu.make = function () {
         a.style = 'position:relative;left:200px;top:70px;';
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
-        divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
+        // Nudge below Google's built-in in-game timer (was 45px)
+        divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:52px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
         divList.id = 'counter-num'
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
@@ -7997,6 +8032,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="AlwaysOnTimeKeeper">Show Speed Info</label>
   </div>
   <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="OldTimeKeeperFormat">
+    <label class="form-check-label" for="OldTimeKeeperFormat">Old TimeKeeper format</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
     <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
   </div>
@@ -8082,6 +8121,21 @@ window.BootstrapMenu.make = function () {
                     window.applyPuddingPanelTextSize();
                 }
                 if (typeof window.saveSettings === "function") window.saveSettings();
+            });
+        }
+
+        const oldTimeKeeperFormatCheckbox = document.getElementById("OldTimeKeeperFormat");
+        if (oldTimeKeeperFormatCheckbox) {
+            if (typeof window.pudding_settings.OldTimeKeeperFormat !== "boolean") {
+                window.pudding_settings.OldTimeKeeperFormat = false;
+            }
+            oldTimeKeeperFormatCheckbox.checked = !!window.pudding_settings.OldTimeKeeperFormat;
+            oldTimeKeeperFormatCheckbox.addEventListener("change", function () {
+                window.pudding_settings.OldTimeKeeperFormat = !!oldTimeKeeperFormatCheckbox.checked;
+                if (typeof window.saveSettings === "function") window.saveSettings();
+                if (window.timeKeeper && typeof window.timeKeeper.refreshSpeedInfo === "function") {
+                    window.timeKeeper.refreshSpeedInfo();
+                }
             });
         }
 
@@ -11235,7 +11289,7 @@ if(window.NepDebug){
   minesDefinition_Origin = code.match(/this\.[a-zA-Z0-9_$]{1,8}=new [a-zA-Z0-9_$]{1,8}\(this.[a-zA-Z0-9_$]{1,8},"snake_arcade\/mine\.png\",10,this\.[a-zA-Z0-9_$]{1,8},"snake_arcade\/pixel\/px_mine\.png\"\)/g)[0]
 
   window.minesDefined = minesDefinition_Origin.split('=')[0].split('.')[1]
-  window.minesEmptySrc = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAABhmlDQ1BJQ0MgcHJvZmlsZQAAKJF9kT1Iw0AcxV9TpaIVQQuKOGSoThZEpQguUsUiWChthVYdTC79giYNSYqLo+BacPBjserg4qyrg6sgCH6AuLo4KbpIif9LCi1iPTjux7t7j7t3gFArMdXsmABUzTIS0YiYzqyKvlf0YBD9CGNWYqYeSy6m0HZ83cPD17sQz2p/7s/Rq2RNBnhE4jmmGxbxBnF409I57xMHWEFSiM+Jxw26IPEj12WX3zjnHRZ4ZsBIJeaJA8RivoXlFmYFQyWeJg4qqkb5QtplhfMWZ7VUYY178hf6s9pKkus0RxDFEmKIQ4SMCooowUKIVo0UEwnaj7TxDzv+OLlkchXByLGAMlRIjh/8D353a+amJt0kfwTofLHtj1HAtwvUq7b9fWzb9RPA+wxcaU1/uQbMfJJebWrBI6BvG7i4bmryHnC5Aww96ZIhOZKXppDLAe9n9E0ZYOAW6F5ze2vs4/QBSFFXyzfAwSEwlqfs9Tbv7mrt7d8zjf5+AC37cvLA+Sj8AAAABmJLR0QA5AADAAO/WDWDAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH5wsXEjcmICONegAAABl0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUFeBDhcAAAAMSURBVAjXY2CgEwAAAGkAAcAd8vgAAAAASUVORK5CYII='
+  window.minesEmptySrc = 'https://i.postimg.cc/LhKWc2Wb/Empty.png'
   minesDefinition_NewCode = `${minesDefinition_Origin};
     window.MinesRef=this;
     window.DefaultMines=${minesDefinition_Origin}

@@ -67,7 +67,8 @@ window.BootstrapMenu.make = function () {
         a.style = 'position:relative;left:200px;top:70px;';
         window.divList = document.createElement('div');
         divList.class = 'counter-num'
-        divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:45px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
+        // Nudge below Google's built-in in-game timer (was 45px)
+        divList.style = 'width:25px;z-index:5;position:relative;left:230px;top:52px;font-size:14px;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;line-height: normal;'
         divList.id = 'counter-num'
 
         document.getElementsByClassName('sEOCsb')[0].appendChild(a);
@@ -258,6 +259,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="AlwaysOnTimeKeeper">Show Speed Info</label>
   </div>
   <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="OldTimeKeeperFormat">
+    <label class="form-check-label" for="OldTimeKeeperFormat">Old TimeKeeper format</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
     <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
   </div>
@@ -343,6 +348,21 @@ window.BootstrapMenu.make = function () {
                     window.applyPuddingPanelTextSize();
                 }
                 if (typeof window.saveSettings === "function") window.saveSettings();
+            });
+        }
+
+        const oldTimeKeeperFormatCheckbox = document.getElementById("OldTimeKeeperFormat");
+        if (oldTimeKeeperFormatCheckbox) {
+            if (typeof window.pudding_settings.OldTimeKeeperFormat !== "boolean") {
+                window.pudding_settings.OldTimeKeeperFormat = false;
+            }
+            oldTimeKeeperFormatCheckbox.checked = !!window.pudding_settings.OldTimeKeeperFormat;
+            oldTimeKeeperFormatCheckbox.addEventListener("change", function () {
+                window.pudding_settings.OldTimeKeeperFormat = !!oldTimeKeeperFormatCheckbox.checked;
+                if (typeof window.saveSettings === "function") window.saveSettings();
+                if (window.timeKeeper && typeof window.timeKeeper.refreshSpeedInfo === "function") {
+                    window.timeKeeper.refreshSpeedInfo();
+                }
             });
         }
 

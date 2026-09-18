@@ -1657,11 +1657,13 @@ window.SpeedInfo.make = function () {
         if (!bold) return;
 
         const name = scoreKey + "-" + modeKey + "-" + count + "-" + speed + "-" + size;
-        const fmt = window.timeKeeper.formatTimeSrcStyle
-            ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
-            : function (ms) {
-                  return String(ms);
-              };
+        const fmt = window.timeKeeper.formatDisplayTime
+            ? window.timeKeeper.formatDisplayTime.bind(window.timeKeeper)
+            : window.timeKeeper.formatTimeSrcStyle
+              ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
+              : function (ms) {
+                    return String(ms);
+                };
 
         if (scoreKey === "att") {
             const totalAttempts =
@@ -1810,11 +1812,13 @@ window.SpeedInfo.make = function () {
             mode_label2.textContent = window.HandleSpeed(speed) + window.HandleSize(size);
         }
 
-        const fmt = window.timeKeeper.formatTimeSrcStyle
-            ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
-            : function (ms) {
-                  return String(ms);
-              };
+        const fmt = window.timeKeeper.formatDisplayTime
+            ? window.timeKeeper.formatDisplayTime.bind(window.timeKeeper)
+            : window.timeKeeper.formatTimeSrcStyle
+              ? window.timeKeeper.formatTimeSrcStyle.bind(window.timeKeeper)
+              : function (ms) {
+                    return String(ms);
+                };
 
         const goldJobs = [];
 
