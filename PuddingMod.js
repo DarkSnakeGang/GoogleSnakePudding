@@ -9437,7 +9437,7 @@ window.PuddingMod.alterSnakeCode = function (code) {
 window.PuddingMod.runCodeAfter = function () {
   let modIndicator = document.createElement('div');
   modIndicator.style = 'position:absolute;font-family:Roboto,Arial,sans-serif;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'Pudding Mod';
+  modIndicator.textContent = 'Pudding Mod v13';
   if (window.loaded_code) {
     // commented out cuz i dont want it to annoy people since its now the official version
     //modIndicator.textContent = 'Pudding Mod - Google Test Version';
