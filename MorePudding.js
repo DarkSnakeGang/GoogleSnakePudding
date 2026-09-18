@@ -44,7 +44,7 @@ window.MorePudding.runCodeAfter = function() {
   //window.moreMenu.runCodeAfter();
   let modIndicator = document.createElement('div');
   modIndicator.style='position:absolute;font-family:roboto;color:white;font-size:14px;padding-top:4px;padding-left:30px;user-select: none;';
-  modIndicator.textContent = 'More Pudding Mod';
+  modIndicator.textContent = 'More Pudding Mod v1';
   let canvasNode = document.getElementsByClassName('jNB0Ic')[0];
   document.getElementsByClassName('EjCLSb')[0].insertBefore(modIndicator, canvasNode);
 };
