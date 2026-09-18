@@ -2489,6 +2489,133 @@ window.SpeedInfo.make = function () {
         "H": "High_Score.json",
     };
 
+    // --- Tab visibility / dirty flush (seamless tab-back) ---
+    function isTabHidden() {
+        return typeof document !== "undefined" && document.hidden;
+    }
+
+    window.markSpeedInfoDirty = function (opts) {
+        window._speedInfoNeedsRefresh = true;
+        if (opts && opts.src) window._speedInfoSrcNeedsRefresh = true;
+    };
+
+    function clearRunsBoardCache() {
+        for (const k of Object.keys(runsBoardCache)) delete runsBoardCache[k];
+        for (const k of Object.keys(runsBoardPromises)) delete runsBoardPromises[k];
+    }
+
+    function goldCacheSettingPrefix(modeKey, count, speed, size) {
+        return modeKey + "|" + count + "|" + speed + "|" + size + "|";
+    }
+
+    function goldCacheScorePrefix(modeKey, count, speed, size, score) {
+        return goldCacheSettingPrefix(modeKey, count, speed, size) + score + "|";
+    }
+
+    function pruneSpeedInfoGoldCache(modeKey, count, speed, size) {
+        if (!window._speedInfoGoldCache) return;
+        if (
+            typeof modeKey !== "string" ||
+            typeof count !== "number" ||
+            typeof speed !== "number" ||
+            typeof size !== "number"
+        ) {
+            return;
+        }
+        const keep = goldCacheSettingPrefix(modeKey, count, speed, size);
+        for (const key of Object.keys(window._speedInfoGoldCache)) {
+            if (key.indexOf(keep) !== 0) delete window._speedInfoGoldCache[key];
+        }
+    }
+
+    function rememberGoldCache(gKey, gold, modeKey, count, speed, size, score) {
+        if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
+        if (
+            typeof modeKey === "string" &&
+            typeof count === "number" &&
+            typeof speed === "number" &&
+            typeof size === "number" &&
+            score != null
+        ) {
+            const scorePrefix = goldCacheScorePrefix(modeKey, count, speed, size, score);
+            for (const key of Object.keys(window._speedInfoGoldCache)) {
+                if (key.indexOf(scorePrefix) === 0 && key !== gKey) {
+                    delete window._speedInfoGoldCache[key];
+                }
+            }
+        }
+        window._speedInfoGoldCache[gKey] = !!gold;
+    }
+
+    function resolveSpeedInfoSettingContext() {
+        if (
+            window.timeKeeper &&
+            (window.timeKeeper.runStarted || window.timeKeeper.playing) &&
+            typeof window.timeKeeper.mode === "string" &&
+            typeof window.timeKeeper.count === "number"
+        ) {
+            return {
+                modeKey: window.timeKeeper.mode,
+                count: window.timeKeeper.count,
+                speed: window.timeKeeper.speed,
+                size: window.timeKeeper.size,
+            };
+        }
+        if (!window.timeKeeper || typeof window.timeKeeper.getCurrentSetting !== "function") {
+            return null;
+        }
+        try {
+            return {
+                modeKey:
+                    typeof window.timeKeeper.getCurrentMode === "function"
+                        ? window.timeKeeper.getCurrentMode()
+                        : null,
+                count: window.timeKeeper.getCurrentSetting("count"),
+                speed: window.timeKeeper.getCurrentSetting("speed"),
+                size: window.timeKeeper.getCurrentSetting("size"),
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    window.flushSpeedInfoIfNeeded = function () {
+        if (isTabHidden()) return;
+        const needSrc = !!window._speedInfoSrcNeedsRefresh;
+        const needPaint = !!window._speedInfoNeedsRefresh;
+        if (!needSrc && !needPaint) return;
+        window._speedInfoSrcNeedsRefresh = false;
+        window._speedInfoNeedsRefresh = false;
+        if (needSrc && typeof window.getAllSrc === "function") {
+            window.getAllSrc().catch(function (e) {
+                console.error("getAllSrc error:", e);
+            });
+            return;
+        }
+        if (needPaint && typeof window.SpeedInfoUpdate === "function") {
+            window.SpeedInfoUpdate().catch(function (e) {
+                console.error("SpeedInfoUpdate error:", e);
+            });
+        }
+    };
+
+    function onTabVisibilityChange() {
+        if (isTabHidden()) {
+            clearRunsBoardCache();
+            const ctx = resolveSpeedInfoSettingContext();
+            if (ctx && ctx.modeKey != null) {
+                pruneSpeedInfoGoldCache(ctx.modeKey, ctx.count, ctx.speed, ctx.size);
+            }
+            return;
+        }
+        window.flushSpeedInfoIfNeeded();
+    }
+
+    if (typeof document !== "undefined" && !window._speedInfoVisibilityHooked) {
+        window._speedInfoVisibilityHooked = true;
+        document.addEventListener("visibilitychange", onTabVisibilityChange);
+    }
+
     // Match FastSnakeStats tally-boards.js (typical dedicated HS modes)
     const TYPICAL_HIGHSCORE_MODES = {
         1: "Wall",
@@ -3095,6 +3222,11 @@ window.SpeedInfo.make = function () {
     window.getRecordSRC = async function (level) {
         const queryId = srcQueryId;
 
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty({ src: true });
+            return;
+        }
+
         if(window.daily_challenge){
             EmptyAll();
             return;
@@ -3451,6 +3583,10 @@ window.SpeedInfo.make = function () {
     };
 
     window.fillTrackedPlayerSuggestions = function () {
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty({ src: true });
+            return;
+        }
         const list = document.getElementById("tracked-player-suggestions");
         if (!list) return;
         list.innerHTML = "";
@@ -3472,6 +3608,10 @@ window.SpeedInfo.make = function () {
 
     window.getTrackedRecord = async function (level) {
         const queryId = srcQueryId;
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty({ src: true });
+            return;
+        }
         const trackIds = {
             "25": "25track",
             "50": "50track",
@@ -3551,6 +3691,10 @@ window.SpeedInfo.make = function () {
     };
 
     window.getAllSrc = async function () {
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty({ src: true });
+            return;
+        }
         const queryId = ++srcQueryId;
         if (isBlenderMode() || window.daily_challenge) {
             EmptyAll();
@@ -3771,8 +3915,14 @@ window.SpeedInfo.make = function () {
         if (speedInfoToggle) speedInfoToggle.checked = true;
         if (typeof window.saveSettings === "function") window.saveSettings();
 
-        window._speedInfoNeedsRefresh = false;
-        window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
+        // Panel was hidden: flush any deferred personal/SRC refresh
+        window._speedInfoNeedsRefresh = true;
+        if (typeof window.flushSpeedInfoIfNeeded === "function") {
+            window.flushSpeedInfoIfNeeded();
+        } else {
+            window._speedInfoNeedsRefresh = false;
+            window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
+        }
     }
 
     window.SpeedInfoHide = function () {
@@ -4045,6 +4195,10 @@ window.SpeedInfo.make = function () {
     });
 
     window.SpeedInfoUpdate = function () {
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty();
+            return Promise.resolve();
+        }
         if (typeof window.SpeedInfoIsVisible === "function" && !window.SpeedInfoIsVisible()) {
             window._speedInfoNeedsRefresh = true;
             return Promise.resolve();
@@ -4068,6 +4222,10 @@ window.SpeedInfo.make = function () {
 
     // Mid-run: update one personal PB/HS row without rebuilding SRC / mode labels
     window.SpeedInfoPaintPersonalRow = function (score) {
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty();
+            return;
+        }
         if (typeof window.SpeedInfoIsVisible === "function" && !window.SpeedInfoIsVisible()) {
             window._speedInfoNeedsRefresh = true;
             return;
@@ -4145,9 +4303,13 @@ window.SpeedInfo.make = function () {
             if (typeof window._speedInfoGoldCache[gKey] === "boolean") return;
             setTimeout(function () {
                 if (gen !== window._speedInfoUpdateGen) return;
+                if (isTabHidden()) {
+                    window.markSpeedInfoDirty();
+                    return;
+                }
                 shouldGoldPb(scoreId, mode, count, speed, size, pb, modeKey).then(function (gold) {
                     if (gen !== window._speedInfoUpdateGen) return;
-                    window._speedInfoGoldCache[gKey] = !!gold;
+                    rememberGoldCache(gKey, gold, modeKey, count, speed, size, scoreId);
                     const el = siEl(scoreId);
                     if (!el) return;
                     el.innerHTML =
@@ -4192,6 +4354,10 @@ window.SpeedInfo.make = function () {
     };
 
     async function runSpeedInfoUpdate() {
+        if (isTabHidden()) {
+            window.markSpeedInfoDirty();
+            return;
+        }
         const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
         if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
 
@@ -4222,6 +4388,8 @@ window.SpeedInfo.make = function () {
             size = window.timeKeeper.getCurrentSetting("size");
             modeKey = window.timeKeeper.getCurrentMode();
         }
+
+        pruneSpeedInfoGoldCache(modeKey, count, speed, size);
 
         let storage = {};
         try {
@@ -4363,6 +4531,10 @@ window.SpeedInfo.make = function () {
         const goldModeKey = modeKey;
         setTimeout(function () {
             if (gen !== window._speedInfoUpdateGen) return;
+            if (isTabHidden()) {
+                window.markSpeedInfoDirty();
+                return;
+            }
             Promise.all(
                 goldJobs.map(function (job) {
                     return shouldGoldPb(
@@ -4380,9 +4552,21 @@ window.SpeedInfo.make = function () {
             )
                 .then(function (results) {
                     if (gen !== window._speedInfoUpdateGen) return;
+                    if (isTabHidden()) {
+                        window.markSpeedInfoDirty();
+                        return;
+                    }
                     for (let i = 0; i < results.length; i++) {
                         const r = results[i];
-                        window._speedInfoGoldCache[r.job.gKey] = !!r.gold;
+                        rememberGoldCache(
+                            r.job.gKey,
+                            r.gold,
+                            goldModeKey,
+                            goldCount,
+                            goldSpeed,
+                            goldSize,
+                            r.job.score
+                        );
                         const el = typeof window.siEl === "function"
                             ? window.siEl(r.job.elId)
                             : document.getElementById(r.job.elId);
@@ -4399,6 +4583,7 @@ window.SpeedInfo.make = function () {
                                 !!r.gold
                             );
                     }
+                    pruneSpeedInfoGoldCache(goldModeKey, goldCount, goldSpeed, goldSize);
                 })
                 .catch(function (e) {
                     if (window.NepDebug) console.error("SpeedInfo gold update failed:", e);
