@@ -9,4 +9,5 @@ ChimeraMod.js
 Libraries/fruit-icons/
 tools/postimg-cache/
 tools/.broken-*.js
+tools/.postwin-results/
 node_modules/

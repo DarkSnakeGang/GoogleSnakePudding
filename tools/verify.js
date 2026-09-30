@@ -359,24 +359,15 @@ function installBrowserStubs() {
   };
 }
 
-async function main() {
-  installBrowserStubs();
-
-  let snakeCode;
-  if (localPath) {
-    snakeCode = fs.readFileSync(path.resolve(localPath), "utf8");
-    console.log(`Loaded local snake.js (${snakeCode.length} chars) as v/${version}`);
-  } else {
-    console.log(`Fetching ${snakeUrl} ...`);
-    snakeCode = await fetchText(snakeUrl);
-    console.log(`Fetched (${snakeCode.length} chars)`);
-  }
-
+function preprocess(snakeCode) {
   // Mirror PuddingInit preprocessing
   snakeCode = snakeCode.replaceAll(/\$\$/gm, "doubleD");
-  snakeCode = snakeCode.replaceAll(/\$\&/gm, "$ &");
+  return snakeCode.replaceAll(/\$\&/gm, "$ &");
+}
 
-  for (const name of LIBS) {
+// Runs make() + alterCode() for each library in order. Stubs must be installed.
+function applyChain(snakeCode, libs = LIBS) {
+  for (const name of libs) {
     const file = path.join(ROOT, "Libraries", `${name}.js`);
     currentLib = name;
     try {
@@ -454,6 +445,23 @@ async function main() {
       console.error(`ERROR ${name}: ${e.message}`);
     }
   }
+  return snakeCode;
+}
+
+async function main() {
+  installBrowserStubs();
+
+  let snakeCode;
+  if (localPath) {
+    snakeCode = fs.readFileSync(path.resolve(localPath), "utf8");
+    console.log(`Loaded local snake.js (${snakeCode.length} chars) as v/${version}`);
+  } else {
+    console.log(`Fetching ${snakeUrl} ...`);
+    snakeCode = await fetchText(snakeUrl);
+    console.log(`Fetched (${snakeCode.length} chars)`);
+  }
+
+  snakeCode = applyChain(preprocess(snakeCode));
 
   console.log("\n=== Summary ===");
   console.log(`version: v/${version}`);
@@ -485,7 +493,11 @@ async function main() {
   process.exit(misses.length || errors.length || syntaxBreaks.length ? 1 : 0);
 }
 
-main().catch((e) => {
-  console.error(e);
-  process.exit(2);
-});
+module.exports = { LIBS, misses, errors, syntaxBreaks, fetchText, installBrowserStubs, preprocess, applyChain };
+
+if (require.main === module) {
+  main().catch((e) => {
+    console.error(e);
+    process.exit(2);
+  });
+}
