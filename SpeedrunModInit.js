@@ -75,6 +75,7 @@ window.SpeedrunMod.runCodeBefore = function () {
     if (typeof settings.SpeedInfo !== "boolean") settings.SpeedInfo = true;
     if (typeof settings.ShowWrHolders !== "boolean") settings.ShowWrHolders = true;
     if (typeof settings.TrackedPlayerName !== "string") settings.TrackedPlayerName = "";
+    if (typeof settings.FpsCounter !== "boolean") settings.FpsCounter = false;
     return settings;
   };
 
@@ -95,6 +96,7 @@ window.SpeedrunMod.runCodeBefore = function () {
     "TimeKeeper",
     "TopBar",
     "Backup",
+    "FpsCounter",
     "SpeedInfo",
     "ResetKey",
   ];

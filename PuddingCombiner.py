@@ -22,6 +22,7 @@ lib_list = [
     "TopBar",
     "SnakeColor",
     "SettingsSaver",
+    "FpsCounter",
     "SpeedInfo",
     "InputDisplay",
     "Timer",

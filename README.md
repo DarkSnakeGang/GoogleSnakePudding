@@ -58,7 +58,7 @@ Adds a **Pudding Mod Settings** panel on the side of the game, not inside Google
 From this panel you can:
 
 - Choose what the counter overlay shows, then **Edit stat** / **Reset stats**
-- Toggle Skull Poison Fruit, Distinct Soko Goals, Input Display, Top Bar Icons, Show Speed Info, Show Split Panel, Disable Randomizer, Save Game Settings
+- Toggle Skull Poison Fruit, Distinct Soko Goals, Input Display, Top Bar Icons, Show Speed Info, Show Split Panel, FPS Counter, Disable Randomizer, Save Game Settings
 - Open **Timer settings**
 - Rebind the reset key
 - Open **Custom Bowl Fruits**
@@ -163,7 +163,7 @@ Shared helpers used while patching `snake.js` (`assertReplace`, image UI helpers
 
 ## Speedrun Mod
 
-`SpeedrunMod.js` on `main` is a minimal bundle for runners who want timing and stats without the full Pudding surface. It targets the same **v13** game as Pudding Mod (`googlesnakemods.com/v/current/`). Libraries: Core, Theme, SpeedrunCss, ModeRegistry, TimeKeeper, SpeedInfo, TopBar, ResetKey.
+`SpeedrunMod.js` on `main` is a minimal bundle for runners who want timing and stats without the full Pudding surface. It targets the same **v13** game as Pudding Mod (`googlesnakemods.com/v/current/`). Libraries: Core, Theme, SpeedrunCss, ModeRegistry, TimeKeeper, SpeedInfo, TopBar, FpsCounter, ResetKey.
 
 Speed Info (with TimeKeeper PB/attempt tracking and FastSnakeStats WR fetching), Top Bar icons, and the reset keybind are always available. The Speed Info panel uses the stripped Bootstrap stylesheet (`bootstrap-stripped.css` via `SpeedrunCss`) and includes **Top Bar Icons** and **Reset Key** controls at the bottom. Open **Details** in Speed Info for per-category stats plus **Track player** and **Show WR holders** (same options as Timer settings in Pudding Mod). Extra board themes from `Theme.js` appear in the native theme picker. Toggle Speed Info visibility via `PuddingSettings.SpeedInfo` in `localStorage`. Reset defaults to Shift and is stored in `localStorage.keybinds`.
 

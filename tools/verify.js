@@ -27,6 +27,7 @@ const LIBS = [
   "TopBar",
   "SnakeColor",
   "SettingsSaver",
+  "FpsCounter",
   "SpeedInfo",
   "InputDisplay",
   "Timer",

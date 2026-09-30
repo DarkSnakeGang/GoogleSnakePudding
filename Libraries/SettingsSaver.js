@@ -206,6 +206,7 @@ window.SettingsSaver.make = function () {
                 SplitPanel: false,
                 BigPanelText: true,
                 OldTimeKeeperFormat: false,
+                FpsCounter: false,
             };
             for (const key of COUNT_KEYS) {
                 pudding_settings.SelectedPairsByCount[key] = defaultPoolForCount(Number(key));
@@ -240,6 +241,9 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.OldTimeKeeperFormat !== 'boolean') {
                 pudding_settings.OldTimeKeeperFormat = false;
+            }
+            if (typeof pudding_settings.FpsCounter !== 'boolean') {
+                pudding_settings.FpsCounter = false;
             }
             if (
                 pudding_settings.SavedGameSettings !== null &&

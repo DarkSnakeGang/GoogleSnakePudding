@@ -84,6 +84,7 @@ window.PuddingMod.runCodeBefore = function () {
     "TopBar",
     "SnakeColor",
     "SettingsSaver",
+    "FpsCounter",
     "SpeedInfo",
     "InputDisplay",
     "Timer",

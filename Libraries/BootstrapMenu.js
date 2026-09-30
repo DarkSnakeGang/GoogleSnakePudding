@@ -271,6 +271,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="BigPanelText">Large panel text</label>
   </div>
   <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="FpsCounter">
+    <label class="form-check-label" for="FpsCounter">FPS Counter</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="EatThemeRandomizer">
     <label class="form-check-label" for="EatThemeRandomizer" id="EatThemeRandomizer2">"Dragon Fruit"</label>
   </div>
@@ -349,6 +353,10 @@ window.BootstrapMenu.make = function () {
                 }
                 if (typeof window.saveSettings === "function") window.saveSettings();
             });
+        }
+
+        if (typeof window.FpsCounterBindCheckbox === "function") {
+            window.FpsCounterBindCheckbox(document.getElementById("FpsCounter"));
         }
 
         const oldTimeKeeperFormatCheckbox = document.getElementById("OldTimeKeeperFormat");

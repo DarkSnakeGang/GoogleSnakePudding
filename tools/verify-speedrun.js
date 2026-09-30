@@ -22,6 +22,7 @@ const LIBS = [
   "TimeKeeper",
   "TopBar",
   "Backup",
+  "FpsCounter",
   "SpeedInfo",
   "ResetKey",
 ];

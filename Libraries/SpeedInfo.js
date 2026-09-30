@@ -1660,6 +1660,10 @@ window.SpeedInfo.make = function () {
         <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
         <label class="form-check-label" data-speedrun-topbar-label>Top Bar Icons</label>
         </div>
+        <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunFpsCounter">
+        <label class="form-check-label" for="SpeedrunFpsCounter">FPS Counter</label>
+        </div>
         <button type="button" class="btn si-btn si-btn-block" id="ResetKeybind">Reset Key: Shift</button>
         <button type="button" class="btn si-btn si-btn-block" id="ExportBackup">Export backup</button>
         <div class="si-btn-row">
@@ -1681,6 +1685,9 @@ window.SpeedInfo.make = function () {
             if (speedInfoCb) {
                 speedInfoCb.checked = !!window.pudding_settings.SpeedInfo;
                 speedInfoCb.addEventListener("change", window.ToggleSpeedInfo);
+            }
+            if (typeof window.FpsCounterBindCheckbox === "function") {
+                window.FpsCounterBindCheckbox(document.getElementById("SpeedrunFpsCounter"));
             }
             if (typeof window.wirePuddingBackupButtons === "function") {
                 window.wirePuddingBackupButtons({

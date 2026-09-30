@@ -8,6 +8,7 @@ LIB_ORDER = [
     "TimeKeeper",
     "TopBar",
     "Backup",
+    "FpsCounter",
     "SpeedInfo",
     "ResetKey",
 ]
