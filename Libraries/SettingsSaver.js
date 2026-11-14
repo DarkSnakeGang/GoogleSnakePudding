@@ -431,7 +431,7 @@ window.SettingsSaver.make = function () {
             const menu = window._puddingSnakeMenu;
             const ready =
                 menu &&
-                menu.oa === "settings" &&
+                menu.wa === "settings" &&
                 typeof window._puddingSnakeP7 === "function";
 
             if (!ready) {
@@ -519,7 +519,7 @@ window.SettingsSaver.alterCode = function (code) {
     catchError(openSettingsRegex, code);
     code = code.assertReplace(
         openSettingsRegex,
-        `$1(){var a=this.menu;window._puddingSnakeMenu=a;a.oa="settings";`
+        `$1(){var a=this.menu;window._puddingSnakeMenu=a;a.wa="settings";`
     );
 
     return code;
