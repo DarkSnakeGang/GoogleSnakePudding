@@ -519,7 +519,7 @@ window.Theme.alterCode = function (code) {
   else{window.randomTheme = true;window.setTheme(window.getRandomThemeName());};
   `)
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if(window.randomTheme){window.setTheme(window.getRandomThemeName());}
@@ -570,11 +570,11 @@ window.DistinctVisual.make = function () {
 
 window.DistinctVisual.alterCode = function (code) {
 
-    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch\(b!==void 0\?b:a\.settings\.[a-zA-Z0-9_$]{1,8}\){d/);
     catchError(realism_draw, code);
     realism_switch = code.match(realism_draw)[0];
 
-    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch\(b!==void 0\?b:a\.settings\.[a-zA-Z0-9_$]{1,8}\){default:[^}]*}}/);
     catchError(realism_path, code);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
@@ -582,7 +582,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     window.drawing_apple = true;
 
-    get_apple_stuff = new RegExp(/(?:let|const|var).*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    get_apple_stuff = new RegExp(/(?:let|const|var) [^;]*?[a-zA-Z0-9_$]{1,8}\.canvas\:[^;]*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     catchError(get_apple_stuff, code);
     poison_default = code.match(get_apple_stuff)[0]
     b_graphics = poison_default.split('(')[2].split(')')[0]
@@ -596,19 +596,12 @@ window.DistinctVisual.alterCode = function (code) {
 
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\?\.[a-zA-Z0-9_$]{1,8}\(b,c,-1\)/)
     catchError(disable_real_grey, code);
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[1]
+    real_grey_path = real_grey.split('?.')[0]
 
-    new_grey_code = `
-    if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
-        ${real_grey.slice(0, -1).slice(0, -1).slice(0, -1)}0)
-    }
-    else {
-        ${real_grey}
-    }
-    `
+    new_grey_code = `(${real_grey_path}&&${real_grey_path}.path&&${real_grey_path}.path.includes("poison-skull")?${real_grey.slice(0, -3)}0):${real_grey})`
 
     code = code.assertReplace(disable_real_grey, new_grey_code)
 
@@ -627,7 +620,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     code = code.assertReplace(sokondeez, sokondeez_nuts)
 
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     set_on_reset = `;
     if (window.pudding_settings.SokoGoals) {
@@ -883,7 +876,7 @@ window.Counter.make = function () {
 
 window.Counter.alterCode = function (code) {
 
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
     window.wallCoords = [];
 
     counter_reset_code = `;stats.inputs.game = 0;
@@ -2231,7 +2224,7 @@ window.TimeKeeper.alterCode = function (code) {
     // v12: this.header=c;this.Oh=this.Eb=this.ticks=this.ob=0
     // v13: this.header=c;this.Sh=this.Fb=this.ticks=this.ob=0
     const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
     );
     let scoreFunc;
     let timeFunc;
@@ -2298,8 +2291,8 @@ window.TimeKeeper.alterCode = function (code) {
     // Count attempts / clear runStarted on reset (SpeedrunMod has no Counter.js hook).
     // Safe to call twice: second addAttempt no-ops when runStarted is already false.
     code = code.assertReplace(
-        /;this\.reset\(\)\}\}/,
-        `;window.timeKeeper.addAttempt();this.reset()}}`
+        /;[a-z]\.reset\(\);return!0\}/,
+        `;window.timeKeeper.addAttempt()$&`
     );
 
     return code;
@@ -2924,7 +2917,7 @@ window.TopBar.alterCode = function (code) {
     }
   }
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if (window.pudding_settings.TopBar && !window.daily_challenge) {
@@ -3177,13 +3170,13 @@ try{
 
     }
 
-    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var c=a.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8};/)
+    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var ([a-z])=[a-z]\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};/)
 
     random_color_super_reset = `$&
     if(window.randomColor){window.isRainbow = window.getRandomBoolean() ? window.getRandomBoolean() : false;}
     if(window.randomColor&&window.isRainbow){
         window.snakeRainbowOverride = getRandomInt(0, Object.keys(window.rainbowAlts).length-1);
-        c = window.rainbowAlts[window.snakeRainbowOverride].set[0];
+        $1 = window.rainbowAlts[window.snakeRainbowOverride].set[0];
     }`
 
     catchError(random_color_super_regex, code)
@@ -3722,7 +3715,7 @@ window.SettingsSaver.make = function () {
 }
 
 window.SettingsSaver.alterCode = function (code) {
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     settings_reset_code = `
     saveSettings();
@@ -3747,7 +3740,7 @@ window.SettingsSaver.alterCode = function (code) {
     );
 
     // Capture menu when native settings open (Ec).
-    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.oa="settings";/;
+    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.wa="settings";/;
     catchError(openSettingsRegex, code);
     code = code.assertReplace(
         openSettingsRegex,
@@ -6021,7 +6014,7 @@ window.SpeedInfo.make = function () {
 
 window.SpeedInfo.alterCode = function (code) {
     
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     speedinfo_reset = `;window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     if(window.first_time_call){window.getAllSrc().catch(e=>console.error('getAllSrc error:',e));window.first_time_call=false;}
@@ -7139,10 +7132,10 @@ window.Timer = {
       ticks = 'c'
       dt = 'd'
       const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
       )
       winTicks = 'this.ticks'
-      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.Fb'
+      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.hb'
     }
 
 
@@ -8710,10 +8703,10 @@ window.ResetKey.make = function (){
 window.ResetKey.alterCode = function(code){
   if (window.SpeedrunMod) {
     const keyHandler =
-      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.VTa\?a\.Qh:void 0/;
+      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.Fna\?a\.Ei:void 0/;
     code = code.assertReplace(
       keyHandler,
-      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.VTa?a.Qh:void 0"
+      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.Fna?a.Ei:void 0"
     );
   }
 
@@ -9008,9 +9001,9 @@ window.CustomBowl.make = function () {
             if (!apple) continue;
             const t = Number(apple.type);
             if (isNaN(t) || t < 0) continue;
-            if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
-            if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
-            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+            if (ctx.lh !== undefined && !!apple.Xg !== ctx.lh) continue;
+            if (ctx.oka !== undefined && !!apple.Bea !== ctx.oka) continue;
+            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Bea) < 0) continue;
             showing.add(t);
         }
         return showing;
@@ -9034,14 +9027,14 @@ window.CustomBowl.make = function () {
         const ctx = {};
         if (opts.pairOka) {
             ctx.pairOka = opts.pairOka;
-        } else if (pending && pending.Oka !== undefined &&
+        } else if (pending && pending.Bea !== undefined &&
             window.__bowlIsMode && window.__bowlIsMode(settings, 10)) {
-            ctx.oka = !!pending.Oka;
+            ctx.oka = !!pending.Bea;
         }
         if (opts.lh !== undefined) {
             ctx.lh = !!opts.lh;
         } else if (pending && window.__bowlIsMode && window.__bowlIsMode(settings, 9)) {
-            ctx.lh = !!pending.Lh;
+            ctx.lh = !!pending.Xg;
         }
         return ctx;
     }
@@ -9075,8 +9068,8 @@ window.CustomBowl.make = function () {
         if (!apples || apples.length < 2) return;
         for (let b = 0; b + 1 < apples.length; b += 2) {
             const c = Math.random() < 0.5;
-            apples[b].Oka = c;
-            apples[b + 1].Oka = !c;
+            apples[b].Bea = c;
+            apples[b + 1].Bea = !c;
         }
     };
 
@@ -9092,9 +9085,9 @@ window.CustomBowl.make = function () {
                 if (!apple) continue;
                 const t = Number(apple.type);
                 if (!counts.has(t)) continue;
-                if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
-                if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
-                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+                if (ctx.lh !== undefined && !!apple.Xg !== ctx.lh) continue;
+                if (ctx.oka !== undefined && !!apple.Bea !== ctx.oka) continue;
+                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Bea) < 0) continue;
                 counts.set(t, counts.get(t) + 1);
             }
         }
@@ -9178,9 +9171,9 @@ window.CustomBowl.make = function () {
             const a1 = apples[i + 1];
             const opts = {};
             if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 10)) {
-                opts.pairOka = [!!a0.Oka, a1 ? !!a1.Oka : !!a0.Oka];
+                opts.pairOka = [!!a0.Bea, a1 ? !!a1.Bea : !!a0.Bea];
             } else if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
-                opts.lh = !!a0.Lh;
+                opts.lh = !!a0.Xg;
             }
             const t = window.pickCustomPortalType(appleManager, true, opts);
             apples[i].type = t;
@@ -9207,7 +9200,7 @@ window.CustomBowl.make = function () {
                 if (a1) a1.type = -1;
                 const opts = {};
                 if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
-                    opts.lh = !!a0.Lh;
+                    opts.lh = !!a0.Xg;
                 }
                 t = window.pickCustomPortalType(appleManager, true, opts);
                 if (a0) a0.type = t;
@@ -9530,7 +9523,7 @@ window.CustomBowl.make = function () {
 };
 
 window.CustomBowl.alterCode = function (code) {
-    const reset_regex = new RegExp(/;this\.reset\(\)\}\}/);
+    const reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/);
     catchError(reset_regex, code);
     code = code.assertReplace(reset_regex, `window.custom_pair_call_counter=0;$&`);
 
@@ -9578,24 +9571,24 @@ window.CustomBowl.alterCode = function (code) {
     // v12: Ni&&(this.wa.ka[vd].type=aaF(this.wa),this.wa.ka[Ok].type=this.wa.ka[vd].type)
     // v13: e&&(a.wa.ka[k].type=Q3E(a.wa),a.wa.ka[d].type=a.wa.ka[k].type)
     const inplace_regex = new RegExp(
-        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2wa\\),\\2wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2wa\\.ka\\[\\3\\]\\.type\\)`
+        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)oa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2oa\\),\\2oa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2oa\\.ka\\[\\3\\]\\.type\\)`
     );
     catchError(inplace_regex, code);
     const inplace_match = code.match(inplace_regex);
     code = code.assertReplace(
         inplace_regex,
-        `${inplace_match[1]}&&(${inplace_match[2]}wa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}wa),${inplace_match[2]}wa.ka[${inplace_match[4]}].type=${inplace_match[2]}wa.ka[${inplace_match[3]}].type)`
+        `${inplace_match[1]}&&(${inplace_match[2]}oa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}oa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}oa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}oa),${inplace_match[2]}oa.ka[${inplace_match[4]}].type=${inplace_match[2]}oa.ka[${inplace_match[3]}].type)`
     );
 
     // Non-portal eat/respawn (3a/5a/10a): clear the reused slot first, same as
     // tally's type:-1 new apple, so the eaten type leaves "showing" and can re-roll.
     const eat_retype_regex = new RegExp(
-        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.wa\\)\\)`
+        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.oa\\)\\)`
     );
     catchError(eat_retype_regex, code);
     code = code.assertReplace(
         eat_retype_regex,
-        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.wa))`
+        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.oa))`
     );
 
     // Non-portal start-of-game fill: stage every slot as -1, then pick sequentially
@@ -9762,6 +9755,9 @@ window.PuddingMod.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function (code) {
+  // Game v14 wraps snake.js lines at different spots than v13; patches here target one-line code.
+  // Only the first mod in a chain flattens (later mods' inserted code may rely on its own line breaks).
+  if (!window.__snakeV14Flattened) { window.__snakeV14Flattened = true; code = code.replace(/([\w$]?)\n(?!\/\/)(?=([\w$]?))/g, (m, a, b) => (a && b ? a + " " : a)); }
   if (window.NepDebug) {
     console.log(code)
   }

@@ -2,11 +2,11 @@ import urllib.request
 import os
 
 if not os.path.exists("MoreMenuMod.js"):
-    url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/main/modloadercode.js"
+    url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeCustomMenuStuff/v14/modloadercode.js"
     urllib.request.urlretrieve(url, "MoreMenuMod.js")
 
 if not os.path.exists("VisibilityMod.js"):
-    url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeDeleteStuffMod/main/VisibilityInit.js"
+    url = "https://raw.githubusercontent.com/DarkSnakeGang/GoogleSnakeDeleteStuffMod/v14/VisibilityInit.js"
     urllib.request.urlretrieve(url, "VisibilityMod.js")
 
 mpm_file = open("MorePudding.js", "w", encoding="utf-8")

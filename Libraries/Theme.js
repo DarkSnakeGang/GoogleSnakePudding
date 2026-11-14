@@ -440,7 +440,7 @@ window.Theme.alterCode = function (code) {
   else{window.randomTheme = true;window.setTheme(window.getRandomThemeName());};
   `)
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if(window.randomTheme){window.setTheme(window.getRandomThemeName());}

@@ -945,10 +945,10 @@ window.Timer = {
       ticks = 'c'
       dt = 'd'
       const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
       )
       winTicks = 'this.ticks'
-      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.Fb'
+      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.hb'
     }
 
 

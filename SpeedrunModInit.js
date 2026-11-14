@@ -124,6 +124,9 @@ window.SpeedrunMod.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.SpeedrunMod.alterSnakeCode = function (code) {
+  // Game v14 wraps snake.js lines at different spots than v13; patches here target one-line code.
+  // Only the first mod in a chain flattens (later mods' inserted code may rely on its own line breaks).
+  if (!window.__snakeV14Flattened) { window.__snakeV14Flattened = true; code = code.replace(/([\w$]?)\n(?!\/\/)(?=([\w$]?))/g, (m, a, b) => (a && b ? a + " " : a)); }
   if (window.NepDebug) {
     console.log(code);
   }

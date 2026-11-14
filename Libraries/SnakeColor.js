@@ -229,13 +229,13 @@ try{
 
     }
 
-    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var c=a.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8};/)
+    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var ([a-z])=[a-z]\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};/)
 
     random_color_super_reset = `$&
     if(window.randomColor){window.isRainbow = window.getRandomBoolean() ? window.getRandomBoolean() : false;}
     if(window.randomColor&&window.isRainbow){
         window.snakeRainbowOverride = getRandomInt(0, Object.keys(window.rainbowAlts).length-1);
-        c = window.rainbowAlts[window.snakeRainbowOverride].set[0];
+        $1 = window.rainbowAlts[window.snakeRainbowOverride].set[0];
     }`
 
     catchError(random_color_super_regex, code)

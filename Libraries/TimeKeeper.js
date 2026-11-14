@@ -951,7 +951,7 @@ window.TimeKeeper.alterCode = function (code) {
     // v12: this.header=c;this.Oh=this.Eb=this.ticks=this.ob=0
     // v13: this.header=c;this.Sh=this.Fb=this.ticks=this.ob=0
     const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
     );
     let scoreFunc;
     let timeFunc;
@@ -1018,8 +1018,8 @@ window.TimeKeeper.alterCode = function (code) {
     // Count attempts / clear runStarted on reset (SpeedrunMod has no Counter.js hook).
     // Safe to call twice: second addAttempt no-ops when runStarted is already false.
     code = code.assertReplace(
-        /;this\.reset\(\)\}\}/,
-        `;window.timeKeeper.addAttempt();this.reset()}}`
+        /;[a-z]\.reset\(\);return!0\}/,
+        `;window.timeKeeper.addAttempt()$&`
     );
 
     return code;

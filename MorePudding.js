@@ -519,7 +519,7 @@ window.Theme.alterCode = function (code) {
   else{window.randomTheme = true;window.setTheme(window.getRandomThemeName());};
   `)
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if(window.randomTheme){window.setTheme(window.getRandomThemeName());}
@@ -570,11 +570,11 @@ window.DistinctVisual.make = function () {
 
 window.DistinctVisual.alterCode = function (code) {
 
-    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch\(b!==void 0\?b:a\.settings\.[a-zA-Z0-9_$]{1,8}\){d/);
     catchError(realism_draw, code);
     realism_switch = code.match(realism_draw)[0];
 
-    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch\(b!==void 0\?b:a\.settings\.[a-zA-Z0-9_$]{1,8}\){default:[^}]*}}/);
     catchError(realism_path, code);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
@@ -582,7 +582,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     window.drawing_apple = true;
 
-    get_apple_stuff = new RegExp(/(?:let|const|var).*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    get_apple_stuff = new RegExp(/(?:let|const|var) [^;]*?[a-zA-Z0-9_$]{1,8}\.canvas\:[^;]*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     catchError(get_apple_stuff, code);
     poison_default = code.match(get_apple_stuff)[0]
     b_graphics = poison_default.split('(')[2].split(')')[0]
@@ -596,19 +596,12 @@ window.DistinctVisual.alterCode = function (code) {
 
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\?\.[a-zA-Z0-9_$]{1,8}\(b,c,-1\)/)
     catchError(disable_real_grey, code);
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[1]
+    real_grey_path = real_grey.split('?.')[0]
 
-    new_grey_code = `
-    if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
-        ${real_grey.slice(0, -1).slice(0, -1).slice(0, -1)}0)
-    }
-    else {
-        ${real_grey}
-    }
-    `
+    new_grey_code = `(${real_grey_path}&&${real_grey_path}.path&&${real_grey_path}.path.includes("poison-skull")?${real_grey.slice(0, -3)}0):${real_grey})`
 
     code = code.assertReplace(disable_real_grey, new_grey_code)
 
@@ -627,7 +620,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     code = code.assertReplace(sokondeez, sokondeez_nuts)
 
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     set_on_reset = `;
     if (window.pudding_settings.SokoGoals) {
@@ -883,7 +876,7 @@ window.Counter.make = function () {
 
 window.Counter.alterCode = function (code) {
 
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
     window.wallCoords = [];
 
     counter_reset_code = `;stats.inputs.game = 0;
@@ -2231,7 +2224,7 @@ window.TimeKeeper.alterCode = function (code) {
     // v12: this.header=c;this.Oh=this.Eb=this.ticks=this.ob=0
     // v13: this.header=c;this.Sh=this.Fb=this.ticks=this.ob=0
     const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
     );
     let scoreFunc;
     let timeFunc;
@@ -2298,8 +2291,8 @@ window.TimeKeeper.alterCode = function (code) {
     // Count attempts / clear runStarted on reset (SpeedrunMod has no Counter.js hook).
     // Safe to call twice: second addAttempt no-ops when runStarted is already false.
     code = code.assertReplace(
-        /;this\.reset\(\)\}\}/,
-        `;window.timeKeeper.addAttempt();this.reset()}}`
+        /;[a-z]\.reset\(\);return!0\}/,
+        `;window.timeKeeper.addAttempt()$&`
     );
 
     return code;
@@ -2924,7 +2917,7 @@ window.TopBar.alterCode = function (code) {
     }
   }
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if (window.pudding_settings.TopBar && !window.daily_challenge) {
@@ -3177,13 +3170,13 @@ try{
 
     }
 
-    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var c=a.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8};/)
+    random_color_super_regex = new RegExp(/else{[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};var ([a-z])=[a-z]\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8};/)
 
     random_color_super_reset = `$&
     if(window.randomColor){window.isRainbow = window.getRandomBoolean() ? window.getRandomBoolean() : false;}
     if(window.randomColor&&window.isRainbow){
         window.snakeRainbowOverride = getRandomInt(0, Object.keys(window.rainbowAlts).length-1);
-        c = window.rainbowAlts[window.snakeRainbowOverride].set[0];
+        $1 = window.rainbowAlts[window.snakeRainbowOverride].set[0];
     }`
 
     catchError(random_color_super_regex, code)
@@ -3722,7 +3715,7 @@ window.SettingsSaver.make = function () {
 }
 
 window.SettingsSaver.alterCode = function (code) {
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     settings_reset_code = `
     saveSettings();
@@ -3747,7 +3740,7 @@ window.SettingsSaver.alterCode = function (code) {
     );
 
     // Capture menu when native settings open (Ec).
-    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.oa="settings";/;
+    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.wa="settings";/;
     catchError(openSettingsRegex, code);
     code = code.assertReplace(
         openSettingsRegex,
@@ -6021,7 +6014,7 @@ window.SpeedInfo.make = function () {
 
 window.SpeedInfo.alterCode = function (code) {
     
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     speedinfo_reset = `;window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     if(window.first_time_call){window.getAllSrc().catch(e=>console.error('getAllSrc error:',e));window.first_time_call=false;}
@@ -7139,10 +7132,10 @@ window.Timer = {
       ticks = 'c'
       dt = 'd'
       const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
       )
       winTicks = 'this.ticks'
-      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.Fb'
+      winDt = scoreCtor ? ('this.' + scoreCtor[2]) : 'this.hb'
     }
 
 
@@ -8710,10 +8703,10 @@ window.ResetKey.make = function (){
 window.ResetKey.alterCode = function(code){
   if (window.SpeedrunMod) {
     const keyHandler =
-      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.VTa\?a\.Qh:void 0/;
+      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.Fna\?a\.Ei:void 0/;
     code = code.assertReplace(
       keyHandler,
-      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.VTa?a.Qh:void 0"
+      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.Fna?a.Ei:void 0"
     );
   }
 
@@ -9008,9 +9001,9 @@ window.CustomBowl.make = function () {
             if (!apple) continue;
             const t = Number(apple.type);
             if (isNaN(t) || t < 0) continue;
-            if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
-            if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
-            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+            if (ctx.lh !== undefined && !!apple.Xg !== ctx.lh) continue;
+            if (ctx.oka !== undefined && !!apple.Bea !== ctx.oka) continue;
+            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Bea) < 0) continue;
             showing.add(t);
         }
         return showing;
@@ -9034,14 +9027,14 @@ window.CustomBowl.make = function () {
         const ctx = {};
         if (opts.pairOka) {
             ctx.pairOka = opts.pairOka;
-        } else if (pending && pending.Oka !== undefined &&
+        } else if (pending && pending.Bea !== undefined &&
             window.__bowlIsMode && window.__bowlIsMode(settings, 10)) {
-            ctx.oka = !!pending.Oka;
+            ctx.oka = !!pending.Bea;
         }
         if (opts.lh !== undefined) {
             ctx.lh = !!opts.lh;
         } else if (pending && window.__bowlIsMode && window.__bowlIsMode(settings, 9)) {
-            ctx.lh = !!pending.Lh;
+            ctx.lh = !!pending.Xg;
         }
         return ctx;
     }
@@ -9075,8 +9068,8 @@ window.CustomBowl.make = function () {
         if (!apples || apples.length < 2) return;
         for (let b = 0; b + 1 < apples.length; b += 2) {
             const c = Math.random() < 0.5;
-            apples[b].Oka = c;
-            apples[b + 1].Oka = !c;
+            apples[b].Bea = c;
+            apples[b + 1].Bea = !c;
         }
     };
 
@@ -9092,9 +9085,9 @@ window.CustomBowl.make = function () {
                 if (!apple) continue;
                 const t = Number(apple.type);
                 if (!counts.has(t)) continue;
-                if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
-                if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
-                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+                if (ctx.lh !== undefined && !!apple.Xg !== ctx.lh) continue;
+                if (ctx.oka !== undefined && !!apple.Bea !== ctx.oka) continue;
+                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Bea) < 0) continue;
                 counts.set(t, counts.get(t) + 1);
             }
         }
@@ -9178,9 +9171,9 @@ window.CustomBowl.make = function () {
             const a1 = apples[i + 1];
             const opts = {};
             if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 10)) {
-                opts.pairOka = [!!a0.Oka, a1 ? !!a1.Oka : !!a0.Oka];
+                opts.pairOka = [!!a0.Bea, a1 ? !!a1.Bea : !!a0.Bea];
             } else if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
-                opts.lh = !!a0.Lh;
+                opts.lh = !!a0.Xg;
             }
             const t = window.pickCustomPortalType(appleManager, true, opts);
             apples[i].type = t;
@@ -9207,7 +9200,7 @@ window.CustomBowl.make = function () {
                 if (a1) a1.type = -1;
                 const opts = {};
                 if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
-                    opts.lh = !!a0.Lh;
+                    opts.lh = !!a0.Xg;
                 }
                 t = window.pickCustomPortalType(appleManager, true, opts);
                 if (a0) a0.type = t;
@@ -9530,7 +9523,7 @@ window.CustomBowl.make = function () {
 };
 
 window.CustomBowl.alterCode = function (code) {
-    const reset_regex = new RegExp(/;this\.reset\(\)\}\}/);
+    const reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/);
     catchError(reset_regex, code);
     code = code.assertReplace(reset_regex, `window.custom_pair_call_counter=0;$&`);
 
@@ -9578,24 +9571,24 @@ window.CustomBowl.alterCode = function (code) {
     // v12: Ni&&(this.wa.ka[vd].type=aaF(this.wa),this.wa.ka[Ok].type=this.wa.ka[vd].type)
     // v13: e&&(a.wa.ka[k].type=Q3E(a.wa),a.wa.ka[d].type=a.wa.ka[k].type)
     const inplace_regex = new RegExp(
-        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2wa\\),\\2wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2wa\\.ka\\[\\3\\]\\.type\\)`
+        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)oa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2oa\\),\\2oa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2oa\\.ka\\[\\3\\]\\.type\\)`
     );
     catchError(inplace_regex, code);
     const inplace_match = code.match(inplace_regex);
     code = code.assertReplace(
         inplace_regex,
-        `${inplace_match[1]}&&(${inplace_match[2]}wa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}wa),${inplace_match[2]}wa.ka[${inplace_match[4]}].type=${inplace_match[2]}wa.ka[${inplace_match[3]}].type)`
+        `${inplace_match[1]}&&(${inplace_match[2]}oa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}oa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}oa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}oa),${inplace_match[2]}oa.ka[${inplace_match[4]}].type=${inplace_match[2]}oa.ka[${inplace_match[3]}].type)`
     );
 
     // Non-portal eat/respawn (3a/5a/10a): clear the reused slot first, same as
     // tally's type:-1 new apple, so the eaten type leaves "showing" and can re-roll.
     const eat_retype_regex = new RegExp(
-        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.wa\\)\\)`
+        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.oa\\)\\)`
     );
     catchError(eat_retype_regex, code);
     code = code.assertReplace(
         eat_retype_regex,
-        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.wa))`
+        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.oa))`
     );
 
     // Non-portal start-of-game fill: stage every slot as -1, then pick sequentially
@@ -9762,6 +9755,9 @@ window.PuddingMod.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.PuddingMod.alterSnakeCode = function (code) {
+  // Game v14 wraps snake.js lines at different spots than v13; patches here target one-line code.
+  // Only the first mod in a chain flattens (later mods' inserted code may rely on its own line breaks).
+  if (!window.__snakeV14Flattened) { window.__snakeV14Flattened = true; code = code.replace(/([\w$]?)\n(?!\/\/)(?=([\w$]?))/g, (m, a, b) => (a && b ? a + " " : a)); }
   if (window.NepDebug) {
     console.log(code)
   }
@@ -9858,6 +9854,9 @@ window.moreMenu = {
     ]) document.querySelector('#count').appendChild(uiImage(src))
   },
   alterSnakeCode: code => {
+    // Game v14 wraps snake.js lines at different spots than v13; patches here target one-line code.
+    // Only the first mod in a chain flattens (later mods' inserted code may rely on its own line breaks).
+    if (!window.__snakeV14Flattened) { window.__snakeV14Flattened = true; code = code.replace(/([\w$]?)\n(?!\/\/)(?=([\w$]?))/g, (m, a, b) => (a && b ? a + " " : a)); }
     const resetFunction = code.match(
       /reset\n?\(\n?\)\n?{\n?this\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?=\n?\[\];[^]*?!1\n?\)\n?}/
     )[0]
@@ -10335,21 +10334,9 @@ window.moreMenu = {
     )
   
   
-    const pixelIssueFunction = code.match(
-      /[a-zA-Z0-9_$]{1,8}\n?=\n?function\n?\(\n?a\n?\)\n?{\n?var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?;\n?if[^]*?10\n?}\n?}\n?}/
-    )[0]
-    const pixelIssueB = pixelIssueFunction.match(
-      /var(\n| )b\n?=\n?a\n?\.\n?[a-zA-Z0-9_$]{1,8}/
-    )[0].replace(/var(\n| )b\n?=\n?/, '')
-    const boardDimensions = pixelIssueFunction.match(
-      /b\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?height/
-    )[0].replace('b', pixelIssueB).replace(/\n?\.\n?height/, '')
-    const boardThing = pixelIssueFunction.match(
-      /b\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\.\n?[a-zA-Z0-9_$]{1,8}\n?\[\n?d\n?\.\n?y\n?\]\n?\[\n?d\n?\.\n?x\n?\]/
-    )[0].replace(/\n?\[\n?d\n?\.\n?y\n?\]\n?\[\n?d\n?\.\n?x\n?\]/, '')
     code = code.assertReplaceAll(
-      RegExp(`${boardThing}\\n?\\[\\n?c\\n?\\.\\n?y\\n?\\]\\n?\\[\\n?c\\n?\\.\\n?x\\n?\\]\\n?=\\n?e`, 'g'),
-      `c.y >= 0 && c.y < ${boardDimensions}.height && c.x >= 0 && c.x < ${boardDimensions}.width && (${boardThing}[c.y][c.x] = e)`
+      /([a-z])\.oa\.wa\[c\.y\]\[c\.x\]=b(?=\))/g,
+      `c.y >= 0 && c.y < $1.oa.oa.height && c.x >= 0 && c.x < $1.oa.oa.width && ($1.oa.wa[c.y][c.x] = b)`
     )
   
   
@@ -11041,6 +11028,9 @@ window.VisibilityModCode.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.VisibilityModCode.alterSnakeCode = function (code) {
+  // Game v14 wraps snake.js lines at different spots than v13; patches here target one-line code.
+  // Only the first mod in a chain flattens (later mods' inserted code may rely on its own line breaks).
+  if (!window.__snakeV14Flattened) { window.__snakeV14Flattened = true; code = code.replace(/([\w$]?)\n(?!\/\/)(?=([\w$]?))/g, (m, a, b) => (a && b ? a + " " : a)); }
 
   //code = window.PuddingMod.alterSnakeCode(code);
   let deleteModDebug = false;
@@ -11155,17 +11145,17 @@ Same as replace, but throws an error if nothing is changed
 
   //Function for body parts
   //let rightEyeRegex = /(\([a-z]\?[a-z]\.[$a-zA-Z0-9_]{0,6}:[a-z]\.[$a-zA-Z0-9_]{0,6}\)\.render\([a-z],\n?[a-z],\n?[a-z],\n?[a-z]\.[$a-zA-Z0-9_]{0,6},\n?[a-z])(\),)/;
-  let rightEyeRegex = /(\([a-z]\?[a-z]\.[$a-zA-Z0-9_]{0,6}:[a-z]\.[$a-zA-Z0-9_]{0,6}\)\.render\([a-z],\n?[a-z],\n?[a-z],\n?[a-z],\n?[a-z]\*[a-z])(\),)/;
+  let rightEyeRegex = /(\([a-z]\?[a-z]\.[$a-zA-Z0-9_]{0,6}:[a-z]\.[$a-zA-Z0-9_]{0,6}\)\.render\([a-zA-Z],[a-zA-Z],[a-zA-Z],[a-zA-Z],[a-zA-Z]\*[a-zA-Z])(,void 0,[a-zA-Z]{1,3}\);)/;
 
   if (deleteModDebug) {
     console.log(code)
   }
 
-  let funcWithBodyParts_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e\)$/,
+  let funcWithBodyParts_Origin = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e=!1,f=!1\)$/,
     rightEyeRegex,
     deleteModDebug);
 
-  let funcWithBodyParts = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e\)$/,
+  let funcWithBodyParts = findFunctionInCode(code, /[$a-zA-Z0-9_]{0,6}=function\(a,b,c,d,e=!1,f=!1\)$/,
     rightEyeRegex,
     deleteModDebug);
 
@@ -11257,11 +11247,11 @@ Same as replace, but throws an error if nothing is changed
 
   //Regular fruit vs poison fruit. `nla` was the v12 poison marker; `Oka` is the v13 one.
   funcWithFruit = assertReplace(funcWithFruit, fruitRegex,
-    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
+    '(window.visiFullPass || ((b.nla||b.Bea) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
 
   //Mirrored copy (in twin/infinity layouts), using the same poison marker.
   funcWithFruit = assertReplace(funcWithFruit, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6},0,0,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},-\([$a-zA-Z0-9_]{0,6}\/2\),-\([$a-zA-Z0-9_]{0,6}\/2\),[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '(window.visiFullPass || ((b.nla||b.Oka) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
+    '(window.visiFullPass || ((b.nla||b.Bea) ? window.checkboxes.checkboxStatuses.poison : window.checkboxes.checkboxStatuses.fruit)) && $&');
 
   //For compatitibilty, also change this code for animatedSnakeColours
   /*
@@ -11273,7 +11263,7 @@ Same as replace, but throws an error if nothing is changed
 
 
   // Walls / locks (ES6 class render(a) over Ca.Aa values)
-  let wallInsideRegex = /this\.[$a-zA-Z0-9_]{0,6}\.Ca\.Aa\.values\(\)/;
+  let wallInsideRegex = /(?<=render\([a-z]\)\{)for\(let [a-z] of this\.[$a-zA-Z0-9_]{0,6}\.(?:Ca\.Aa|Tw\.wa)\.values\(\)\)/;
 
   let funcWithRenderWall_Origin = findFunctionInCode(code, /render\([$a-zA-Z0-9_]{0,6}\)$/,
     wallInsideRegex,
@@ -11285,7 +11275,7 @@ Same as replace, but throws an error if nothing is changed
 
   //for walls / locks / hotdog walls (same renderer; v12 uses ez/XNa, v13 uses ty/yNa)
   funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.fillRect\([$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
-    '((k.ez||k.ty)?window.checkboxes.checkboxStatuses.hotdogWalls:(((k.XNa!==void 0&&k.XNa>=0)||(k.yNa!==void 0&&k.yNa>=0))?window.checkboxes.checkboxStatuses.locks:window.checkboxes.checkboxStatuses.walls))&&$&');
+    '((k.ez||k.ty||k.wv)?window.checkboxes.checkboxStatuses.hotdogWalls:(((k.XNa!==void 0&&k.XNa>=0)||(k.yNa!==void 0&&k.yNa>=0)||(k.oOa!==void 0&&k.oOa>=0))?window.checkboxes.checkboxStatuses.locks:window.checkboxes.checkboxStatuses.walls))&&$&');
 
   //lock icon on wall
   funcWithRenderWall = assertReplace(funcWithRenderWall, /this\.[$a-zA-Z0-9_]{0,6}\.drawImage\([$a-zA-Z0-9_]{0,6}\(this\.[$a-zA-Z0-9_]{0,6}\)\.[$a-zA-Z0-9_]{0,6}\.canvas,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}\*128,0,128,128,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6}\.[$a-zA-Z0-9_]{0,6}-[$a-zA-Z0-9_]{0,6}\/2,[$a-zA-Z0-9_]{0,6},[$a-zA-Z0-9_]{0,6}\)/,
@@ -11387,13 +11377,13 @@ Same as replace, but throws an error if nothing is changed
   funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, lightSnakeCallRegex,
     'window.checkboxes.checkboxStatuses.lightSnake&&$&');
 
-  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_]{1,6}\.wb\.wa\.ka\)\{)/,
+  funcWithMiscRendering = assertReplace(funcWithMiscRendering, /(for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_]{1,6}\.(?:wb\.wa|ub\.oa)\.ka\)\{)/,
     'if(window.checkboxes.checkboxStatuses.lightFruit)$1');
 
   //Inline active bridges/gates drawn in the compositor (not only via helper functions)
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,20\)/g,
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[efM]7\(this\.settings,20\)/g,
     '$&&&window.checkboxes.checkboxStatuses.bridges');
-  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[ef]7\(this\.settings,19\)/g,
+  funcWithMiscRendering = assertReplaceAll(funcWithMiscRendering, /[efM]7\(this\.settings,19\)/g,
     '$&&&window.checkboxes.checkboxStatuses.gates');
 
   //Snake, fruit, keys and boxes are drawn into the sprite layer, and the shadow is taken straight
@@ -11404,7 +11394,7 @@ Same as replace, but throws an error if nothing is changed
   let shadowFnName = funcWithShadow_Origin.match(/^([$a-zA-Z0-9_]{1,6})=function/)[1];
   let sceneRegionRegex = new RegExp(
     '(this\\.[$a-zA-Z0-9_]{1,6}\\.render\\(a,b,[$a-zA-Z0-9_]{1,6}\\(this\\)\\);[\\s\\S]*?)' +
-    '([ef]7\\(this\\.settings,4\\)\\|\\|' + shadowFnName.replace(/\$/g, '\\$') + '\\(this\\);)');
+    '([efM]7\\(this\\.settings,4\\)\\|\\|' + shadowFnName.replace(/\$/g, '\\$') + '\\(this\\);)');
 
   funcWithMiscRendering = assertReplace(funcWithMiscRendering, sceneRegionRegex,
     'window.visiBeginShadowPass(this,this.ka.canvas.width!==this.context.canvas.width||this.ka.canvas.height!==this.context.canvas.height);$1$2if(window.visiEndShadowPass(this)){$1}');
@@ -11412,11 +11402,11 @@ Same as replace, but throws an error if nothing is changed
   //eval(funcWithMiscRendering);
 
   let funcWithLockRendering_Origin = findFunctionInCode(code, /render\(\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.hb\.particles/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.Ua\.particles/,
     false);
 
   let funcWithLockRendering = findFunctionInCode(code, /render\(\)$/,
-    /this\.[$a-zA-Z0-9_]{0,6}\.hb\.particles/,
+    /this\.[$a-zA-Z0-9_]{0,6}\.Ua\.particles/,
     false);
 
   //background for falling lock piece
@@ -11539,7 +11529,7 @@ if(window.NepDebug){
     shieldsFnName + '=function($1){if(!window.checkboxes.checkboxStatuses.shields)return;');
 
   //Gates (mode 19): BbF dashed rectangles
-  let gatesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_.]{1,20}\.(?:Yfa|pfa)\)/);
+  let gatesFnMatch = code.match(/([$a-zA-Z0-9_]{1,6})=function\(([$a-zA-Z0-9_]{1,6}),([$a-zA-Z0-9_]{1,6})\)\{for\(let [$a-zA-Z0-9_]{1,6} of [$a-zA-Z0-9_.]{1,20}\.(?:Yfa|pfa|gga)\)/);
   if (!gatesFnMatch) {
     throw new Error('Visibility mod: could not find gate drawer (BbF)');
   }
@@ -11558,8 +11548,8 @@ if(window.NepDebug){
 
   //Border chrome CSS background-color (same palette index as the canvas border fill)
   code = assertReplaceAll(code,
-    /_\.(?:on|pn)\(([$a-zA-Z0-9_.()]{1,40}),"background-color",([$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,30},[$a-zA-Z0-9_.]{1,30},3\))\)/g,
-    '($1&&window.visiBorderEls.push($1),window.visiBorderColor=$2,_.pn($1,"background-color",window.checkboxes.checkboxStatuses.border?$2:"transparent"))'
+    /_\.(?:on|pn|gn)\(([$a-zA-Z0-9_.()]{1,40}),"background-color",([$a-zA-Z0-9_]{1,6}\([$a-zA-Z0-9_.]{1,30},[$a-zA-Z0-9_.]{1,30},3\))\)/g,
+    '($1&&window.visiBorderEls.push($1),window.visiBorderColor=$2,_.gn($1,"background-color",window.checkboxes.checkboxStatuses.border?$2:"transparent"))'
   );
 
     // Mines

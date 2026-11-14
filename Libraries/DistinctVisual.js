@@ -41,11 +41,11 @@ window.DistinctVisual.make = function () {
 
 window.DistinctVisual.alterCode = function (code) {
 
-    realism_draw = new RegExp(/function\(a,b\){switch.*{d/);
+    realism_draw = new RegExp(/function\(a,b\){switch\(b!==void 0\?b:a\.settings\.[a-zA-Z0-9_$]{1,8}\){d/);
     catchError(realism_draw, code);
     realism_switch = code.match(realism_draw)[0];
 
-    realism_path = new RegExp(/function\(a,b\){switch.*}}/);
+    realism_path = new RegExp(/function\(a,b\){switch\(b!==void 0\?b:a\.settings\.[a-zA-Z0-9_$]{1,8}\){default:[^}]*}}/);
     catchError(realism_path, code);
     last_path = code.match(realism_path)[0].split('.')[9].split('}')[0]
 
@@ -53,7 +53,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     window.drawing_apple = true;
 
-    get_apple_stuff = new RegExp(/(?:let|const|var).*[a-zA-Z0-9_$]{1,8}\.canvas\:.*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
+    get_apple_stuff = new RegExp(/(?:let|const|var) [^;]*?[a-zA-Z0-9_$]{1,8}\.canvas\:[^;]*\([a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\);/)
     catchError(get_apple_stuff, code);
     poison_default = code.match(get_apple_stuff)[0]
     b_graphics = poison_default.split('(')[2].split(')')[0]
@@ -67,19 +67,12 @@ window.DistinctVisual.alterCode = function (code) {
 
     code = code.assertReplace(get_apple_stuff, get_apple_code)
 
-    disable_real_grey = new RegExp(/\(f=[a-zA-Z0-9_$]{1,8}.[a-zA-Z0-9_$]{1,8}\)==null\|\|[a-zA-Z0-9_$]{1,8}\(f,b,c,-1\)/)
+    disable_real_grey = new RegExp(/[a-zA-Z0-9_$]{1,8}\.[a-zA-Z0-9_$]{1,8}\?\.[a-zA-Z0-9_$]{1,8}\(b,c,-1\)/)
     catchError(disable_real_grey, code);
     real_grey = code.match(disable_real_grey)[0]
-    real_grey_path = real_grey.split(')')[0].split('=')[1]
+    real_grey_path = real_grey.split('?.')[0]
 
-    new_grey_code = `
-    if (${real_grey_path} && ${real_grey_path}.path.includes("poison-skull")) {
-        ${real_grey.slice(0, -1).slice(0, -1).slice(0, -1)}0)
-    }
-    else {
-        ${real_grey}
-    }
-    `
+    new_grey_code = `(${real_grey_path}&&${real_grey_path}.path&&${real_grey_path}.path.includes("poison-skull")?${real_grey.slice(0, -3)}0):${real_grey})`
 
     code = code.assertReplace(disable_real_grey, new_grey_code)
 
@@ -98,7 +91,7 @@ window.DistinctVisual.alterCode = function (code) {
 
     code = code.assertReplace(sokondeez, sokondeez_nuts)
 
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     set_on_reset = `;
     if (window.pudding_settings.SokoGoals) {

@@ -519,7 +519,7 @@ window.Theme.alterCode = function (code) {
   else{window.randomTheme = true;window.setTheme(window.getRandomThemeName());};
   `)
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if(window.randomTheme){window.setTheme(window.getRandomThemeName());}
@@ -1776,7 +1776,7 @@ window.TimeKeeper.alterCode = function (code) {
     // v12: this.header=c;this.Oh=this.Eb=this.ticks=this.ob=0
     // v13: this.header=c;this.Sh=this.Fb=this.ticks=this.ob=0
     const scoreCtor = code.match(
-        /this\.header=[a-zA-Z0-9_$];this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
+        /this\.header=[a-zA-Z0-9_$];(?:this\.[a-zA-Z0-9_$]{1,8}=[a-zA-Z0-9_$];)?this\.([a-zA-Z0-9_$]{1,8})=this\.([a-zA-Z0-9_$]{1,8})=this\.ticks=/
     );
     let scoreFunc;
     let timeFunc;
@@ -1843,8 +1843,8 @@ window.TimeKeeper.alterCode = function (code) {
     // Count attempts / clear runStarted on reset (SpeedrunMod has no Counter.js hook).
     // Safe to call twice: second addAttempt no-ops when runStarted is already false.
     code = code.assertReplace(
-        /;this\.reset\(\)\}\}/,
-        `;window.timeKeeper.addAttempt();this.reset()}}`
+        /;[a-z]\.reset\(\);return!0\}/,
+        `;window.timeKeeper.addAttempt()$&`
     );
 
     return code;
@@ -2012,7 +2012,7 @@ window.TopBar.alterCode = function (code) {
     }
   }
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if (window.pudding_settings.TopBar && !window.daily_challenge) {
@@ -4722,7 +4722,7 @@ window.SpeedInfo.make = function () {
 
 window.SpeedInfo.alterCode = function (code) {
     
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     speedinfo_reset = `;window.SpeedInfoUpdate().catch(e=>console.error('SpeedInfoUpdate error:',e));
     if(window.first_time_call){window.getAllSrc().catch(e=>console.error('getAllSrc error:',e));window.first_time_call=false;}
@@ -4805,10 +4805,10 @@ window.ResetKey.make = function (){
 window.ResetKey.alterCode = function(code){
   if (window.SpeedrunMod) {
     const keyHandler =
-      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.VTa\?a\.Qh:void 0/;
+      /([a-zA-Z0-9_$]{1,8})\(a\)\{if\(!this\.closed\)\{var b=\s*a\.Fna\?a\.Ei:void 0/;
     code = code.assertReplace(
       keyHandler,
-      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.VTa?a.Qh:void 0"
+      "$1(a){if(!this.closed){var _ae=document.activeElement;if(_ae&&(_ae.tagName==='INPUT'||_ae.tagName==='TEXTAREA'||_ae.tagName==='SELECT'||_ae.isContentEditable))return;var b= a.Fna?a.Ei:void 0"
     );
   }
 
@@ -4974,6 +4974,9 @@ window.SpeedrunMod.runCodeBefore = function () {
 ////////////////////////////////////////////////////////////////////
 
 window.SpeedrunMod.alterSnakeCode = function (code) {
+  // Game v14 wraps snake.js lines at different spots than v13; patches here target one-line code.
+  // Only the first mod in a chain flattens (later mods' inserted code may rely on its own line breaks).
+  if (!window.__snakeV14Flattened) { window.__snakeV14Flattened = true; code = code.replace(/([\w$]?)\n(?!\/\/)(?=([\w$]?))/g, (m, a, b) => (a && b ? a + " " : a)); }
   if (window.NepDebug) {
     console.log(code);
   }

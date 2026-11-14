@@ -490,7 +490,7 @@ window.SettingsSaver.make = function () {
 }
 
 window.SettingsSaver.alterCode = function (code) {
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
     settings_reset_code = `
     saveSettings();
@@ -515,7 +515,7 @@ window.SettingsSaver.alterCode = function (code) {
     );
 
     // Capture menu when native settings open (Ec).
-    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.oa="settings";/;
+    const openSettingsRegex = /([a-zA-Z0-9_$]{1,8})\(\)\{var a=this\.menu;a\.wa="settings";/;
     catchError(openSettingsRegex, code);
     code = code.assertReplace(
         openSettingsRegex,

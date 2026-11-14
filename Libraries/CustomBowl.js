@@ -212,9 +212,9 @@ window.CustomBowl.make = function () {
             if (!apple) continue;
             const t = Number(apple.type);
             if (isNaN(t) || t < 0) continue;
-            if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
-            if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
-            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+            if (ctx.lh !== undefined && !!apple.Xg !== ctx.lh) continue;
+            if (ctx.oka !== undefined && !!apple.Bea !== ctx.oka) continue;
+            if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Bea) < 0) continue;
             showing.add(t);
         }
         return showing;
@@ -238,14 +238,14 @@ window.CustomBowl.make = function () {
         const ctx = {};
         if (opts.pairOka) {
             ctx.pairOka = opts.pairOka;
-        } else if (pending && pending.Oka !== undefined &&
+        } else if (pending && pending.Bea !== undefined &&
             window.__bowlIsMode && window.__bowlIsMode(settings, 10)) {
-            ctx.oka = !!pending.Oka;
+            ctx.oka = !!pending.Bea;
         }
         if (opts.lh !== undefined) {
             ctx.lh = !!opts.lh;
         } else if (pending && window.__bowlIsMode && window.__bowlIsMode(settings, 9)) {
-            ctx.lh = !!pending.Lh;
+            ctx.lh = !!pending.Xg;
         }
         return ctx;
     }
@@ -279,8 +279,8 @@ window.CustomBowl.make = function () {
         if (!apples || apples.length < 2) return;
         for (let b = 0; b + 1 < apples.length; b += 2) {
             const c = Math.random() < 0.5;
-            apples[b].Oka = c;
-            apples[b + 1].Oka = !c;
+            apples[b].Bea = c;
+            apples[b + 1].Bea = !c;
         }
     };
 
@@ -296,9 +296,9 @@ window.CustomBowl.make = function () {
                 if (!apple) continue;
                 const t = Number(apple.type);
                 if (!counts.has(t)) continue;
-                if (ctx.lh !== undefined && !!apple.Lh !== ctx.lh) continue;
-                if (ctx.oka !== undefined && !!apple.Oka !== ctx.oka) continue;
-                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Oka) < 0) continue;
+                if (ctx.lh !== undefined && !!apple.Xg !== ctx.lh) continue;
+                if (ctx.oka !== undefined && !!apple.Bea !== ctx.oka) continue;
+                if (ctx.pairOka && ctx.pairOka.indexOf(!!apple.Bea) < 0) continue;
                 counts.set(t, counts.get(t) + 1);
             }
         }
@@ -382,9 +382,9 @@ window.CustomBowl.make = function () {
             const a1 = apples[i + 1];
             const opts = {};
             if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 10)) {
-                opts.pairOka = [!!a0.Oka, a1 ? !!a1.Oka : !!a0.Oka];
+                opts.pairOka = [!!a0.Bea, a1 ? !!a1.Bea : !!a0.Bea];
             } else if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
-                opts.lh = !!a0.Lh;
+                opts.lh = !!a0.Xg;
             }
             const t = window.pickCustomPortalType(appleManager, true, opts);
             apples[i].type = t;
@@ -411,7 +411,7 @@ window.CustomBowl.make = function () {
                 if (a1) a1.type = -1;
                 const opts = {};
                 if (window.__bowlIsMode && window.__bowlIsMode(appleManager.settings, 9)) {
-                    opts.lh = !!a0.Lh;
+                    opts.lh = !!a0.Xg;
                 }
                 t = window.pickCustomPortalType(appleManager, true, opts);
                 if (a0) a0.type = t;
@@ -734,7 +734,7 @@ window.CustomBowl.make = function () {
 };
 
 window.CustomBowl.alterCode = function (code) {
-    const reset_regex = new RegExp(/;this\.reset\(\)\}\}/);
+    const reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/);
     catchError(reset_regex, code);
     code = code.assertReplace(reset_regex, `window.custom_pair_call_counter=0;$&`);
 
@@ -782,24 +782,24 @@ window.CustomBowl.alterCode = function (code) {
     // v12: Ni&&(this.wa.ka[vd].type=aaF(this.wa),this.wa.ka[Ok].type=this.wa.ka[vd].type)
     // v13: e&&(a.wa.ka[k].type=Q3E(a.wa),a.wa.ka[d].type=a.wa.ka[k].type)
     const inplace_regex = new RegExp(
-        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2wa\\),\\2wa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2wa\\.ka\\[\\3\\]\\.type\\)`
+        `([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8}\\.)oa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=${aaf_name}\\(\\2oa\\),\\2oa\\.ka\\[([a-zA-Z0-9_$]{1,8})\\]\\.type=\\2oa\\.ka\\[\\3\\]\\.type\\)`
     );
     catchError(inplace_regex, code);
     const inplace_match = code.match(inplace_regex);
     code = code.assertReplace(
         inplace_regex,
-        `${inplace_match[1]}&&(${inplace_match[2]}wa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}wa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}wa),${inplace_match[2]}wa.ka[${inplace_match[4]}].type=${inplace_match[2]}wa.ka[${inplace_match[3]}].type)`
+        `${inplace_match[1]}&&(${inplace_match[2]}oa.ka[${inplace_match[3]}].type=-1,${inplace_match[2]}oa.ka[${inplace_match[4]}].type=-1,${inplace_match[2]}oa.ka[${inplace_match[3]}].type=${aaf_name}(${inplace_match[2]}oa),${inplace_match[2]}oa.ka[${inplace_match[4]}].type=${inplace_match[2]}oa.ka[${inplace_match[3]}].type)`
     );
 
     // Non-portal eat/respawn (3a/5a/10a): clear the reused slot first, same as
     // tally's type:-1 new apple, so the eaten type leaves "showing" and can re-roll.
     const eat_retype_regex = new RegExp(
-        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.wa\\)\\)`
+        `:([a-zA-Z0-9_$]{1,8})&&\\(([a-zA-Z0-9_$]{1,8})\\.type=${aaf_name}\\(([a-zA-Z0-9_$]{1,8})\\.oa\\)\\)`
     );
     catchError(eat_retype_regex, code);
     code = code.assertReplace(
         eat_retype_regex,
-        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.wa))`
+        `:$1&&($2.type=-1,$2.type=${aaf_name}($3.oa))`
     );
 
     // Non-portal start-of-game fill: stage every slot as -1, then pick sequentially

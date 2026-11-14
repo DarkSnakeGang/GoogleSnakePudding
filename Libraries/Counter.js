@@ -240,7 +240,7 @@ window.Counter.make = function () {
 
 window.Counter.alterCode = function (code) {
 
-    reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+    reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
     window.wallCoords = [];
 
     counter_reset_code = `;stats.inputs.game = 0;

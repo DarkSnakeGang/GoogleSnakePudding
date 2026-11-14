@@ -161,7 +161,7 @@ window.TopBar.alterCode = function (code) {
     }
   }
 
-  reset_regex = new RegExp(/;this\.reset\(\)\}\}/)
+  reset_regex = new RegExp(/;[a-z]\.reset\(\);return!0\}/)
 
   set_on_reset = `;
   if (window.pudding_settings.TopBar && !window.daily_challenge) {
