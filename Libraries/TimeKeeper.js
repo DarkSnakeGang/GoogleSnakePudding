@@ -2,13 +2,16 @@ window.TimeKeeper = {};
 
 window.TimeKeeper.make = function () {
     /*
-    storage v4:
+    storage v4 (localStorage snake_timeKeeper) — all-time only:
     att-modeKey-count-speed-size : number (legacy) OR
       { total, lastAttempt, session, lastSession }
       session = attempts since this page load; lastSession = previous page's session count
     25|50|100|ALL-modeKey-count-speed-size: {time, date, att, sum}
     H-modeKey-count-speed-size: {high, time, date}
     modeKey = classic | wall | ... | peaceful | wall+portal (blender)
+
+    Session PBs use those same keys but live only in timeKeeper._sessionPbs for
+    this page load. They are never written into snake_timeKeeper.
     */
     window.timeKeeper = {};
     window.timeKeeper.debug = false;
@@ -76,6 +79,86 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.buildKey = function (prefix, ctx) {
         const c = ctx || window.timeKeeper.getSaveContext();
         return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
+    };
+
+    // Shown in Speed Info when Session PBs is on and this page has no best yet.
+    window.timeKeeper.SESSION_PB_PLACEHOLDER = "—";
+
+    window.timeKeeper._sessionStore = function () {
+        if (!window.timeKeeper._sessionPbs || typeof window.timeKeeper._sessionPbs !== "object") {
+            window.timeKeeper._sessionPbs = Object.create(null);
+        }
+        return window.timeKeeper._sessionPbs;
+    };
+
+    window.timeKeeper.usesSessionPbs = function () {
+        return !!(window.pudding_settings && window.pudding_settings.SessionPbs);
+    };
+
+    window.timeKeeper.personalSectionTitle = function () {
+        return window.timeKeeper.usesSessionPbs() ? "Session PBs" : "Personal";
+    };
+
+    window.timeKeeper.personalEmptyText = function (label) {
+        if (window.timeKeeper.usesSessionPbs()) {
+            return label + ": " + window.timeKeeper.SESSION_PB_PLACEHOLDER;
+        }
+        return label + ": None";
+    };
+
+    // Read-only. Session mode never falls back to the stored all-time record.
+    window.timeKeeper.readDisplayedRecord = function (storage, key, kind) {
+        if (window.timeKeeper.usesSessionPbs()) {
+            const store = window.timeKeeper._sessionPbs;
+            const rec = store && store[key];
+            if (!rec || typeof rec !== "object") return null;
+            if (kind === "high") return rec.high == null ? null : rec;
+            return rec.time == null ? null : rec;
+        }
+        if (!storage || storage[key] == null) return null;
+        const rec = storage[key];
+        if (kind === "high") return rec.high == null ? null : rec;
+        return rec.time == null ? null : rec;
+    };
+
+    // Memory-only. Must not assign into snake_timeKeeper or reuse its objects.
+    window.timeKeeper.recordSessionTime = function (time, score, ctx) {
+        const t = Math.floor(Number(time));
+        if (!isFinite(t)) return false;
+        const store = window.timeKeeper._sessionStore();
+        const key = window.timeKeeper.buildKey(String(score), ctx);
+        const prev = store[key];
+        if (prev && typeof prev.time === "number" && t >= prev.time) return false;
+        store[key] = { time: t, date: new Date() };
+        return true;
+    };
+
+    window.timeKeeper.recordSessionHigh = function (time, score, ctx) {
+        const apples = Number(score);
+        const t = Math.floor(Number(time));
+        if (!isFinite(apples) || !isFinite(t)) return false;
+        const store = window.timeKeeper._sessionStore();
+        const key = window.timeKeeper.buildKey("H", ctx);
+        const prev = store[key];
+        if (prev && typeof prev.high === "number") {
+            if (apples < prev.high) return false;
+            if (apples === prev.high && t >= prev.time) return false;
+        }
+        store[key] = { high: apples, time: t, date: new Date() };
+        return true;
+    };
+
+    window.timeKeeper.bindSessionPbCheckbox = function (checkbox) {
+        if (!checkbox || !window.pudding_settings) return;
+        if (typeof window.pudding_settings.SessionPbs !== "boolean") {
+            window.pudding_settings.SessionPbs = false;
+        }
+        checkbox.checked = !!window.pudding_settings.SessionPbs;
+        checkbox.addEventListener("change", function () {
+            window.pudding_settings.SessionPbs = !!checkbox.checked;
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            window.timeKeeper.refreshSpeedInfo();
+        });
     };
 
     // Normalize legacy number / partial objects into the attempt stats record
@@ -352,6 +435,8 @@ window.TimeKeeper.make = function () {
                 ? window.timeKeeper.lastAppleTime
                 : Math.floor(time);
 
+        const sessionChanged = window.timeKeeper.recordSessionHigh(appleTime, score, ctx);
+
         if (typeof storage[name] == "undefined") {
             storage[name] = {
                 high: score,
@@ -367,8 +452,12 @@ window.TimeKeeper.make = function () {
         }
 
         const cur = storage[name];
-        if (score < cur.high) return;
-        if (score == cur.high && appleTime >= cur.time) return;
+        if (score < cur.high || (score == cur.high && appleTime >= cur.time)) {
+            if (sessionChanged && window.timeKeeper.usesSessionPbs()) {
+                window.timeKeeper.scheduleLiveRefresh();
+            }
+            return;
+        }
 
         cur.high = score;
         cur.time = appleTime;
@@ -394,6 +483,7 @@ window.TimeKeeper.make = function () {
         time = Math.floor(time);
         const storage = window.timeKeeper.getStorage();
         const name = window.timeKeeper.buildKey("H", ctx);
+        window.timeKeeper.recordSessionHigh(window.timeKeeper.lastAppleTime, score, ctx);
         if (typeof storage[name] == "undefined") {
             storage[name] = {
                 high: score,
@@ -443,6 +533,8 @@ window.TimeKeeper.make = function () {
                 };
             }
         }
+        // Parallel session best. Does not read or write the stored all-time row.
+        window.timeKeeper.recordSessionTime(time, score, ctx);
         // Mid-run (25/50/100) or pre-flush ALL: keep in memory only; paint one row
         window.timeKeeper.markStorageDirty();
         window.timeKeeper.paintSpeedInfoRow(score);
