@@ -1563,7 +1563,7 @@ window.SpeedInfo.make = function () {
   </div>
 
   <div id="si-personal" class="si-section">
-    <span class="si-section-title">Personal</span>
+    <span id="si-personal-title" class="si-section-title">Personal</span>
     <div class="si-stack">
       <label id="mode-selected" class="form-check-label"></label>
       <label id="mode-selected2" class="form-check-label"></label>
@@ -1657,6 +1657,10 @@ window.SpeedInfo.make = function () {
         <label class="form-check-label" for="SpeedrunSpeedInfo">Show Speed Info</label>
         </div>
         <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSessionPbs">
+        <label class="form-check-label" for="SpeedrunSessionPbs">Session PBs</label>
+        </div>
+        <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
         <label class="form-check-label" data-speedrun-topbar-label>Top Bar Icons</label>
         </div>
@@ -1685,6 +1689,9 @@ window.SpeedInfo.make = function () {
             if (speedInfoCb) {
                 speedInfoCb.checked = !!window.pudding_settings.SpeedInfo;
                 speedInfoCb.addEventListener("change", window.ToggleSpeedInfo);
+            }
+            if (window.timeKeeper && typeof window.timeKeeper.bindSessionPbCheckbox === "function") {
+                window.timeKeeper.bindSessionPbCheckbox(document.getElementById("SpeedrunSessionPbs"));
             }
             if (typeof window.FpsCounterBindCheckbox === "function") {
                 window.FpsCounterBindCheckbox(document.getElementById("SpeedrunFpsCounter"));
@@ -1770,6 +1777,32 @@ window.SpeedInfo.make = function () {
         return window._speedInfoUpdatePromise;
     };
 
+    function syncPersonalSectionTitle() {
+        const title = document.getElementById("si-personal-title");
+        if (!title || !window.timeKeeper || typeof window.timeKeeper.personalSectionTitle !== "function") {
+            return;
+        }
+        const next = window.timeKeeper.personalSectionTitle();
+        if (title.textContent !== next) title.textContent = next;
+    }
+
+    function displayedPersonalRecord(storage, name, kind) {
+        if (window.timeKeeper && typeof window.timeKeeper.readDisplayedRecord === "function") {
+            return window.timeKeeper.readDisplayedRecord(storage, name, kind);
+        }
+        const rec = storage && storage[name];
+        if (!rec) return null;
+        if (kind === "high") return rec.high != null ? rec : null;
+        return rec.time != null ? rec : null;
+    }
+
+    function emptyPersonalText(label) {
+        if (window.timeKeeper && typeof window.timeKeeper.personalEmptyText === "function") {
+            return window.timeKeeper.personalEmptyText(label);
+        }
+        return label + ": None";
+    }
+
     // Mid-run: update one personal PB/HS row without rebuilding SRC / mode labels
     window.SpeedInfoPaintPersonalRow = function (score) {
         if (isTabHidden()) {
@@ -1781,6 +1814,7 @@ window.SpeedInfo.make = function () {
             return;
         }
         if (!window.timeKeeper || window.daily_challenge) return;
+        syncPersonalSectionTitle();
         if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
 
         const midRun =
@@ -1870,8 +1904,9 @@ window.SpeedInfo.make = function () {
         }
 
         if (scoreKey === "H") {
-            if (typeof storage[name] != "undefined" && storage[name].high != null) {
-                const highText = String(storage[name].high) + " Apples";
+            const shownHigh = displayedPersonalRecord(storage, name, "high");
+            if (shownHigh) {
+                const highText = String(shownHigh.high) + " Apples";
                 const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
                 const allowGold = canGoldHighscore(mode, count, speed, size);
                 const knownGold = allowGold && window._speedInfoGoldCache[gKey];
@@ -1879,26 +1914,28 @@ window.SpeedInfo.make = function () {
                     "Highscore: " +
                     pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
                 if (allowGold) {
-                    queueGoldJob("H", "Highscore: ", highText, storage[name], gKey);
+                    queueGoldJob("H", "Highscore: ", highText, shownHigh, gKey);
                 }
-            } else if (bold.textContent !== "Highscore: None") {
-                bold.textContent = "Highscore: None";
+            } else {
+                const noneText = emptyPersonalText("Highscore");
+                if (bold.textContent !== noneText) bold.textContent = noneText;
             }
             return;
         }
 
         const label = scoreKey === "ALL" ? "All Apples" : scoreKey + " Apples";
-        if (typeof storage[name] != "undefined" && storage[name].time != null) {
-            const displayText = fmt(storage[name].time);
+        const shownTime = displayedPersonalRecord(storage, name, "time");
+        if (shownTime) {
+            const displayText = fmt(shownTime.time);
             const gKey = goldCacheKey(modeKey, count, speed, size, scoreKey, displayText);
             const knownGold = window._speedInfoGoldCache[gKey];
             bold.innerHTML =
                 label +
                 ": " +
                 pbValueHtml(displayText, scoreKey, mode, count, speed, size, !!knownGold);
-            queueGoldJob(scoreKey, label + ": ", displayText, storage[name], gKey);
+            queueGoldJob(scoreKey, label + ": ", displayText, shownTime, gKey);
         } else {
-            const noneText = label + ": None";
+            const noneText = emptyPersonalText(label);
             if (bold.textContent !== noneText) bold.textContent = noneText;
         }
     };
@@ -1909,6 +1946,7 @@ window.SpeedInfo.make = function () {
             return;
         }
         const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
+        syncPersonalSectionTitle();
         if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
 
         let count;
@@ -2023,8 +2061,9 @@ window.SpeedInfo.make = function () {
             }
 
             if (score == "H") {
-                if (typeof storage[name] != "undefined" && storage[name].high != null) {
-                    const highText = String(storage[name].high) + " Apples";
+                const shownHigh = displayedPersonalRecord(storage, name, "high");
+                if (shownHigh) {
+                    const highText = String(shownHigh.high) + " Apples";
                     const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
                     const allowGold = canGoldHighscore(mode, count, speed, size);
                     const knownGold = allowGold && window._speedInfoGoldCache[gKey];
@@ -2037,19 +2076,21 @@ window.SpeedInfo.make = function () {
                             elId: "H",
                             labelPrefix: "Highscore: ",
                             displayText: highText,
-                            pb: storage[name],
+                            pb: shownHigh,
                             gKey: gKey,
                         });
                     }
-                } else if (bold.textContent !== "Highscore: None") {
-                    bold.textContent = "Highscore: None";
+                } else {
+                    const noneText = emptyPersonalText("Highscore");
+                    if (bold.textContent !== noneText) bold.textContent = noneText;
                 }
                 continue;
             }
 
             const label = score === "ALL" ? "All Apples" : score + " Apples";
-            if (typeof storage[name] != "undefined" && storage[name].time != null) {
-                const displayText = fmt(storage[name].time);
+            const shownTime = displayedPersonalRecord(storage, name, "time");
+            if (shownTime) {
+                const displayText = fmt(shownTime.time);
                 const gKey = goldCacheKey(modeKey, count, speed, size, score, displayText);
                 const knownGold = window._speedInfoGoldCache[gKey];
                 bold.innerHTML =
@@ -2062,12 +2103,12 @@ window.SpeedInfo.make = function () {
                         elId: score,
                         labelPrefix: label + ": ",
                         displayText: displayText,
-                        pb: storage[name],
+                        pb: shownTime,
                         gKey: gKey,
                     });
                 }
             } else {
-                const noneText = label + ": None";
+                const noneText = emptyPersonalText(label);
                 if (bold.textContent !== noneText) bold.textContent = noneText;
             }
         }

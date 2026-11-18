@@ -263,6 +263,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="OldTimeKeeperFormat">Old TimeKeeper format</label>
   </div>
   <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="SessionPbs">
+    <label class="form-check-label" for="SessionPbs">Session PBs</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
     <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
   </div>
@@ -372,6 +376,10 @@ window.BootstrapMenu.make = function () {
                     window.timeKeeper.refreshSpeedInfo();
                 }
             });
+        }
+
+        if (window.timeKeeper && typeof window.timeKeeper.bindSessionPbCheckbox === "function") {
+            window.timeKeeper.bindSessionPbCheckbox(document.getElementById("SessionPbs"));
         }
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");

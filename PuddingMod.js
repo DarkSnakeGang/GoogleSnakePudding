@@ -1282,13 +1282,16 @@ window.TimeKeeper = {};
 
 window.TimeKeeper.make = function () {
     /*
-    storage v4:
+    storage v4 (localStorage snake_timeKeeper) — all-time only:
     att-modeKey-count-speed-size : number (legacy) OR
       { total, lastAttempt, session, lastSession }
       session = attempts since this page load; lastSession = previous page's session count
     25|50|100|ALL-modeKey-count-speed-size: {time, date, att, sum}
     H-modeKey-count-speed-size: {high, time, date}
     modeKey = classic | wall | ... | peaceful | wall+portal (blender)
+
+    Session PBs use those same keys but live only in timeKeeper._sessionPbs for
+    this page load. They are never written into snake_timeKeeper.
     */
     window.timeKeeper = {};
     window.timeKeeper.debug = false;
@@ -1356,6 +1359,86 @@ window.TimeKeeper.make = function () {
     window.timeKeeper.buildKey = function (prefix, ctx) {
         const c = ctx || window.timeKeeper.getSaveContext();
         return prefix + "-" + c.modeKey + "-" + c.count + "-" + c.speed + "-" + c.size;
+    };
+
+    // Shown in Speed Info when Session PBs is on and this page has no best yet.
+    window.timeKeeper.SESSION_PB_PLACEHOLDER = "—";
+
+    window.timeKeeper._sessionStore = function () {
+        if (!window.timeKeeper._sessionPbs || typeof window.timeKeeper._sessionPbs !== "object") {
+            window.timeKeeper._sessionPbs = Object.create(null);
+        }
+        return window.timeKeeper._sessionPbs;
+    };
+
+    window.timeKeeper.usesSessionPbs = function () {
+        return !!(window.pudding_settings && window.pudding_settings.SessionPbs);
+    };
+
+    window.timeKeeper.personalSectionTitle = function () {
+        return window.timeKeeper.usesSessionPbs() ? "Session PBs" : "Personal";
+    };
+
+    window.timeKeeper.personalEmptyText = function (label) {
+        if (window.timeKeeper.usesSessionPbs()) {
+            return label + ": " + window.timeKeeper.SESSION_PB_PLACEHOLDER;
+        }
+        return label + ": None";
+    };
+
+    // Read-only. Session mode never falls back to the stored all-time record.
+    window.timeKeeper.readDisplayedRecord = function (storage, key, kind) {
+        if (window.timeKeeper.usesSessionPbs()) {
+            const store = window.timeKeeper._sessionPbs;
+            const rec = store && store[key];
+            if (!rec || typeof rec !== "object") return null;
+            if (kind === "high") return rec.high == null ? null : rec;
+            return rec.time == null ? null : rec;
+        }
+        if (!storage || storage[key] == null) return null;
+        const rec = storage[key];
+        if (kind === "high") return rec.high == null ? null : rec;
+        return rec.time == null ? null : rec;
+    };
+
+    // Memory-only. Must not assign into snake_timeKeeper or reuse its objects.
+    window.timeKeeper.recordSessionTime = function (time, score, ctx) {
+        const t = Math.floor(Number(time));
+        if (!isFinite(t)) return false;
+        const store = window.timeKeeper._sessionStore();
+        const key = window.timeKeeper.buildKey(String(score), ctx);
+        const prev = store[key];
+        if (prev && typeof prev.time === "number" && t >= prev.time) return false;
+        store[key] = { time: t, date: new Date() };
+        return true;
+    };
+
+    window.timeKeeper.recordSessionHigh = function (time, score, ctx) {
+        const apples = Number(score);
+        const t = Math.floor(Number(time));
+        if (!isFinite(apples) || !isFinite(t)) return false;
+        const store = window.timeKeeper._sessionStore();
+        const key = window.timeKeeper.buildKey("H", ctx);
+        const prev = store[key];
+        if (prev && typeof prev.high === "number") {
+            if (apples < prev.high) return false;
+            if (apples === prev.high && t >= prev.time) return false;
+        }
+        store[key] = { high: apples, time: t, date: new Date() };
+        return true;
+    };
+
+    window.timeKeeper.bindSessionPbCheckbox = function (checkbox) {
+        if (!checkbox || !window.pudding_settings) return;
+        if (typeof window.pudding_settings.SessionPbs !== "boolean") {
+            window.pudding_settings.SessionPbs = false;
+        }
+        checkbox.checked = !!window.pudding_settings.SessionPbs;
+        checkbox.addEventListener("change", function () {
+            window.pudding_settings.SessionPbs = !!checkbox.checked;
+            if (typeof window.saveSettings === "function") window.saveSettings();
+            window.timeKeeper.refreshSpeedInfo();
+        });
     };
 
     // Normalize legacy number / partial objects into the attempt stats record
@@ -1632,6 +1715,8 @@ window.TimeKeeper.make = function () {
                 ? window.timeKeeper.lastAppleTime
                 : Math.floor(time);
 
+        const sessionChanged = window.timeKeeper.recordSessionHigh(appleTime, score, ctx);
+
         if (typeof storage[name] == "undefined") {
             storage[name] = {
                 high: score,
@@ -1647,8 +1732,12 @@ window.TimeKeeper.make = function () {
         }
 
         const cur = storage[name];
-        if (score < cur.high) return;
-        if (score == cur.high && appleTime >= cur.time) return;
+        if (score < cur.high || (score == cur.high && appleTime >= cur.time)) {
+            if (sessionChanged && window.timeKeeper.usesSessionPbs()) {
+                window.timeKeeper.scheduleLiveRefresh();
+            }
+            return;
+        }
 
         cur.high = score;
         cur.time = appleTime;
@@ -1674,6 +1763,7 @@ window.TimeKeeper.make = function () {
         time = Math.floor(time);
         const storage = window.timeKeeper.getStorage();
         const name = window.timeKeeper.buildKey("H", ctx);
+        window.timeKeeper.recordSessionHigh(window.timeKeeper.lastAppleTime, score, ctx);
         if (typeof storage[name] == "undefined") {
             storage[name] = {
                 high: score,
@@ -1723,6 +1813,8 @@ window.TimeKeeper.make = function () {
                 };
             }
         }
+        // Parallel session best. Does not read or write the stored all-time row.
+        window.timeKeeper.recordSessionTime(time, score, ctx);
         // Mid-run (25/50/100) or pre-flush ALL: keep in memory only; paint one row
         window.timeKeeper.markStorageDirty();
         window.timeKeeper.paintSpeedInfoRow(score);
@@ -3438,6 +3530,7 @@ window.SettingsSaver.make = function () {
                 SplitPanel: false,
                 BigPanelText: true,
                 OldTimeKeeperFormat: false,
+                SessionPbs: false,
                 FpsCounter: false,
             };
             for (const key of COUNT_KEYS) {
@@ -3473,6 +3566,9 @@ window.SettingsSaver.make = function () {
             }
             if (typeof pudding_settings.OldTimeKeeperFormat !== 'boolean') {
                 pudding_settings.OldTimeKeeperFormat = false;
+            }
+            if (typeof pudding_settings.SessionPbs !== 'boolean') {
+                pudding_settings.SessionPbs = false;
             }
             if (typeof pudding_settings.FpsCounter !== 'boolean') {
                 pudding_settings.FpsCounter = false;
@@ -5409,7 +5505,7 @@ window.SpeedInfo.make = function () {
   </div>
 
   <div id="si-personal" class="si-section">
-    <span class="si-section-title">Personal</span>
+    <span id="si-personal-title" class="si-section-title">Personal</span>
     <div class="si-stack">
       <label id="mode-selected" class="form-check-label"></label>
       <label id="mode-selected2" class="form-check-label"></label>
@@ -5503,6 +5599,10 @@ window.SpeedInfo.make = function () {
         <label class="form-check-label" for="SpeedrunSpeedInfo">Show Speed Info</label>
         </div>
         <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" role="switch" id="SpeedrunSessionPbs">
+        <label class="form-check-label" for="SpeedrunSessionPbs">Session PBs</label>
+        </div>
+        <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" data-speedrun-topbar>
         <label class="form-check-label" data-speedrun-topbar-label>Top Bar Icons</label>
         </div>
@@ -5531,6 +5631,9 @@ window.SpeedInfo.make = function () {
             if (speedInfoCb) {
                 speedInfoCb.checked = !!window.pudding_settings.SpeedInfo;
                 speedInfoCb.addEventListener("change", window.ToggleSpeedInfo);
+            }
+            if (window.timeKeeper && typeof window.timeKeeper.bindSessionPbCheckbox === "function") {
+                window.timeKeeper.bindSessionPbCheckbox(document.getElementById("SpeedrunSessionPbs"));
             }
             if (typeof window.FpsCounterBindCheckbox === "function") {
                 window.FpsCounterBindCheckbox(document.getElementById("SpeedrunFpsCounter"));
@@ -5616,6 +5719,32 @@ window.SpeedInfo.make = function () {
         return window._speedInfoUpdatePromise;
     };
 
+    function syncPersonalSectionTitle() {
+        const title = document.getElementById("si-personal-title");
+        if (!title || !window.timeKeeper || typeof window.timeKeeper.personalSectionTitle !== "function") {
+            return;
+        }
+        const next = window.timeKeeper.personalSectionTitle();
+        if (title.textContent !== next) title.textContent = next;
+    }
+
+    function displayedPersonalRecord(storage, name, kind) {
+        if (window.timeKeeper && typeof window.timeKeeper.readDisplayedRecord === "function") {
+            return window.timeKeeper.readDisplayedRecord(storage, name, kind);
+        }
+        const rec = storage && storage[name];
+        if (!rec) return null;
+        if (kind === "high") return rec.high != null ? rec : null;
+        return rec.time != null ? rec : null;
+    }
+
+    function emptyPersonalText(label) {
+        if (window.timeKeeper && typeof window.timeKeeper.personalEmptyText === "function") {
+            return window.timeKeeper.personalEmptyText(label);
+        }
+        return label + ": None";
+    }
+
     // Mid-run: update one personal PB/HS row without rebuilding SRC / mode labels
     window.SpeedInfoPaintPersonalRow = function (score) {
         if (isTabHidden()) {
@@ -5627,6 +5756,7 @@ window.SpeedInfo.make = function () {
             return;
         }
         if (!window.timeKeeper || window.daily_challenge) return;
+        syncPersonalSectionTitle();
         if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
 
         const midRun =
@@ -5716,8 +5846,9 @@ window.SpeedInfo.make = function () {
         }
 
         if (scoreKey === "H") {
-            if (typeof storage[name] != "undefined" && storage[name].high != null) {
-                const highText = String(storage[name].high) + " Apples";
+            const shownHigh = displayedPersonalRecord(storage, name, "high");
+            if (shownHigh) {
+                const highText = String(shownHigh.high) + " Apples";
                 const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
                 const allowGold = canGoldHighscore(mode, count, speed, size);
                 const knownGold = allowGold && window._speedInfoGoldCache[gKey];
@@ -5725,26 +5856,28 @@ window.SpeedInfo.make = function () {
                     "Highscore: " +
                     pbValueHtml(highText, "H", mode, count, speed, size, !!knownGold);
                 if (allowGold) {
-                    queueGoldJob("H", "Highscore: ", highText, storage[name], gKey);
+                    queueGoldJob("H", "Highscore: ", highText, shownHigh, gKey);
                 }
-            } else if (bold.textContent !== "Highscore: None") {
-                bold.textContent = "Highscore: None";
+            } else {
+                const noneText = emptyPersonalText("Highscore");
+                if (bold.textContent !== noneText) bold.textContent = noneText;
             }
             return;
         }
 
         const label = scoreKey === "ALL" ? "All Apples" : scoreKey + " Apples";
-        if (typeof storage[name] != "undefined" && storage[name].time != null) {
-            const displayText = fmt(storage[name].time);
+        const shownTime = displayedPersonalRecord(storage, name, "time");
+        if (shownTime) {
+            const displayText = fmt(shownTime.time);
             const gKey = goldCacheKey(modeKey, count, speed, size, scoreKey, displayText);
             const knownGold = window._speedInfoGoldCache[gKey];
             bold.innerHTML =
                 label +
                 ": " +
                 pbValueHtml(displayText, scoreKey, mode, count, speed, size, !!knownGold);
-            queueGoldJob(scoreKey, label + ": ", displayText, storage[name], gKey);
+            queueGoldJob(scoreKey, label + ": ", displayText, shownTime, gKey);
         } else {
-            const noneText = label + ": None";
+            const noneText = emptyPersonalText(label);
             if (bold.textContent !== noneText) bold.textContent = noneText;
         }
     };
@@ -5755,6 +5888,7 @@ window.SpeedInfo.make = function () {
             return;
         }
         const gen = (window._speedInfoUpdateGen = (window._speedInfoUpdateGen || 0) + 1);
+        syncPersonalSectionTitle();
         if (!window._speedInfoGoldCache) window._speedInfoGoldCache = {};
 
         let count;
@@ -5869,8 +6003,9 @@ window.SpeedInfo.make = function () {
             }
 
             if (score == "H") {
-                if (typeof storage[name] != "undefined" && storage[name].high != null) {
-                    const highText = String(storage[name].high) + " Apples";
+                const shownHigh = displayedPersonalRecord(storage, name, "high");
+                if (shownHigh) {
+                    const highText = String(shownHigh.high) + " Apples";
                     const gKey = goldCacheKey(modeKey, count, speed, size, "H", highText);
                     const allowGold = canGoldHighscore(mode, count, speed, size);
                     const knownGold = allowGold && window._speedInfoGoldCache[gKey];
@@ -5883,19 +6018,21 @@ window.SpeedInfo.make = function () {
                             elId: "H",
                             labelPrefix: "Highscore: ",
                             displayText: highText,
-                            pb: storage[name],
+                            pb: shownHigh,
                             gKey: gKey,
                         });
                     }
-                } else if (bold.textContent !== "Highscore: None") {
-                    bold.textContent = "Highscore: None";
+                } else {
+                    const noneText = emptyPersonalText("Highscore");
+                    if (bold.textContent !== noneText) bold.textContent = noneText;
                 }
                 continue;
             }
 
             const label = score === "ALL" ? "All Apples" : score + " Apples";
-            if (typeof storage[name] != "undefined" && storage[name].time != null) {
-                const displayText = fmt(storage[name].time);
+            const shownTime = displayedPersonalRecord(storage, name, "time");
+            if (shownTime) {
+                const displayText = fmt(shownTime.time);
                 const gKey = goldCacheKey(modeKey, count, speed, size, score, displayText);
                 const knownGold = window._speedInfoGoldCache[gKey];
                 bold.innerHTML =
@@ -5908,12 +6045,12 @@ window.SpeedInfo.make = function () {
                         elId: score,
                         labelPrefix: label + ": ",
                         displayText: displayText,
-                        pb: storage[name],
+                        pb: shownTime,
                         gKey: gKey,
                     });
                 }
             } else {
-                const noneText = label + ": None";
+                const noneText = emptyPersonalText(label);
                 if (bold.textContent !== noneText) bold.textContent = noneText;
             }
         }
@@ -8329,6 +8466,10 @@ window.BootstrapMenu.make = function () {
     <label class="form-check-label" for="OldTimeKeeperFormat">Old TimeKeeper format</label>
   </div>
   <div class="form-check form-switch">
+    <input class="form-check-input" type="checkbox" role="switch" id="SessionPbs">
+    <label class="form-check-label" for="SessionPbs">Session PBs</label>
+  </div>
+  <div class="form-check form-switch">
     <input class="form-check-input" type="checkbox" role="switch" id="ShowSplitPanel">
     <label class="form-check-label" for="ShowSplitPanel">Show Split Panel</label>
   </div>
@@ -8438,6 +8579,10 @@ window.BootstrapMenu.make = function () {
                     window.timeKeeper.refreshSpeedInfo();
                 }
             });
+        }
+
+        if (window.timeKeeper && typeof window.timeKeeper.bindSessionPbCheckbox === "function") {
+            window.timeKeeper.bindSessionPbCheckbox(document.getElementById("SessionPbs"));
         }
 
         skull_checkbox = document.getElementById("SkullPoisonFruit");

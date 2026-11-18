@@ -76,6 +76,7 @@ window.SpeedrunMod.runCodeBefore = function () {
     if (typeof settings.ShowWrHolders !== "boolean") settings.ShowWrHolders = true;
     if (typeof settings.TrackedPlayerName !== "string") settings.TrackedPlayerName = "";
     if (typeof settings.FpsCounter !== "boolean") settings.FpsCounter = false;
+    if (typeof settings.SessionPbs !== "boolean") settings.SessionPbs = false;
     return settings;
   };
 
